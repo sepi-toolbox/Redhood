@@ -1,0 +1,25 @@
+{
+  "_version": 1,
+  "player": { "maxHp": 70 },
+  "map": {
+    "floors": 11,
+    "choicesMin": 2,
+    "choicesMax": 3,
+    "nodeWeights": { "battle": 6, "elite": 1.5, "rest": 1.5 },
+    "eliteFloors": [5, 6, 7, 8, 9],
+    "fixed": { "1": "battle", "10": "rest", "11": "boss" }
+  },
+  "encounters": {
+    "easyFloors": [1, 2, 3],
+    "easy": [["crow", "crow"], ["thorn_bush"], ["forest_spider"]],
+    "hard": [["stray_dog", "crow"], ["will_o_wisp", "forest_spider"], ["twig_golem"], ["stray_dog", "stray_dog"]],
+    "elite": [["alpha_dog"]],
+    "boss": [["wolf"]]
+  },
+  "rewards": {
+    "battle": { "cardChoices": 3, "rarityWeights": { "common": 70, "uncommon": 25, "rare": 5 } },
+    "elite":  { "cardChoices": 3, "rarityWeights": { "common": 45, "uncommon": 40, "rare": 15 } },
+    "boss":   { "cardChoices": 0, "rarityWeights": {} }
+  },
+  "rest": { "healRatio": 0.3 }
+}

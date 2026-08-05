@@ -1,0 +1,162 @@
+/* REDHOOD — 다크 페어리테일, 모바일 세로 전용 */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: #14100f;
+  color: #e8dcc8;
+  font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#app { height: 100dvh; display: flex; flex-direction: column; }
+
+.screen {
+  flex: 1; display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  min-height: 0;
+}
+.screen.center { align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 20px; }
+.hidden { display: none !important; }
+.error { color: #e05c4b; padding: 20px; }
+.loading { color: #9c8f7a; }
+
+/* ---------- 공용 ---------- */
+.btn {
+  border: 1px solid #4a3b30; border-radius: 10px;
+  background: #241c18; color: #e8dcc8;
+  font-size: 16px; padding: 12px 22px; cursor: pointer;
+}
+.btn.primary { background: #7e1f1f; border-color: #a33; font-weight: 700; }
+.btn.primary:active { background: #9b2727; }
+.btn.ghost { background: transparent; color: #9c8f7a; font-size: 14px; padding: 8px 14px; }
+
+.topbar, .bottombar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: #1b1512; font-size: 14px;
+  flex: none;
+}
+.topbar { border-bottom: 1px solid #2c221c; padding-top: calc(10px + env(safe-area-inset-top)); }
+.bottombar { border-top: 1px solid #2c221c; padding-bottom: calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
+.hp { color: #e05c4b; font-weight: 700; }
+
+/* ---------- 타이틀 ---------- */
+.title-screen { align-items: center; justify-content: center; gap: 10px; padding: 24px; }
+.title-art { font-size: 40px; }
+.title-screen h1 { font-size: 42px; letter-spacing: 6px; color: #c9302f; text-shadow: 0 0 24px rgba(201, 48, 47, .35); }
+.subtitle { color: #9c8f7a; margin-bottom: 10px; }
+.pick-label { color: #9c8f7a; font-size: 13px; margin-top: 8px; }
+.weapon-list { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 340px; }
+.weapon-card {
+  display: flex; flex-direction: column; gap: 6px; text-align: left;
+  background: #1e1713; border: 1px solid #3c2f26; border-radius: 12px;
+  color: #e8dcc8; padding: 14px 16px; cursor: pointer;
+}
+.weapon-card:active { border-color: #c9302f; }
+.weapon-name { font-size: 18px; font-weight: 700; }
+.weapon-name small { color: #b08948; font-weight: 400; margin-left: 6px; }
+.weapon-desc { font-size: 12.5px; color: #9c8f7a; line-height: 1.5; }
+.hint { font-size: 11.5px; color: #6f6353; margin-top: 4px; }
+
+/* ---------- 맵 ---------- */
+.map-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.map-row { display: flex; align-items: center; gap: 10px; opacity: .35; }
+.map-row.next { opacity: 1; }
+.map-row.done { opacity: .55; }
+.floor-num { width: 26px; text-align: right; color: #6f6353; font-size: 13px; flex: none; }
+.map-node {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: #1e1713; border: 1px solid #3c2f26; border-radius: 12px;
+  color: #e8dcc8; font-size: 22px; padding: 10px 6px;
+}
+.map-node small { font-size: 11px; color: #9c8f7a; }
+.map-row.next .map-node { border-color: #b08948; cursor: pointer; }
+.map-row.next .map-node:active { border-color: #c9302f; background: #2a1d18; }
+.map-row.done .map-node, .map-row.future .map-node { pointer-events: none; }
+
+/* ---------- 전투 ---------- */
+.battle-screen { min-height: 0; }
+.enemy-zone {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 12px; padding: 12px; min-height: 0;
+  background: radial-gradient(ellipse at 50% 20%, #221a15 0%, #14100f 70%);
+}
+.enemy {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: transparent; border: 1px dashed transparent; border-radius: 12px;
+  color: #e8dcc8; padding: 10px; max-width: 46%;
+}
+.enemy.targetable { border-color: #c9302f; }
+.enemy-art { font-size: 44px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+.enemy-name { font-size: 13px; color: #cbbfa8; }
+.enemy .bar { width: 84px; height: 6px; background: #33241d; border-radius: 3px; overflow: hidden; }
+.enemy .bar i { display: block; height: 100%; background: #b3362a; }
+.enemy-hp { font-size: 12px; color: #9c8f7a; }
+.intent { font-size: 15px; font-weight: 700; color: #e8b64b; min-height: 20px; }
+.status { font-size: 12px; margin-left: 2px; }
+
+.player-zone {
+  flex: none; display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; background: #191310; border-top: 1px solid #2c221c; min-height: 44px;
+}
+.res-label { font-size: 14px; }
+.res-label .oil { color: #e8b64b; font-size: 17px; }
+.pips { display: flex; gap: 3px; margin-top: 3px; }
+.pip { width: 12px; height: 12px; border-radius: 50%; background: #33241d; }
+.pip.on { background: #e8b64b; }
+.frenzy-bar { display: flex; gap: 2px; margin-top: 3px; }
+.fseg { width: 13px; height: 8px; border-radius: 2px; background: #2c221c; }
+.fseg.on.s-calm { background: #7a9e6a; }
+.fseg.on.s-excited { background: #e8b64b; }
+.fseg.on.s-rampage, .fseg.on.s-limit { background: #c9302f; }
+.stage-calm { color: #7a9e6a; } .stage-excited { color: #e8b64b; }
+.stage-rampage, .stage-limit { color: #c9302f; }
+
+.hand-zone {
+  flex: none; display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px;
+  background: #171210; min-height: 148px; align-items: stretch;
+}
+.card {
+  flex: none; width: 106px; display: flex; flex-direction: column; gap: 4px;
+  background: #221a15; border: 1.5px solid #4a3b30; border-radius: 10px;
+  color: #e8dcc8; padding: 8px; text-align: left; position: relative; cursor: pointer;
+}
+.card.selected { border-color: #e8b64b; transform: translateY(-8px); box-shadow: 0 6px 14px rgba(0,0,0,.5); }
+.card.unplayable { opacity: .4; }
+.card .cost { font-size: 13px; font-weight: 700; color: #e8b64b; }
+.card .cost.frenzy-up { color: #e05c4b; }
+.card .cost.frenzy-down { color: #7a9e6a; }
+.card-name { font-size: 13.5px; font-weight: 700; }
+.card-text { font-size: 11px; color: #9c8f7a; line-height: 1.45; }
+.card-rarity { font-size: 10px; color: #6f6353; margin-top: auto; }
+.card.r-uncommon { border-color: #4a6d8c; }
+.card.r-rare { border-color: #b08948; }
+
+.turn-hint { flex: 1; text-align: center; font-size: 11.5px; color: #b08948; }
+.pile { font-size: 13px; color: #6f6353; }
+
+/* ---------- 보상/휴식/엔딩 ---------- */
+.reward-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.reward-cards .card { width: 116px; min-height: 140px; }
+.rest-art { font-size: 56px; }
+
+/* ---------- 모달 ---------- */
+.modal-back {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
+}
+.modal {
+  background: #1e1713; border: 1px solid #3c2f26; border-radius: 14px;
+  max-width: 86vw; max-height: 74dvh; padding: 18px; display: flex; flex-direction: column; gap: 12px;
+}
+.deck-list { overflow-y: auto; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; }
+.modal-text { color: #9c8f7a; font-size: 12px; }
+
+/* ---------- 가로 회전 가드 ---------- */
+#rotate-overlay {
+  position: fixed; inset: 0; background: #14100f; z-index: 100;
+  display: none; align-items: center; justify-content: center; font-size: 20px;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  #rotate-overlay { display: flex; }
+}
