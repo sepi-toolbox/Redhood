@@ -112,12 +112,20 @@ function showMap() {
     rows.push(`
       <div class="map-row ${cls}">
         <span class="floor-num">${f}</span>
+        ${f === run.floor ? '<span class="you-marker" title="현재 위치">🧣</span>' : ''}
         ${nodes.map((nd, i) => `
           <button class="map-node" data-floor="${f}" data-idx="${i}" ${f !== nextFloor ? 'disabled' : ''}>
             ${NODE_META[nd.type].icon}<small>${NODE_META[nd.type].label}</small>
           </button>`).join('')}
-      </div>`);
+      </div>
+      <div class="trail ${f <= run.floor ? 't-done' : f === nextFloor ? 't-drawing' : 't-future'}"></div>`);
   }
+  rows.push(`
+      <div class="map-row start-row">
+        <span class="floor-num"></span>
+        ${run.floor === 0 ? '<span class="you-marker">🧣</span>' : ''}
+        <span class="start-label">🌲 숲의 입구</span>
+      </div>`);
   app.innerHTML = '';
   app.append(h(`
     <div class="screen map-screen">
@@ -126,7 +134,7 @@ function showMap() {
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
         <span class="hp">❤️ ${run.hp}/${run.maxHp}</span>
       </header>
-      <div class="map-scroll">${rows.join('')}</div>
+      <div class="map-scroll parchment">${rows.join('')}</div>
       <footer class="bottombar">
         <button class="btn ghost" id="bag-btn">🎲 가방</button>
         <button class="btn ghost" id="abandon-btn">런 포기</button>
@@ -492,8 +500,9 @@ function showRewardCards(choices, box) {
       <p>하나를 고른다</p>
       <div class="reward-cards">
         ${choices.map((c, i) => `
-          <button class="card pop-in r-${c.item.tier} ${c.item.tier === 'rare' ? 'shiny-rare' : c.item.tier === 'uncommon' ? 'shiny-un' : ''}"
+          <button class="card pop-in r-${c.item.tier} ${c.item.tier === 'rare' ? 'shiny-rare' : c.item.tier === 'uncommon' ? 'shiny-un' : ''} ${c.kind === 'category' && c.newLevel === 1 ? 'new-cat' : ''}"
             data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
+            ${c.kind === 'category' && c.newLevel === 1 ? '<span class="new-badge">새 족보!</span>' : ''}
             <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : '📜 족보'}</span>
             <span class="card-name">${esc(c.item.name)}${c.kind === 'category' && c.newLevel > 1 ? ` Lv${c.newLevel}` : ''}</span>
             <span class="card-text">${

@@ -48,21 +48,60 @@ body {
 .subtitle { color: #9c8f7a; margin-bottom: 10px; }
 .hint { font-size: 11.5px; color: #6f6353; }
 
-/* ---------- 맵 ---------- */
-.map-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-.map-row { display: flex; align-items: center; gap: 10px; opacity: .35; }
-.map-row.next { opacity: 1; }
-.map-row.done { opacity: .55; }
-.floor-num { width: 26px; text-align: right; color: #6f6353; font-size: 13px; flex: none; }
-.map-node {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
-  background: #1e1713; border: 1px solid #3c2f26; border-radius: 12px;
-  color: #e8dcc8; font-size: 22px; padding: 10px 6px;
+/* ---------- 맵: 양피지 ---------- */
+.map-scroll { flex: 1; overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; }
+.map-scroll.parchment {
+  margin: 10px 12px; border-radius: 6px;
+  background:
+    radial-gradient(ellipse at 18% 22%, rgba(122, 92, 50, .16), transparent 42%),
+    radial-gradient(ellipse at 82% 64%, rgba(122, 92, 50, .18), transparent 38%),
+    radial-gradient(ellipse at 55% 90%, rgba(95, 65, 32, .14), transparent 34%),
+    radial-gradient(ellipse at 40% 45%, rgba(255, 248, 224, .25), transparent 55%),
+    linear-gradient(158deg, #e8d7ac 0%, #ddc795 48%, #d2ba82 100%);
+  box-shadow: inset 0 0 46px rgba(92, 62, 28, .42), inset 0 0 6px rgba(92, 62, 28, .3), 0 4px 16px rgba(0, 0, 0, .55);
+  color: #4a3423;
 }
-.map-node small { font-size: 11px; color: #9c8f7a; }
-.map-row.next .map-node { border-color: #b08948; cursor: pointer; }
-.map-row.next .map-node:active { border-color: #c9302f; background: #2a1d18; }
+.map-row { display: flex; align-items: center; gap: 10px; opacity: .3; position: relative; }
+.map-row.next { opacity: 1; }
+.map-row.done { opacity: .62; }
+.floor-num { width: 24px; text-align: right; color: #7a5c38; font-size: 12.5px; font-weight: 700; flex: none; font-style: italic; }
+.map-node {
+  flex: 1; max-width: 190px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  background: rgba(255, 250, 235, .28);
+  border: 2px solid #6a4c33;
+  border-radius: 46% 54% 52% 48% / 55% 47% 53% 45%;  /* 손으로 그린 원 */
+  color: #4a3423; font-size: 21px; padding: 9px 6px;
+  box-shadow: 1px 2px 0 rgba(90, 60, 30, .25);
+}
+.map-node small { font-size: 10.5px; color: #6a4c33; font-weight: 700; }
+.map-row.next .map-node { border-color: #a02c25; cursor: pointer; background: rgba(255, 250, 235, .5); }
+.map-row.next .map-node:active { background: rgba(160, 44, 37, .18); }
 .map-row.done .map-node, .map-row.future .map-node { pointer-events: none; }
+.map-row.done .map-node { filter: grayscale(.3) sepia(.3); }
+.map-row.future .map-node { border-style: dashed; }
+
+/* 잉크 길 — 지나온 길은 진하게, 다음 길은 그려지는 중, 그 너머는 흐릿한 밑그림 */
+.trail {
+  width: 4px; height: 24px; margin: 2px auto; flex: none;
+  background-image: repeating-linear-gradient(180deg, #5a3f28 0 5px, transparent 5px 11px);
+}
+.trail.t-done { opacity: .8; }
+.trail.t-future { opacity: .14; }
+@keyframes inkDraw {
+  0% { clip-path: inset(100% 0 0 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+.trail.t-drawing { opacity: .8; animation: inkDraw .8s ease-out .15s backwards; }
+
+.you-marker {
+  flex: none; font-size: 19px;
+  filter: drop-shadow(1px 2px 2px rgba(60, 35, 15, .5));
+  animation: youBob 1.6s ease-in-out infinite alternate;
+}
+@keyframes youBob { 0% { transform: translateY(0); } 100% { transform: translateY(-3px); } }
+.start-row { opacity: .85; justify-content: flex-start; padding: 4px 0 2px; }
+.start-label { font-size: 12.5px; color: #6a4c33; font-weight: 700; font-style: italic; }
 
 /* ---------- 전투: 적 (다중) ---------- */
 .enemy-zone {
@@ -315,6 +354,26 @@ body {
   background: linear-gradient(115deg, transparent 35%, rgba(180, 205, 235, .35) 50%, transparent 65%);
   transform: translateX(-130%); pointer-events: none;
   animation: shineSweep 1.2s ease-out calc(var(--d, 0s) + .5s) 1;
+}
+
+/* 미보유 족보 — 붉은 인장이 쾅 찍힘 */
+.card.new-cat { position: relative; }
+.card.new-cat:not(.shiny-rare) { border-color: #c9302f; }
+@keyframes stampIn {
+  0%   { opacity: 0; transform: rotate(-14deg) scale(2.4); }
+  55%  { opacity: 1; transform: rotate(-11deg) scale(.92); }
+  75%  { transform: rotate(-12deg) scale(1.08); }
+  100% { opacity: 1; transform: rotate(-12deg) scale(1); }
+}
+.new-badge {
+  position: absolute; top: 3px; right: 3px; z-index: 2;
+  background: #a02c25; color: #f5e9d0;
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1px;
+  padding: 3px 8px; border-radius: 4px;
+  border: 1.5px solid #7e1f1f;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
+  opacity: 0;
+  animation: stampIn .38s cubic-bezier(.34, 1.3, .64, 1) calc(var(--d, 0s) + .42s) forwards;
 }
 
 /* ---------- 보상/휴식/엔딩 ---------- */
