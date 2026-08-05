@@ -517,12 +517,6 @@ function showRest() {
 }
 
 // ---------- 전투 ----------
-function upperThreshold() {
-  let v = DB.scoring.upperBonus.threshold;
-  for (const r of battle.relics) if (r.hook.type === 'upperBonusThreshold') v = r.hook.value;
-  return v;
-}
-
 function breakdownText(bd) {
   if (bd.isZero) return '불발';
   const parts = [`기본 ${bd.base}`];
@@ -552,7 +546,7 @@ function renderBattle(opts = {}) {
       <header class="topbar">
         <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
         <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
-        <span class="upper-meter" title="상단 점수 누적 — 기준마다 추가 피해">☀ ${battle.upperTotal}/${upperThreshold()}</span>
+        <span>🪙${run.coins} <span class="hp">❤️</span></span>
       </header>
       <div class="enemy-zone">
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `

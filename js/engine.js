@@ -40,8 +40,6 @@ export function createBattle(run, encounterIds) {
     pendingBuff: 0,
     pendingConfuse: 0,                    // 적 혼란 예약 — 다음 턴 시작 시 주사위 잠금 수
     dodgeActive: false,
-    upperTotal: 0,
-    upperBonusFired: false,
     enemies: encounterIds.map((id, i) => spawnEnemy(id, i, scale)),
     lastResult: null,
     lastHits: [],                         // [{uid, amount}] — 연출용
@@ -260,11 +258,6 @@ function applyAbility(battle, variant, bd, targets) {
         battle.dodgeActive = true;
         battle.lastResult.bonusHits.push('회피!');
         break;
-      case 'upperCharge':
-        // 늑대 사냥탄: 상단 보너스 게이지 추가 적립 (발동 판정은 확정 직후 상단 블록에서)
-        battle.upperTotal += ab.amount;
-        battle.lastResult.bonusHits.push(`☀+${ab.amount}`);
-        break;
     }
   }
 }
@@ -315,29 +308,6 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   applyAbility(battle, variant, bd, targets);
   applyDiceEffects(battle, bd);
   if (battle.over && battle.result === 'defeat') return battle.lastResult; // 저주 주사위 등으로 자멸
-
-  // 상단 보너스 — 발동분은 같은 대상(들)에게 (은저울: 피해 상향)
-  if (cat.kind === 'upper') {
-    battle.upperTotal += bd.base;
-    const cfg = DB.scoring.upperBonus;
-    const threshold = relicValue(battle.relics, 'upperBonusThreshold', cfg.threshold);
-    const bonusDmg = relicValue(battle.relics, 'upperBonusDamage', cfg.damage);
-    if (cfg.repeat) {
-      while (battle.upperTotal >= threshold) {
-        battle.upperTotal -= threshold;
-        for (const t of targets) {
-          if (t.hp > 0 || battle.lastHits.some(h => h.uid === t.uid)) {
-            dealToEnemy(battle, t, bonusDmg);
-          }
-        }
-        battle.lastResult.bonusHits.push(`상단 보너스 ${bonusDmg}!`);
-      }
-    } else if (!battle.upperBonusFired && battle.upperTotal >= threshold) {
-      battle.upperBonusFired = true;
-      for (const t of targets) dealToEnemy(battle, t, bonusDmg);
-      battle.lastResult.bonusHits.push(`상단 보너스 ${bonusDmg}!`);
-    }
-  }
 
   // 늑대 가죽: 처치한 적 수만큼 회복
   const hk = sumRelic(battle.relics, 'healOnKill');

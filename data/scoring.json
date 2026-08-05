@@ -1,11 +1,6 @@
 {
-  "_version": 10,
+  "_version": 11,
   "rerollsPerTurn": 2,
-  "upperBonus": {
-    "threshold": 40,
-    "damage": 25,
-    "repeat": true
-  },
   "categories": [
     {
       "id": "chance",
@@ -45,22 +40,42 @@
       ]
     },
     {
-      "id": "ones",
-      "name": "에이스",
-      "kind": "upper",
-      "face": 1,
+      "id": "onePair",
+      "name": "원페어",
+      "kind": "ofKind",
+      "count": 2,
+      "score": "matchedSum",
+      "mult": 1,
       "tier": "common",
-      "ruleText": "굴린 주사위 중 [1]의 합만큼 피해.",
+      "fx": "slash",
+      "ruleText": "같은 눈 2개 이상 — 피해: 같은 눈들의 합",
       "example": [
-        1,
-        1,
+        5,
+        5,
+        4,
+        2,
         1
       ],
-      "fx": "slash",
       "variants": [
         {
-          "id": "needle",
-          "name": "바늘 한 땀",
+          "id": "clasped_hands",
+          "name": "맞잡은 손",
+          "ability": [
+            {
+              "op": "heal",
+              "amount": 3
+            },
+            {
+              "op": "block",
+              "amount": 3
+            }
+          ],
+          "abilityText": "HP 3 회복 + 방어도 3",
+          "tier": "common"
+        },
+        {
+          "id": "red_shoes",
+          "name": "한 켤레 붉은 구두",
           "ability": [
             {
               "op": "rerollNext",
@@ -68,234 +83,10 @@
             },
             {
               "op": "buffNext",
-              "amount": 12
-            }
-          ],
-          "abilityText": "다음 턴 리롤 +1 + 다음 피해 +12",
-          "tier": "common"
-        },
-        {
-          "id": "silver_needle",
-          "name": "은바늘",
-          "ability": [
-            {
-              "op": "heal",
-              "amount": 10
-            },
-            {
-              "op": "block",
-              "amount": 5
-            }
-          ],
-          "abilityText": "HP 10 회복 + 방어도 5",
-          "tier": "uncommon"
-        }
-      ]
-    },
-    {
-      "id": "twos",
-      "name": "듀스",
-      "kind": "upper",
-      "face": 2,
-      "tier": "common",
-      "ruleText": "굴린 주사위 중 [2]의 합만큼 피해.",
-      "example": [
-        2,
-        2,
-        2
-      ],
-      "fx": "slash",
-      "variants": [
-        {
-          "id": "cloak_hem",
-          "name": "붉은 망토 자락",
-          "ability": [
-            {
-              "op": "block",
-              "scoreMult": 3
-            }
-          ],
-          "abilityText": "방어도 +점수×3",
-          "tier": "common"
-        },
-        {
-          "id": "thorn_fence",
-          "name": "가시 울타리",
-          "ability": [
-            {
-              "op": "heal",
-              "amount": 3
-            },
-            {
-              "op": "block",
-              "amount": 10
-            }
-          ],
-          "abilityText": "HP 3 회복 + 방어도 10",
-          "tier": "uncommon"
-        }
-      ]
-    },
-    {
-      "id": "threes",
-      "name": "트레이",
-      "kind": "upper",
-      "face": 3,
-      "tier": "common",
-      "ruleText": "굴린 주사위 중 [3]의 합만큼 피해.",
-      "example": [
-        3,
-        3,
-        3
-      ],
-      "fx": "slash",
-      "variants": [
-        {
-          "id": "herbs",
-          "name": "약초 한 줌",
-          "ability": [
-            {
-              "op": "heal",
-              "amount": 7
-            }
-          ],
-          "abilityText": "HP 7 회복",
-          "tier": "common"
-        },
-        {
-          "id": "berry_jam",
-          "name": "산딸기 잼",
-          "ability": [
-            {
-              "op": "heal",
-              "amount": 4
-            },
-            {
-              "op": "block",
-              "amount": 5
-            }
-          ],
-          "abilityText": "HP 4 회복 + 방어도 5",
-          "tier": "uncommon"
-        }
-      ]
-    },
-    {
-      "id": "fours",
-      "name": "포스",
-      "kind": "upper",
-      "face": 4,
-      "tier": "common",
-      "ruleText": "굴린 주사위 중 [4]의 합만큼 피해.",
-      "example": [
-        4,
-        4,
-        4
-      ],
-      "fx": "slash",
-      "variants": [
-        {
-          "id": "oak_shield",
-          "name": "참나무 방패",
-          "ability": [
-            {
-              "op": "block",
-              "scoreMult": 0.5
-            }
-          ],
-          "abilityText": "방어도 +점수의 절반",
-          "tier": "common"
-        },
-        {
-          "id": "iron_pot",
-          "name": "무쇠 냄비",
-          "ability": [
-            {
-              "op": "block",
-              "amount": 6
-            }
-          ],
-          "abilityText": "방어도 +6",
-          "tier": "uncommon"
-        }
-      ]
-    },
-    {
-      "id": "fives",
-      "name": "파이브",
-      "kind": "upper",
-      "face": 5,
-      "tier": "common",
-      "ruleText": "굴린 주사위 중 [5]의 합만큼 피해.",
-      "example": [
-        5,
-        5,
-        5
-      ],
-      "fx": "slash",
-      "variants": [
-        {
-          "id": "powder",
-          "name": "화약 재기",
-          "ability": [
-            {
-              "op": "buffNext",
               "amount": 3
             }
           ],
-          "abilityText": "다음 족보 피해 +3",
-          "tier": "common"
-        },
-        {
-          "id": "five_claws",
-          "name": "다섯 발톱",
-          "ability": [
-            {
-              "op": "heal",
-              "amount": 3
-            }
-          ],
-          "abilityText": "HP 3 회복",
-          "tier": "uncommon"
-        }
-      ]
-    },
-    {
-      "id": "sixes",
-      "name": "식스",
-      "kind": "upper",
-      "face": 6,
-      "tier": "common",
-      "ruleText": "굴린 주사위 중 [6]의 합만큼 피해.",
-      "example": [
-        6,
-        6,
-        6
-      ],
-      "fx": "slash",
-      "variants": [
-        {
-          "id": "wolfshot",
-          "name": "늑대 사냥탄",
-          "ability": [
-            {
-              "op": "upperCharge",
-              "amount": 5
-            }
-          ],
-          "abilityText": "상단 보너스 게이지 +5",
-          "tier": "common"
-        },
-        {
-          "id": "overload",
-          "name": "화약 과적",
-          "ability": [
-            {
-              "op": "buffNext",
-              "amount": 2
-            }
-          ],
-          "abilityText": "다음 족보 피해 +2",
+          "abilityText": "다음 턴 리롤 +1 + 다음 피해 +3",
           "tier": "uncommon"
         }
       ]

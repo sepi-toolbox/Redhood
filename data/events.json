@@ -8,8 +8,8 @@
       "desc": "멀리서, 크게, 한 방.",
       "start": {
         "chance": "instinct",
-        "sixes": "wolfshot",
-        "fourKind": "heavy_blow"
+        "fourKind": "heavy_blow",
+        "twoPair": "twin_sisters"
       }
     },
     {
@@ -30,8 +30,8 @@
       "desc": "어둠을 밀어내고 숨을 고른다.",
       "start": {
         "chance": "whisper",
-        "threes": "herbs",
-        "fullHouse": "cottage"
+        "fullHouse": "cottage",
+        "onePair": "clasped_hands"
       }
     },
     {
@@ -41,8 +41,8 @@
       "desc": "파고, 막고, 버틴다.",
       "start": {
         "chance": "instinct",
-        "fours": "oak_shield",
-        "twos": "thorn_fence"
+        "twoPair": "twin_sisters",
+        "threeKind": "woodsman_breath"
       }
     },
     {
@@ -52,7 +52,7 @@
       "desc": "조용히 재고, 정확히 맞힌다.",
       "start": {
         "chance": "instinct",
-        "fives": "powder",
+        "twoPair": "two_moons",
         "smallStraight": "windpath"
       }
     },
@@ -63,8 +63,8 @@
       "desc": "작고 빠른 손놀림의 연속.",
       "start": {
         "chance": "whisper",
-        "ones": "needle",
-        "twos": "cloak_hem"
+        "onePair": "red_shoes",
+        "threeKind": "triple_axe"
       }
     }
   ],

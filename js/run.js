@@ -354,7 +354,10 @@ export function bossLegendaryChoices(run) {
 // ---------- 상점: 커먼~레어 주사위 + 일반 유물 (전설 없음) ----------
 export function rollShopStock(run) {
   const cfg = DB.act1.shop;
-  const priceMult = (run.enlight || 0) >= 16 ? 1.3 : 1; // 계몽 16: 상점 가격 증가
+  let priceMult = (run.enlight || 0) >= 16 ? 1.3 : 1; // 계몽 16: 상점 가격 증가
+  // 가계부: 상점 가격 -20%
+  priceMult *= run.relics.map(id => DB.relicById[id].hook)
+    .filter(h => h.type === 'shopDiscount').reduce((m, h) => m * (h.mult || 1), 1);
   const stock = [];
   const usedDie = new Set();
   for (let i = 0; i < cfg.stockDice; i++) {
@@ -376,6 +379,10 @@ export function rollShopStock(run) {
 export function coinReward(run, nodeType) {
   const cr = DB.act1.coins[nodeType === 'elite' ? 'elite' : 'battle'];
   let got = cr[0] + Math.floor(rng.next() * (cr[1] - cr[0] + 1));
+  // 은저울: 코인 +25%
+  const cm = run.relics.map(id => DB.relicById[id].hook)
+    .filter(h => h.type === 'coinBonus').reduce((m, h) => m * (h.mult || 1), 1);
+  got = Math.round(got * cm);
   if ((run.enlight || 0) >= 13) got = Math.floor(got * 0.75);
   run.coins += got;
   return got;

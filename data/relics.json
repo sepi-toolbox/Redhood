@@ -26,7 +26,7 @@
     "name": "붉은 실타래",
     "icon": "🧵",
     "tier": "normal",
-    "desc": "찬스 피해 +4.",
+    "desc": "노페어 피해 +4.",
     "hook": {
       "type": "categoryBonus",
       "category": "chance",
@@ -60,11 +60,11 @@
     "name": "가죽 장갑",
     "icon": "🧤",
     "tier": "normal",
-    "desc": "상단 족보(에이스~식스) 피해 +3.",
+    "desc": "투페어 피해 +6.",
     "hook": {
-      "type": "kindBonus",
-      "kind": "upper",
-      "bonus": 3
+      "type": "categoryBonus",
+      "category": "twoPair",
+      "bonus": 6
     }
   },
   {
@@ -96,10 +96,10 @@
     "name": "가계부",
     "icon": "📒",
     "tier": "normal",
-    "desc": "상단 보너스 발동 기준 40 → 30.",
+    "desc": "상점 가격 -20%.",
     "hook": {
-      "type": "upperBonusThreshold",
-      "value": 30
+      "type": "shopDiscount",
+      "mult": 0.8
     }
   },
   {
@@ -118,10 +118,10 @@
     "name": "은저울",
     "icon": "⚖️",
     "tier": "normal",
-    "desc": "상단 보너스 피해 25 → 35.",
+    "desc": "전투에서 얻는 🪙 +25%.",
     "hook": {
-      "type": "upperBonusDamage",
-      "value": 35
+      "type": "coinBonus",
+      "mult": 1.25
     }
   },
   {
@@ -139,7 +139,7 @@
     "name": "오래된 뼈",
     "icon": "🦴",
     "tier": "normal",
-    "desc": "같은 눈 족보(트리플·포카드·야찌) 피해 +6.",
+    "desc": "같은 눈 족보(원페어·트리플·포카드·야찌) 피해 +6.",
     "hook": {
       "type": "kindBonus",
       "kind": "ofKind",
@@ -252,11 +252,11 @@
     "name": "은탄환",
     "icon": "🔫",
     "tier": "elite",
-    "desc": "에이스 족보 피해 5배.",
+    "desc": "포카드 피해 2배.",
     "hook": {
       "type": "categoryMult",
-      "category": "ones",
-      "mult": 5
+      "category": "fourKind",
+      "mult": 2
     }
   },
   {

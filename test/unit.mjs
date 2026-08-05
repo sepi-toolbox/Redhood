@@ -9,7 +9,7 @@ function eq(label, actual, expected) {
 }
 
 const C = {
-  ones: { id: 'ones', kind: 'upper', face: 1 },
+  onePair: { id: 'onePair', kind: 'ofKind', count: 2, score: 'matchedSum', mult: 1 },
   threeKind: { id: 'threeKind', kind: 'ofKind', count: 3, score: 'matchedSum', mult: 1.5 },
   fourKind: { id: 'fourKind', kind: 'ofKind', count: 4, score: 'matchedSum', mult: 3 },
   fullHouse: { id: 'fullHouse', kind: 'fullHouse', score: 35 },
@@ -36,7 +36,9 @@ eq('라지 [2,3,4,5,6]', evalCategory(C.large, [2, 3, 4, 5, 6]).base, 60);
 eq('트리플 [4,4,4,2,1] 매칭합×1.5', evalCategory(C.threeKind, [4, 4, 4, 2, 1]).base, 18);
 eq('포카드 [5,5,5,5,2] 매칭합×3', evalCategory(C.fourKind, [5, 5, 5, 5, 2]).base, 60);
 eq('포카드 실패 [4,4,4,2,1]', evalCategory(C.fourKind, [4, 4, 4, 2, 1]).valid, false);
-eq('에이스 [1,1,2,3,4]', evalCategory(C.ones, [1, 1, 2, 3, 4]).base, 2);
+eq('원페어 [5,5,4,2,1] → 10', evalCategory(C.onePair, [5, 5, 4, 2, 1]).base, 10);
+eq('원페어 [5,5,5,2,1] 매칭 전부 → 15', evalCategory(C.onePair, [5, 5, 5, 2, 1]).base, 15);
+eq('원페어 실패 [1,2,3,4,6]', evalCategory(C.onePair, [1, 2, 3, 4, 6]).valid, false);
 eq('찬스 [6,6,5,4,1] 상위3합', evalCategory(C.chance, [6, 6, 5, 4, 1]).base, 17);
 eq('트리플 ×1.5 내림 [3,3,3,1,2] → 13', evalCategory(C.threeKind, [3, 3, 3, 1, 2]).base, 13);
 // v0.15 찬스 개정: 서로 다른 눈 상위 3합 — 뭉칠수록 약해진다
@@ -60,18 +62,18 @@ eq('금박 노페어 기여: [6,..] 0번 금박 → 6+6=12', computeDamage(C.noP
 eq('금박 찬스(개정) 기여', computeDamage(C.chanceD, [6, 6, 5, 4, 1], [G, N, N, N, N], []).total, 21);
 
 // 금박·유물 결합: (기본+금박)×배수+가산
-const silver = { hook: { type: 'categoryMult', category: 'ones', mult: 5 } };
+const silver = { hook: { type: 'categoryMult', category: 'fourKind', mult: 2 } };
 const fang = { hook: { type: 'flatDamage', amount: 3 } };
 const charm = { hook: { type: 'categoryBonus', category: 'fullHouse', bonus: 15 } };
 
-// [1,1,1,1,6], 금박이 0번(눈1) → 기본4 +금박1 =5, ×5 =25, +3 =28
-eq('은탄환+금박+이빨 에이스', computeDamage(C.ones, [1, 1, 1, 1, 6], [G, N, N, N, N], [silver, fang]).total, 28);
-// 금박이 4번(눈6, 에이스 비기여) → 기여 없음: 기본4 ×5 +3 = 23
-eq('금박 비기여 시 미적용', computeDamage(C.ones, [1, 1, 1, 1, 6], [N, N, N, N, G], [silver, fang]).total, 23);
+// 포카드 [4,4,4,4,1] ×3=48, 은탄환(×2)=96, 금박 0번(눈4 기여) +4 → (48+4)×2+3 = 107
+eq('은탄환+금박+이빨 포카드', computeDamage(C.fourKind, [4, 4, 4, 4, 1], [G, N, N, N, N], [silver, fang]).total, 107);
+// 금박이 4번(눈1, 포카드 비기여) → (48)×2+3 = 99
+eq('금박 비기여 시 미적용', computeDamage(C.fourKind, [4, 4, 4, 4, 1], [N, N, N, N, G], [silver, fang]).total, 99);
 // 풀하우스 35 + 부적15 + 이빨3 = 53
 eq('풀하우스+부적+이빨', computeDamage(C.fullHouse, [2, 2, 5, 5, 5], plain5, [charm, fang]).total, 53);
-// 0점 버리기: 에이스인데 1 없음 → total 0, isZero (이빨 미적용)
-const zero = computeDamage(C.ones, [2, 3, 4, 5, 6], plain5, [fang]);
+// 0점 버리기: 원페어인데 쌍 없음 → total 0, isZero (이빨 미적용)
+const zero = computeDamage(C.onePair, [2, 3, 4, 5, 6], plain5, [fang]);
 eq('0점 버리기 total', zero.total, 0);
 eq('0점 버리기 isZero', zero.isZero, true);
 // 금박이 찬스(상위3)에 기여: 상위3합 17 + 금박(0번 눈6, 상위3 포함) = 23
@@ -83,7 +85,6 @@ eq('금박 트리플 매칭 기여', computeDamage(C.threeKind, [4, 4, 4, 2, 1],
 
 // v0.8: 레벨 폐지 — 배수는 유물만
 eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).total, 17);
-eq('에이스+은탄환+금박+이빨', computeDamage(C.ones, [1, 1, 1, 1, 6], [G, N, N, N, N], [silver, fang]).total, 28);
 
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
