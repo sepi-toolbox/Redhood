@@ -102,19 +102,20 @@
       "id": "chance",
       "name": "찬스",
       "kind": "chance",
-      "score": "sumAll",
+      "score": "sumTop3",
       "startOwned": true,
       "tier": "common",
       "ability": [],
-      "abilityText": "언제나 성립",
-      "ruleText": "조건 없음 — 항상 성립. 주사위 5개 전체 합만큼 피해."
+      "abilityText": "언제나 성립 (레벨업 불가)",
+      "ruleText": "조건 없음 — 항상 성립. 가장 높은 눈 3개의 합만큼 피해.",
+      "maxLevel": 1
     },
     {
       "id": "threeKind",
       "name": "트리플",
       "kind": "ofKind",
       "count": 3,
-      "score": "sumAll",
+      "score": "matchedSumX2",
       "startOwned": true,
       "tier": "common",
       "ability": [
@@ -123,14 +124,14 @@
         }
       ],
       "abilityText": "봉인 해제",
-      "ruleText": "같은 눈 3개 이상이면 성립. 주사위 5개 전체 합만큼 피해."
+      "ruleText": "같은 눈 3개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해."
     },
     {
       "id": "fourKind",
       "name": "포카드",
       "kind": "ofKind",
       "count": 4,
-      "score": "sumAll",
+      "score": "matchedSumX2",
       "startOwned": false,
       "tier": "rare",
       "ability": [
@@ -139,7 +140,7 @@
         }
       ],
       "abilityText": "적 다음 행동 취소",
-      "ruleText": "같은 눈 4개 이상이면 성립. 주사위 5개 전체 합만큼 피해."
+      "ruleText": "같은 눈 4개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해."
     },
     {
       "id": "fullHouse",

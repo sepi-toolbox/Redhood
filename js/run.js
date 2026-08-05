@@ -71,7 +71,8 @@ export function rollRewards(run, nodeType) {
     } else {
       // 족보: 미보유=신규 획득, 보유=레벨업 (레벨캡 도달 시 제외)
       pool = DB.scoring.categories.filter(c =>
-        c.tier === tier && !usedIds.has('c_' + c.id) && (run.categories[c.id] || 0) < levelCap);
+        c.tier === tier && !usedIds.has('c_' + c.id) &&
+        (run.categories[c.id] || 0) < (c.maxLevel !== undefined ? c.maxLevel : levelCap));
     }
     if (pool.length === 0) continue;
     const item = pool[Math.floor(rng.next() * pool.length)];
