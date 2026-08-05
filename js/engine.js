@@ -23,6 +23,7 @@ export function createBattle(run, encounterIds) {
     rollsLeft: 0,
     nextTurnRerolls: 0,
     pendingBuff: 0,
+    pendingConfuse: 0,                    // 적 혼란 예약 — 다음 턴 시작 시 주사위 잠금 수
     dodgeActive: false,
     upperTotal: 0,
     upperBonusFired: false,
@@ -41,6 +42,8 @@ function spawnEnemy(id, idx, scale) {
   return {
     uid: `${id}_${idx}`, defId: id, name: def.name, tier: def.tier,
     hp, maxHpInit: hp, stunned: false,
+    block: 0,                             // 방어: 자기 다음 행동 때까지 피해 흡수
+    power: 0,                             // 강화: 이후 모든 공격 피해 +power (전투 내 누적)
     patternState: { index: 0, recent: [] }, phaseIndex: 0, nextMove: null,
   };
 }
@@ -58,7 +61,18 @@ function startTurn(battle, first = false) {
     + dicePassive(battle, 'extraReroll') + battle.nextTurnRerolls;
   battle.nextTurnRerolls = 0;
   battle.rolled = false;
-  for (const d of battle.dice) { d.held = false; d.face = 0; }
+  for (const d of battle.dice) { d.held = false; d.face = 0; d.confused = false; }
+  // 혼란(🌀): 무작위 주사위 N개가 뒤틀림 — 이번 턴 다시 굴릴 수 없다
+  if (battle.pendingConfuse > 0) {
+    const idx = battle.dice.map((_, i) => i);
+    const n = Math.min(battle.pendingConfuse, idx.length);
+    for (let k = 0; k < n; k++) {
+      const j = Math.floor(rng.next() * idx.length);
+      battle.dice[idx[j]].confused = true;
+      idx.splice(j, 1);
+    }
+    battle.pendingConfuse = 0;
+  }
 }
 
 export function initialRoll(battle) {
@@ -82,6 +96,7 @@ export function reroll(battle) {
 
 export function toggleHold(battle, i) {
   if (battle.over || !battle.rolled || battle.await) return;
+  if (battle.dice[i].confused) return; // 혼란 주사위는 다시 굴릴 수 없음
   battle.dice[i].held = !battle.dice[i].held;
 }
 
@@ -174,9 +189,13 @@ function applyAbility(battle, variant, bd, targets) {
         battle.lastResult.bonusHits.push(`다음 피해 +${ab.amount}`);
         break;
       case 'cleanse': {
-        const n = Object.keys(battle.sealed).length;
+        // v0.11: 해제 = 혼란(🌀) 제거 (현재 뒤틀린 주사위 + 예약된 혼란)
+        let n = 0;
+        for (const d of battle.dice) if (d.confused) { d.confused = false; n++; }
+        n += battle.pendingConfuse;
+        battle.pendingConfuse = 0;
         battle.sealed = {};
-        if (n > 0) battle.lastResult.bonusHits.push('봉인 해제!');
+        if (n > 0) battle.lastResult.bonusHits.push('혼란 해제!');
         break;
       }
       case 'stun':
@@ -189,6 +208,15 @@ function applyAbility(battle, variant, bd, targets) {
         break;
     }
   }
+}
+
+// 적에게 피해 — 방어(block)가 먼저 흡수 (v0.11)
+function dealToEnemy(battle, t, amount) {
+  const absorbed = Math.min(t.block || 0, amount);
+  t.block -= absorbed;
+  const dealt = amount - absorbed;
+  t.hp -= dealt;
+  battle.lastHits.push({ uid: t.uid, amount: dealt, absorbed, killed: t.hp <= 0 });
 }
 
 // ---------- 족보 확정 (플레이어 페이즈) — 사용할 변형을 지정 ----------
@@ -221,10 +249,7 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   battle.lastHits = [];
 
   if (bd.total > 0) {
-    for (const t of targets) {
-      t.hp -= bd.total;
-      battle.lastHits.push({ uid: t.uid, amount: bd.total, killed: t.hp <= 0 });
-    }
+    for (const t of targets) dealToEnemy(battle, t, bd.total);
   }
 
   applyAbility(battle, variant, bd, targets);
@@ -241,15 +266,14 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
         battle.upperTotal -= threshold;
         for (const t of targets) {
           if (t.hp > 0 || battle.lastHits.some(h => h.uid === t.uid)) {
-            t.hp -= cfg.damage;
-            battle.lastHits.push({ uid: t.uid, amount: cfg.damage, killed: t.hp <= 0 });
+            dealToEnemy(battle, t, cfg.damage);
           }
         }
         battle.lastResult.bonusHits.push(`상단 보너스 ${cfg.damage}!`);
       }
     } else if (!battle.upperBonusFired && battle.upperTotal >= threshold) {
       battle.upperBonusFired = true;
-      for (const t of targets) t.hp -= cfg.damage;
+      for (const t of targets) dealToEnemy(battle, t, cfg.damage);
       battle.lastResult.bonusHits.push(`상단 보너스 ${cfg.damage}!`);
     }
   }
@@ -268,27 +292,37 @@ export function enemyPhase(battle) {
   battle.lastHits = []; // 사체 연출 종료 — 다음 렌더부터 죽은 적 제거
   for (const e of aliveEnemies(battle)) {
     if (battle.over) break;
+    e.block = 0; // 자기 차례가 돌아오면 이전 방어는 소멸
     if (e.stunned) { e.stunned = false; chooseMove(e); continue; }
     for (const ef of e.nextMove.effects) {
-      if (ef.op === 'damage') {
-        if (battle.dodgeActive) continue;
-        let dmg = ef.amount;
-        const absorbed = Math.min(battle.player.block, dmg);
-        battle.player.block -= absorbed;
-        dmg -= absorbed;
-        if (dmg > 0) {
-          battle.player.hp -= dmg;
-          if (battle.player.hp <= 0) {
-            battle.player.hp = 0; battle.over = true; battle.result = 'defeat';
-            return;
+      switch (ef.op) {
+        case 'damage': {                                   // ⚔️ 공격 (+강화 누적분)
+          if (battle.dodgeActive) break;
+          let dmg = ef.amount + (e.power || 0);
+          const absorbed = Math.min(battle.player.block, dmg);
+          battle.player.block -= absorbed;
+          dmg -= absorbed;
+          if (dmg > 0) {
+            battle.player.hp -= dmg;
+            if (battle.player.hp <= 0) {
+              battle.player.hp = 0; battle.over = true; battle.result = 'defeat';
+              return;
+            }
           }
+          break;
         }
-      } else if (ef.op === 'seal') {
-        const owned = Object.keys(battle.categories);
-        const target = battle.lastUsedCat && battle.categories[battle.lastUsedCat]
-          ? battle.lastUsedCat
-          : owned[Math.floor(rng.next() * owned.length)];
-        if (target) battle.sealed[target] = Math.max(battle.sealed[target] || 0, ef.turns + 1);
+        case 'block':                                      // 🛡 방어
+          e.block += ef.amount;
+          break;
+        case 'confuse':                                    // 🌀 혼란 — 다음 턴 주사위 잠금
+          battle.pendingConfuse += ef.amount;
+          break;
+        case 'empower':                                    // 💪 강화 — 전투 내 공격력 누적
+          e.power = (e.power || 0) + ef.amount;
+          break;
+        case 'heal':                                       // 💚 치료
+          e.hp = Math.min(e.maxHpInit, e.hp + ef.amount);
+          break;
       }
     }
     chooseMove(e);
@@ -335,12 +369,21 @@ function chooseMove(enemy) {
   enemy.nextMove = { id: moveId, ...def.moves[moveId] };
 }
 
+// 의도 표기 (v0.11): ⚔️공격 / 🛡방어 / 🌀혼란 / 💪강화 / 💚치료 / ❓의문 — 혼합은 병기
 export function intentOf(enemy) {
   const mv = enemy.nextMove;
   if (!mv) return '';
   if (enemy.stunned) return '💫';
-  const dmg = mv.effects.filter(e => e.op === 'damage').reduce((s, e) => s + e.amount, 0);
-  if (dmg > 0) return `⚔️${dmg}`;
-  if (mv.effects.some(e => e.op === 'seal')) return '🔒';
-  return '💤';
+  if (mv.hidden) return '❓';
+  const parts = [];
+  const dmg = mv.effects.filter(e => e.op === 'damage')
+    .reduce((s, e) => s + e.amount + (enemy.power || 0), 0);
+  if (dmg > 0) parts.push(`⚔️${dmg}`);
+  for (const ef of mv.effects) {
+    if (ef.op === 'block') parts.push(`🛡${ef.amount}`);
+    else if (ef.op === 'confuse') parts.push('🌀');
+    else if (ef.op === 'empower') parts.push('💪');
+    else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
+  }
+  return parts.join(' ') || '💤';
 }

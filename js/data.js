@@ -51,6 +51,15 @@ function validate() {
       }
     }
   }
+  // 적 행동 6유형 검증 (v0.11)
+  const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal']);
+  for (const e of DB.enemies) {
+    for (const [mid, mv] of Object.entries(e.moves)) {
+      for (const ef of mv.effects) {
+        if (!ENEMY_OPS.has(ef.op)) throw new Error(`enemies.json: ${e.id}.${mid} 미지원 행동 "${ef.op}"`);
+      }
+    }
+  }
   // 무기 시작 족보(변형) 존재 검증
   const catById = {};
   for (const c of DB.scoring.categories) catById[c.id] = c;

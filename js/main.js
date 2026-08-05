@@ -354,11 +354,11 @@ function renderBattle(opts = {}) {
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
           <button class="enemy ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
             ${targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
-            <span class="intent">${intentOf(e)} <small>${esc(e.nextMove.name)}</small></span>
+            <span class="intent">${intentOf(e)} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
             <span class="enemy-art">${e.tier === 'boss' ? '🐺' : e.tier === 'elite' ? '💀' : '🌑'}</span>
             <span class="enemy-name">${esc(e.name)}</span>
             <span class="bar"><i style="width:${Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
-            <span class="enemy-hp">${e.hp}/${e.maxHpInit}</span>
+            <span class="enemy-hp">${e.hp}/${e.maxHpInit}${(e.block > 0 || e.power > 0) ? ` <span class="enemy-buffs">${e.block > 0 ? `🛡${e.block}` : ''}${e.power > 0 ? ` 💪+${e.power}` : ''}</span>` : ''}</span>
           </button>`).join('')}
       </div>
       <div class="mid-line">
@@ -369,10 +369,10 @@ function renderBattle(opts = {}) {
           const def = battle.diceDefs[i];
           const blank = !battle.rolled;
           const marked = battle.rolled && !d.held; // 다시 굴릴 주사위
-          return `<button class="die ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}"
+          return `<button class="die ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}"
             data-idx="${i}" title="${esc(def.name)}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
             <span class="pip">${blank ? '' : PIPS[d.face] || d.face}</span>
-            <small>${marked ? '다시' : ''}</small>
+            <small>${marked ? '다시' : d.confused ? '🌀혼란' : ''}</small>
           </button>`;
         }).join('')}
       </div>
@@ -663,8 +663,8 @@ function playHitEffects(hits, fx = 'slash') {
       default:         addSlash('');                                            // 기본 베기
     }
     const dmg = document.createElement('span');
-    dmg.className = 'dmg-float' + (fx === 'judgment' ? ' big' : '');
-    dmg.textContent = `-${hit.amount}`;
+    dmg.className = 'dmg-float' + (fx === 'judgment' ? ' big' : '') + (hit.amount === 0 ? ' blocked' : '');
+    dmg.textContent = hit.amount > 0 ? `-${hit.amount}` : '🛡막음';
     el.appendChild(dmg);
     cleanup.push(dmg);
     setTimeout(() => { cleanup.forEach(n => n.remove()); el.classList.remove('hit'); }, 720);
