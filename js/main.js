@@ -632,8 +632,9 @@ function renderBattle(opts = {}) {
     const rerolled = battle.dice.map((d, i) => (d.held ? -1 : i)).filter(i => i >= 0);
     if (reroll(battle)) animateRoll(rerolled);
   });
-  // 적 탭 = 표적 변경 (언제든, 확정과 무관)
+  // 적 탭 = 표적 변경 (언제든, 확정과 무관) / 길게 누르면 행동 상세 (치트)
   app.querySelectorAll('.enemy').forEach(el => {
+    addLongPress(el, () => showEnemyInfo(el.dataset.uid));
     el.addEventListener('click', () => {
       if (busy) return;
       const uid = el.dataset.uid;
@@ -655,6 +656,42 @@ function renderBattle(opts = {}) {
       tryConfirm(catId, variantId, targetUid);
     });
   });
+}
+
+// ---------- 적 행동 상세 (치트): 적 길게 눌러 예고 행동의 실제 내용 확인 — ❓ 의문도 공개 ----------
+const ENEMY_TIER_KO = { normal: '일반', elite: '정예', boss: '보스' };
+function enemyEffectText(e, ef) {
+  switch (ef.op) {
+    case 'damage': return `⚔️ 피해 ${Math.round(ef.amount * (e.atkScale || 1)) + (e.power || 0)}` +
+      (e.power > 0 ? ` (기본 ${Math.round(ef.amount * (e.atkScale || 1))} + 강화 ${e.power})` : '');
+    case 'block': return `🛡 방어 ${ef.amount} 획득`;
+    case 'confuse': return `🌀 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
+    case 'empower': return `💪 강화 — 공격력 +${ef.amount} (전투 내 누적)`;
+    case 'heal': return `💚 자신 HP ${ef.amount} 회복`;
+    default: return ef.op;
+  }
+}
+function showEnemyInfo(uid) {
+  const e = battle && battle.enemies.find(x => x.uid === uid);
+  if (!e || !e.nextMove) return;
+  const mv = e.nextMove;
+  const effects = mv.effects.map(ef => `<li>${esc(enemyEffectText(e, ef))}</li>`).join('');
+  app.append(h(`
+    <div class="modal-back" id="enemy-info">
+      <div class="modal">
+        <h3>${e.art} ${esc(e.name)} <small class="cat-tag">${ENEMY_TIER_KO[e.tier] || e.tier}${e.final ? ' · 무한' : ''}</small></h3>
+        <p class="modal-text">${e.final ? '체력 ∞' : `HP ${e.hp}/${e.maxHpInit}`}${e.block > 0 ? ` · 🛡${e.block}` : ''}${e.power > 0 ? ` · 💪+${e.power}` : ''}${e.stunned ? ' · 💫행동 취소됨' : ''}</p>
+        <p class="info-ability">🔍 예고 행동: <b>${esc(mv.name)}</b>${mv.hidden ? ' <small class="cat-tag">(❓ 의문 — 치트로 공개)</small>' : ''}</p>
+        <ul class="deck-list">${effects || '<li class="modal-text">아무것도 하지 않는다</li>'}</ul>
+        ${e.escalation ? `<p class="modal-text">⚠ 매 턴 공격력 +${e.escalation} 누적 — 점점 강해진다</p>` : ''}
+        ${e.enlightened ? `<p class="modal-text">🔮 계몽 상태 — 3번째 행동마다 강화 기술 사용</p>` : ''}
+        <p class="hint">⚠ 치트 보기 — 숨겨진 정보(❓)까지 공개된다</p>
+        <button class="btn primary" id="enemy-info-close">닫기</button>
+      </div>
+    </div>`));
+  const back = document.getElementById('enemy-info');
+  document.getElementById('enemy-info-close').addEventListener('click', () => back.remove());
+  back.addEventListener('click', (ev) => { if (ev.target === back) back.remove(); });
 }
 
 // 굴림 연출: 낙하-텀블링-바운스 착지, 왼쪽부터 차례로 멈추며 값 공개
