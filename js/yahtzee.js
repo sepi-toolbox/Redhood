@@ -45,6 +45,12 @@ export function evalCategory(cat, faces) {
         : { valid: false, base: 0, contributing: [] };
     }
     case 'chance': {
+      if (cat.score === 'highestDie') {
+        // v0.16 노페어: 가장 높은 눈 하나 — 언제나 성립하는 순수 보험 (성권 지시)
+        let best = 0;
+        for (const i of all) if (faces[i] > faces[best]) best = i;
+        return { valid: true, base: faces[best], contributing: [best] };
+      }
       if (cat.score === 'sumTop3Distinct') {
         // v0.15: 서로 다른 눈 중 높은 3개의 합 — 같은 눈이 뭉칠수록 찬스가 약해진다 (보험 역할 고정)
         const seen = new Set();

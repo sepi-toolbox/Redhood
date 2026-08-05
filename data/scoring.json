@@ -1,5 +1,5 @@
 {
-  "_version": 8,
+  "_version": 9,
   "rerollsPerTurn": 2,
   "upperBonus": {
     "threshold": 40,
@@ -9,15 +9,17 @@
   "categories": [
     {
       "id": "chance",
-      "name": "찬스",
+      "name": "노페어",
       "kind": "chance",
-      "score": "sumTop3Distinct",
+      "score": "highestDie",
       "tier": "common",
-      "ruleText": "언제나 성립 — 피해: 서로 다른 눈 중 높은 3개의 합 (같은 눈은 한 번만)",
+      "ruleText": "언제나 성립 — 피해: 가장 높은 눈 하나 (보험)",
       "example": [
         6,
-        5,
-        3
+        4,
+        3,
+        2,
+        1
       ],
       "fx": "slash",
       "variants": [

@@ -18,6 +18,7 @@ const C = {
   yahtzee: { id: 'yahtzee', kind: 'ofKind', count: 5, score: 70 },
   chance: { id: 'chance', kind: 'chance', score: 'sumTop3' },
   chanceD: { id: 'chance', kind: 'chance', score: 'sumTop3Distinct' },
+  noPair: { id: 'chance', kind: 'chance', score: 'highestDie' },
 };
 const N = { faces: [1, 2, 3, 4, 5, 6] };
 const G = { faces: [1, 2, 3, 4, 5, 6], gold: true };
@@ -42,6 +43,11 @@ eq('찬스(개정) [6,6,5,4,1] → 6+5+4', evalCategory(C.chanceD, [6, 6, 5, 4, 
 eq('찬스(개정) [6,6,6,6,6] → 6', evalCategory(C.chanceD, [6, 6, 6, 6, 6]).base, 6);
 eq('찬스(개정) [6,6,4,4,2] → 12', evalCategory(C.chanceD, [6, 6, 4, 4, 2]).base, 12);
 eq('찬스(개정) 기여 3개(중복 제외)', evalCategory(C.chanceD, [6, 6, 5, 4, 1]).contributing.length, 3);
+// v0.16 노페어: 가장 높은 눈 하나
+eq('노페어 [6,4,3,2,1] → 6', evalCategory(C.noPair, [6, 4, 3, 2, 1]).base, 6);
+eq('노페어 [2,2,1,1,1] → 2', evalCategory(C.noPair, [2, 2, 1, 1, 1]).base, 2);
+eq('노페어 기여 주사위 1개', evalCategory(C.noPair, [6, 4, 3, 2, 1]).contributing.length, 1);
+eq('금박 노페어 기여: [6,..] 0번 금박 → 6+6=12', computeDamage(C.noPair, [6, 4, 3, 2, 1], [G, N, N, N, N], []).total, 12);
 // 금박이 개정 찬스의 채택 눈에 기여: [6,6,5,4,1] 0번(눈6 채택) → 15+6=21
 eq('금박 찬스(개정) 기여', computeDamage(C.chanceD, [6, 6, 5, 4, 1], [G, N, N, N, N], []).total, 21);
 
