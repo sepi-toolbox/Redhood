@@ -1,7 +1,7 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
-import { newRun, rollEncounter, rollRewards, applyRest, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices } from './run.js';
+import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward } from './run.js';
 
 const app = document.getElementById('app');
 let run = null;
@@ -71,8 +71,18 @@ function showCategoryInfo(catId, variantId) {
 }
 
 // ---------- 타이틀 ----------
+const ENLIGHT_DESC = [
+  '엘리트가 더 자주 나타난다', '모든 일반 적 공격력 +15%', '모든 엘리트 공격력 +15%', '보스 공격력 +15%',
+  '보스 처치 회복 50% → 15%', 'HP 30%를 잃은 채 시작', '모든 일반 적 체력 +20%', '모든 엘리트 체력 +20%',
+  '모든 보스 체력 +20%', '주사위 하나가 저주 주사위로', '휴식 회복량 -50%',
+  '일반의 언커먼·엘리트의 레어 확률 절반', '적이 주는 🪙 -25%', '최대 HP -10%',
+  '이벤트의 대가가 가혹해진다', '상점 가격 증가', '일반 적에게 계몽 패턴', '엘리트에게 계몽 패턴',
+  '보스에게 계몽 패턴', '최종 보스가 두 마리',
+];
+
 function showTitle() {
   run = null; battle = null;
+  const enlight = loadMeta().enlight;
   app.innerHTML = '';
   app.append(h(`
     <div class="screen title-screen">
@@ -81,11 +91,13 @@ function showTitle() {
       <p class="subtitle">빨간망토의 모험 — 주사위판</p>
       ${hasSave() ? `<button class="btn primary" id="continue-btn">이어하기</button>` : ''}
       <button class="btn primary" id="start-btn">숲으로 들어간다</button>
+      <button class="btn ghost" id="enlight-btn">🔮 계몽 ${enlight}</button>
       <p class="hint">야찌 족보로 점수를 내면, 그만큼 늑대가 아프다.</p>
       <button class="btn ghost hidden" id="install-btn">📲 홈 화면에 설치</button>
       <p class="hint">iOS는 공유 버튼 → "홈 화면에 추가"</p>
     </div>`));
   document.getElementById('start-btn').addEventListener('click', () => { run = newRun(); showIntro(); });
+  document.getElementById('enlight-btn').addEventListener('click', showEnlightModal);
   const cont = document.getElementById('continue-btn');
   if (cont) cont.addEventListener('click', () => { const r = loadRun(); if (r) { run = r; showMap(); } });
   const install = document.getElementById('install-btn');
@@ -192,6 +204,38 @@ function showEventResult(npc, linesHtml, pendingDie = null) {
   }, { once: true });
 }
 
+// ---------- 계몽 설정 (치트 — 원래는 클리어로만 상승) ----------
+function showEnlightModal() {
+  const render = () => {
+    const cur = loadMeta().enlight;
+    const back = document.getElementById('enlight-modal');
+    if (back) back.remove();
+    app.append(h(`
+      <div class="modal-back" id="enlight-modal">
+        <div class="modal">
+          <h3>🔮 계몽 — 현재 ${cur}단계</h3>
+          <p class="modal-text">3막 보스를 처치할 때마다 +1. 높을수록 숲이 가혹해진다.<br>⚠ 아래 버튼은 테스트용 치트 — 다음 런부터 적용.</p>
+          <div class="enlight-ctl">
+            <button class="btn" id="enl-minus">−</button>
+            <span class="enlight-num">${cur}</span>
+            <button class="btn" id="enl-plus">＋</button>
+          </div>
+          <ul class="deck-list enlight-list">
+            ${ENLIGHT_DESC.map((d, i) => `<li class="${i < cur ? 'on' : ''}">${i + 1}. ${esc(d)}</li>`).join('')}
+          </ul>
+          <button class="btn primary" id="enl-close">닫기</button>
+        </div>
+      </div>`));
+    document.getElementById('enl-minus').addEventListener('click', () => { setEnlight(cur - 1); render(); });
+    document.getElementById('enl-plus').addEventListener('click', () => { setEnlight(cur + 1); render(); });
+    document.getElementById('enl-close').addEventListener('click', () => {
+      document.getElementById('enlight-modal').remove();
+      showTitle();
+    });
+  };
+  render();
+}
+
 // ---------- 상점 (v0.13): 커먼~레어 주사위 + 일반 유물, 화폐는 🪙 ----------
 function showShop() {
   const stock = rollShopStock(run);
@@ -270,27 +314,80 @@ function showLootCards(title, subtitle, choices, onPick) {
   document.getElementById('skip-btn').addEventListener('click', () => onPick(null));
 }
 
-function showBossReward() {
-  const finishBoss = () => { clearSave(); showEnd(true); };
+function showBossReward(onDone) {
   const stage2 = () => {
     const legend = bossLegendaryChoices(run);
-    if (legend.length === 0) return finishBoss();
-    showLootCards('🐺 전리품', '전설의 유산 — 하나를 고른다', legend, (c) => {
-      if (!c) return finishBoss();
+    if (legend.length === 0) return onDone();
+    showLootCards('🏆 전리품', '전설의 유산 — 하나를 고른다', legend, (c) => {
+      if (!c) return onDone();
       if (c.kind === 'category') {
         (run.categories[c.item.cat.id] = run.categories[c.item.cat.id] || []).push(c.item.variant.id);
-        finishBoss();
+        onDone();
       } else {
-        showReplaceDie(c.item, finishBoss, finishBoss);
+        showReplaceDie(c.item, onDone, onDone);
       }
     });
   };
   const relics = bossRelicChoices(run);
   if (relics.length === 0) return stage2();
-  showLootCards('🐺 전리품', '정예 유물 — 하나를 고른다', relics, (c) => {
+  showLootCards('🏆 전리품', '정예 유물 — 하나를 고른다', relics, (c) => {
     if (c) applyRelicPickup(run, c.item);
     stage2();
   });
+}
+
+// 보스 처치 후: 1·2막 → 회복하고 다음 막 / 3막 → 계몽 +1, 최후의 어둠
+function afterBossVictory() {
+  if (run.act < 3) {
+    const healed = advanceAct(run);
+    saveRun(run);
+    const theme = themeOf(run);
+    app.innerHTML = '';
+    app.append(h(`
+      <div class="screen center end-screen">
+        <div class="rest-art">${theme.icon}</div>
+        <h2>${run.act}막 — ${esc(theme.name)}</h2>
+        <p>상처를 여미고 다시 걷는다. <b class="coin-gain">+${healed} HP</b> (❤️ ${run.hp}/${run.maxHp})</p>
+        <button class="btn primary" id="next-act-btn">더 깊은 곳으로</button>
+      </div>`));
+    document.getElementById('next-act-btn').addEventListener('click', showMap);
+  } else {
+    const n = gainEnlight();
+    clearSave(); // 최종전은 세이브 없음 — 여기서부터는 돌아갈 수 없다
+    app.innerHTML = '';
+    app.append(h(`
+      <div class="screen center end-screen">
+        <div class="rest-art">🔮</div>
+        <h2>계몽 — ${n}단계</h2>
+        <p>세 번째 어둠이 걷혔다. 빨간 두건은 알게 되었다.<br>
+        숲의 끝에서, <b>이름 없는 공포</b>가 기다린다는 것을.</p>
+        <p class="hint">이 존재는 쓰러지지 않는다. 버틸 수 있는 만큼 버텨라.</p>
+        <button class="btn primary" id="final-btn">마주한다</button>
+      </div>`));
+    document.getElementById('final-btn').addEventListener('click', startFinalBattle);
+  }
+}
+
+function startFinalBattle() {
+  run.act = 4;
+  currentNodeType = 'final';
+  battle = createBattle(run, finalEncounter(run));
+  selectedCat = null; busy = false;
+  targetUid = aliveEnemies(battle)[0]?.uid || null;
+  renderBattle();
+}
+
+function showFinalEnd(turns) {
+  const enlight = loadMeta().enlight;
+  app.innerHTML = '';
+  app.append(h(`
+    <div class="screen center end-screen">
+      <div class="rest-art">🌑</div>
+      <h2>심연에 삼켜졌다</h2>
+      <p>이름 없는 공포 앞에서 <b class="coin-gain">${turns}턴</b>을 버텼다.<br>숲은 끝났고, 빨간 두건은 계몽했다. (🔮 ${enlight})</p>
+      <button class="btn primary" id="restart-btn">새로운 런</button>
+    </div>`));
+  document.getElementById('restart-btn').addEventListener('click', showTitle);
 }
 
 // ---------- 맵 ----------
@@ -301,6 +398,7 @@ const NODE_META = {
   event: { icon: '💬', label: '만남' },
   shop: { icon: '🧺', label: '상점' },
   boss: { icon: '🐺', label: '보스' },
+  final: { icon: '🌑', label: '최후' },
 };
 
 function showMap() {
@@ -331,7 +429,7 @@ function showMap() {
   app.append(h(`
     <div class="screen map-screen">
       <header class="topbar">
-        <span>🌲 ${run.floor}/${run.map.length}층</span>
+        <span>${themeOf(run).icon} ${run.act}막 · ${esc(themeOf(run).name)} ${run.floor}/${run.map.length}</span>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
         <span>🪙${run.coins} <span class="hp">❤️ ${run.hp}/${run.maxHp}</span></span>
       </header>
@@ -407,7 +505,7 @@ function showRest() {
     <div class="screen center rest-screen">
       <div class="rest-art">🔥</div>
       <h2>모닥불</h2>
-      <button class="btn primary" id="rest-btn">휴식 (HP ${Math.floor(run.maxHp * DB.act1.rest.healRatio)} 회복)</button>
+      <button class="btn primary" id="rest-btn">휴식 (HP ${restHealAmount(run)} 회복)</button>
     </div>`));
   document.getElementById('rest-btn').addEventListener('click', () => {
     const healed = applyRest(run); saveRun(run);
@@ -461,10 +559,10 @@ function renderBattle(opts = {}) {
           <button class="enemy ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
             ${targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
             <span class="intent">${intentOf(e)} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
-            <span class="enemy-art">${e.tier === 'boss' ? '🐺' : e.tier === 'elite' ? '💀' : '🌑'}</span>
+            <span class="enemy-art">${e.art}</span>
             <span class="enemy-name">${esc(e.name)}</span>
-            <span class="bar"><i style="width:${Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
-            <span class="enemy-hp">${e.hp}/${e.maxHpInit}${(e.block > 0 || e.power > 0) ? ` <span class="enemy-buffs">${e.block > 0 ? `🛡${e.block}` : ''}${e.power > 0 ? ` 💪+${e.power}` : ''}</span>` : ''}</span>
+            <span class="bar"><i style="width:${e.final ? 100 : Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
+            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${(e.block > 0 || e.power > 0) ? ` <span class="enemy-buffs">${e.block > 0 ? `🛡${e.block}` : ''}${e.power > 0 ? ` 💪+${e.power}` : ''}</span>` : ''}</span>
           </button>`).join('')}
       </div>
       <div class="mid-line">
@@ -789,6 +887,7 @@ function playerDeathFx() {
     busy = false;
     run.hp = 0;
     clearSave();
+    if (currentNodeType === 'final') { showFinalEnd(battle.turn); return; }
     showEnd(false);
   }, 1000);
 }
@@ -798,18 +897,21 @@ function finishBattle() {
   setTimeout(() => {
     busy = false;
     run.hp = battle.player.hp;
-    if (battle.result === 'defeat') { clearSave(); showEnd(false); return; }
+    if (battle.result === 'defeat') {
+      clearSave();
+      if (currentNodeType === 'final') { showFinalEnd(battle.turn); return; }
+      showEnd(false);
+      return;
+    }
     // (승리 시 처치 연출을 여유 있게 재생)
     // 승리 시 회복 유물 (빵부스러기·꿀단지)
     const heal = run.relics.map(id => DB.relicById[id])
       .filter(r => r.hook.type === 'healOnVictory')
       .reduce((s, r) => s + r.hook.amount, 0);
     if (heal > 0) run.hp = Math.min(run.maxHp, run.hp + heal);
-    if (currentNodeType === 'boss') { showBossReward(); return; }
-    // 코인 획득 (v0.13)
-    const cr = DB.act1.coins[currentNodeType === 'elite' ? 'elite' : 'battle'];
-    lastCoinGain = cr[0] + Math.floor(Math.random() * (cr[1] - cr[0] + 1));
-    run.coins += lastCoinGain;
+    if (currentNodeType === 'boss') { showBossReward(afterBossVictory); return; }
+    // 코인 획득 (v0.13 — 계몽 13: -25%)
+    lastCoinGain = coinReward(run, currentNodeType);
     showReward();
   }, 850);
 }

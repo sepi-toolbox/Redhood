@@ -136,6 +136,9 @@ async function playTurn(page) {
       await page.locator('.rest-screen .btn').first().click(); await page.waitForTimeout(80); continue;
     }
     if (await page.locator('.end-screen').count()) {
+      // 막 전환·최종전 진입 화면은 계속 진행
+      if (await page.locator('#next-act-btn').count()) { await page.locator('#next-act-btn').click(); await page.waitForTimeout(150); continue; }
+      if (await page.locator('#final-btn').count()) { await page.locator('#final-btn').click(); await page.waitForTimeout(150); continue; }
       ended = await page.locator('.end-screen h2').innerText();
       await page.screenshot({ path: `${SHOT}/05-end.png` });
       break;

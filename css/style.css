@@ -665,3 +665,10 @@ body {
 .coin-gain { font-size: 17px; font-weight: 800; color: #e8b64b; }
 .card.r-elite { border-color: #b08948; }
 .card.r-normal { border-color: #4a3b30; }
+
+/* ---------- 계몽 (v0.14) ---------- */
+.enlight-ctl { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 10px 0; }
+.enlight-num { font-size: 28px; font-weight: 800; color: #c8aae8; min-width: 44px; text-align: center; }
+.enlight-list { max-height: 38vh; overflow-y: auto; font-size: 12.5px; }
+.enlight-list li { color: #6f6353; padding: 2px 0; }
+.enlight-list li.on { color: #c8aae8; font-weight: 700; }

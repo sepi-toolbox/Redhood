@@ -2,20 +2,21 @@
 export const DB = {
   dice: null, diceById: {}, relics: null, relicById: {},
   scoring: null, enemies: null, enemyById: {}, act1: null,
-  events: null, weaponById: {}, eventById: {},
+  events: null, weaponById: {}, eventById: {}, acts: null,
 };
 
 export async function loadAll() {
-  const [dice, relics, scoring, enemies, act1, events] = await Promise.all([
+  const [dice, relics, scoring, enemies, act1, events, acts] = await Promise.all([
     fetchJson('./data/dice.json'),
     fetchJson('./data/relics.json'),
     fetchJson('./data/scoring.json'),
     fetchJson('./data/enemies.json'),
     fetchJson('./data/act1.json'),
     fetchJson('./data/events.json'),
+    fetchJson('./data/acts.json'),
   ]);
   DB.dice = dice; DB.relics = relics; DB.scoring = scoring;
-  DB.enemies = enemies; DB.act1 = act1; DB.events = events;
+  DB.enemies = enemies; DB.act1 = act1; DB.events = events; DB.acts = acts;
   DB.diceById = {}; for (const d of dice) DB.diceById[d.id] = d;
   DB.relicById = {}; for (const r of relics) DB.relicById[r.id] = r;
   DB.enemyById = {}; for (const e of enemies) DB.enemyById[e.id] = e;
@@ -73,8 +74,21 @@ function validate() {
       if (!(c.variants || []).some(v => v.id === vid)) throw new Error(`events.json: 무기 ${w.id}가 없는 변형 "${cid}:${vid}" 참조`);
     }
   }
+  // 막/테마 참조 무결성 (v0.14)
+  const evIds = new Set(DB.events.events.map(e => e.id));
+  for (const a of DB.acts.acts) {
+    for (const t of a.themes) {
+      for (const eid of [...t.normals, ...t.elites, t.boss]) {
+        if (!DB.enemyById[eid]) throw new Error(`acts.json: ${t.id} 테마가 없는 적 "${eid}" 참조`);
+      }
+      for (const ev of t.events) {
+        if (!evIds.has(ev)) throw new Error(`acts.json: ${t.id} 테마가 없는 이벤트 "${ev}" 참조`);
+      }
+    }
+  }
+  if (!DB.enemyById[DB.acts.finalBoss]) throw new Error(`acts.json: 최종 보스 "${DB.acts.finalBoss}" 없음`);
   // 이벤트 효과 op 검증
-  const OPS = new Set(['heal', 'loseHp', 'maxHp', 'gainRelic', 'gainVariant', 'gainDie']);
+  const OPS = new Set(['heal', 'loseHp', 'maxHp', 'maxHpLoss', 'gainRelic', 'gainRelicElite', 'gainVariant', 'gainDie', 'gainCoins', 'loseCoins']);
   for (const ev of DB.events.events) {
     for (const ch of ev.choices) {
       for (const ef of (ch.effects || [])) {

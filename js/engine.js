@@ -6,9 +6,24 @@ export const rng = { next: Math.random };
 
 function ri(min, max) { return min + Math.floor(rng.next() * (max - min + 1)); }
 
+// 계몽에 따른 티어별 배율 — 2/3/4: 공격력 / 7/8/9: 체력
+function enlightMults(enlight, tier) {
+  let hp = 1, atk = 1;
+  if (tier === 'normal') { if (enlight >= 2) atk *= 1.15; if (enlight >= 7) hp *= 1.2; }
+  else if (tier === 'elite') { if (enlight >= 3) atk *= 1.15; if (enlight >= 8) hp *= 1.2; }
+  else { if (enlight >= 4) atk *= 1.15; if (enlight >= 9) hp *= 1.2; }
+  return { hp, atk };
+}
+
 // ---------- 전투 생성 ----------
 export function createBattle(run, encounterIds) {
-  const scale = 1 + (DB.act1.hpScalePerFloor || 0) * (run.floor - 1);
+  const enlight = run.enlight || 0;
+  // 막 스케일 × 층 스케일 (최종전(act 4)은 절대 수치)
+  const actKey = String(Math.min(run.act || 1, 3));
+  const actHp = (DB.acts.scaling.hp[actKey] || 1);
+  const actAtk = (DB.acts.scaling.atk[actKey] || 1);
+  const floorScale = 1 + (DB.act1.hpScalePerFloor || 0) * (Math.max(run.floor, 1) - 1);
+  const scale = { hp: actHp * floorScale, atk: actAtk, enlight };
   const battle = {
     over: false, result: null, turn: 1,
     await: null,                          // null | 'enemy' (플레이어 확정 후 적 페이즈 대기)
@@ -38,13 +53,27 @@ export function createBattle(run, encounterIds) {
 
 function spawnEnemy(id, idx, scale) {
   const def = DB.enemyById[id];
-  const hp = Math.round(ri(def.hp[0], def.hp[1]) * scale);
+  const em = enlightMults(scale.enlight, def.tier);
+  // 최종 보스: 무한 체력(사실상), 막/층 스케일 미적용, 매 턴 점진 강화
+  const hp = def.final
+    ? def.hp[0]
+    : Math.round(ri(def.hp[0], def.hp[1]) * scale.hp * em.hp);
+  // 계몽 17/18/19: 티어별 '계몽 패턴' 해금
+  const enlightened = !!def.enlightenedMove && (
+    (def.tier === 'normal' && scale.enlight >= 17) ||
+    (def.tier === 'elite' && scale.enlight >= 18) ||
+    (def.tier === 'boss' && scale.enlight >= 19));
   return {
     uid: `${id}_${idx}`, defId: id, name: def.name, tier: def.tier,
+    art: def.art || (def.tier === 'boss' ? '🐺' : def.tier === 'elite' ? '💀' : '🌑'),
+    final: !!def.final,
+    escalation: def.escalation || 0,      // 최종 보스: 매 턴 공격력 +N
     hp, maxHpInit: hp, stunned: false,
+    atkScale: (def.final ? 1 : scale.atk) * em.atk,
+    enlightened,
     block: 0,                             // 방어: 자기 다음 행동 때까지 피해 흡수
     power: 0,                             // 강화: 이후 모든 공격 피해 +power (전투 내 누적)
-    patternState: { index: 0, recent: [] }, phaseIndex: 0, nextMove: null,
+    patternState: { index: 0, recent: [], count: 0 }, phaseIndex: 0, nextMove: null,
   };
 }
 
@@ -334,9 +363,9 @@ export function enemyPhase(battle) {
     if (e.stunned) { e.stunned = false; chooseMove(e); continue; }
     for (const ef of e.nextMove.effects) {
       switch (ef.op) {
-        case 'damage': {                                   // ⚔️ 공격 (+강화 누적분)
+        case 'damage': {                                   // ⚔️ 공격 (막·계몽 스케일 + 강화 누적분)
           if (battle.dodgeActive) break;
-          let dmg = ef.amount + (e.power || 0);
+          let dmg = Math.round(ef.amount * (e.atkScale || 1)) + (e.power || 0);
           const absorbed = Math.min(battle.player.block, dmg);
           battle.player.block -= absorbed;
           dmg -= absorbed;
@@ -363,6 +392,7 @@ export function enemyPhase(battle) {
           break;
       }
     }
+    if (e.escalation) e.power += e.escalation; // 최종 보스: 매 턴 점진적으로 강해진다
     chooseMove(e);
   }
   battle.dodgeActive = false;
@@ -386,8 +416,14 @@ function currentPattern(enemy) {
 
 function chooseMove(enemy) {
   const def = DB.enemyById[enemy.defId];
-  const pat = currentPattern(enemy);
   const st = enemy.patternState;
+  st.count = (st.count || 0) + 1;
+  // 계몽 패턴: 3번째 행동마다 강력한 계몽 기술 사용
+  if (enemy.enlightened && def.enlightenedMove && st.count % 3 === 0) {
+    enemy.nextMove = { id: '__enlightened', ...def.enlightenedMove };
+    return;
+  }
+  const pat = currentPattern(enemy);
   let moveId;
   if (pat.mode === 'sequence') {
     moveId = pat.order[st.index % pat.order.length];
@@ -415,7 +451,7 @@ export function intentOf(enemy) {
   if (mv.hidden) return '❓';
   const parts = [];
   const dmg = mv.effects.filter(e => e.op === 'damage')
-    .reduce((s, e) => s + e.amount + (enemy.power || 0), 0);
+    .reduce((s, e) => s + Math.round(e.amount * (enemy.atkScale || 1)) + (enemy.power || 0), 0);
   if (dmg > 0) parts.push(`⚔️${dmg}`);
   for (const ef of mv.effects) {
     if (ef.op === 'block') parts.push(`🛡${ef.amount}`);

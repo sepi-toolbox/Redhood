@@ -2,22 +2,80 @@
 import { DB } from './data.js';
 import { rng } from './engine.js';
 
-const SAVE_KEY = 'redhood_run_v8';
+const SAVE_KEY = 'redhood_run_v9';
+const META_KEY = 'redhood_meta_v1';
+
+// ---------- 메타 진행 (런 간 유지): 계몽 ----------
+export function loadMeta() {
+  try {
+    const m = JSON.parse(localStorage.getItem(META_KEY)) || {};
+    return { enlight: Math.max(0, Math.min(20, m.enlight | 0)) };
+  } catch (e) { return { enlight: 0 }; }
+}
+export function saveMeta(meta) {
+  try { localStorage.setItem(META_KEY, JSON.stringify(meta)); } catch (e) {}
+}
+// 치트 포함 — 계몽 수치 직접 설정 (0~20)
+export function setEnlight(n) {
+  const meta = loadMeta();
+  meta.enlight = Math.max(0, Math.min(20, n | 0));
+  saveMeta(meta);
+  return meta.enlight;
+}
+// 3막 보스 처치 = 클리어 → 계몽 +1
+export function gainEnlight() {
+  const meta = loadMeta();
+  meta.enlight = Math.min(20, meta.enlight + 1);
+  saveMeta(meta);
+  return meta.enlight;
+}
+
+// ---------- 막/테마 ----------
+export function pickTheme(act) {
+  const themes = DB.acts.acts[act - 1].themes;
+  return themes[Math.floor(rng.next() * themes.length)].id;
+}
+export function themeOf(run) {
+  const act = Math.min(run.act || 1, 3);
+  return DB.acts.acts[act - 1].themes.find(t => t.id === run.theme) || DB.acts.acts[act - 1].themes[0];
+}
 
 // v0.10: 시작 족보는 무기 선택으로 결정 — newRun 시점엔 빈 상태
+// v0.14: 계몽(enlight) 스냅샷이 런에 박힌다 — 6: 시작 HP -30% / 10: 저주 주사위 / 14: 최대 HP -10%
 export function newRun() {
-  const maxHp = DB.act1.player.maxHp;
+  const enlight = loadMeta().enlight;
+  let maxHp = DB.act1.player.maxHp;
+  if (enlight >= 14) maxHp = Math.floor(maxHp * 0.9);
+  let hp = maxHp;
+  if (enlight >= 6) hp = Math.max(1, Math.floor(maxHp * 0.7));
+  const dice = DB.act1.player.startDice.slice();
+  if (enlight >= 10) dice[dice.length - 1] = 'cursed';
   return {
-    hp: maxHp, maxHp,
-    dice: DB.act1.player.startDice.slice(),
+    hp, maxHp,
+    dice,
     relics: [],
     weapon: null,        // 무기 id (인트로에서 선택)
     categories: {},      // 족보 id -> 보유 변형 id 배열 (누적 수집)
     seenEvents: [],      // 이번 런에서 만난 대화 이벤트 id
     coins: 0,            // 🪙 상점 화폐 — 전투 승리로 획득 (v0.13)
+    enlight,             // 계몽 스냅샷 (런 시작 시점 고정)
+    act: 1,              // 1~3막, 4 = 최종전
+    theme: pickTheme(1), // 이번 막의 테마 id
     floor: 0,
-    map: generateMap(),
+    map: generateMap(enlight),
   };
+}
+
+// 보스 처치 → 다음 막 (최대 체력 50% 회복 — 계몽 5+: 15%)
+export function advanceAct(run) {
+  const ratio = run.enlight >= 5 ? 0.15 : DB.acts.bossHealRatio;
+  const healed = Math.min(run.maxHp - run.hp, Math.floor(run.maxHp * ratio));
+  run.hp += healed;
+  run.act += 1;
+  run.theme = pickTheme(run.act);
+  run.floor = 0;
+  run.map = generateMap(run.enlight);
+  return healed;
 }
 
 // 무기 선택 → 시작 족보 3종 지급
@@ -40,12 +98,14 @@ export function offerWeapons(n) {
   return out;
 }
 
-// ---------- 대화 이벤트 ----------
-// 아직 안 본 이벤트 우선 무작위 (모두 봤으면 아무거나)
+// ---------- 대화 이벤트 (v0.14: 테마 풀) ----------
+// 현재 테마의 이벤트 중 아직 안 본 것 우선 (모두 봤으면 테마 내 아무거나)
 export function pickEvent(run) {
-  const all = DB.events.events;
-  const fresh = all.filter(ev => !run.seenEvents.includes(ev.id));
-  const pool = fresh.length > 0 ? fresh : all;
+  const theme = themeOf(run);
+  const all = DB.events.events.filter(ev => (ev.themes || []).includes(theme.id));
+  const pool0 = all.length > 0 ? all : DB.events.events;
+  const fresh = pool0.filter(ev => !run.seenEvents.includes(ev.id));
+  const pool = fresh.length > 0 ? fresh : pool0;
   const ev = pool[Math.floor(rng.next() * pool.length)];
   if (!run.seenEvents.includes(ev.id)) run.seenEvents.push(ev.id);
   return ev;
@@ -56,6 +116,8 @@ export function pickEvent(run) {
 export function applyEventEffects(run, effects) {
   const messages = [];
   let pendingDie = null;
+  // 계몽 15: 이벤트의 대가가 더 가혹해진다 (부정 효과 ×1.5)
+  const grim = run.enlight >= 15 ? 1.5 : 1;
   for (const ef of (effects || [])) {
     switch (ef.op) {
       case 'heal': {
@@ -64,15 +126,43 @@ export function applyEventEffects(run, effects) {
         messages.push(`HP +${healed}`);
         break;
       }
-      case 'loseHp':
-        run.hp = Math.max(1, run.hp - ef.amount); // 이벤트로는 죽지 않는다
-        messages.push(`HP -${ef.amount}`);
+      case 'loseHp': {
+        const amt = Math.ceil(ef.amount * grim);
+        run.hp = Math.max(1, run.hp - amt); // 이벤트로는 죽지 않는다
+        messages.push(`HP -${amt}`);
         break;
+      }
       case 'maxHp':
         run.maxHp += ef.amount;
         run.hp += ef.amount;
         messages.push(`최대 HP +${ef.amount}`);
         break;
+      case 'maxHpLoss': {
+        const amt = Math.ceil(ef.amount * grim);
+        run.maxHp = Math.max(10, run.maxHp - amt);
+        run.hp = Math.min(run.hp, run.maxHp);
+        messages.push(`최대 HP -${amt}`);
+        break;
+      }
+      case 'gainCoins':
+        run.coins += ef.amount;
+        messages.push(`🪙 +${ef.amount}`);
+        break;
+      case 'loseCoins': {
+        const amt = Math.min(run.coins, Math.ceil(ef.amount * grim));
+        run.coins -= amt;
+        messages.push(`🪙 -${amt}`);
+        break;
+      }
+      case 'gainRelicElite': {
+        let pool = DB.relics.filter(r => r.tier === 'elite' && !run.relics.includes(r.id));
+        if (pool.length === 0) pool = DB.relics.filter(r => !run.relics.includes(r.id));
+        if (pool.length === 0) { messages.push('더 얻을 유물이 없다'); break; }
+        const r = pool[Math.floor(rng.next() * pool.length)];
+        applyRelicPickup(run, r);
+        messages.push(`${r.icon} ${r.name} 획득`);
+        break;
+      }
       case 'gainRelic': {
         const pool = DB.relics.filter(r => !run.relics.includes(r.id));
         if (pool.length === 0) { run.hp = Math.min(run.maxHp, run.hp + 5); messages.push('줄 것이 없어 HP +5'); break; }
@@ -105,7 +195,7 @@ export function applyEventEffects(run, effects) {
 }
 
 // ---------- 맵 ----------
-export function generateMap() {
+export function generateMap(enlight = 0) {
   const cfg = DB.act1.map;
   const floors = [];
   for (let f = 1; f <= cfg.floors; f++) {
@@ -113,14 +203,15 @@ export function generateMap() {
     if (fixed) { floors.push([{ type: fixed }]); continue; }
     const n = cfg.choicesMin + Math.floor(rng.next() * (cfg.choicesMax - cfg.choicesMin + 1));
     const nodes = [];
-    for (let i = 0; i < n; i++) nodes.push({ type: rollNodeType(cfg, f, nodes) });
+    for (let i = 0; i < n; i++) nodes.push({ type: rollNodeType(cfg, f, nodes, enlight) });
     floors.push(nodes);
   }
   return floors;
 }
 
-function rollNodeType(cfg, floor, existing) {
+function rollNodeType(cfg, floor, existing, enlight = 0) {
   const w = { ...cfg.nodeWeights };
+  if (enlight >= 1 && w.elite) w.elite *= 2; // 계몽 1: 엘리트가 더 자주 나온다
   if (!cfg.eliteFloors.includes(floor)) delete w.elite;
   if (existing.some(nd => nd.type === 'elite')) delete w.elite;
   const total = Object.values(w).reduce((a, b) => a + b, 0);
@@ -129,14 +220,23 @@ function rollNodeType(cfg, floor, existing) {
   return 'battle';
 }
 
-// ---------- 조우 ----------
+// ---------- 조우 (v0.14: 테마 풀 기반) ----------
 export function rollEncounter(run, nodeType) {
-  const enc = DB.act1.encounters;
-  if (nodeType === 'boss') return pickArr(enc.boss);
-  if (nodeType === 'elite') return pickArr(enc.elite);
-  return enc.easyFloors.includes(run.floor) ? pickArr(enc.easy) : pickArr(enc.hard);
+  const theme = themeOf(run);
+  if (nodeType === 'boss') return [theme.boss];
+  if (nodeType === 'elite') return [pick(theme.elites)];
+  // 일반: 쉬운 층은 1마리, 이후 55% 1마리 / 45% 2마리
+  if (DB.act1.encounters.easyFloors.includes(run.floor)) return [pick(theme.normals)];
+  if (rng.next() < 0.55) return [pick(theme.normals)];
+  return [pick(theme.normals), pick(theme.normals)];
 }
-function pickArr(arr) { return arr[Math.floor(rng.next() * arr.length)].slice(); }
+function pick(arr) { return arr[Math.floor(rng.next() * arr.length)]; }
+
+// 최종전 조우: 무한 체력 보스 (계몽 20: 두 마리)
+export function finalEncounter(run) {
+  const id = DB.acts.finalBoss;
+  return run.enlight >= 20 ? [id, id] : [id];
+}
 
 // ---------- 보상 경제 (v0.13, 성권 지시) ----------
 // 일반 전투 = 커먼~언커먼 족보·주사위 / 엘리트 = 언커먼~레어 족보·주사위 + 일반 유물
@@ -195,12 +295,16 @@ export function rollRewards(run, nodeType) {
   if (pool.length === 0) return [];
   // 2) 범주 안에서 등급 가중으로 3개 추첨 (허용 등급 밖으로는 절대 나가지 않음)
   // 네잎클로버(luck): 상위 등급 가중 배가 / 유물은 등급 가중 없음(일반 균등)
-  let tierWeights = cfg.tierWeights;
+  let tierWeights = { ...cfg.tierWeights };
   const luckMult = run.relics.map(id => DB.relicById[id].hook)
     .filter(h => h.type === 'luck').reduce((m, h) => m * (h.mult || 2), 1);
   if (luckMult > 1) {
-    tierWeights = { ...tierWeights };
     for (const t of ['rare', 'epic']) if (tierWeights[t]) tierWeights[t] *= luckMult;
+  }
+  // 계몽 12: 상위 등급 확률 절반 (일반 전투의 언커먼, 엘리트의 레어)
+  if ((run.enlight || 0) >= 12) {
+    if (nodeType === 'battle' && tierWeights.uncommon) tierWeights.uncommon *= 0.5;
+    if (nodeType === 'elite' && tierWeights.rare) tierWeights.rare *= 0.5;
   }
   const picks = [];
   const usedIds = new Set();
@@ -250,6 +354,7 @@ export function bossLegendaryChoices(run) {
 // ---------- 상점: 커먼~레어 주사위 + 일반 유물 (전설 없음) ----------
 export function rollShopStock(run) {
   const cfg = DB.act1.shop;
+  const priceMult = (run.enlight || 0) >= 16 ? 1.3 : 1; // 계몽 16: 상점 가격 증가
   const stock = [];
   const usedDie = new Set();
   for (let i = 0; i < cfg.stockDice; i++) {
@@ -259,12 +364,21 @@ export function rollShopStock(run) {
     if (cand.length === 0) break;
     const d = cand[Math.floor(rng.next() * cand.length)];
     usedDie.add(d.id);
-    stock.push({ kind: 'die', item: d, price: cfg.prices.diceByTier[d.tier] });
+    stock.push({ kind: 'die', item: d, price: Math.round(cfg.prices.diceByTier[d.tier] * priceMult) });
   }
   for (const r of pickN(DB.relics.filter(r => r.tier === 'normal' && !run.relics.includes(r.id)), cfg.stockRelics)) {
-    stock.push({ kind: 'relic', item: r, price: cfg.prices.relic });
+    stock.push({ kind: 'relic', item: r, price: Math.round(cfg.prices.relic * priceMult) });
   }
   return stock;
+}
+
+// 전투 승리 코인 (계몽 13: -25%)
+export function coinReward(run, nodeType) {
+  const cr = DB.act1.coins[nodeType === 'elite' ? 'elite' : 'battle'];
+  let got = cr[0] + Math.floor(rng.next() * (cr[1] - cr[0] + 1));
+  if ((run.enlight || 0) >= 13) got = Math.floor(got * 0.75);
+  run.coins += got;
+  return got;
 }
 
 function rollWeight(weights) {
@@ -283,16 +397,20 @@ export function applyRelicPickup(run, relic) {
   }
 }
 
-// ---------- 휴식 ----------
+// ---------- 휴식 (계몽 11: 회복량 -50%) ----------
+export function restHealAmount(run) {
+  const ratio = DB.act1.rest.healRatio * ((run.enlight || 0) >= 11 ? 0.5 : 1);
+  return Math.floor(run.maxHp * ratio);
+}
 export function applyRest(run) {
-  const heal = Math.floor(run.maxHp * DB.act1.rest.healRatio);
+  const heal = restHealAmount(run);
   run.hp = Math.min(run.maxHp, run.hp + heal);
   return heal;
 }
 
 // ---------- 세이브 ----------
 export function saveRun(run) {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 8 })); } catch (e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 9 })); } catch (e) {}
 }
 
 export function loadRun() {
@@ -300,13 +418,17 @@ export function loadRun() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw);
-    if (s._v !== 8) { clearSave(); return null; }
+    if (s._v !== 9) { clearSave(); return null; }
     if (!s.dice.every(id => DB.diceById[id])) { clearSave(); return null; }
     if (!s.relics.every(id => DB.relicById[id])) { clearSave(); return null; }
     if (!s.weapon || !DB.weaponById[s.weapon]) { clearSave(); return null; }
     if (Object.keys(s.categories || {}).length === 0) { clearSave(); return null; }
     if (!Array.isArray(s.seenEvents)) s.seenEvents = [];
     if (typeof s.coins !== 'number') s.coins = 0;
+    if (typeof s.enlight !== 'number') s.enlight = 0;
+    if (![1, 2, 3].includes(s.act)) { clearSave(); return null; } // 최종전(4) 중 세이브는 없음
+    const actDef = DB.acts.acts[s.act - 1];
+    if (!actDef || !actDef.themes.some(t => t.id === s.theme)) { clearSave(); return null; }
     const byId = {};
     for (const c of DB.scoring.categories) byId[c.id] = c;
     for (const [cid, vids] of Object.entries(s.categories || {})) {
