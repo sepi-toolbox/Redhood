@@ -672,3 +672,24 @@ body {
 .enlight-list { max-height: 38vh; overflow-y: auto; font-size: 12.5px; }
 .enlight-list li { color: #6f6353; padding: 2px 0; }
 .enlight-list li.on { color: #c8aae8; font-weight: 700; }
+
+/* ---------- 버프/디버프 (v0.19) ---------- */
+.buff-strip {
+  flex: none; display: flex; gap: 6px; justify-content: center; align-items: center;
+  padding: 3px 12px 1px; min-height: 20px;
+}
+.buff-chip {
+  font-size: 12px; font-weight: 800; color: #e8dcc8;
+  background: #241c18; border: 1px solid #4a3b30; border-radius: 9px;
+  padding: 1px 8px;
+}
+/* 적 방어도 — LoL식 실드 세그먼트 (적 체력바) */
+.enemy .bar { position: relative; }
+.enemy .bar b {
+  position: absolute; top: 0; bottom: 0;
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, .14) 0 3px, transparent 3px 6px),
+    linear-gradient(180deg, #e9e5da, #a9a396);
+  border-left: 1px solid rgba(0, 0, 0, .4);
+  transition: width .25s, left .25s;
+}

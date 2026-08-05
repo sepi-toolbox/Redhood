@@ -1,5 +1,5 @@
 {
-  "_version": 11,
+  "_version": 12,
   "rerollsPerTurn": 2,
   "categories": [
     {
@@ -22,7 +22,7 @@
           "id": "instinct",
           "name": "떠돌이의 직감",
           "ability": [],
-          "abilityText": "부가 없음 — 언제나 믿을 수 있는 한 수",
+          "abilityText": "부가 없음 — 언제나 성립하는 보험",
           "tier": "common"
         },
         {
@@ -30,11 +30,11 @@
           "name": "숲의 속삭임",
           "ability": [
             {
-              "op": "rerollNext",
+              "op": "focus",
               "amount": 1
             }
           ],
-          "abilityText": "다음 턴 리롤 +1",
+          "abilityText": "🎲 집중 +1 (전투 동안 매 턴 리롤 +1)",
           "tier": "uncommon"
         }
       ]
@@ -62,15 +62,15 @@
           "name": "맞잡은 손",
           "ability": [
             {
-              "op": "heal",
-              "amount": 3
+              "op": "regen",
+              "amount": 1
             },
             {
               "op": "block",
               "amount": 3
             }
           ],
-          "abilityText": "HP 3 회복 + 방어도 3",
+          "abilityText": "❤️ 재생 +1 + 방어도 3",
           "tier": "common"
         },
         {
@@ -78,15 +78,11 @@
           "name": "한 켤레 붉은 구두",
           "ability": [
             {
-              "op": "rerollNext",
-              "amount": 1
-            },
-            {
-              "op": "buffNext",
-              "amount": 3
+              "op": "strength",
+              "amount": 2
             }
           ],
-          "abilityText": "다음 턴 리롤 +1 + 다음 피해 +3",
+          "abilityText": "🗡️ 힘 +2 (전투 동안 모든 족보 피해 +2)",
           "tier": "uncommon"
         }
       ]
@@ -125,15 +121,11 @@
           "name": "두 개의 달",
           "ability": [
             {
-              "op": "rerollNext",
-              "amount": 1
-            },
-            {
-              "op": "buffNext",
-              "amount": 3
+              "op": "vulnerable",
+              "amount": 2
             }
           ],
-          "abilityText": "다음 턴 리롤 +1 + 다음 피해 +3",
+          "abilityText": "🎯 맞은 적 취약 +2 (받는 피해 +2)",
           "tier": "uncommon"
         }
       ]
@@ -158,11 +150,11 @@
           "name": "세 번 찍는 도끼",
           "ability": [
             {
-              "op": "buffNext",
-              "amount": 6
+              "op": "strength",
+              "amount": 2
             }
           ],
-          "abilityText": "다음 족보 피해 +6",
+          "abilityText": "🗡️ 힘 +2",
           "tier": "common"
         },
         {
@@ -170,15 +162,11 @@
           "name": "나무꾼의 호흡",
           "ability": [
             {
-              "op": "block",
-              "amount": 4
-            },
-            {
-              "op": "rerollNext",
-              "amount": 1
+              "op": "weakEnemy",
+              "amount": 2
             }
           ],
-          "abilityText": "방어도 4 + 다음 턴 리롤 +1",
+          "abilityText": "🔻 맞은 적 약화 +2 (공격력 -2)",
           "tier": "uncommon"
         }
       ],
@@ -205,10 +193,11 @@
           "name": "네 개의 송곳니",
           "ability": [
             {
-              "op": "stun"
+              "op": "bleed",
+              "amount": 4
             }
           ],
-          "abilityText": "피해 준 적의 다음 행동 취소",
+          "abilityText": "🩸 맞은 적 출혈 +4 (행동마다 피해, 점차 감소)",
           "tier": "rare"
         },
         {
@@ -216,11 +205,11 @@
           "name": "묵직한 일격",
           "ability": [
             {
-              "op": "buffNext",
-              "amount": 12
+              "op": "strength",
+              "amount": 3
             }
           ],
-          "abilityText": "다음 족보 피해 +12",
+          "abilityText": "🗡️ 힘 +3",
           "tier": "uncommon"
         }
       ],
@@ -259,15 +248,15 @@
           "name": "따뜻한 화덕",
           "ability": [
             {
-              "op": "heal",
-              "amount": 10
+              "op": "regen",
+              "amount": 2
             },
             {
               "op": "block",
               "amount": 8
             }
           ],
-          "abilityText": "HP 10 회복 + 방어도 8",
+          "abilityText": "❤️ 재생 +2 + 방어도 8",
           "tier": "rare"
         }
       ]
@@ -294,10 +283,11 @@
           "name": "바람길",
           "ability": [
             {
-              "op": "dodge"
+              "op": "weakEnemy",
+              "amount": 3
             }
           ],
-          "abilityText": "이번 적 공격 회피",
+          "abilityText": "🔻 맞은 모든 적 약화 +3",
           "tier": "uncommon"
         },
         {
@@ -337,14 +327,15 @@
           "name": "달빛 오솔길",
           "ability": [
             {
-              "op": "dodge"
+              "op": "vulnerable",
+              "amount": 3
             },
             {
-              "op": "rerollNext",
+              "op": "focus",
               "amount": 1
             }
           ],
-          "abilityText": "회피 + 다음 턴 리롤 +1",
+          "abilityText": "🎯 맞은 모든 적 취약 +3 + 🎲 집중 +1",
           "tier": "rare"
         },
         {
@@ -352,14 +343,15 @@
           "name": "폭풍 질주",
           "ability": [
             {
-              "op": "dodge"
+              "op": "strength",
+              "amount": 4
             },
             {
-              "op": "buffNext",
-              "amount": 12
+              "op": "weakEnemy",
+              "amount": 2
             }
           ],
-          "abilityText": "회피 + 다음 피해 +12",
+          "abilityText": "🗡️ 힘 +4 + 🔻 맞은 모든 적 약화 +2",
           "tier": "epic"
         }
       ]
@@ -386,14 +378,19 @@
           "name": "심판의 밤",
           "ability": [
             {
-              "op": "stun"
+              "op": "bleed",
+              "amount": 6
+            },
+            {
+              "op": "weakEnemy",
+              "amount": 4
             },
             {
               "op": "block",
-              "amount": 20
+              "amount": 12
             }
           ],
-          "abilityText": "적 행동 취소 + 방어도 20",
+          "abilityText": "🩸 출혈 +6 + 🔻 약화 +4 + 방어도 12",
           "tier": "epic"
         },
         {
@@ -401,14 +398,15 @@
           "name": "핏빛 만월",
           "ability": [
             {
-              "op": "stun"
+              "op": "strength",
+              "amount": 6
             },
             {
-              "op": "buffNext",
-              "amount": 15
+              "op": "bleed",
+              "amount": 5
             }
           ],
-          "abilityText": "적 행동 취소 + 다음 피해 +15",
+          "abilityText": "🗡️ 힘 +6 + 🩸 출혈 +5",
           "tier": "epic"
         }
       ]

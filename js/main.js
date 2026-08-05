@@ -555,8 +555,21 @@ function renderBattle(opts = {}) {
             <span class="intent">${intentOf(e)} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
             <span class="enemy-art">${e.art}</span>
             <span class="enemy-name">${esc(e.name)}</span>
-            <span class="bar"><i style="width:${e.final ? 100 : Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
-            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${(e.block > 0 || e.power > 0) ? ` <span class="enemy-buffs">${e.block > 0 ? `🛡${e.block}` : ''}${e.power > 0 ? ` 💪+${e.power}` : ''}</span>` : ''}</span>
+            ${(() => {
+              // 적 방어도 LoL식: HP 구간 끝에 회백색 실드 세그먼트
+              const ebTotal = Math.max(e.maxHpInit, e.hp + e.block);
+              const ehpPct = e.final ? 100 : Math.max(0, e.hp / ebTotal * 100);
+              const eshPct = e.final ? 0 : Math.min(e.block, ebTotal - e.hp) / ebTotal * 100;
+              return `<span class="bar"><i style="width:${ehpPct}%"></i>${e.block > 0 && !e.final ? `<b class="ebar-shield" style="left:${ehpPct}%;width:${eshPct}%"></b>` : ''}</span>`;
+            })()}
+            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${(() => {
+              const d = e.debuffs || {};
+              const chips = [
+                e.block > 0 ? `🛡${e.block}` : '', e.power > 0 ? `💪+${e.power}` : '',
+                d.weak > 0 ? `🔻${d.weak}` : '', d.bleed > 0 ? `🩸${d.bleed}` : '', d.vulnerable > 0 ? `🎯${d.vulnerable}` : '',
+              ].filter(Boolean).join(' ');
+              return chips ? ` <span class="enemy-buffs">${chips}</span>` : '';
+            })()}</span>
           </button>`).join('')}
       </div>
       <div class="mid-line">
@@ -594,6 +607,14 @@ function renderBattle(opts = {}) {
             <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? bd.total : '—') : '—'}</span>
           </button>`).join('')}
       </div>
+      ${(() => {
+        // 내 버프 칩 — 체력바 위, 길게 눌러 상세 (v0.19)
+        const b = battle.buffs;
+        const chips = [
+          b.strength > 0 ? `🗡️${b.strength}` : '', b.focus > 0 ? `🎲+${b.focus}` : '', b.regen > 0 ? `❤️+${b.regen}` : '',
+        ].filter(Boolean);
+        return chips.length ? `<div class="buff-strip" id="buff-strip">${chips.map(c => `<span class="buff-chip">${c}</span>`).join('')}</div>` : '';
+      })()}
       <div class="player-bar ${opts.playerHit ? 'hurt' : ''}">
         <span class="pb-side"></span>
         <div class="hp-gauge">
@@ -638,6 +659,11 @@ function renderBattle(opts = {}) {
       renderBattle();
     });
   });
+  // 내 버프 — 체력바(또는 버프 칩) 길게 눌러 상세
+  const pbEl = app.querySelector('.player-bar');
+  if (pbEl) addLongPress(pbEl, showPlayerBuffs);
+  const bsEl = document.getElementById('buff-strip');
+  if (bsEl) addLongPress(bsEl, showPlayerBuffs);
   // 족보 — 선택 키는 (족보:변형) 조합, 같은 족보의 다른 변형은 별개 버튼
   app.querySelectorAll('.sheet-row').forEach(el => {
     const catId = el.dataset.cat;
@@ -655,9 +681,16 @@ function renderBattle(opts = {}) {
 // ---------- 적 행동 상세 (치트): 적 길게 눌러 예고 행동의 실제 내용 확인 — ❓ 의문도 공개 ----------
 const ENEMY_TIER_KO = { normal: '일반', elite: '정예', boss: '보스' };
 function enemyEffectText(e, ef) {
+  const weak = e.debuffs ? e.debuffs.weak : 0;
   switch (ef.op) {
-    case 'damage': return `⚔️ 피해 ${Math.round(ef.amount * (e.atkScale || 1)) + (e.power || 0)}` +
-      (e.power > 0 ? ` (기본 ${Math.round(ef.amount * (e.atkScale || 1))} + 강화 ${e.power})` : '');
+    case 'damage': {
+      const base = Math.round(ef.amount * (e.atkScale || 1));
+      const final = Math.max(0, base + (e.power || 0) - weak);
+      const parts = [];
+      if (e.power > 0) parts.push(`+강화 ${e.power}`);
+      if (weak > 0) parts.push(`-약화 ${weak}`);
+      return `⚔️ 피해 ${final}` + (parts.length ? ` (기본 ${base} ${parts.join(' ')})` : '');
+    }
     case 'block': return `🛡 방어 ${ef.amount} 획득`;
     case 'confuse': return `🌀 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
     case 'empower': return `💪 강화 — 공격력 +${ef.amount} (전투 내 누적)`;
@@ -665,16 +698,53 @@ function enemyEffectText(e, ef) {
     default: return ef.op;
   }
 }
+// 내게 걸린 버프/디버프 상세 — 체력바 길게 누르기 (v0.19)
+function showPlayerBuffs() {
+  if (!battle) return;
+  const b = battle.buffs;
+  const confusedNow = battle.dice.filter(d => d.confused).length;
+  const items = [
+    b.strength > 0 ? `<li>🗡️ 힘 ${b.strength} — 이번 전투 동안 모든 족보 피해 +${b.strength}</li>` : '',
+    b.focus > 0 ? `<li>🎲 집중 ${b.focus} — 이번 전투 동안 매 턴 리롤 +${b.focus}</li>` : '',
+    b.regen > 0 ? `<li>❤️ 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen}</li>` : '',
+    battle.player.block > 0 ? `<li>🛡 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
+    confusedNow > 0 ? `<li>🌀 혼란 — 이번 턴 주사위 ${confusedNow}개가 뒤틀려 다시 굴릴 수 없음</li>` : '',
+    battle.pendingConfuse > 0 ? `<li>🌀 혼란 예고 — 다음 턴 주사위 ${battle.pendingConfuse}개가 뒤틀린다</li>` : '',
+  ].filter(Boolean).join('');
+  app.append(h(`
+    <div class="modal-back" id="pbuff-info">
+      <div class="modal">
+        <h3>🧣 빨간 두건 <small class="cat-tag">걸린 효과</small></h3>
+        <ul class="deck-list">${items || '<li class="modal-text">걸린 효과 없음</li>'}</ul>
+        <p class="hint">힘·집중·재생은 이번 전투가 끝날 때까지 유지된다</p>
+        <button class="btn primary" id="pbuff-close">닫기</button>
+      </div>
+    </div>`));
+  const back = document.getElementById('pbuff-info');
+  document.getElementById('pbuff-close').addEventListener('click', () => back.remove());
+  back.addEventListener('click', (ev) => { if (ev.target === back) back.remove(); });
+}
+
 function showEnemyInfo(uid) {
   const e = battle && battle.enemies.find(x => x.uid === uid);
   if (!e || !e.nextMove) return;
   const mv = e.nextMove;
   const effects = mv.effects.map(ef => `<li>${esc(enemyEffectText(e, ef))}</li>`).join('');
+  const d = e.debuffs || {};
+  const status = [
+    e.block > 0 ? `<li>🛡 방어 ${e.block} — 다음 행동까지 받는 피해 흡수</li>` : '',
+    e.power > 0 ? `<li>💪 강화 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
+    d.weak > 0 ? `<li>🔻 약화 ${d.weak} — 공격력 -${d.weak}</li>` : '',
+    d.bleed > 0 ? `<li>🩸 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
+    d.vulnerable > 0 ? `<li>🎯 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable}</li>` : '',
+    e.stunned ? '<li>💫 다음 행동 취소됨</li>' : '',
+  ].filter(Boolean).join('');
   app.append(h(`
     <div class="modal-back" id="enemy-info">
       <div class="modal">
         <h3>${e.art} ${esc(e.name)} <small class="cat-tag">${ENEMY_TIER_KO[e.tier] || e.tier}${e.final ? ' · 무한' : ''}</small></h3>
-        <p class="modal-text">${e.final ? '체력 ∞' : `HP ${e.hp}/${e.maxHpInit}`}${e.block > 0 ? ` · 🛡${e.block}` : ''}${e.power > 0 ? ` · 💪+${e.power}` : ''}${e.stunned ? ' · 💫행동 취소됨' : ''}</p>
+        <p class="modal-text">${e.final ? '체력 ∞' : `HP ${e.hp}/${e.maxHpInit}`}</p>
+        ${status ? `<p class="info-ability">걸린 효과</p><ul class="deck-list">${status}</ul>` : ''}
         <p class="info-ability">🔍 예고 행동: <b>${esc(mv.name)}</b>${mv.hidden ? ' <small class="cat-tag">(❓ 의문 — 치트로 공개)</small>' : ''}</p>
         <ul class="deck-list">${effects || '<li class="modal-text">아무것도 하지 않는다</li>'}</ul>
         ${e.escalation ? `<p class="modal-text">⚠ 매 턴 공격력 +${e.escalation} 누적 — 점점 강해진다</p>` : ''}
@@ -768,7 +838,10 @@ function tryConfirm(catId, variantId, uid) {
     setTimeout(() => {
       const hpBefore = battle.player.hp;
       enemyPhase(battle);
-      if (battle.over) { playerDeathFx(); return; } // 사망 연출
+      if (battle.over) {
+        if (battle.result === 'victory') { renderBattle(); finishBattle(); return; } // 출혈사 — 적 페이즈 중 전멸
+        playerDeathFx(); return; // 사망 연출
+      }
       syncTarget();
       renderBattle();
       const dmgTaken = hpBefore - battle.player.hp;

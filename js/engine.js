@@ -40,6 +40,7 @@ export function createBattle(run, encounterIds) {
     pendingBuff: 0,
     pendingConfuse: 0,                    // 적 혼란 예약 — 다음 턴 시작 시 주사위 잠금 수
     dodgeActive: false,
+    buffs: { strength: 0, focus: 0, regen: 0 }, // v0.19: 전투 내 지속 버프 (스택)
     enemies: encounterIds.map((id, i) => spawnEnemy(id, i, scale)),
     lastResult: null,
     lastHits: [],                         // [{uid, amount}] — 연출용
@@ -71,6 +72,7 @@ function spawnEnemy(id, idx, scale) {
     enlightened,
     block: 0,                             // 방어: 자기 다음 행동 때까지 피해 흡수
     power: 0,                             // 강화: 이후 모든 공격 피해 +power (전투 내 누적)
+    debuffs: { weak: 0, bleed: 0, vulnerable: 0 }, // v0.19: 약화(공격-N)/출혈(행동마다 피해, -1씩 감소)/취약(받는 피해+N)
     patternState: { index: 0, recent: [], count: 0 }, phaseIndex: 0, nextMove: null,
   };
 }
@@ -94,11 +96,12 @@ function startTurn(battle, first = false) {
   // 방어: 기본은 초기화. 문지기의 빗장(blockKeep)이 있으면 유지 + 턴 시작 방어 가산
   const kept = hasRelic(battle.relics, 'blockKeep') ? battle.player.block : 0;
   battle.player.block = kept + dicePassive(battle, 'turnBlock') + sumRelic(battle.relics, 'turnBlock');
-  // 따뜻한 우유 등: 턴 시작 회복
-  const th = sumRelic(battle.relics, 'turnHeal');
+  // 따뜻한 우유·재생 버프: 턴 시작 회복
+  const th = sumRelic(battle.relics, 'turnHeal') + battle.buffs.regen;
   if (th > 0) battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + th);
+  // 리롤: 기본 + 유물 + 주사위 패시브 + 집중 버프
   battle.rollsLeft = relicValue(battle.relics, 'extraReroll', DB.scoring.rerollsPerTurn)
-    + dicePassive(battle, 'extraReroll') + battle.nextTurnRerolls;
+    + dicePassive(battle, 'extraReroll') + battle.buffs.focus + battle.nextTurnRerolls;
   battle.nextTurnRerolls = 0;
   battle.rolled = false;
   for (const d of battle.dice) { d.held = false; d.face = 0; d.confused = false; }
@@ -172,7 +175,7 @@ export function previewAll(battle) {
     const bd0 = battle.rolled
       ? computeDamage(cat, faces, battle.diceDefs, battle.relics)
       : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 };
-    const total = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ : bd0.total;
+    const total = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ + battle.buffs.strength : bd0.total;
     const seal = battle.sealed[cat.id] || 0;
     // 성립하지 않는(또는 0점) 족보는 선택 불가
     const locked = seal > 0 || !battle.rolled || total === 0;
@@ -258,15 +261,43 @@ function applyAbility(battle, variant, bd, targets) {
         battle.dodgeActive = true;
         battle.lastResult.bonusHits.push('회피!');
         break;
+      // ---- v0.19 전투 내 지속 버프 (플레이어) ----
+      case 'strength':
+        battle.buffs.strength += ab.amount;
+        battle.lastResult.bonusHits.push(`🗡️+${ab.amount}`);
+        break;
+      case 'focus':
+        battle.buffs.focus += ab.amount;
+        battle.rollsLeft += ab.amount; // 이번 턴 남은 시간에도 즉시 반영
+        battle.lastResult.bonusHits.push(`🎲+${ab.amount}`);
+        break;
+      case 'regen':
+        battle.buffs.regen += ab.amount;
+        battle.lastResult.bonusHits.push(`❤️+${ab.amount}`);
+        break;
+      // ---- v0.19 적 디버프 (피해 준 대상에게) ----
+      case 'weakEnemy':
+        for (const t of targets) t.debuffs.weak += ab.amount;
+        battle.lastResult.bonusHits.push(`🔻${ab.amount}`);
+        break;
+      case 'bleed':
+        for (const t of targets) t.debuffs.bleed += ab.amount;
+        battle.lastResult.bonusHits.push(`🩸${ab.amount}`);
+        break;
+      case 'vulnerable':
+        for (const t of targets) t.debuffs.vulnerable += ab.amount;
+        battle.lastResult.bonusHits.push(`🎯${ab.amount}`);
+        break;
     }
   }
 }
 
-// 적에게 피해 — 방어(block)가 먼저 흡수 (v0.11)
+// 적에게 피해 — 취약(받는 피해 +N) 가산 후 방어(block)가 흡수 (v0.19)
 function dealToEnemy(battle, t, amount) {
-  const absorbed = Math.min(t.block || 0, amount);
+  const total = amount + (t.debuffs ? t.debuffs.vulnerable : 0);
+  const absorbed = Math.min(t.block || 0, total);
   t.block -= absorbed;
-  const dealt = amount - absorbed;
+  const dealt = total - absorbed;
   t.hp -= dealt;
   battle.lastHits.push({ uid: t.uid, amount: dealt, absorbed, killed: t.hp <= 0 });
 }
@@ -292,9 +323,10 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics);
   if (bd.total === 0) return null; // 성립 불가 족보는 확정 불가 (0점 버리기 폐지)
   if (bd.total > 0) {
-    const situ = situationalFlat(battle); // 독사과 등 조건부 가산
-    bd.total += battle.pendingBuff + situ;
-    bd.flat += battle.pendingBuff + situ;
+    const situ = situationalFlat(battle); // 독사과 등 조건부 가산 + 힘 버프
+    const add = battle.pendingBuff + situ + battle.buffs.strength;
+    bd.total += add;
+    bd.flat += add;
     battle.pendingBuff = 0;
   }
   battle.lastResult = { catName: `${variant.name}(${cat.name})`, ...bd, bonusHits: [], aoe: isAoE(cat), fx: cat.fx || 'slash' };
@@ -335,12 +367,18 @@ export function enemyPhase(battle) {
   for (const e of aliveEnemies(battle)) {
     if (battle.over) break;
     e.block = 0; // 자기 차례가 돌아오면 이전 방어는 소멸
+    // 🩸 출혈: 행동할 때마다 스택만큼 피해(방어 무시), 이후 스택 -1
+    if (e.debuffs.bleed > 0) {
+      e.hp -= e.debuffs.bleed;
+      e.debuffs.bleed -= 1;
+      if (e.hp <= 0) continue; // 출혈사 — 행동 없이 쓰러진다
+    }
     if (e.stunned) { e.stunned = false; chooseMove(e); continue; }
     for (const ef of e.nextMove.effects) {
       switch (ef.op) {
-        case 'damage': {                                   // ⚔️ 공격 (막·계몽 스케일 + 강화 누적분)
+        case 'damage': {                                   // ⚔️ 공격 (막·계몽 스케일 + 강화 - 약화)
           if (battle.dodgeActive) break;
-          let dmg = Math.round(ef.amount * (e.atkScale || 1)) + (e.power || 0);
+          let dmg = Math.max(0, Math.round(ef.amount * (e.atkScale || 1)) + (e.power || 0) - e.debuffs.weak);
           const absorbed = Math.min(battle.player.block, dmg);
           battle.player.block -= absorbed;
           dmg -= absorbed;
@@ -371,6 +409,12 @@ export function enemyPhase(battle) {
     chooseMove(e);
   }
   battle.dodgeActive = false;
+  // 출혈사 등으로 적이 전멸했으면 승리
+  if (!battle.over && aliveEnemies(battle).length === 0) {
+    battle.over = true;
+    battle.result = 'victory';
+    return;
+  }
   battle.await = null;
   battle.turn += 1;
   startTurn(battle);
@@ -426,7 +470,7 @@ export function intentOf(enemy) {
   if (mv.hidden) return '❓';
   const parts = [];
   const dmg = mv.effects.filter(e => e.op === 'damage')
-    .reduce((s, e) => s + Math.round(e.amount * (enemy.atkScale || 1)) + (enemy.power || 0), 0);
+    .reduce((s, e) => s + Math.max(0, Math.round(e.amount * (enemy.atkScale || 1)) + (enemy.power || 0) - (enemy.debuffs ? enemy.debuffs.weak : 0)), 0);
   if (dmg > 0) parts.push(`⚔️${dmg}`);
   for (const ef of mv.effects) {
     if (ef.op === 'block') parts.push(`🛡${ef.amount}`);
