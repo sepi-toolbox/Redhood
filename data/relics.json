@@ -50,10 +50,10 @@
     "name": "빵부스러기",
     "icon": "🍞",
     "tier": "common",
-    "desc": "0점으로 족보를 버리면 HP 3 회복.",
+    "desc": "전투에서 승리하면 HP 4 회복.",
     "hook": {
-      "type": "healOnZero",
-      "amount": 3
+      "type": "healOnVictory",
+      "amount": 4
     }
   },
   {

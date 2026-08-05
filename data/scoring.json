@@ -22,7 +22,12 @@
         }
       ],
       "abilityText": "다음 턴 리롤 +1",
-      "ruleText": "굴린 주사위 중 [1]의 합만큼 피해."
+      "ruleText": "굴린 주사위 중 [1]의 합만큼 피해.",
+      "example": [
+        1,
+        1,
+        1
+      ]
     },
     {
       "id": "twos",
@@ -38,7 +43,12 @@
         }
       ],
       "abilityText": "방어도 +점수×2",
-      "ruleText": "굴린 주사위 중 [2]의 합만큼 피해."
+      "ruleText": "굴린 주사위 중 [2]의 합만큼 피해.",
+      "example": [
+        2,
+        2,
+        2
+      ]
     },
     {
       "id": "threes",
@@ -54,7 +64,12 @@
         }
       ],
       "abilityText": "HP 3 회복",
-      "ruleText": "굴린 주사위 중 [3]의 합만큼 피해."
+      "ruleText": "굴린 주사위 중 [3]의 합만큼 피해.",
+      "example": [
+        3,
+        3,
+        3
+      ]
     },
     {
       "id": "fours",
@@ -70,7 +85,12 @@
         }
       ],
       "abilityText": "방어도 +점수",
-      "ruleText": "굴린 주사위 중 [4]의 합만큼 피해."
+      "ruleText": "굴린 주사위 중 [4]의 합만큼 피해.",
+      "example": [
+        4,
+        4,
+        4
+      ]
     },
     {
       "id": "fives",
@@ -86,7 +106,12 @@
         }
       ],
       "abilityText": "다음 족보 피해 +5",
-      "ruleText": "굴린 주사위 중 [5]의 합만큼 피해."
+      "ruleText": "굴린 주사위 중 [5]의 합만큼 피해.",
+      "example": [
+        5,
+        5,
+        5
+      ]
     },
     {
       "id": "sixes",
@@ -97,7 +122,12 @@
       "tier": "common",
       "ability": [],
       "abilityText": "부가 없음 — 순수 화력",
-      "ruleText": "굴린 주사위 중 [6]의 합만큼 피해."
+      "ruleText": "굴린 주사위 중 [6]의 합만큼 피해.",
+      "example": [
+        6,
+        6,
+        6
+      ]
     },
     {
       "id": "chance",
@@ -109,7 +139,12 @@
       "ability": [],
       "abilityText": "언제나 성립 (레벨업 불가)",
       "ruleText": "조건 없음 — 항상 성립. 가장 높은 눈 3개의 합만큼 피해.",
-      "maxLevel": 1
+      "maxLevel": 1,
+      "example": [
+        6,
+        5,
+        3
+      ]
     },
     {
       "id": "threeKind",
@@ -124,8 +159,13 @@
           "op": "cleanse"
         }
       ],
-      "abilityText": "봉인 해제",
-      "ruleText": "같은 눈 3개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해."
+      "abilityText": "해제 (디버프 개편 예정)",
+      "ruleText": "같은 눈 3개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해.",
+      "example": [
+        4,
+        4,
+        4
+      ]
     },
     {
       "id": "fourKind",
@@ -141,7 +181,13 @@
         }
       ],
       "abilityText": "적 다음 행동 취소",
-      "ruleText": "같은 눈 4개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해."
+      "ruleText": "같은 눈 4개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해.",
+      "example": [
+        4,
+        4,
+        4,
+        4
+      ]
     },
     {
       "id": "fullHouse",
@@ -157,7 +203,14 @@
         }
       ],
       "abilityText": "방어도 +15",
-      "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25."
+      "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25.",
+      "example": [
+        5,
+        5,
+        5,
+        2,
+        2
+      ]
     },
     {
       "id": "smallStraight",
@@ -174,7 +227,13 @@
       ],
       "abilityText": "이번 적 공격 회피",
       "ruleText": "연속된 눈 4개(예: 2·3·4·5)면 성립. 모든 적에게 피해 30.",
-      "target": "allEnemies"
+      "target": "allEnemies",
+      "example": [
+        2,
+        3,
+        4,
+        5
+      ]
     },
     {
       "id": "largeStraight",
@@ -195,7 +254,14 @@
       ],
       "abilityText": "회피 + 다음 턴 리롤 +1",
       "ruleText": "연속된 눈 5개(1~5 또는 2~6)면 성립. 모든 적에게 피해 40.",
-      "target": "allEnemies"
+      "target": "allEnemies",
+      "example": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
     },
     {
       "id": "yahtzee",
@@ -215,7 +281,14 @@
         }
       ],
       "abilityText": "적 행동 취소 + 방어도 20",
-      "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50."
+      "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50.",
+      "example": [
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
     }
   ]
 }

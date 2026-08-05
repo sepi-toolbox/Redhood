@@ -56,8 +56,9 @@ function showCategoryInfo(catId, level) {
         <h3>${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}${isAoE(cat) ? ' <small class="aoe-tag">전체 공격</small>' : ''}</h3>
         <p class="info-rule">${esc(cat.ruleText || '')}</p>
         <p class="info-ability">✨ ${esc(cat.abilityText || '부가 없음')}</p>
+        <p class="modal-text">예시: ${(cat.example || []).map(f => PIPS[f]).join(' ')}</p>
         ${level > 1 ? `<p class="modal-text">레벨 보정: 피해 ×${level} (부가 능력은 고정)</p>` : ''}
-        <p class="modal-text">0점으로 확정하면 부가 능력은 발동하지 않는다.</p>
+        <p class="modal-text">성립하지 않으면 선택할 수 없다.</p>
         <button class="btn primary" id="cat-info-close">닫기</button>
       </div>
     </div>`));
@@ -268,13 +269,12 @@ function renderBattle(opts = {}) {
       }</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, level, seal, locked, bd }) => `
-          <button class="sheet-row ${locked ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''} ${!locked && bd.total === 0 ? 'zero' : ''}"
+          <button class="sheet-row ${locked ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''}"
             data-cat="${cat.id}" data-locked="${locked ? 1 : 0}">
-            <span class="sheet-main">
-              <span class="sheet-name">${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}${isAoE(cat) ? ' <small class="aoe-tag">전체</small>' : ''}</span>
-              <span class="sheet-ability">${esc(cat.abilityText || '')}</span>
-            </span>
-            <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? bd.total : '0') : '—'}</span>
+            <span class="sheet-name">${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}${isAoE(cat) ? ' <small class="aoe-tag">전체</small>' : ''}</span>
+            <span class="sheet-ability">${esc(cat.abilityText || '')}</span>
+            <span class="sheet-example">${(cat.example || []).map(f => PIPS[f]).join('')}</span>
+            <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? bd.total : '—') : '—'}</span>
           </button>`).join('')}
       </div>
       <div class="player-bar ${opts.playerHit ? 'hurt' : ''}">
@@ -405,6 +405,11 @@ function finishBattle() {
     busy = false;
     run.hp = battle.player.hp;
     if (battle.result === 'defeat') { clearSave(); showEnd(false); return; }
+    // 승리 시 회복 유물 (빵부스러기)
+    const heal = run.relics.map(id => DB.relicById[id])
+      .filter(r => r.hook.type === 'healOnVictory')
+      .reduce((s, r) => s + r.hook.amount, 0);
+    if (heal > 0) run.hp = Math.min(run.maxHp, run.hp + heal);
     if (currentNodeType === 'boss') { clearSave(); showEnd(true); return; }
     showReward();
   }, 500);

@@ -96,7 +96,8 @@ export function previewAll(battle) {
         ? computeDamage(cat, faces, battle.diceDefs, battle.relics, level)
         : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0, level };
       const total = bd.total > 0 ? bd.total + battle.pendingBuff : bd.total;
-      return { cat, level, seal, locked: seal > 0 || !battle.rolled, bd: { ...bd, total } };
+      // 성립하지 않는(또는 0점) 족보는 선택 불가
+      return { cat, level, seal, locked: seal > 0 || !battle.rolled || total === 0, bd: { ...bd, total } };
     });
 }
 
@@ -158,6 +159,7 @@ export function confirmCategory(battle, catId, targetUid = null) {
 
   const faces = battle.dice.map(d => d.face);
   const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics, level);
+  if (bd.total === 0) return null; // 성립 불가 족보는 확정 불가 (0점 버리기 폐지)
   if (bd.total > 0 && battle.pendingBuff > 0) {
     bd.total += battle.pendingBuff;
     bd.flat += battle.pendingBuff;
@@ -174,16 +176,7 @@ export function confirmCategory(battle, catId, targetUid = null) {
     }
   }
 
-  if (bd.isZero) {
-    const heal = battle.relics.filter(r => r.hook.type === 'healOnZero')
-      .reduce((s, r) => s + r.hook.amount, 0);
-    if (heal > 0) {
-      battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + heal);
-      battle.lastResult.bonusHits.push(`HP +${heal}`);
-    }
-  } else {
-    applyAbility(battle, cat, bd, targets);
-  }
+  applyAbility(battle, cat, bd, targets);
 
   // 상단 보너스 — 발동분은 같은 대상(들)에게
   if (cat.kind === 'upper') {
