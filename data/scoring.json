@@ -1,5 +1,5 @@
 {
-  "_version": 9,
+  "_version": 10,
   "rerollsPerTurn": 2,
   "upperBonus": {
     "threshold": 40,
@@ -296,6 +296,53 @@
             }
           ],
           "abilityText": "다음 족보 피해 +2",
+          "tier": "uncommon"
+        }
+      ]
+    },
+    {
+      "id": "twoPair",
+      "name": "투페어",
+      "kind": "twoPair",
+      "score": "matchedSum",
+      "mult": 1.25,
+      "tier": "common",
+      "fx": "slash2",
+      "ruleText": "서로 다른 눈 2쌍 — 피해: 두 쌍(주사위 4개)의 합 ×1.25 (내림)",
+      "example": [
+        5,
+        5,
+        3,
+        3,
+        1
+      ],
+      "variants": [
+        {
+          "id": "twin_sisters",
+          "name": "쌍둥이 자매",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 5
+            }
+          ],
+          "abilityText": "방어도 +5",
+          "tier": "common"
+        },
+        {
+          "id": "two_moons",
+          "name": "두 개의 달",
+          "ability": [
+            {
+              "op": "rerollNext",
+              "amount": 1
+            },
+            {
+              "op": "buffNext",
+              "amount": 3
+            }
+          ],
+          "abilityText": "다음 턴 리롤 +1 + 다음 피해 +3",
           "tier": "uncommon"
         }
       ]

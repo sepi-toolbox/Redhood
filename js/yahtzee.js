@@ -27,6 +27,22 @@ export function evalCategory(cat, faces) {
       const base = cat.score === 'sumAll' ? faces.reduce((a, b) => a + b, 0) : cat.score;
       return { valid: true, base, contributing: all };
     }
+    case 'twoPair': {
+      // v0.17: 서로 다른 눈 2쌍 — 높은 두 쌍(각 2개)의 합 ×배수(내림)
+      const pairFaces = Object.entries(counts)
+        .filter(([, n]) => n >= 2).map(([f]) => +f)
+        .sort((a, b) => b - a).slice(0, 2);
+      if (pairFaces.length < 2) return { valid: false, base: 0, contributing: [] };
+      const idx = [];
+      for (const f of pairFaces) {
+        let need = 2;
+        for (const i of all) {
+          if (faces[i] === f && need > 0) { idx.push(i); need--; }
+        }
+      }
+      const mult = cat.mult || 1;
+      return { valid: true, base: Math.floor(2 * (pairFaces[0] + pairFaces[1]) * mult), contributing: idx };
+    }
     case 'fullHouse': {
       const cs = Object.values(counts).sort((a, b) => a - b);
       const ok = (cs.length === 2 && cs[0] === 2 && cs[1] === 3) || cs[0] === 5;
