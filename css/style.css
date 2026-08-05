@@ -272,6 +272,51 @@ body {
 }
 .pop-in { opacity: 0; animation: cardPop .42s cubic-bezier(.34, 1.2, .64, 1) forwards; animation-delay: var(--d, 0s); }
 
+/* ---------- 희귀 보상 광휘 연출 ---------- */
+@keyframes glowPulse {
+  0%   { box-shadow: 0 0 6px 1px rgba(232, 182, 75, .35); }
+  100% { box-shadow: 0 0 18px 5px rgba(232, 182, 75, .65); }
+}
+@keyframes flareIn {
+  0%   { opacity: 0; transform: scale(.4); }
+  35%  { opacity: 1; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+@keyframes shineSweep {
+  0%   { transform: translateX(-130%) rotate(0); }
+  55%  { transform: translateX(130%) rotate(0); }
+  100% { transform: translateX(130%) rotate(0); }
+}
+.card.shiny-rare {
+  position: relative; overflow: hidden;
+  border-color: #e8b64b;
+  animation:
+    cardPop .42s cubic-bezier(.34, 1.2, .64, 1) forwards,
+    glowPulse 1.6s ease-in-out calc(var(--d, 0s) + .45s) infinite alternate;
+  animation-delay: var(--d, 0s), calc(var(--d, 0s) + .45s);
+}
+.card.shiny-rare::before {
+  content: ''; position: absolute; inset: -30%;
+  background: radial-gradient(circle, rgba(255, 226, 140, .55) 0%, transparent 62%);
+  opacity: 0; pointer-events: none;
+  animation: flareIn .7s ease-out calc(var(--d, 0s) + .28s) forwards;
+}
+.card.shiny-rare::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 240, 190, .5) 50%, transparent 68%);
+  transform: translateX(-130%); pointer-events: none;
+  animation: shineSweep 2.6s ease-in-out calc(var(--d, 0s) + .6s) infinite;
+}
+.card.shiny-un {
+  position: relative; overflow: hidden;
+}
+.card.shiny-un::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(180, 205, 235, .35) 50%, transparent 65%);
+  transform: translateX(-130%); pointer-events: none;
+  animation: shineSweep 1.2s ease-out calc(var(--d, 0s) + .5s) 1;
+}
+
 /* ---------- 보상/휴식/엔딩 ---------- */
 .reward-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .card {

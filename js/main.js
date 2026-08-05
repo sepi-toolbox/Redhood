@@ -492,7 +492,8 @@ function showRewardCards(choices, box) {
       <p>하나를 고른다</p>
       <div class="reward-cards">
         ${choices.map((c, i) => `
-          <button class="card pop-in r-${c.item.tier}" data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
+          <button class="card pop-in r-${c.item.tier} ${c.item.tier === 'rare' ? 'shiny-rare' : c.item.tier === 'uncommon' ? 'shiny-un' : ''}"
+            data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
             <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : '📜 족보'}</span>
             <span class="card-name">${esc(c.item.name)}${c.kind === 'category' && c.newLevel > 1 ? ` Lv${c.newLevel}` : ''}</span>
             <span class="card-text">${
