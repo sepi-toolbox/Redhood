@@ -408,22 +408,42 @@ function tryConfirm(catId, uid) {
   if (!res) { busy = false; renderBattle(); return; }
   syncTarget(); // 표적이 죽었으면 다음 적으로
   renderBattle();
-  const fxTotal = playAttackSequence(); // 기여 주사위 발광 → 발사체 → 명중/폭발
+  const fxTotal = playAttackSequence(); // 기여 주사위 발광 → 타격
 
   setTimeout(() => {
     if (battle.over) { finishBattle(); return; } // 승리 — 처치 연출이 재생된 뒤 전환
-    const hpBefore = battle.player.hp;
-    enemyPhase(battle);
-    if (battle.over) { playerDeathFx(); return; } // 사망 연출
-    syncTarget();
-    renderBattle();
-    const dmgTaken = hpBefore - battle.player.hp;
-    if (dmgTaken > 0) playPlayerHitFx(dmgTaken);
-    busy = false;
+
+    // 적 공격 연출: 행동하는 적이 순서대로 윈드업 → 내려찍기 (준비 행동은 은은한 충전 발광)
+    const ATK_MS = 780;
+    const actors = aliveEnemies(battle)
+      .filter(e => !e.stunned)
+      .map(e => ({ uid: e.uid, isAtk: e.nextMove.effects.some(f => f.op === 'damage') }));
+    actors.forEach((a, i) => setTimeout(() => {
+      const el = app.querySelector(`.enemy[data-uid="${a.uid}"]`);
+      if (!el) return;
+      el.classList.add(a.isAtk ? 'attacking' : 'charging');
+      setTimeout(() => el.classList.remove('attacking', 'charging'), 740);
+    }, i * ATK_MS));
+    const atkTotal = actors.length > 0 ? actors.length * ATK_MS + 200 : 300;
+
+    setTimeout(() => {
+      const hpBefore = battle.player.hp;
+      enemyPhase(battle);
+      if (battle.over) { playerDeathFx(); return; } // 사망 연출
+      syncTarget();
+      renderBattle();
+      const dmgTaken = hpBefore - battle.player.hp;
+      if (dmgTaken > 0) playPlayerHitFx(dmgTaken);
+      busy = false;
+    }, atkTotal);
   }, fxTotal);
 }
 
-// 공격 시퀀스: 합산에 기여한 주사위 발광 → 발사체 발사 → 명중(단일) 또는 중앙 폭발(전체)
+// 공격 시퀀스: 합산에 기여한 주사위가 통째로 빛남(족보가 화려할수록 강하게) → 곧바로 타격
+const FX_FLARE = {
+  slash: 'flare', slash2: 'flare mid', smash: 'flare mid', ring: 'flare mid',
+  wave: 'flare mid', bigwave: 'flare high', judgment: 'flare high',
+};
 function playAttackSequence() {
   const hits = battle.lastHits;
   const lastR = battle.lastResult;
@@ -431,79 +451,55 @@ function playAttackSequence() {
   const screen = app.querySelector('.battle-screen');
   const dieEls = [...app.querySelectorAll('.die')];
   const contributing = lastR.contributing || [];
+  const fx = lastR.fx || 'slash';
+  const flare = (FX_FLARE[fx] || 'flare').split(' ');
 
-  // 1) 기여 주사위 발광
-  for (const i of contributing) dieEls[i]?.classList.add('glow');
+  // 1) 기여 주사위 전체 발광 (타격 이펙트의 예열)
+  for (const i of contributing) dieEls[i]?.classList.add(...flare);
+  const FLARE = flare.includes('high') ? 640 : flare.includes('mid') ? 540 : 460;
+  const IMPACT = 900;
 
-  const GLOW = 300, FLIGHT = 320, IMPACT = 650;
-
-  // 2) 발사체
+  // 2) 타격 — 족보별 이펙트
   setTimeout(() => {
     if (!screen.isConnected) return;
-    const sRect = screen.getBoundingClientRect();
-    const zone = app.querySelector('.dice-zone');
-    const from = zone ? zone.getBoundingClientRect() : sRect;
-    const fromX = from.left + from.width / 2 - sRect.left;
-    const fromY = from.top + from.height / 2 - sRect.top;
-    let toX, toY;
     if (lastR.aoe) {
-      const ez = app.querySelector('.enemy-zone').getBoundingClientRect();
-      toX = ez.left + ez.width / 2 - sRect.left;
-      toY = ez.top + ez.height * 0.62 - sRect.top;
-    } else {
-      const el = app.querySelector(`.enemy[data-uid="${hits[0].uid}"]`);
-      const r = (el || app.querySelector('.enemy-zone')).getBoundingClientRect();
-      toX = r.left + r.width / 2 - sRect.left;
-      toY = r.top + r.height * 0.55 - sRect.top;
-    }
-    const p = document.createElement('div');
-    p.className = 'projectile' + (lastR.aoe ? ' big' : '');
-    p.style.left = `${fromX}px`;
-    p.style.top = `${fromY}px`;
-    screen.appendChild(p);
-    requestAnimationFrame(() => {
-      p.style.transform = `translate(${toX - fromX}px, ${toY - fromY}px) scale(${lastR.aoe ? 1.35 : 1})`;
-    });
-    // 3) 착탄 — 족보별 이펙트
-    setTimeout(() => {
-      p.remove();
-      const fx = lastR.fx || 'slash';
-      if (lastR.aoe) {
-        if (fx === 'wave' || fx === 'bigwave') {
-          // 스트레이트: 적진을 가로지르는 빛의 파도
-          const ez = app.querySelector('.enemy-zone');
-          if (ez) {
-            const wave = document.createElement('div');
-            wave.className = 'shockwave' + (fx === 'bigwave' ? ' big' : '');
-            ez.appendChild(wave);
-            setTimeout(() => wave.remove(), 560);
-          }
-          if (fx === 'bigwave') flashScreen(screen, 'gold');
-        } else {
+      if (fx === 'wave' || fx === 'bigwave') {
+        const ez = app.querySelector('.enemy-zone');
+        if (ez) {
+          const wave = document.createElement('div');
+          wave.className = 'shockwave' + (fx === 'bigwave' ? ' big' : '');
+          ez.appendChild(wave);
+          setTimeout(() => wave.remove(), 560);
+        }
+        if (fx === 'bigwave') flashScreen(screen, 'gold');
+      } else {
+        const ez = app.querySelector('.enemy-zone');
+        if (ez) {
+          const sRect = screen.getBoundingClientRect();
+          const r = ez.getBoundingClientRect();
           const boom = document.createElement('div');
           boom.className = 'explosion';
-          boom.style.left = `${toX}px`;
-          boom.style.top = `${toY}px`;
+          boom.style.left = `${r.left + r.width / 2 - sRect.left}px`;
+          boom.style.top = `${r.top + r.height * 0.6 - sRect.top}px`;
           screen.appendChild(boom);
           setTimeout(() => boom.remove(), 480);
         }
-        screen.classList.add('micro-shake');
-        setTimeout(() => screen.classList.remove('micro-shake'), 320);
-      } else if (fx === 'judgment') {
-        // 야찌: 화면 섬광 + 심판의 일격
-        flashScreen(screen, 'gold');
-        screen.classList.add('screen-shake');
-        setTimeout(() => screen.classList.remove('screen-shake'), 520);
-      } else if (fx === 'smash') {
-        screen.classList.add('micro-shake');
-        setTimeout(() => screen.classList.remove('micro-shake'), 320);
       }
-      playHitEffects(hits, fx);
-      for (const i of contributing) dieEls[i]?.classList.remove('glow');
-    }, FLIGHT);
-  }, GLOW);
+      screen.classList.add('micro-shake');
+      setTimeout(() => screen.classList.remove('micro-shake'), 320);
+    } else if (fx === 'judgment') {
+      flashScreen(screen, 'gold');
+      screen.classList.add('screen-shake');
+      setTimeout(() => screen.classList.remove('screen-shake'), 520);
+    } else if (fx === 'smash') {
+      screen.classList.add('micro-shake');
+      setTimeout(() => screen.classList.remove('micro-shake'), 320);
+    }
+    playHitEffects(hits, fx);
+    for (const i of contributing) dieEls[i]?.classList.remove('flare', 'mid', 'high');
+  }, FLARE);
 
-  return GLOW + FLIGHT + IMPACT;
+  return FLARE + IMPACT;
 }
 
 function flashScreen(screen, tone) {
@@ -528,9 +524,9 @@ function playPlayerHitFx(dmg) {
     f.className = 'pdmg-float';
     f.textContent = `-${dmg}`;
     bar.appendChild(f);
-    setTimeout(() => { f.remove(); bar.classList.remove('hurt'); }, 900);
+    setTimeout(() => { f.remove(); bar.classList.remove('hurt'); }, 2100);
   }
-  setTimeout(() => { screen.classList.remove('screen-shake'); veil.remove(); }, 620);
+  setTimeout(() => { screen.classList.remove('screen-shake'); veil.remove(); }, 700);
 }
 
 // 족보별 명중 이펙트 — 어려운 족보일수록 화려하게

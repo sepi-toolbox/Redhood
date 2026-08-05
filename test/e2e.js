@@ -6,7 +6,7 @@ fs.mkdirSync(SHOT, { recursive: true });
 
 async function settle(page) {
   // 연출(busy) 종료 대기: 굴림/베기 연출 최대치보다 넉넉히
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(3800);
 }
 
 async function playTurn(page) {

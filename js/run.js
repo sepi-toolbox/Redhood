@@ -64,8 +64,12 @@ function rewardPoolOf(run, kind) {
 export function rollRewards(run, nodeType) {
   const cfg = DB.act1.rewards[nodeType];
   if (!cfg || cfg.choices === 0) return [];
-  // 1) 범주 추첨 (빈 풀이면 다른 범주로)
+  // 1) 범주 추첨 (빈 풀이면 다른 범주로) — 단, 첫 전투(1층) 보상은 무조건 족보
   let kind = null, pool = [];
+  if (nodeType === 'battle' && run.floor === 1) {
+    kind = 'category';
+    pool = rewardPoolOf(run, 'category');
+  }
   for (let g = 0; g < 30 && pool.length === 0; g++) {
     kind = rollWeight(cfg.pool);
     pool = rewardPoolOf(run, kind);

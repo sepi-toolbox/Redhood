@@ -103,10 +103,10 @@ body {
 .start-row { opacity: .85; justify-content: flex-start; padding: 4px 0 2px; }
 .start-label { font-size: 12.5px; color: #6a4c33; font-weight: 700; font-style: italic; }
 
-/* ---------- 전투: 적 (다중) ---------- */
+/* ---------- 전투: 적 (다중) — 컴팩트 (족보·체력 영역 우선) ---------- */
 .enemy-zone {
-  flex: 1 1 auto; display: flex; justify-content: center; align-items: center; gap: 12px;
-  padding: 8px 10px 4px; min-height: 172px; position: relative; overflow: hidden;
+  flex: none; display: flex; justify-content: center; align-items: center; gap: 12px;
+  padding: 4px 10px 2px; min-height: 148px; position: relative; overflow: hidden;
   background: radial-gradient(ellipse at 50% 0%, #221a15 0%, #14100f 75%);
 }
 .enemy {
@@ -123,7 +123,24 @@ body {
 }
 .intent { font-size: 15px; font-weight: 700; color: #e8b64b; }
 .intent small { color: #9c8f7a; font-weight: 400; font-size: 11px; }
-.enemy-art { font-size: 56px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+.enemy-art { font-size: 46px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+
+/* 적 공격 연출 — 움찔(윈드업) 후 플레이어 쪽으로 내려찍기 */
+@keyframes enemyAttack {
+  0%   { transform: translateY(0) scale(1); }
+  28%  { transform: translateY(-12px) scale(.95); }
+  46%  { transform: translateY(-12px) scale(.97); }
+  60%  { transform: translateY(34px) scale(1.24); filter: brightness(1.35); }
+  74%  { transform: translateY(28px) scale(1.18); }
+  100% { transform: translateY(0) scale(1); filter: brightness(1); }
+}
+.enemy.attacking { animation: enemyAttack .72s cubic-bezier(.45, 0, .3, 1); z-index: 5; }
+/* 준비 행동 — 은은한 충전 발광 */
+@keyframes enemyCharge {
+  0%, 100% { filter: brightness(1); transform: scale(1); }
+  50% { filter: brightness(1.5) drop-shadow(0 0 10px rgba(232,182,75,.7)); transform: scale(1.07); }
+}
+.enemy.charging { animation: enemyCharge .72s ease-in-out; }
 .enemy-name { font-size: 13px; color: #cbbfa8; }
 .enemy .bar { width: 110px; height: 7px; background: #33241d; border-radius: 3px; overflow: hidden; }
 .enemy .bar i { display: block; height: 100%; background: #b3362a; transition: width .25s; }
@@ -212,21 +229,38 @@ body {
 }
 .enemy.dying { animation: enemyDie .6s ease-in .05s forwards; pointer-events: none; }
 
-/* ---------- 공격 시퀀스: 주사위 발광 → 발사체 → 폭발 ---------- */
+/* ---------- 공격 시퀀스: 주사위 전체 발광 → 타격 ---------- */
 .battle-screen { position: relative; overflow: hidden; }
-@keyframes dieGlow {
-  0%, 100% { box-shadow: 0 0 4px 1px rgba(232, 182, 75, .4); }
-  50% { box-shadow: 0 0 16px 6px rgba(255, 220, 120, .85); }
+/* 기본 발광 — 주사위 통째로 빠르게 번쩍임 */
+@keyframes dieFlare {
+  0%, 100% { filter: brightness(1); transform: scale(1) rotate(var(--tilt, 0deg)); }
+  50% { filter: brightness(2.1) saturate(1.2); transform: scale(1.09) rotate(var(--tilt, 0deg)); }
 }
-.die.glow { animation: dieGlow .32s ease-in-out infinite; border-color: #e8b64b; }
-.projectile {
-  position: absolute; z-index: 30; width: 15px; height: 15px; margin: -8px 0 0 -8px;
-  border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle at 38% 35%, #fff3c8 0%, #e8b64b 45%, #c9302f 100%);
-  box-shadow: 0 0 12px 4px rgba(232, 182, 75, .75), 0 0 26px 8px rgba(201, 48, 47, .35);
-  transition: transform .32s cubic-bezier(.3, .1, .6, 1);
+.die.flare {
+  animation: dieFlare .17s ease-in-out 3 alternate;
+  border-color: #e8b64b;
+  box-shadow: 0 0 14px 4px rgba(255, 226, 140, .7);
 }
-.projectile.big { width: 20px; height: 20px; margin: -10px 0 0 -10px; }
+/* 중급 (트리플·포카드·풀하우스·스몰) — 금빛 광휘 */
+@keyframes dieFlareMid {
+  0%, 100% { filter: brightness(1.1) drop-shadow(0 0 3px rgba(232,182,75,.6)); transform: scale(1) rotate(var(--tilt, 0deg)); }
+  50% { filter: brightness(2.4) saturate(1.5) drop-shadow(0 0 12px rgba(255,214,100,.95)); transform: scale(1.13) rotate(var(--tilt, 0deg)); }
+}
+.die.flare.mid {
+  animation: dieFlareMid .16s ease-in-out 4 alternate;
+  box-shadow: 0 0 20px 7px rgba(255, 210, 100, .85);
+}
+/* 최상급 (라지·야찌) — 백금 섬광 */
+@keyframes dieFlareHigh {
+  0% { filter: brightness(1.2); transform: scale(1) rotate(var(--tilt, 0deg)); }
+  45% { filter: brightness(3) saturate(1.6) drop-shadow(0 0 18px #ffe9a8); transform: scale(1.2) rotate(var(--tilt, 0deg)); }
+  100% { filter: brightness(1.6); transform: scale(1.07) rotate(var(--tilt, 0deg)); }
+}
+.die.flare.high {
+  animation: dieFlareHigh .15s ease-in-out 5 alternate;
+  border-color: #fff0c0;
+  box-shadow: 0 0 26px 10px rgba(255, 230, 150, .95), 0 0 50px 18px rgba(201, 48, 47, .35);
+}
 @keyframes explode {
   0%   { transform: translate(-50%, -50%) scale(.25); opacity: 1; }
   60%  { transform: translate(-50%, -50%) scale(1.55); opacity: .85; }
@@ -269,16 +303,17 @@ body {
   animation: hurtVeil .62s ease-out forwards;
 }
 @keyframes pdmgFloat {
-  0% { transform: translate(-50%, 6px) scale(.85); opacity: 0; }
-  22% { transform: translate(-50%, -6px) scale(1.2); opacity: 1; }
-  100% { transform: translate(-50%, -34px) scale(1); opacity: 0; }
+  0% { transform: translate(-50%, 8px) scale(.85); opacity: 0; }
+  14% { transform: translate(-50%, -4px) scale(1.18); opacity: 1; }
+  70% { transform: translate(-50%, -26px) scale(1); opacity: .95; }
+  100% { transform: translate(-50%, -44px) scale(.98); opacity: 0; }
 }
 .player-bar { position: relative; }
 .pdmg-float {
-  position: absolute; left: 50%; top: -14px; z-index: 41;
-  font-size: 21px; font-weight: 800; color: #ff5546;
+  position: absolute; left: 50%; top: -16px; z-index: 41;
+  font-size: 22px; font-weight: 800; color: #ff5546;
   text-shadow: 0 1px 4px #000; pointer-events: none;
-  animation: pdmgFloat .9s ease-out forwards;
+  animation: pdmgFloat 2s ease-out forwards;
 }
 
 /* 플레이어 사망 — 붉은 장막 */
@@ -374,7 +409,7 @@ body {
 
 /* ---------- 전투: 족보 시트 ---------- */
 .sheet-zone {
-  flex: 0 1 auto; max-height: 44dvh; overflow-y: auto; display: flex; flex-direction: column;
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column;
   gap: 6px; padding: 10px 12px;
   background: #171210; border-top: 1px solid #2c221c;
 }
