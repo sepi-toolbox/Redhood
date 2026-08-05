@@ -80,7 +80,7 @@ export function computeDamage(cat, faces, diceDefs, relics, level = 1) {
   const levelMult = flatScaling ? 1 : level;
   const levelFlatBonus = flatScaling ? cat.levelFlat * (level - 1) : 0;
   const total = Math.floor(core * levelMult * mult) + levelFlatBonus + bonus + flat;
-  return { valid: true, base: ev.base, gold, level, levelFlatBonus, mult, bonus, flat, total, isZero: false };
+  return { valid: true, base: ev.base, gold, level, levelFlatBonus, mult, bonus, flat, total, isZero: false, contributing: ev.contributing };
 }
 
 export function rollFace(dieDef, rngf) {

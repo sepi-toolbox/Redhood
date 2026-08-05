@@ -407,8 +407,7 @@ function tryConfirm(catId, uid) {
   if (!res) { busy = false; renderBattle(); return; }
   syncTarget(); // 표적이 죽었으면 다음 적으로
   renderBattle();
-  playHitEffects(battle.lastHits);
-  const hitDelay = battle.lastHits.length > 0 ? 620 : 220;
+  const fxTotal = playAttackSequence(); // 기여 주사위 발광 → 발사체 → 명중/폭발
 
   setTimeout(() => {
     if (battle.over) { finishBattle(); return; } // 승리 — 처치 연출이 재생된 뒤 전환
@@ -416,9 +415,93 @@ function tryConfirm(catId, uid) {
     enemyPhase(battle);
     if (battle.over) { playerDeathFx(); return; } // 사망 연출
     syncTarget();
-    renderBattle({ playerHit: battle.player.hp < hpBefore });
+    renderBattle();
+    const dmgTaken = hpBefore - battle.player.hp;
+    if (dmgTaken > 0) playPlayerHitFx(dmgTaken);
     busy = false;
-  }, hitDelay);
+  }, fxTotal);
+}
+
+// 공격 시퀀스: 합산에 기여한 주사위 발광 → 발사체 발사 → 명중(단일) 또는 중앙 폭발(전체)
+function playAttackSequence() {
+  const hits = battle.lastHits;
+  const lastR = battle.lastResult;
+  if (!lastR || hits.length === 0) return 250;
+  const screen = app.querySelector('.battle-screen');
+  const dieEls = [...app.querySelectorAll('.die')];
+  const contributing = lastR.contributing || [];
+
+  // 1) 기여 주사위 발광
+  for (const i of contributing) dieEls[i]?.classList.add('glow');
+
+  const GLOW = 300, FLIGHT = 320, IMPACT = 650;
+
+  // 2) 발사체
+  setTimeout(() => {
+    if (!screen.isConnected) return;
+    const sRect = screen.getBoundingClientRect();
+    const zone = app.querySelector('.dice-zone');
+    const from = zone ? zone.getBoundingClientRect() : sRect;
+    const fromX = from.left + from.width / 2 - sRect.left;
+    const fromY = from.top + from.height / 2 - sRect.top;
+    let toX, toY;
+    if (lastR.aoe) {
+      const ez = app.querySelector('.enemy-zone').getBoundingClientRect();
+      toX = ez.left + ez.width / 2 - sRect.left;
+      toY = ez.top + ez.height * 0.62 - sRect.top;
+    } else {
+      const el = app.querySelector(`.enemy[data-uid="${hits[0].uid}"]`);
+      const r = (el || app.querySelector('.enemy-zone')).getBoundingClientRect();
+      toX = r.left + r.width / 2 - sRect.left;
+      toY = r.top + r.height * 0.55 - sRect.top;
+    }
+    const p = document.createElement('div');
+    p.className = 'projectile' + (lastR.aoe ? ' big' : '');
+    p.style.left = `${fromX}px`;
+    p.style.top = `${fromY}px`;
+    screen.appendChild(p);
+    requestAnimationFrame(() => {
+      p.style.transform = `translate(${toX - fromX}px, ${toY - fromY}px) scale(${lastR.aoe ? 1.35 : 1})`;
+    });
+    // 3) 착탄
+    setTimeout(() => {
+      p.remove();
+      if (lastR.aoe) {
+        const boom = document.createElement('div');
+        boom.className = 'explosion';
+        boom.style.left = `${toX}px`;
+        boom.style.top = `${toY}px`;
+        screen.appendChild(boom);
+        setTimeout(() => boom.remove(), 480);
+        screen.classList.add('micro-shake');
+        setTimeout(() => screen.classList.remove('micro-shake'), 320);
+      }
+      playHitEffects(hits);
+      for (const i of contributing) dieEls[i]?.classList.remove('glow');
+    }, FLIGHT);
+  }, GLOW);
+
+  return GLOW + FLIGHT + IMPACT;
+}
+
+// 피격 연출: 화면 흔들림 + 붉은 블러 비네트 + 체력바 위 피해 수치
+function playPlayerHitFx(dmg) {
+  const screen = app.querySelector('.battle-screen');
+  if (!screen) return;
+  screen.classList.add('screen-shake');
+  const veil = document.createElement('div');
+  veil.className = 'hurt-veil';
+  screen.appendChild(veil);
+  const bar = app.querySelector('.player-bar');
+  if (bar) {
+    bar.classList.add('hurt');
+    const f = document.createElement('span');
+    f.className = 'pdmg-float';
+    f.textContent = `-${dmg}`;
+    bar.appendChild(f);
+    setTimeout(() => { f.remove(); bar.classList.remove('hurt'); }, 900);
+  }
+  setTimeout(() => { screen.classList.remove('screen-shake'); veil.remove(); }, 620);
 }
 
 function playHitEffects(hits) {

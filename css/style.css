@@ -172,6 +172,75 @@ body {
 }
 .enemy.dying { animation: enemyDie .6s ease-in .05s forwards; pointer-events: none; }
 
+/* ---------- 공격 시퀀스: 주사위 발광 → 발사체 → 폭발 ---------- */
+.battle-screen { position: relative; overflow: hidden; }
+@keyframes dieGlow {
+  0%, 100% { box-shadow: 0 0 4px 1px rgba(232, 182, 75, .4); }
+  50% { box-shadow: 0 0 16px 6px rgba(255, 220, 120, .85); }
+}
+.die.glow { animation: dieGlow .32s ease-in-out infinite; border-color: #e8b64b; }
+.projectile {
+  position: absolute; z-index: 30; width: 15px; height: 15px; margin: -8px 0 0 -8px;
+  border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 38% 35%, #fff3c8 0%, #e8b64b 45%, #c9302f 100%);
+  box-shadow: 0 0 12px 4px rgba(232, 182, 75, .75), 0 0 26px 8px rgba(201, 48, 47, .35);
+  transition: transform .32s cubic-bezier(.3, .1, .6, 1);
+}
+.projectile.big { width: 20px; height: 20px; margin: -10px 0 0 -10px; }
+@keyframes explode {
+  0%   { transform: translate(-50%, -50%) scale(.25); opacity: 1; }
+  60%  { transform: translate(-50%, -50%) scale(1.55); opacity: .85; }
+  100% { transform: translate(-50%, -50%) scale(2.1); opacity: 0; }
+}
+.explosion {
+  position: absolute; z-index: 29; width: 110px; height: 110px; pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 240, 190, .95) 0%, rgba(232, 150, 60, .7) 38%, rgba(201, 48, 47, .45) 62%, transparent 78%);
+  animation: explode .46s ease-out forwards;
+}
+@keyframes microShake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-3px, 2px); }
+  55% { transform: translate(3px, -2px); }
+  80% { transform: translate(-2px, -1px); }
+}
+.micro-shake { animation: microShake .3s linear; }
+
+/* ---------- 피격: 화면 흔들림 + 붉은 블러 + 피해 수치 ---------- */
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  12% { transform: translate(-6px, 3px); }
+  30% { transform: translate(5px, -4px); }
+  48% { transform: translate(-4px, -2px); }
+  66% { transform: translate(3px, 3px); }
+  84% { transform: translate(-2px, 1px); }
+}
+.battle-screen.screen-shake { animation: screenShake .5s linear; }
+@keyframes hurtVeil {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.hurt-veil {
+  position: absolute; inset: 0; z-index: 40; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 55%, transparent 38%, rgba(180, 30, 22, .38) 78%, rgba(150, 18, 12, .55) 100%);
+  backdrop-filter: blur(1.2px);
+  -webkit-backdrop-filter: blur(1.2px);
+  animation: hurtVeil .62s ease-out forwards;
+}
+@keyframes pdmgFloat {
+  0% { transform: translate(-50%, 6px) scale(.85); opacity: 0; }
+  22% { transform: translate(-50%, -6px) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -34px) scale(1); opacity: 0; }
+}
+.player-bar { position: relative; }
+.pdmg-float {
+  position: absolute; left: 50%; top: -14px; z-index: 41;
+  font-size: 21px; font-weight: 800; color: #ff5546;
+  text-shadow: 0 1px 4px #000; pointer-events: none;
+  animation: pdmgFloat .9s ease-out forwards;
+}
+
 /* 플레이어 사망 — 붉은 장막 */
 @keyframes deathVeil {
   0% { opacity: 0; }

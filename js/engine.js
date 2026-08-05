@@ -165,7 +165,7 @@ export function confirmCategory(battle, catId, targetUid = null) {
     bd.flat += battle.pendingBuff;
     battle.pendingBuff = 0;
   }
-  battle.lastResult = { catName: cat.name, ...bd, bonusHits: [] };
+  battle.lastResult = { catName: cat.name, ...bd, bonusHits: [], aoe: isAoE(cat) };
   battle.lastUsedCat = catId;
   battle.lastHits = [];
 
