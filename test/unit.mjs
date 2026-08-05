@@ -16,7 +16,7 @@ const C = {
   small: { id: 'smallStraight', kind: 'straight', length: 4, score: 30 },
   large: { id: 'largeStraight', kind: 'straight', length: 5, score: 40 },
   yahtzee: { id: 'yahtzee', kind: 'ofKind', count: 5, score: 50 },
-  chance: { id: 'chance', kind: 'chance', score: 'sumTop3', levelFlat: 2 },
+  chance: { id: 'chance', kind: 'chance', score: 'sumTop3' },
 };
 const N = { faces: [1, 2, 3, 4, 5, 6] };
 const G = { faces: [1, 2, 3, 4, 5, 6], gold: true };
@@ -58,15 +58,9 @@ eq('금박 상위3 밖 미기여', computeDamage(C.chance, [6, 6, 5, 4, 1], [N, 
 // 금박이 트리플 매칭 눈에 기여: [4,4,4,2,1] 매칭합×2=24 + 금박(0번 눈4) = 28
 eq('금박 트리플 매칭 기여', computeDamage(C.threeKind, [4, 4, 4, 2, 1], [G, N, N, N, N], []).total, 28);
 
-// 족보 레벨: (기본+금박)×레벨×유물배수+가산 — 트리플 Lv2: (24+4)×2 = 56
-eq('트리플 Lv2', computeDamage(C.threeKind, [4, 4, 4, 2, 1], [G, N, N, N, N], [], 2).total, 56);
-// 찬스 levelFlat: 배수 대신 레벨당 +2 — Lv3: 17 + 4 = 21
-eq('찬스 Lv3 (levelFlat)', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, [], 3).total, 21);
-eq('찬스 Lv1 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, [], 1).total, 17);
-// 에이스 Lv3 + 은탄환 + 금박(눈1): (4+1)×3×5 +3 = 78
-eq('에이스 Lv3+은탄환+금박+이빨', computeDamage(C.ones, [1, 1, 1, 1, 6], [G, N, N, N, N], [silver, fang], 3).total, 78);
-// 레벨이 있어도 0점은 0점
-eq('Lv3이어도 0점 버리기', computeDamage(C.ones, [2, 3, 4, 5, 6], plain5, [], 3).total, 0);
+// v0.8: 레벨 폐지 — 배수는 유물만
+eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).total, 17);
+eq('에이스+은탄환+금박+이빨', computeDamage(C.ones, [1, 1, 1, 1, 6], [G, N, N, N, N], [silver, fang]).total, 28);
 
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);

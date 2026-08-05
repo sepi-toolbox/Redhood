@@ -56,10 +56,10 @@ export function evalCategory(cat, faces) {
   }
 }
 
-// 최종 피해 = (기본 + 금박 기여) × 족보 레벨 × Π(categoryMult) + Σ(categoryBonus) + Σ(flatDamage)
-// 단, cat.levelFlat이 있으면 레벨은 배수가 아니라 "레벨당 +levelFlat 고정 피해"로 적용 (찬스)
+// 최종 피해 = (기본 + 금박 기여) × Π(categoryMult) + Σ(categoryBonus) + Σ(flatDamage)
+// (v0.8: 족보 레벨 폐지 — 성장은 변형 교체·주사위·유물로)
 // 기본+금박이 0이면 성립 실패 — total 0 (선택 불가 처리 대상)
-export function computeDamage(cat, faces, diceDefs, relics, level = 1) {
+export function computeDamage(cat, faces, diceDefs, relics) {
   const ev = evalCategory(cat, faces);
   let gold = 0;
   for (const i of ev.contributing) {
@@ -67,7 +67,7 @@ export function computeDamage(cat, faces, diceDefs, relics, level = 1) {
   }
   const core = ev.base + gold;
   if (!ev.valid || core === 0) {
-    return { valid: ev.valid, base: ev.base, gold: 0, level, levelFlatBonus: 0, mult: 1, bonus: 0, flat: 0, total: 0, isZero: true };
+    return { valid: ev.valid, base: ev.base, gold: 0, mult: 1, bonus: 0, flat: 0, total: 0, isZero: true };
   }
   let mult = 1, bonus = 0, flat = 0;
   for (const r of relics) {
@@ -76,11 +76,8 @@ export function computeDamage(cat, faces, diceDefs, relics, level = 1) {
     if (h.type === 'categoryBonus' && h.category === cat.id) bonus += h.bonus;
     if (h.type === 'flatDamage') flat += h.amount;
   }
-  const flatScaling = cat.levelFlat !== undefined;
-  const levelMult = flatScaling ? 1 : level;
-  const levelFlatBonus = flatScaling ? cat.levelFlat * (level - 1) : 0;
-  const total = Math.floor(core * levelMult * mult) + levelFlatBonus + bonus + flat;
-  return { valid: true, base: ev.base, gold, level, levelFlatBonus, mult, bonus, flat, total, isZero: false, contributing: ev.contributing };
+  const total = Math.floor(core * mult) + bonus + flat;
+  return { valid: true, base: ev.base, gold, mult, bonus, flat, total, isZero: false, contributing: ev.contributing };
 }
 
 export function rollFace(dieDef, rngf) {

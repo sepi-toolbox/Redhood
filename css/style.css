@@ -427,6 +427,7 @@ body {
 .sheet-example { flex: none; font-size: 19px; color: #9c8f7a; letter-spacing: 1px; }
 .sheet-row .sheet-preview { flex: none; min-width: 36px; text-align: right; font-weight: 700; color: #e8b64b; font-size: 18px; }
 .sheet-row .lv { color: #b08948; font-size: 11px; }
+.cat-tag { color: #8a7d68; font-size: 10.5px; font-weight: 400; }
 .sheet-row.selected { border-color: #e8b64b; background: #2a2118; }
 .sheet-row.used { opacity: .32; }
 .sheet-row.used .sheet-preview { color: #6f6353; }

@@ -88,26 +88,31 @@ export function aliveEnemies(battle) { return battle.enemies.filter(e => e.hp > 
 
 export function isAoE(cat) { return cat.target === 'allEnemies'; }
 
+// 보유 중인 변형 정의 (없으면 첫 변형으로 방어)
+export function variantOf(cat, variantId) {
+  return (cat.variants || []).find(v => v.id === variantId) || (cat.variants || [])[0] || { id: 'none', name: cat.name, ability: [], abilityText: '' };
+}
+
 // ---------- 미리보기 ----------
 export function previewAll(battle) {
   const faces = battle.dice.map(d => d.face);
   return DB.scoring.categories
     .filter(cat => battle.categories[cat.id])
     .map(cat => {
-      const level = battle.categories[cat.id];
+      const variant = variantOf(cat, battle.categories[cat.id]);
       const seal = battle.sealed[cat.id] || 0;
       const bd = battle.rolled
-        ? computeDamage(cat, faces, battle.diceDefs, battle.relics, level)
-        : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0, level };
+        ? computeDamage(cat, faces, battle.diceDefs, battle.relics)
+        : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 };
       const total = bd.total > 0 ? bd.total + battle.pendingBuff : bd.total;
       // 성립하지 않는(또는 0점) 족보는 선택 불가
-      return { cat, level, seal, locked: seal > 0 || !battle.rolled || total === 0, bd: { ...bd, total } };
+      return { cat, variant, seal, locked: seal > 0 || !battle.rolled || total === 0, bd: { ...bd, total } };
     });
 }
 
 // ---------- 부가 능력 ----------
-function applyAbility(battle, cat, bd, targets) {
-  for (const ab of (cat.ability || [])) {
+function applyAbility(battle, variant, bd, targets) {
+  for (const ab of (variant.ability || [])) {
     switch (ab.op) {
       case 'block': {
         const amt = ab.amount !== undefined ? ab.amount : bd.total * (ab.scoreMult || 1);
@@ -149,8 +154,9 @@ function applyAbility(battle, cat, bd, targets) {
 export function confirmCategory(battle, catId, targetUid = null) {
   if (battle.over || !battle.rolled || battle.await) return null;
   const cat = DB.scoring.categories.find(c => c.id === catId);
-  const level = battle.categories[catId];
-  if (!cat || !level) return null;
+  const variantId = battle.categories[catId];
+  if (!cat || !variantId) return null;
+  const variant = variantOf(cat, variantId);
   if ((battle.sealed[catId] || 0) > 0) return null;
 
   const alive = aliveEnemies(battle);
@@ -162,14 +168,14 @@ export function confirmCategory(battle, catId, targetUid = null) {
   }
 
   const faces = battle.dice.map(d => d.face);
-  const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics, level);
+  const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics);
   if (bd.total === 0) return null; // 성립 불가 족보는 확정 불가 (0점 버리기 폐지)
   if (bd.total > 0 && battle.pendingBuff > 0) {
     bd.total += battle.pendingBuff;
     bd.flat += battle.pendingBuff;
     battle.pendingBuff = 0;
   }
-  battle.lastResult = { catName: cat.name, ...bd, bonusHits: [], aoe: isAoE(cat), fx: cat.fx || 'slash' };
+  battle.lastResult = { catName: `${variant.name}(${cat.name})`, ...bd, bonusHits: [], aoe: isAoE(cat), fx: cat.fx || 'slash' };
   battle.lastUsedCat = catId;
   battle.lastHits = [];
 
@@ -180,7 +186,7 @@ export function confirmCategory(battle, catId, targetUid = null) {
     }
   }
 
-  applyAbility(battle, cat, bd, targets);
+  applyAbility(battle, variant, bd, targets);
 
   // 상단 보너스 — 발동분은 같은 대상(들)에게
   if (cat.kind === 'upper') {

@@ -1,7 +1,6 @@
 {
-  "_version": 4,
+  "_version": 5,
   "rerollsPerTurn": 2,
-  "levelCap": 3,
   "upperBonus": {
     "threshold": 40,
     "damage": 25,
@@ -15,16 +14,35 @@
       "score": "sumTop3",
       "startOwned": true,
       "tier": "common",
-      "ability": [],
-      "abilityText": "언제나 성립",
       "ruleText": "조건 없음 — 항상 성립. 가장 높은 눈 3개의 합만큼 피해.",
       "example": [
         6,
         5,
         3
       ],
-      "levelFlat": 2,
-      "fx": "slash"
+      "fx": "slash",
+      "variants": [
+        {
+          "id": "instinct",
+          "name": "떠돌이의 직감",
+          "ability": [],
+          "abilityText": "부가 없음 — 언제나 믿을 수 있는 한 수",
+          "tier": "common"
+        },
+        {
+          "id": "whisper",
+          "name": "숲의 속삭임",
+          "ability": [
+            {
+              "op": "rerollNext",
+              "amount": 1
+            }
+          ],
+          "abilityText": "다음 턴 리롤 +1",
+          "tier": "uncommon"
+        }
+      ],
+      "startVariant": "instinct"
     },
     {
       "id": "ones",
@@ -33,20 +51,39 @@
       "face": 1,
       "startOwned": false,
       "tier": "common",
-      "ability": [
-        {
-          "op": "rerollNext",
-          "amount": 1
-        }
-      ],
-      "abilityText": "다음 턴 리롤 +1",
       "ruleText": "굴린 주사위 중 [1]의 합만큼 피해.",
       "example": [
         1,
         1,
         1
       ],
-      "fx": "slash"
+      "fx": "slash",
+      "variants": [
+        {
+          "id": "needle",
+          "name": "바늘 한 땀",
+          "ability": [
+            {
+              "op": "rerollNext",
+              "amount": 1
+            }
+          ],
+          "abilityText": "다음 턴 리롤 +1",
+          "tier": "common"
+        },
+        {
+          "id": "silver_needle",
+          "name": "은바늘",
+          "ability": [
+            {
+              "op": "heal",
+              "amount": 2
+            }
+          ],
+          "abilityText": "HP 2 회복",
+          "tier": "uncommon"
+        }
+      ]
     },
     {
       "id": "twos",
@@ -55,20 +92,40 @@
       "face": 2,
       "startOwned": true,
       "tier": "common",
-      "ability": [
-        {
-          "op": "block",
-          "scoreMult": 2
-        }
-      ],
-      "abilityText": "방어도 +점수×2",
       "ruleText": "굴린 주사위 중 [2]의 합만큼 피해.",
       "example": [
         2,
         2,
         2
       ],
-      "fx": "slash"
+      "fx": "slash",
+      "variants": [
+        {
+          "id": "cloak_hem",
+          "name": "붉은 망토 자락",
+          "ability": [
+            {
+              "op": "block",
+              "scoreMult": 2
+            }
+          ],
+          "abilityText": "방어도 +점수×2",
+          "tier": "common"
+        },
+        {
+          "id": "thorn_fence",
+          "name": "가시 울타리",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 7
+            }
+          ],
+          "abilityText": "방어도 +7",
+          "tier": "uncommon"
+        }
+      ],
+      "startVariant": "cloak_hem"
     },
     {
       "id": "threes",
@@ -77,20 +134,43 @@
       "face": 3,
       "startOwned": false,
       "tier": "common",
-      "ability": [
-        {
-          "op": "heal",
-          "amount": 3
-        }
-      ],
-      "abilityText": "HP 3 회복",
       "ruleText": "굴린 주사위 중 [3]의 합만큼 피해.",
       "example": [
         3,
         3,
         3
       ],
-      "fx": "slash"
+      "fx": "slash",
+      "variants": [
+        {
+          "id": "herbs",
+          "name": "약초 한 줌",
+          "ability": [
+            {
+              "op": "heal",
+              "amount": 3
+            }
+          ],
+          "abilityText": "HP 3 회복",
+          "tier": "common"
+        },
+        {
+          "id": "berry_jam",
+          "name": "산딸기 잼",
+          "ability": [
+            {
+              "op": "heal",
+              "amount": 2
+            },
+            {
+              "op": "block",
+              "amount": 3
+            }
+          ],
+          "abilityText": "HP 2 회복 + 방어도 3",
+          "tier": "uncommon"
+        }
+      ]
     },
     {
       "id": "fours",
@@ -99,20 +179,39 @@
       "face": 4,
       "startOwned": false,
       "tier": "common",
-      "ability": [
-        {
-          "op": "block",
-          "scoreMult": 1
-        }
-      ],
-      "abilityText": "방어도 +점수",
       "ruleText": "굴린 주사위 중 [4]의 합만큼 피해.",
       "example": [
         4,
         4,
         4
       ],
-      "fx": "slash"
+      "fx": "slash",
+      "variants": [
+        {
+          "id": "oak_shield",
+          "name": "참나무 방패",
+          "ability": [
+            {
+              "op": "block",
+              "scoreMult": 1
+            }
+          ],
+          "abilityText": "방어도 +점수",
+          "tier": "common"
+        },
+        {
+          "id": "iron_pot",
+          "name": "무쇠 냄비",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 9
+            }
+          ],
+          "abilityText": "방어도 +9",
+          "tier": "uncommon"
+        }
+      ]
     },
     {
       "id": "fives",
@@ -121,20 +220,43 @@
       "face": 5,
       "startOwned": false,
       "tier": "common",
-      "ability": [
-        {
-          "op": "buffNext",
-          "amount": 5
-        }
-      ],
-      "abilityText": "다음 족보 피해 +5",
       "ruleText": "굴린 주사위 중 [5]의 합만큼 피해.",
       "example": [
         5,
         5,
         5
       ],
-      "fx": "slash"
+      "fx": "slash",
+      "variants": [
+        {
+          "id": "powder",
+          "name": "화약 재기",
+          "ability": [
+            {
+              "op": "buffNext",
+              "amount": 5
+            }
+          ],
+          "abilityText": "다음 족보 피해 +5",
+          "tier": "common"
+        },
+        {
+          "id": "five_claws",
+          "name": "다섯 발톱",
+          "ability": [
+            {
+              "op": "buffNext",
+              "amount": 3
+            },
+            {
+              "op": "rerollNext",
+              "amount": 1
+            }
+          ],
+          "abilityText": "다음 피해 +3 + 다음 턴 리롤 +1",
+          "tier": "uncommon"
+        }
+      ]
     },
     {
       "id": "sixes",
@@ -143,15 +265,34 @@
       "face": 6,
       "startOwned": false,
       "tier": "common",
-      "ability": [],
-      "abilityText": "부가 없음 — 순수 화력",
       "ruleText": "굴린 주사위 중 [6]의 합만큼 피해.",
       "example": [
         6,
         6,
         6
       ],
-      "fx": "slash"
+      "fx": "slash",
+      "variants": [
+        {
+          "id": "wolfshot",
+          "name": "늑대 사냥탄",
+          "ability": [],
+          "abilityText": "부가 없음 — 순수 화력",
+          "tier": "common"
+        },
+        {
+          "id": "overload",
+          "name": "화약 과적",
+          "ability": [
+            {
+              "op": "buffNext",
+              "amount": 8
+            }
+          ],
+          "abilityText": "다음 족보 피해 +8",
+          "tier": "uncommon"
+        }
+      ]
     },
     {
       "id": "threeKind",
@@ -161,19 +302,44 @@
       "score": "matchedSumX2",
       "startOwned": true,
       "tier": "common",
-      "ability": [
-        {
-          "op": "cleanse"
-        }
-      ],
-      "abilityText": "해제 (디버프 개편 예정)",
       "ruleText": "같은 눈 3개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해.",
       "example": [
         4,
         4,
         4
       ],
-      "fx": "slash2"
+      "fx": "slash2",
+      "variants": [
+        {
+          "id": "triple_axe",
+          "name": "세 번 찍는 도끼",
+          "ability": [
+            {
+              "op": "buffNext",
+              "amount": 6
+            }
+          ],
+          "abilityText": "다음 족보 피해 +6",
+          "tier": "common"
+        },
+        {
+          "id": "woodsman_breath",
+          "name": "나무꾼의 호흡",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 4
+            },
+            {
+              "op": "rerollNext",
+              "amount": 1
+            }
+          ],
+          "abilityText": "방어도 4 + 다음 턴 리롤 +1",
+          "tier": "uncommon"
+        }
+      ],
+      "startVariant": "triple_axe"
     },
     {
       "id": "fourKind",
@@ -183,12 +349,6 @@
       "score": "matchedSumX2",
       "startOwned": false,
       "tier": "rare",
-      "ability": [
-        {
-          "op": "stun"
-        }
-      ],
-      "abilityText": "적 다음 행동 취소",
       "ruleText": "같은 눈 4개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해.",
       "example": [
         4,
@@ -196,7 +356,32 @@
         4,
         4
       ],
-      "fx": "smash"
+      "fx": "smash",
+      "variants": [
+        {
+          "id": "four_fangs",
+          "name": "네 개의 송곳니",
+          "ability": [
+            {
+              "op": "stun"
+            }
+          ],
+          "abilityText": "피해 준 적의 다음 행동 취소",
+          "tier": "rare"
+        },
+        {
+          "id": "heavy_blow",
+          "name": "묵직한 일격",
+          "ability": [
+            {
+              "op": "buffNext",
+              "amount": 12
+            }
+          ],
+          "abilityText": "다음 족보 피해 +12",
+          "tier": "uncommon"
+        }
+      ]
     },
     {
       "id": "fullHouse",
@@ -205,13 +390,6 @@
       "score": 25,
       "startOwned": false,
       "tier": "uncommon",
-      "ability": [
-        {
-          "op": "block",
-          "amount": 15
-        }
-      ],
-      "abilityText": "방어도 +15",
       "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25.",
       "example": [
         5,
@@ -220,7 +398,37 @@
         2,
         2
       ],
-      "fx": "ring"
+      "fx": "ring",
+      "variants": [
+        {
+          "id": "cottage",
+          "name": "할머니의 오두막",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 15
+            }
+          ],
+          "abilityText": "방어도 +15",
+          "tier": "uncommon"
+        },
+        {
+          "id": "hearth",
+          "name": "따뜻한 화덕",
+          "ability": [
+            {
+              "op": "heal",
+              "amount": 6
+            },
+            {
+              "op": "block",
+              "amount": 6
+            }
+          ],
+          "abilityText": "HP 6 회복 + 방어도 6",
+          "tier": "rare"
+        }
+      ]
     },
     {
       "id": "smallStraight",
@@ -230,12 +438,6 @@
       "score": 30,
       "startOwned": false,
       "tier": "uncommon",
-      "ability": [
-        {
-          "op": "dodge"
-        }
-      ],
-      "abilityText": "이번 적 공격 회피",
       "ruleText": "연속된 눈 4개(예: 2·3·4·5)면 성립. 모든 적에게 피해 30.",
       "target": "allEnemies",
       "example": [
@@ -244,7 +446,32 @@
         4,
         5
       ],
-      "fx": "wave"
+      "fx": "wave",
+      "variants": [
+        {
+          "id": "windpath",
+          "name": "바람길",
+          "ability": [
+            {
+              "op": "dodge"
+            }
+          ],
+          "abilityText": "이번 적 공격 회피",
+          "tier": "uncommon"
+        },
+        {
+          "id": "hunt_drive",
+          "name": "몰이사냥",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 10
+            }
+          ],
+          "abilityText": "방어도 +10",
+          "tier": "common"
+        }
+      ]
     },
     {
       "id": "largeStraight",
@@ -254,16 +481,6 @@
       "score": 40,
       "startOwned": false,
       "tier": "rare",
-      "ability": [
-        {
-          "op": "dodge"
-        },
-        {
-          "op": "rerollNext",
-          "amount": 1
-        }
-      ],
-      "abilityText": "회피 + 다음 턴 리롤 +1",
       "ruleText": "연속된 눈 5개(1~5 또는 2~6)면 성립. 모든 적에게 피해 40.",
       "target": "allEnemies",
       "example": [
@@ -273,7 +490,39 @@
         5,
         6
       ],
-      "fx": "bigwave"
+      "fx": "bigwave",
+      "variants": [
+        {
+          "id": "moonpath",
+          "name": "달빛 오솔길",
+          "ability": [
+            {
+              "op": "dodge"
+            },
+            {
+              "op": "rerollNext",
+              "amount": 1
+            }
+          ],
+          "abilityText": "회피 + 다음 턴 리롤 +1",
+          "tier": "rare"
+        },
+        {
+          "id": "storm_run",
+          "name": "폭풍 질주",
+          "ability": [
+            {
+              "op": "dodge"
+            },
+            {
+              "op": "buffNext",
+              "amount": 8
+            }
+          ],
+          "abilityText": "회피 + 다음 피해 +8",
+          "tier": "rare"
+        }
+      ]
     },
     {
       "id": "yahtzee",
@@ -283,16 +532,6 @@
       "score": 50,
       "startOwned": false,
       "tier": "rare",
-      "ability": [
-        {
-          "op": "stun"
-        },
-        {
-          "op": "block",
-          "amount": 20
-        }
-      ],
-      "abilityText": "적 행동 취소 + 방어도 20",
       "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50.",
       "example": [
         6,
@@ -301,7 +540,39 @@
         6,
         6
       ],
-      "fx": "judgment"
+      "fx": "judgment",
+      "variants": [
+        {
+          "id": "judgment_night",
+          "name": "심판의 밤",
+          "ability": [
+            {
+              "op": "stun"
+            },
+            {
+              "op": "block",
+              "amount": 20
+            }
+          ],
+          "abilityText": "적 행동 취소 + 방어도 20",
+          "tier": "rare"
+        },
+        {
+          "id": "blood_moon",
+          "name": "핏빛 만월",
+          "ability": [
+            {
+              "op": "stun"
+            },
+            {
+              "op": "buffNext",
+              "amount": 15
+            }
+          ],
+          "abilityText": "적 행동 취소 + 다음 피해 +15",
+          "tier": "rare"
+        }
+      ]
     }
   ]
 }

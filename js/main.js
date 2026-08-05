@@ -47,18 +47,18 @@ function addLongPress(el, onLong) {
   el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
-function showCategoryInfo(catId, level) {
+function showCategoryInfo(catId, variantId) {
   const cat = DB.scoring.categories.find(c => c.id === catId);
   if (!cat) return;
+  const v = (cat.variants || []).find(x => x.id === variantId) || (cat.variants || [])[0] || {};
   app.append(h(`
     <div class="modal-back" id="cat-info">
       <div class="modal">
-        <h3>${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}${isAoE(cat) ? ' <small class="aoe-tag">전체 공격</small>' : ''}</h3>
+        <h3>${esc(v.name || cat.name)} <small class="cat-tag">${esc(cat.name)}</small>${isAoE(cat) ? ' <small class="aoe-tag">전체 공격</small>' : ''}</h3>
         <p class="info-rule">${esc(cat.ruleText || '')}</p>
-        <p class="info-ability">✨ ${esc(cat.abilityText || '부가 없음')}</p>
-        <p class="modal-text">예시: ${(cat.example || []).map(f => PIPS[f]).join(' ')}</p>
-        ${level > 1 ? `<p class="modal-text">레벨 보정: ${cat.levelFlat !== undefined ? `피해 +${cat.levelFlat * (level - 1)}` : `피해 ×${level}`} (부가 능력은 고정)</p>` : ''}
-        <p class="modal-text">성립하지 않으면 선택할 수 없다.</p>
+        <p class="info-ability">✨ ${esc(v.abilityText || '부가 없음')}</p>
+        <p class="modal-text">예시: ${(cat.example || []).map(f => PIPS[f]).join(' ')} · 등급: ${esc(v.tier || '')}</p>
+        <p class="modal-text">성립하지 않으면 선택할 수 없다. 같은 족보의 다른 변형을 얻으면 교체할 수 있다.</p>
         <button class="btn primary" id="cat-info-close">닫기</button>
       </div>
     </div>`));
@@ -162,7 +162,10 @@ function showBagModal() {
   }).join('');
   const catItems = DB.scoring.categories
     .filter(c => run.categories[c.id])
-    .map(c => `<li><b>${esc(c.name)}</b> Lv${run.categories[c.id]}${isAoE(c) ? ' <small class="aoe-tag">전체</small>' : ''} <span class="modal-text">${esc(c.abilityText || '')}</span></li>`)
+    .map(c => {
+      const v = (c.variants || []).find(x => x.id === run.categories[c.id]) || {};
+      return `<li><b>${esc(v.name || c.name)}</b> <small class="cat-tag">${esc(c.name)}</small>${isAoE(c) ? ' <small class="aoe-tag">전체</small>' : ''} <span class="modal-text">${esc(v.abilityText || '')}</span></li>`;
+    })
     .join('');
   const relicItems = run.relics.length
     ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${r.icon} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
@@ -223,9 +226,7 @@ function breakdownText(bd) {
   if (bd.isZero) return '불발';
   const parts = [`기본 ${bd.base}`];
   if (bd.gold) parts.push(`+금박 ${bd.gold}`);
-  if (bd.level > 1 && !bd.levelFlatBonus) parts.push(`×Lv${bd.level}`);
   if (bd.mult !== 1) parts.push(`×${bd.mult}`);
-  if (bd.levelFlatBonus) parts.push(`+Lv${bd.levelFlatBonus}`);
   if (bd.bonus) parts.push(`+${bd.bonus}`);
   if (bd.flat) parts.push(`+${bd.flat}`);
   return parts.join(' ');
@@ -286,11 +287,11 @@ function renderBattle(opts = {}) {
         multi ? '주사위 탭=다시 굴릴 것 선택 · 적 탭=표적 변경' : '주사위 탭=다시 굴릴 것 선택 · 족보 길게 눌러 설명'
       }</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
-        ${previews.map(({ cat, level, seal, locked, bd }) => `
+        ${previews.map(({ cat, variant, seal, locked, bd }) => `
           <button class="sheet-row ${locked ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''}"
             data-cat="${cat.id}" data-locked="${locked ? 1 : 0}">
-            <span class="sheet-name">${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}${isAoE(cat) ? ' <small class="aoe-tag">전체</small>' : ''}</span>
-            <span class="sheet-ability">${esc(cat.abilityText || '')}</span>
+            <span class="sheet-name">${esc(variant.name)} <small class="cat-tag">${esc(cat.name)}</small>${isAoE(cat) ? ' <small class="aoe-tag">전체</small>' : ''}</span>
+            <span class="sheet-ability">${esc(variant.abilityText || '')}</span>
             <span class="sheet-example">${(cat.example || []).map(f => PIPS[f]).join('')}</span>
             <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? bd.total : '—') : '—'}</span>
           </button>`).join('')}
@@ -340,7 +341,7 @@ function renderBattle(opts = {}) {
   // 족보
   app.querySelectorAll('.sheet-row').forEach(el => {
     const catId = el.dataset.cat;
-    addLongPress(el, () => showCategoryInfo(catId, battle.categories[catId] || 1));
+    addLongPress(el, () => showCategoryInfo(catId, battle.categories[catId]));
     el.addEventListener('click', () => {
       if (busy || el.dataset.locked === '1') return;
       if (selectedCat !== catId) { selectedCat = catId; renderBattle(); return; }
@@ -636,21 +637,28 @@ function showRewardCards(choices, box) {
       <h2>${box.icon} ${esc(box.name)}</h2>
       <p>하나를 고른다</p>
       <div class="reward-cards">
-        ${choices.map((c, i) => `
-          <button class="card pop-in r-${c.item.tier} ${c.item.tier === 'rare' ? 'shiny-rare' : c.item.tier === 'uncommon' ? 'shiny-un' : ''} ${c.kind === 'category' && c.newLevel === 1 ? 'new-cat' : ''}"
+        ${choices.map((c, i) => {
+          const isCat = c.kind === 'category';
+          const isNew = isCat && !c.item.owned;
+          const curName = isCat && c.item.owned
+            ? ((c.item.cat.variants || []).find(v => v.id === run.categories[c.item.cat.id]) || {}).name || ''
+            : '';
+          return `
+          <button class="card pop-in r-${c.item.tier} ${c.item.tier === 'rare' ? 'shiny-rare' : c.item.tier === 'uncommon' ? 'shiny-un' : ''} ${isNew ? 'new-cat' : ''}"
             data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
-            ${c.kind === 'category' && c.newLevel === 1 ? '<span class="new-badge">새 족보!</span>' : ''}
-            <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : '📜 족보'}</span>
-            <span class="card-name">${esc(c.item.name)}${c.kind === 'category' && c.newLevel > 1 ? ` Lv${c.newLevel}` : ''}</span>
+            ${isNew ? '<span class="new-badge">새 족보!</span>' : ''}
+            <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : `📜 ${esc(isCat ? c.item.cat.name : '족보')}`}</span>
+            <span class="card-name">${esc(isCat ? c.item.variant.name : c.item.name)}</span>
             <span class="card-text">${
               c.kind === 'die' ? `[${c.item.faces.join(',')}]<br>${esc(c.item.desc)}` :
               c.kind === 'relic' ? esc(c.item.desc) :
-              c.newLevel > 1
-                ? (c.item.levelFlat !== undefined ? `강화: 피해 +${c.item.levelFlat * (c.newLevel - 1)}` : `강화: 점수 ×${c.newLevel}`)
-                : `새 족보 획득<br>${esc(c.item.abilityText || '')}`
+              isNew
+                ? `새 족보 획득<br>✨ ${esc(c.item.variant.abilityText || '')}`
+                : `교체: ${esc(curName)} →<br>✨ ${esc(c.item.variant.abilityText || '')}`
             }</span>
             <span class="card-rarity">${c.item.tier}</span>
-          </button>`).join('')}
+          </button>`;
+        }).join('')}
       </div>
       <button class="btn ghost pop-in" id="skip-btn" style="--d:${0.2 + choices.length * 0.22}s">넘어가기</button>
     </div>`));
@@ -658,7 +666,7 @@ function showRewardCards(choices, box) {
     el.addEventListener('click', () => {
       const c = choices[parseInt(el.dataset.idx, 10)];
       if (c.kind === 'relic') { run.relics.push(c.item.id); saveRun(run); showMap(); }
-      else if (c.kind === 'category') { run.categories[c.item.id] = c.newLevel; saveRun(run); showMap(); }
+      else if (c.kind === 'category') { run.categories[c.item.cat.id] = c.item.variant.id; saveRun(run); showMap(); }
       else showReplaceDie(c.item);
     });
   });
