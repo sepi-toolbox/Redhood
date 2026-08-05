@@ -48,6 +48,14 @@ function spawnEnemy(id, idx, scale) {
   };
 }
 
+// 유물 훅 합산 (같은 훅 여러 개 소지 가능)
+function sumRelic(relics, type, field = 'amount') {
+  let v = 0;
+  for (const r of relics) if (r.hook.type === type) v += r.hook[field] || 0;
+  return v;
+}
+function hasRelic(relics, type) { return relics.some(r => r.hook.type === type); }
+
 // ---------- 턴 ----------
 function startTurn(battle, first = false) {
   if (!first) {
@@ -56,12 +64,18 @@ function startTurn(battle, first = false) {
       if (battle.sealed[id] <= 0) delete battle.sealed[id];
     }
   }
-  battle.player.block = dicePassive(battle, 'turnBlock'); // 패시브 주사위(가시덤불 등): 턴 시작 방어
+  // 방어: 기본은 초기화. 문지기의 빗장(blockKeep)이 있으면 유지 + 턴 시작 방어 가산
+  const kept = hasRelic(battle.relics, 'blockKeep') ? battle.player.block : 0;
+  battle.player.block = kept + dicePassive(battle, 'turnBlock') + sumRelic(battle.relics, 'turnBlock');
+  // 따뜻한 우유 등: 턴 시작 회복
+  const th = sumRelic(battle.relics, 'turnHeal');
+  if (th > 0) battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + th);
   battle.rollsLeft = relicValue(battle.relics, 'extraReroll', DB.scoring.rerollsPerTurn)
     + dicePassive(battle, 'extraReroll') + battle.nextTurnRerolls;
   battle.nextTurnRerolls = 0;
   battle.rolled = false;
   for (const d of battle.dice) { d.held = false; d.face = 0; d.confused = false; }
+  if (hasRelic(battle.relics, 'confuseImmune')) battle.pendingConfuse = 0; // 수지 양초: 혼란 면역
   // 혼란(🌀): 무작위 주사위 N개가 뒤틀림 — 이번 턴 다시 굴릴 수 없다
   if (battle.pendingConfuse > 0) {
     const idx = battle.dice.map((_, i) => i);
@@ -109,10 +123,21 @@ export function variantOf(cat, variantId) {
   return (cat.variants || []).find(v => v.id === variantId) || (cat.variants || [])[0] || { id: 'none', name: cat.name, ability: [], abilityText: '' };
 }
 
+// 저체력 보너스(독사과 등): 조건 충족 시 모든 족보 피해 가산
+function situationalFlat(battle) {
+  let v = 0;
+  for (const r of battle.relics) {
+    const h = r.hook;
+    if (h.type === 'lowHpDamage' && battle.player.hp <= battle.player.maxHp * h.ratio) v += h.amount;
+  }
+  return v;
+}
+
 // ---------- 미리보기 ----------
 // v0.9: 족보당 변형을 여러 개 보유(누적) — 같은 족보의 변형은 목록에서 이웃하게 정렬됨
 export function previewAll(battle) {
   const faces = battle.dice.map(d => d.face);
+  const situ = situationalFlat(battle);
   const out = [];
   for (const cat of DB.scoring.categories) {
     const ownedList = battle.categories[cat.id];
@@ -120,7 +145,7 @@ export function previewAll(battle) {
     const bd0 = battle.rolled
       ? computeDamage(cat, faces, battle.diceDefs, battle.relics)
       : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 };
-    const total = bd0.total > 0 ? bd0.total + battle.pendingBuff : bd0.total;
+    const total = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ : bd0.total;
     const seal = battle.sealed[cat.id] || 0;
     // 성립하지 않는(또는 0점) 족보는 선택 불가
     const locked = seal > 0 || !battle.rolled || total === 0;
@@ -239,9 +264,10 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   const faces = battle.dice.map(d => d.face);
   const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics);
   if (bd.total === 0) return null; // 성립 불가 족보는 확정 불가 (0점 버리기 폐지)
-  if (bd.total > 0 && battle.pendingBuff > 0) {
-    bd.total += battle.pendingBuff;
-    bd.flat += battle.pendingBuff;
+  if (bd.total > 0) {
+    const situ = situationalFlat(battle); // 독사과 등 조건부 가산
+    bd.total += battle.pendingBuff + situ;
+    bd.flat += battle.pendingBuff + situ;
     battle.pendingBuff = 0;
   }
   battle.lastResult = { catName: `${variant.name}(${cat.name})`, ...bd, bonusHits: [], aoe: isAoE(cat), fx: cat.fx || 'slash' };
@@ -256,25 +282,37 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   applyDiceEffects(battle, bd);
   if (battle.over && battle.result === 'defeat') return battle.lastResult; // 저주 주사위 등으로 자멸
 
-  // 상단 보너스 — 발동분은 같은 대상(들)에게
+  // 상단 보너스 — 발동분은 같은 대상(들)에게 (은저울: 피해 상향)
   if (cat.kind === 'upper') {
     battle.upperTotal += bd.base;
     const cfg = DB.scoring.upperBonus;
     const threshold = relicValue(battle.relics, 'upperBonusThreshold', cfg.threshold);
+    const bonusDmg = relicValue(battle.relics, 'upperBonusDamage', cfg.damage);
     if (cfg.repeat) {
       while (battle.upperTotal >= threshold) {
         battle.upperTotal -= threshold;
         for (const t of targets) {
           if (t.hp > 0 || battle.lastHits.some(h => h.uid === t.uid)) {
-            dealToEnemy(battle, t, cfg.damage);
+            dealToEnemy(battle, t, bonusDmg);
           }
         }
-        battle.lastResult.bonusHits.push(`상단 보너스 ${cfg.damage}!`);
+        battle.lastResult.bonusHits.push(`상단 보너스 ${bonusDmg}!`);
       }
     } else if (!battle.upperBonusFired && battle.upperTotal >= threshold) {
       battle.upperBonusFired = true;
-      for (const t of targets) dealToEnemy(battle, t, cfg.damage);
-      battle.lastResult.bonusHits.push(`상단 보너스 ${cfg.damage}!`);
+      for (const t of targets) dealToEnemy(battle, t, bonusDmg);
+      battle.lastResult.bonusHits.push(`상단 보너스 ${bonusDmg}!`);
+    }
+  }
+
+  // 늑대 가죽: 처치한 적 수만큼 회복
+  const hk = sumRelic(battle.relics, 'healOnKill');
+  if (hk > 0) {
+    const kills = new Set(battle.lastHits.filter(h => h.killed).map(h => h.uid)).size;
+    if (kills > 0) {
+      const heal = hk * kills;
+      battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + heal);
+      battle.lastResult.bonusHits.push(`🐺+${heal}HP`);
     }
   }
 

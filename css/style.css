@@ -657,3 +657,11 @@ body {
   75% { transform: rotate(calc(var(--tilt, 0deg) + 2.4deg)); }
 }
 .dmg-float.blocked { color: #cfcabe; font-size: 15px; }
+
+/* ---------- 상점·코인·보스 전리품 (v0.13) ---------- */
+.shop-price { margin-left: auto; font-weight: 800; color: #e8b64b; font-size: 14px; padding-left: 8px; }
+.shop-item .choice-main { display: flex; align-items: center; width: 100%; }
+.shop-item.used { opacity: .4; }
+.coin-gain { font-size: 17px; font-weight: 800; color: #e8b64b; }
+.card.r-elite { border-color: #b08948; }
+.card.r-normal { border-color: #4a3b30; }

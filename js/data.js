@@ -43,6 +43,9 @@ function validate() {
     if (r.hook.category && !catIds.has(r.hook.category)) {
       throw new Error(`relics.json: ${r.id}가 없는 족보 "${r.hook.category}" 참조`);
     }
+    if (r.tier !== 'normal' && r.tier !== 'elite') {
+      throw new Error(`relics.json: ${r.id} 등급은 normal/elite 2단계 (현재 "${r.tier}")`);
+    }
   }
   for (const group of ['easy', 'hard', 'elite', 'boss']) {
     for (const enc of DB.act1.encounters[group]) {

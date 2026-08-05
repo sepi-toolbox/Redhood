@@ -93,6 +93,11 @@ async function playTurn(page) {
       if (await nodes.count() === 0) break;
       await nodes.first().click(); await page.waitForTimeout(80); continue;
     }
+    if (await page.locator('.shop-screen').count()) {
+      await page.locator('#shop-leave').click();
+      await page.waitForTimeout(150);
+      continue;
+    }
     if (await page.locator('.event-screen').count()) {
       const done = page.locator('#event-done');
       if (await done.count()) { await done.click(); }

@@ -1,7 +1,7 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
-import { newRun, rollEncounter, rollRewards, applyRest, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects } from './run.js';
+import { newRun, rollEncounter, rollRewards, applyRest, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices } from './run.js';
 
 const app = document.getElementById('app');
 let run = null;
@@ -29,6 +29,9 @@ function h(html) { const t = document.createElement('template'); t.innerHTML = h
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
 const PIPS = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' };
+// 등급 표기 (성권 지시: 족보·주사위 4등급, 유물은 일반/정예 2등급, epic=전설)
+const TIER_KO = { common: '커먼', uncommon: '언커먼', rare: '레어', epic: '전설', normal: '일반', elite: '정예' };
+const SHINY = { uncommon: 'shiny-un', rare: 'shiny-rare', epic: 'shiny-epic', elite: 'shiny-epic', normal: '' };
 
 // 길게 누르기(450ms) → onLong 실행. 발동 시 이어지는 click은 무시된다.
 function addLongPress(el, onLong) {
@@ -57,7 +60,7 @@ function showCategoryInfo(catId, variantId) {
         <h3>${esc(v.name || cat.name)} <small class="cat-tag">${esc(cat.name)}</small>${isAoE(cat) ? ' <small class="aoe-tag">전체 공격</small>' : ''}</h3>
         <p class="info-rule">${esc(cat.ruleText || '')}</p>
         <p class="info-ability">✨ ${esc(v.abilityText || '부가 없음')}</p>
-        <p class="modal-text">예시: ${(cat.example || []).map(f => PIPS[f]).join(' ')} · 등급: ${esc(v.tier || '')}</p>
+        <p class="modal-text">예시: ${(cat.example || []).map(f => PIPS[f]).join(' ')} · 등급: ${esc(TIER_KO[v.tier] || v.tier || '')}</p>
         <p class="modal-text">성립하지 않으면 선택할 수 없다. 같은 족보의 다른 변형을 얻으면 나란히 추가된다.</p>
         <button class="btn primary" id="cat-info-close">닫기</button>
       </div>
@@ -103,7 +106,7 @@ function eventFrame(npc, linesHtml, choicesHtml) {
       <header class="topbar">
         <span>💬 ${run.floor > 0 ? `${run.floor}층 · ` : ''}만남</span>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
-        <span></span>
+        <span>${run.floor > 0 ? `🪙${run.coins}` : ''}</span>
       </header>
       <div class="enemy-zone npc-zone">
         <div class="npc">
@@ -189,12 +192,114 @@ function showEventResult(npc, linesHtml, pendingDie = null) {
   }, { once: true });
 }
 
+// ---------- 상점 (v0.13): 커먼~레어 주사위 + 일반 유물, 화폐는 🪙 ----------
+function showShop() {
+  const stock = rollShopStock(run);
+  const sold = new Set();
+  const merchant = { name: '잿빛 방물장수', art: '🧙' };
+  const render = () => {
+    const rows = stock.map((s, i) => {
+      const isSold = sold.has(i);
+      const afford = run.coins >= s.price;
+      const tierTag = TIER_KO[s.item.tier] || s.item.tier;
+      const name = s.kind === 'die' ? `🎲 ${s.item.name}` : `${s.item.icon} ${s.item.name}`;
+      const sub = s.kind === 'die' ? `[${s.item.faces.join(',')}] ${s.item.desc}` : s.item.desc;
+      return `
+        <button class="sheet-row choice-row shop-item ${isSold || !afford ? 'used' : ''}" data-idx="${i}" ${isSold || !afford ? 'disabled' : ''}>
+          <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(tierTag)}</small><span class="shop-price">${isSold ? '판매됨' : `🪙${s.price}`}</span></span>
+          <span class="choice-sub">${esc(sub)}</span>
+        </button>`;
+    }).join('') + `<button class="btn ghost" id="shop-leave">🌲 떠난다</button>`;
+    app.innerHTML = '';
+    app.append(h(eventFrame(merchant,
+      `<p class="npc-line">"또 만났구나, 빨간 두건. 골라 보렴 — 이번엔 값을 먼저 받으마."</p>`,
+      rows)));
+    app.querySelector('.event-screen').classList.add('shop-screen');
+    app.querySelectorAll('.shop-item:not([disabled])').forEach(el => {
+      el.addEventListener('click', () => {
+        const i = parseInt(el.dataset.idx, 10);
+        const s = stock[i];
+        if (sold.has(i) || run.coins < s.price) return;
+        if (s.kind === 'relic') {
+          run.coins -= s.price;
+          sold.add(i);
+          applyRelicPickup(run, s.item);
+          saveRun(run);
+          render();
+        } else {
+          // 주사위: 교체를 마쳐야 결제 (취소하면 무료)
+          showReplaceDie(s.item,
+            () => { run.coins -= s.price; sold.add(i); saveRun(run); render(); },
+            () => render());
+        }
+      });
+    });
+    document.getElementById('shop-leave').addEventListener('click', () => { saveRun(run); showMap(); });
+  };
+  render();
+}
+
+// ---------- 보스 전리품: 정예 유물 → 전설(에픽) 족보/주사위 ----------
+function showLootCards(title, subtitle, choices, onPick) {
+  app.innerHTML = '';
+  app.append(h(`
+    <div class="screen center reward-screen">
+      <h2>${title}</h2>
+      <p>${esc(subtitle)}</p>
+      <div class="reward-cards">
+        ${choices.map((c, i) => {
+          const t = c.item.tier;
+          const isCat = c.kind === 'category';
+          return `
+          <button class="card pop-in r-${t} ${SHINY[t] || ''}" data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
+            <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : `📜 ${esc(c.item.cat.name)}`}</span>
+            <span class="card-name">${esc(isCat ? c.item.variant.name : c.item.name)}</span>
+            <span class="card-text">${
+              c.kind === 'die' ? `[${c.item.faces.join(',')}]<br>${esc(c.item.desc)}` :
+              c.kind === 'relic' ? esc(c.item.desc) : `✨ ${esc(c.item.variant.abilityText || '')}`
+            }</span>
+            <span class="card-rarity">${esc(TIER_KO[t] || t)}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      <button class="btn ghost pop-in" id="skip-btn" style="--d:${0.2 + choices.length * 0.22}s">넘어가기</button>
+    </div>`));
+  app.querySelectorAll('.reward-cards .card').forEach(el => {
+    el.addEventListener('click', () => onPick(choices[parseInt(el.dataset.idx, 10)]));
+  });
+  document.getElementById('skip-btn').addEventListener('click', () => onPick(null));
+}
+
+function showBossReward() {
+  const finishBoss = () => { clearSave(); showEnd(true); };
+  const stage2 = () => {
+    const legend = bossLegendaryChoices(run);
+    if (legend.length === 0) return finishBoss();
+    showLootCards('🐺 전리품', '전설의 유산 — 하나를 고른다', legend, (c) => {
+      if (!c) return finishBoss();
+      if (c.kind === 'category') {
+        (run.categories[c.item.cat.id] = run.categories[c.item.cat.id] || []).push(c.item.variant.id);
+        finishBoss();
+      } else {
+        showReplaceDie(c.item, finishBoss, finishBoss);
+      }
+    });
+  };
+  const relics = bossRelicChoices(run);
+  if (relics.length === 0) return stage2();
+  showLootCards('🐺 전리품', '정예 유물 — 하나를 고른다', relics, (c) => {
+    if (c) applyRelicPickup(run, c.item);
+    stage2();
+  });
+}
+
 // ---------- 맵 ----------
 const NODE_META = {
   battle: { icon: '⚔️', label: '전투' },
   elite: { icon: '💀', label: '엘리트' },
   rest: { icon: '🔥', label: '휴식' },
   event: { icon: '💬', label: '만남' },
+  shop: { icon: '🧺', label: '상점' },
   boss: { icon: '🐺', label: '보스' },
 };
 
@@ -228,7 +333,7 @@ function showMap() {
       <header class="topbar">
         <span>🌲 ${run.floor}/${run.map.length}층</span>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
-        <span class="hp">❤️ ${run.hp}/${run.maxHp}</span>
+        <span>🪙${run.coins} <span class="hp">❤️ ${run.hp}/${run.maxHp}</span></span>
       </header>
       <div class="map-scroll parchment">${rows.join('')}</div>
       <footer class="bottombar">
@@ -282,6 +387,7 @@ function enterNode(type) {
   currentNodeType = type;
   if (type === 'rest') { showRest(); return; }
   if (type === 'event') { showEvent(pickEvent(run)); return; }
+  if (type === 'shop') { showShop(); return; }
   battle = createBattle(run, rollEncounter(run, type));
   selectedCat = null; busy = false;
   targetUid = aliveEnemies(battle)[0]?.uid || null; // 기본 표적: 맨 왼쪽
@@ -687,18 +793,23 @@ function playerDeathFx() {
   }, 1000);
 }
 
+let lastCoinGain = 0;
 function finishBattle() {
   setTimeout(() => {
     busy = false;
     run.hp = battle.player.hp;
     if (battle.result === 'defeat') { clearSave(); showEnd(false); return; }
     // (승리 시 처치 연출을 여유 있게 재생)
-    // 승리 시 회복 유물 (빵부스러기)
+    // 승리 시 회복 유물 (빵부스러기·꿀단지)
     const heal = run.relics.map(id => DB.relicById[id])
       .filter(r => r.hook.type === 'healOnVictory')
       .reduce((s, r) => s + r.hook.amount, 0);
     if (heal > 0) run.hp = Math.min(run.maxHp, run.hp + heal);
-    if (currentNodeType === 'boss') { clearSave(); showEnd(true); return; }
+    if (currentNodeType === 'boss') { showBossReward(); return; }
+    // 코인 획득 (v0.13)
+    const cr = DB.act1.coins[currentNodeType === 'elite' ? 'elite' : 'battle'];
+    lastCoinGain = cr[0] + Math.floor(Math.random() * (cr[1] - cr[0] + 1));
+    run.coins += lastCoinGain;
     showReward();
   }, 850);
 }
@@ -718,6 +829,7 @@ function showReward() {
   app.append(h(`
     <div class="screen center reward-screen">
       <h2>승리!</h2>
+      <p class="coin-gain">🪙 +${lastCoinGain} <span class="hint">(보유 ${run.coins})</span></p>
       <p>${esc(box.desc)}</p>
       <button class="chest" id="chest">
         <span class="chest-icon">${box.icon}</span>
@@ -744,7 +856,7 @@ function showRewardCards(choices, box) {
           const isCat = c.kind === 'category';
           const isNew = isCat && !c.item.owned;
           return `
-          <button class="card pop-in r-${c.item.tier} ${c.item.tier === 'epic' ? 'shiny-epic' : c.item.tier === 'rare' ? 'shiny-rare' : c.item.tier === 'uncommon' ? 'shiny-un' : ''} ${isNew ? 'new-cat' : ''}"
+          <button class="card pop-in r-${c.item.tier} ${SHINY[c.item.tier] || ''} ${isNew ? 'new-cat' : ''}"
             data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
             ${isNew ? '<span class="new-badge">새 족보!</span>' : ''}
             <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : `📜 ${esc(isCat ? c.item.cat.name : '족보')}`}</span>
@@ -756,7 +868,7 @@ function showRewardCards(choices, box) {
                 ? `새 족보 획득<br>✨ ${esc(c.item.variant.abilityText || '')}`
                 : `${esc(c.item.cat.name)} 변형 추가<br>✨ ${esc(c.item.variant.abilityText || '')}`
             }</span>
-            <span class="card-rarity">${c.item.tier}</span>
+            <span class="card-rarity">${esc(TIER_KO[c.item.tier] || c.item.tier)}</span>
           </button>`;
         }).join('')}
       </div>
@@ -765,7 +877,7 @@ function showRewardCards(choices, box) {
   app.querySelectorAll('.reward-cards .card').forEach(el => {
     el.addEventListener('click', () => {
       const c = choices[parseInt(el.dataset.idx, 10)];
-      if (c.kind === 'relic') { run.relics.push(c.item.id); saveRun(run); showMap(); }
+      if (c.kind === 'relic') { applyRelicPickup(run, c.item); saveRun(run); showMap(); }
       else if (c.kind === 'category') {
         (run.categories[c.item.cat.id] = run.categories[c.item.cat.id] || []).push(c.item.variant.id);
         saveRun(run); showMap();
@@ -776,7 +888,7 @@ function showRewardCards(choices, box) {
   document.getElementById('skip-btn').addEventListener('click', () => { saveRun(run); showMap(); });
 }
 
-function showReplaceDie(newDie, onDone = null) {
+function showReplaceDie(newDie, onDone = null, onCancel = null) {
   app.append(h(`
     <div class="modal-back">
       <div class="modal">
@@ -800,7 +912,8 @@ function showReplaceDie(newDie, onDone = null) {
   });
   document.getElementById('replace-cancel').addEventListener('click', () => {
     app.querySelector('.modal-back').remove();
-    if (onDone) onDone();
+    if (onCancel) onCancel();
+    else if (onDone) onDone();
   });
 }
 

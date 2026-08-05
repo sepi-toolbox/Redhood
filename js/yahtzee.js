@@ -75,6 +75,8 @@ export function computeDamage(cat, faces, diceDefs, relics) {
     const h = r.hook;
     if (h.type === 'categoryMult' && h.category === cat.id) mult *= h.mult;
     if (h.type === 'categoryBonus' && h.category === cat.id) bonus += h.bonus;
+    if (h.type === 'kindBonus' && h.kind === cat.kind) bonus += h.bonus;      // 족보군 보너스
+    if (h.type === 'aoeBonus' && cat.target === 'allEnemies') bonus += h.bonus; // 전체 공격 보너스
     if (h.type === 'flatDamage') flat += h.amount;
   }
   const total = Math.floor(core * mult) + bonus + flat;
