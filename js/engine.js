@@ -212,6 +212,7 @@ export function confirmCategory(battle, catId, targetUid = null) {
 // ---------- 적 페이즈 ----------
 export function enemyPhase(battle) {
   if (battle.over || battle.await !== 'enemy') return;
+  battle.lastHits = []; // 사체 연출 종료 — 다음 렌더부터 죽은 적 제거
   for (const e of aliveEnemies(battle)) {
     if (battle.over) break;
     if (e.stunned) { e.stunned = false; chooseMove(e); continue; }

@@ -94,6 +94,8 @@ async function playTurn(page) {
       continue;
     }
     if (await page.locator('.reward-screen').count()) {
+      const chest = page.locator('#chest');
+      if (await chest.count()) { await chest.click(); await page.waitForTimeout(700); }
       const cards = page.locator('.reward-cards .card');
       if (await cards.count() > 0) {
         await cards.first().click(); await page.waitForTimeout(80);

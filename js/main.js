@@ -236,7 +236,7 @@ function renderBattle(opts = {}) {
         <span class="upper-meter" title="상단 점수 누적 — 기준마다 추가 피해">☀ ${battle.upperTotal}/${upperThreshold()}</span>
       </header>
       <div class="enemy-zone">
-        ${battle.enemies.filter(e => e.hp > 0).map(e => `
+        ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
           <button class="enemy ${targeting ? 'targetable' : ''} ${targetUid === e.uid && selDef && !isAoE(selDef) ? 'targeted' : ''}" data-uid="${e.uid}">
             <span class="intent">${intentOf(e)} <small>${esc(e.nextMove.name)}</small></span>
             <span class="enemy-art">${e.tier === 'boss' ? '🐺' : e.tier === 'elite' ? '💀' : '🌑'}</span>
@@ -397,10 +397,10 @@ function tryConfirm(catId, uid) {
   const hitDelay = battle.lastHits.length > 0 ? 620 : 220;
 
   setTimeout(() => {
-    if (battle.over) { finishBattle(); return; }
+    if (battle.over) { finishBattle(); return; } // 승리 — 처치 연출이 재생된 뒤 전환
     const hpBefore = battle.player.hp;
     enemyPhase(battle);
-    if (battle.over) { finishBattle(); return; }
+    if (battle.over) { playerDeathFx(); return; } // 사망 연출
     renderBattle({ playerHit: battle.player.hp < hpBefore });
     busy = false;
   }, hitDelay);
@@ -419,7 +419,23 @@ function playHitEffects(hits) {
     dmg.textContent = `-${hit.amount}`;
     el.appendChild(dmg);
     setTimeout(() => { slash.remove(); dmg.remove(); el.classList.remove('hit'); }, 650);
+    // 처치 연출: 베인 뒤 무너져 내림
+    if (hit.killed) setTimeout(() => el.classList.add('dying'), 280);
   }
+}
+
+// 플레이어 사망 연출: 붉은 장막이 덮이고 게이지가 비워진 뒤 엔딩으로
+function playerDeathFx() {
+  renderBattle({ playerHit: true });
+  const veil = document.createElement('div');
+  veil.className = 'death-veil';
+  app.append(veil);
+  setTimeout(() => {
+    busy = false;
+    run.hp = 0;
+    clearSave();
+    showEnd(false);
+  }, 1000);
 }
 
 function finishBattle() {
@@ -427,6 +443,7 @@ function finishBattle() {
     busy = false;
     run.hp = battle.player.hp;
     if (battle.result === 'defeat') { clearSave(); showEnd(false); return; }
+    // (승리 시 처치 연출을 여유 있게 재생)
     // 승리 시 회복 유물 (빵부스러기)
     const heal = run.relics.map(id => DB.relicById[id])
       .filter(r => r.hook.type === 'healOnVictory')
@@ -434,20 +451,48 @@ function finishBattle() {
     if (heal > 0) run.hp = Math.min(run.maxHp, run.hp + heal);
     if (currentNodeType === 'boss') { clearSave(); showEnd(true); return; }
     showReward();
-  }, 500);
+  }, 850);
 }
 
-// ---------- 보상 ----------
+// ---------- 보상: 범주 상자 → 열면 그 범주의 카드 3장이 튀어나옴 ----------
+const KIND_BOX = {
+  category: { icon: '📜', name: '낡은 두루마리', desc: '족보가 잠들어 있다' },
+  die: { icon: '🎲', name: '가죽 주머니', desc: '주사위가 굴러다닌다' },
+  relic: { icon: '🎁', name: '숲의 상자', desc: '유물이 숨겨져 있다' },
+};
+
 function showReward() {
   const choices = rollRewards(run, currentNodeType);
+  if (choices.length === 0) { saveRun(run); showMap(); return; }
+  const box = KIND_BOX[choices[0].kind];
   app.innerHTML = '';
   app.append(h(`
     <div class="screen center reward-screen">
       <h2>승리!</h2>
-      <p>전리품 — 하나를 고른다</p>
+      <p>${esc(box.desc)}</p>
+      <button class="chest" id="chest">
+        <span class="chest-icon">${box.icon}</span>
+        <span class="chest-name">${esc(box.name)}</span>
+      </button>
+      <p class="hint">탭해서 연다</p>
+    </div>`));
+  document.getElementById('chest').addEventListener('click', function open() {
+    const chest = document.getElementById('chest');
+    chest.classList.add('opening');
+    chest.disabled = true;
+    setTimeout(() => showRewardCards(choices, box), 480);
+  }, { once: true });
+}
+
+function showRewardCards(choices, box) {
+  app.innerHTML = '';
+  app.append(h(`
+    <div class="screen center reward-screen">
+      <h2>${box.icon} ${esc(box.name)}</h2>
+      <p>하나를 고른다</p>
       <div class="reward-cards">
         ${choices.map((c, i) => `
-          <button class="card r-${c.item.tier}" data-idx="${i}">
+          <button class="card pop-in r-${c.item.tier}" data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
             <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : '📜 족보'}</span>
             <span class="card-name">${esc(c.item.name)}${c.kind === 'category' && c.newLevel > 1 ? ` Lv${c.newLevel}` : ''}</span>
             <span class="card-text">${
@@ -460,7 +505,7 @@ function showReward() {
             <span class="card-rarity">${c.item.tier}</span>
           </button>`).join('')}
       </div>
-      <button class="btn ghost" id="skip-btn">넘어가기</button>
+      <button class="btn ghost pop-in" id="skip-btn" style="--d:${0.2 + choices.length * 0.22}s">넘어가기</button>
     </div>`));
   app.querySelectorAll('.reward-cards .card').forEach(el => {
     el.addEventListener('click', () => {

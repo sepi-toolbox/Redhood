@@ -52,31 +52,36 @@ export function rollEncounter(run, nodeType) {
 }
 function pickArr(arr) { return arr[Math.floor(rng.next() * arr.length)].slice(); }
 
-// ---------- 보상: 족보/주사위/유물 혼합 3택1 ----------
+// ---------- 보상: 범주(족보/주사위/유물)를 먼저 하나 뽑고, 그 범주 안에서만 3택1 ----------
+function rewardPoolOf(run, kind) {
+  const levelCap = DB.scoring.levelCap;
+  if (kind === 'dice') return DB.dice.filter(d => d.id !== 'normal');
+  if (kind === 'relic') return DB.relics.filter(r => !run.relics.includes(r.id));
+  return DB.scoring.categories.filter(c =>
+    (run.categories[c.id] || 0) < (c.maxLevel !== undefined ? c.maxLevel : levelCap));
+}
+
 export function rollRewards(run, nodeType) {
   const cfg = DB.act1.rewards[nodeType];
   if (!cfg || cfg.choices === 0) return [];
-  const levelCap = DB.scoring.levelCap;
+  // 1) 범주 추첨 (빈 풀이면 다른 범주로)
+  let kind = null, pool = [];
+  for (let g = 0; g < 30 && pool.length === 0; g++) {
+    kind = rollWeight(cfg.pool);
+    pool = rewardPoolOf(run, kind);
+  }
+  if (pool.length === 0) return [];
+  // 2) 범주 안에서 등급 가중으로 3개 추첨 (중복 없음, 등급 소진 시 아무거나로 채움)
   const picks = [];
   const usedIds = new Set();
   let guard = 0;
-  while (picks.length < cfg.choices && guard++ < 300) {
-    const kind = rollWeight(cfg.pool);
+  while (picks.length < cfg.choices && guard++ < 200) {
     const tier = rollWeight(cfg.tierWeights);
-    let pool;
-    if (kind === 'dice') {
-      pool = DB.dice.filter(d => d.tier === tier && d.id !== 'normal' && !usedIds.has('d_' + d.id));
-    } else if (kind === 'relic') {
-      pool = DB.relics.filter(r => r.tier === tier && !run.relics.includes(r.id) && !usedIds.has('r_' + r.id));
-    } else {
-      // 족보: 미보유=신규 획득, 보유=레벨업 (레벨캡 도달 시 제외)
-      pool = DB.scoring.categories.filter(c =>
-        c.tier === tier && !usedIds.has('c_' + c.id) &&
-        (run.categories[c.id] || 0) < (c.maxLevel !== undefined ? c.maxLevel : levelCap));
-    }
-    if (pool.length === 0) continue;
-    const item = pool[Math.floor(rng.next() * pool.length)];
-    usedIds.add((kind === 'dice' ? 'd_' : kind === 'relic' ? 'r_' : 'c_') + item.id);
+    let cand = pool.filter(x => x.tier === tier && !usedIds.has(x.id));
+    if (cand.length === 0) cand = pool.filter(x => !usedIds.has(x.id));
+    if (cand.length === 0) break;
+    const item = cand[Math.floor(rng.next() * cand.length)];
+    usedIds.add(item.id);
     picks.push({
       kind: kind === 'dice' ? 'die' : kind === 'relic' ? 'relic' : 'category',
       item,
