@@ -251,8 +251,8 @@ function renderBattle(opts = {}) {
       </header>
       <div class="enemy-zone">
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
-          <button class="enemy ${multi && targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
-            ${multi && targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
+          <button class="enemy ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
+            ${targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
             <span class="intent">${intentOf(e)} <small>${esc(e.nextMove.name)}</small></span>
             <span class="enemy-art">${e.tier === 'boss' ? '🐺' : e.tier === 'elite' ? '💀' : '🌑'}</span>
             <span class="enemy-name">${esc(e.name)}</span>
@@ -267,22 +267,23 @@ function renderBattle(opts = {}) {
         ${battle.dice.map((d, i) => {
           const def = battle.diceDefs[i];
           const blank = !battle.rolled;
-          return `<button class="die ${blank ? 'blank' : ''} ${d.held ? 'held' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}"
+          const marked = battle.rolled && !d.held; // 다시 굴릴 주사위
+          return `<button class="die ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}"
             data-idx="${i}" title="${esc(def.name)}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
             <span class="pip">${blank ? '' : PIPS[d.face] || d.face}</span>
-            <small>${d.held ? '홀드' : ''}</small>
+            <small>${marked ? '다시' : ''}</small>
           </button>`;
         }).join('')}
       </div>
       <div class="roll-bar">
         ${!battle.rolled
           ? `<button class="btn primary roll-btn" id="roll-btn">🎲 굴림</button>`
-          : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft <= 0 || battle.await ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})</button>`}
+          : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft <= 0 || battle.await || battle.dice.every(d => d.held) ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})</button>`}
       </div>
       <div class="hint-line">${
         !battle.rolled ? '굴려서 턴을 시작한다' :
         selectedCat ? '한 번 더 탭하면 확정' :
-        multi ? '적 탭=표적 변경 · 주사위 탭=홀드' : '주사위 탭=홀드 · 족보 길게 누르면 설명'
+        multi ? '주사위 탭=다시 굴릴 것 선택 · 적 탭=표적 변경' : '주사위 탭=다시 굴릴 것 선택 · 족보 길게 눌러 설명'
       }</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, level, seal, locked, bd }) => `
@@ -463,25 +464,53 @@ function playAttackSequence() {
     requestAnimationFrame(() => {
       p.style.transform = `translate(${toX - fromX}px, ${toY - fromY}px) scale(${lastR.aoe ? 1.35 : 1})`;
     });
-    // 3) 착탄
+    // 3) 착탄 — 족보별 이펙트
     setTimeout(() => {
       p.remove();
+      const fx = lastR.fx || 'slash';
       if (lastR.aoe) {
-        const boom = document.createElement('div');
-        boom.className = 'explosion';
-        boom.style.left = `${toX}px`;
-        boom.style.top = `${toY}px`;
-        screen.appendChild(boom);
-        setTimeout(() => boom.remove(), 480);
+        if (fx === 'wave' || fx === 'bigwave') {
+          // 스트레이트: 적진을 가로지르는 빛의 파도
+          const ez = app.querySelector('.enemy-zone');
+          if (ez) {
+            const wave = document.createElement('div');
+            wave.className = 'shockwave' + (fx === 'bigwave' ? ' big' : '');
+            ez.appendChild(wave);
+            setTimeout(() => wave.remove(), 560);
+          }
+          if (fx === 'bigwave') flashScreen(screen, 'gold');
+        } else {
+          const boom = document.createElement('div');
+          boom.className = 'explosion';
+          boom.style.left = `${toX}px`;
+          boom.style.top = `${toY}px`;
+          screen.appendChild(boom);
+          setTimeout(() => boom.remove(), 480);
+        }
+        screen.classList.add('micro-shake');
+        setTimeout(() => screen.classList.remove('micro-shake'), 320);
+      } else if (fx === 'judgment') {
+        // 야찌: 화면 섬광 + 심판의 일격
+        flashScreen(screen, 'gold');
+        screen.classList.add('screen-shake');
+        setTimeout(() => screen.classList.remove('screen-shake'), 520);
+      } else if (fx === 'smash') {
         screen.classList.add('micro-shake');
         setTimeout(() => screen.classList.remove('micro-shake'), 320);
       }
-      playHitEffects(hits);
+      playHitEffects(hits, fx);
       for (const i of contributing) dieEls[i]?.classList.remove('glow');
     }, FLIGHT);
   }, GLOW);
 
   return GLOW + FLIGHT + IMPACT;
+}
+
+function flashScreen(screen, tone) {
+  const f = document.createElement('div');
+  f.className = 'flash-veil ' + (tone || '');
+  screen.appendChild(f);
+  setTimeout(() => f.remove(), 380);
 }
 
 // 피격 연출: 화면 흔들림 + 붉은 블러 비네트 + 체력바 위 피해 수치
@@ -504,21 +533,43 @@ function playPlayerHitFx(dmg) {
   setTimeout(() => { screen.classList.remove('screen-shake'); veil.remove(); }, 620);
 }
 
-function playHitEffects(hits) {
+// 족보별 명중 이펙트 — 어려운 족보일수록 화려하게
+function playHitEffects(hits, fx = 'slash') {
   for (const hit of hits) {
     const el = app.querySelector(`.enemy[data-uid="${hit.uid}"]`);
     if (!el) continue;
     el.classList.add('hit');
-    const slash = document.createElement('span');
-    slash.className = 'slash';
-    el.appendChild(slash);
+    const cleanup = [];
+    const addSlash = (cls, delay = 0) => setTimeout(() => {
+      if (!el.isConnected) return;
+      const s = document.createElement('span');
+      s.className = 'slash ' + cls;
+      el.appendChild(s);
+      cleanup.push(s);
+    }, delay);
+    const addRing = (cls) => {
+      const r = document.createElement('span');
+      r.className = 'impact-ring ' + cls;
+      el.appendChild(r);
+      cleanup.push(r);
+    };
+    switch (fx) {
+      case 'slash2':   addSlash(''); addSlash('rev', 100); break;              // 트리플: X자 이중 베기
+      case 'smash':    addRing('red'); addSlash('', 60); break;                // 포카드: 충격파 + 베기
+      case 'ring':     addRing('gold'); addSlash(''); break;                   // 풀하우스: 금빛 파문
+      case 'wave':     addSlash('wide'); break;                                // 스몰 스트레이트: 넓은 베기
+      case 'bigwave':  addSlash('wide'); addSlash('wide rev', 110); break;     // 라지: 교차 파도
+      case 'judgment': addRing('gold'); addRing('red'); addSlash(''); addSlash('rev', 90); break; // 야찌
+      default:         addSlash('');                                            // 기본 베기
+    }
     const dmg = document.createElement('span');
-    dmg.className = 'dmg-float';
+    dmg.className = 'dmg-float' + (fx === 'judgment' ? ' big' : '');
     dmg.textContent = `-${hit.amount}`;
     el.appendChild(dmg);
-    setTimeout(() => { slash.remove(); dmg.remove(); el.classList.remove('hit'); }, 650);
+    cleanup.push(dmg);
+    setTimeout(() => { cleanup.forEach(n => n.remove()); el.classList.remove('hit'); }, 720);
     // 처치 연출: 베인 뒤 무너져 내림
-    if (hit.killed) setTimeout(() => el.classList.add('dying'), 280);
+    if (hit.killed) setTimeout(() => el.classList.add('dying'), 300);
   }
 }
 

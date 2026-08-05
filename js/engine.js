@@ -62,16 +62,20 @@ function startTurn(battle, first = false) {
 
 export function initialRoll(battle) {
   if (battle.over || battle.rolled || battle.await) return false;
-  battle.dice.forEach((d, i) => { d.face = rollFace(battle.diceDefs[i], rng.next); });
+  battle.dice.forEach((d, i) => { d.face = rollFace(battle.diceDefs[i], rng.next); d.held = true; });
   battle.rolled = true;
   return true;
 }
 
+// 조작 규칙(v0.6): 기본은 전부 유지, 탭한 주사위(held=false)만 다시 굴린다
 export function reroll(battle) {
   if (battle.over || !battle.rolled || battle.await || battle.rollsLeft <= 0) return false;
-  if (battle.dice.every(d => d.held)) return false;
+  if (battle.dice.every(d => d.held)) return false; // 다시 굴릴 주사위 미선택
   battle.rollsLeft -= 1;
-  battle.dice.forEach((d, i) => { if (!d.held) d.face = rollFace(battle.diceDefs[i], rng.next); });
+  battle.dice.forEach((d, i) => {
+    if (!d.held) d.face = rollFace(battle.diceDefs[i], rng.next);
+    d.held = true; // 선택 초기화
+  });
   return true;
 }
 
@@ -165,7 +169,7 @@ export function confirmCategory(battle, catId, targetUid = null) {
     bd.flat += battle.pendingBuff;
     battle.pendingBuff = 0;
   }
-  battle.lastResult = { catName: cat.name, ...bd, bonusHits: [], aoe: isAoE(cat) };
+  battle.lastResult = { catName: cat.name, ...bd, bonusHits: [], aoe: isAoE(cat), fx: cat.fx || 'slash' };
   battle.lastUsedCat = catId;
   battle.lastHits = [];
 
