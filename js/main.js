@@ -1,33 +1,24 @@
-// main.js — 부트스트랩 + 화면(UI) 렌더링
+// main.js — 부트스트랩 + 화면(UI) 렌더링 (v2: 주사위)
 import { loadAll, DB } from './data.js';
-import { createBattle, playCard, canPlay, endTurn, previewMoveDamage, frenzyStage } from './engine.js';
-import { newRun, rollEncounter, rollCardRewards, applyRest, saveRun, loadRun, clearSave, hasSave } from './run.js';
+import { createBattle, reroll, toggleHold, confirmCategory, previewAll, intentOf } from './engine.js';
+import { newRun, rollEncounter, rollRewards, applyRest, saveRun, loadRun, clearSave, hasSave } from './run.js';
 
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
 let currentNodeType = null;
-let selectedCard = -1;
+let selectedCat = null;
 
-// ---------- 부트 ----------
 (async function boot() {
-  try {
-    await loadAll();
-  } catch (e) {
-    app.innerHTML = `<div class="screen center"><p class="error">${e.message}</p></div>`;
-    return;
-  }
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
+  try { await loadAll(); }
+  catch (e) { app.innerHTML = `<div class="screen center"><p class="error">${e.message}</p></div>`; return; }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
   showTitle();
 })();
 
-// PWA 설치 프롬프트
 let deferredInstall = null;
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredInstall = e;
+  e.preventDefault(); deferredInstall = e;
   const btn = document.getElementById('install-btn');
   if (btn) btn.classList.remove('hidden');
 });
@@ -35,38 +26,33 @@ window.addEventListener('beforeinstallprompt', (e) => {
 function h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content; }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
+const PIPS = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' };
+
 // ---------- 타이틀 ----------
 function showTitle() {
   run = null; battle = null;
-  const weapons = Object.entries(DB.weapons).filter(([k]) => !k.startsWith('_'));
   app.innerHTML = '';
   app.append(h(`
     <div class="screen title-screen">
-      <div class="title-art">🌲🌕🌲</div>
+      <div class="title-art">🌲🎲🌲</div>
       <h1>REDHOOD</h1>
-      <p class="subtitle">빨간망토의 모험</p>
+      <p class="subtitle">빨간망토의 모험 — 주사위판</p>
       ${hasSave() ? `<button class="btn primary" id="continue-btn">이어하기</button>` : ''}
-      <p class="pick-label">무기를 선택하고 숲으로</p>
-      <div class="weapon-list">
-        ${weapons.map(([id, w]) => `
-          <button class="weapon-card" data-weapon="${id}">
-            <span class="weapon-name">${esc(w.name)} <small>${esc(w.title)}</small></span>
-            <span class="weapon-desc">${esc(w.desc)}</span>
-          </button>`).join('')}
-      </div>
+      <button class="btn primary" id="start-btn">숲으로 들어간다</button>
+      <p class="hint">야찌 족보로 점수를 내면, 그만큼 늑대가 아프다.</p>
       <button class="btn ghost hidden" id="install-btn">📲 홈 화면에 설치</button>
       <p class="hint">iOS는 공유 버튼 → "홈 화면에 추가"</p>
     </div>`));
-  app.querySelectorAll('.weapon-card').forEach(btn => {
-    btn.addEventListener('click', () => { run = newRun(btn.dataset.weapon); saveRun(run); showMap(); });
-  });
+  document.getElementById('start-btn').addEventListener('click', () => { run = newRun(); saveRun(run); showMap(); });
   const cont = document.getElementById('continue-btn');
   if (cont) cont.addEventListener('click', () => { const r = loadRun(); if (r) { run = r; showMap(); } });
   const install = document.getElementById('install-btn');
-  if (install) install.addEventListener('click', async () => {
-    if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; install.classList.add('hidden'); }
-  });
-  if (deferredInstall && install) install.classList.remove('hidden');
+  if (install) {
+    install.addEventListener('click', () => {
+      if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; install.classList.add('hidden'); }
+    });
+    if (deferredInstall) install.classList.remove('hidden');
+  }
 }
 
 // ---------- 맵 ----------
@@ -97,24 +83,23 @@ function showMap() {
   app.append(h(`
     <div class="screen map-screen">
       <header class="topbar">
-        <span>🌲 어두운 숲 — ${run.floor}/${run.map.length}층</span>
+        <span>🌲 ${run.floor}/${run.map.length}층</span>
+        <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
         <span class="hp">❤️ ${run.hp}/${run.maxHp}</span>
       </header>
       <div class="map-scroll">${rows.join('')}</div>
       <footer class="bottombar">
-        <button class="btn ghost" id="deck-btn">덱 보기 (${run.deck.length})</button>
+        <button class="btn ghost" id="bag-btn">🎲 가방</button>
         <button class="btn ghost" id="abandon-btn">런 포기</button>
       </footer>
     </div>`));
   app.querySelectorAll('.map-node:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => {
-      const f = parseInt(btn.dataset.floor, 10);
-      const node = run.map[f - 1][parseInt(btn.dataset.idx, 10)];
-      run.floor = f;
-      enterNode(node.type);
+      run.floor = parseInt(btn.dataset.floor, 10);
+      enterNode(run.map[run.floor - 1][parseInt(btn.dataset.idx, 10)].type);
     });
   });
-  document.getElementById('deck-btn').addEventListener('click', showDeckModal);
+  document.getElementById('bag-btn').addEventListener('click', showBagModal);
   document.getElementById('abandon-btn').addEventListener('click', () => {
     if (confirm('런을 포기할까요?')) { clearSave(); showTitle(); }
   });
@@ -123,32 +108,30 @@ function showMap() {
   if (nextRow) scroll.scrollTop = nextRow.offsetTop - scroll.clientHeight / 2;
 }
 
-function showDeckModal() {
-  const counts = {};
-  for (const c of run.deck) counts[c.id] = (counts[c.id] || 0) + 1;
-  const items = Object.entries(counts).map(([id, n]) => {
-    const c = DB.cardById[id];
-    return `<li><b>${esc(c.name)}</b>${n > 1 ? ` ×${n}` : ''} <span class="modal-text">${esc(c.text)}</span></li>`;
+function showBagModal() {
+  const diceItems = run.dice.map(id => {
+    const d = DB.diceById[id];
+    return `<li><b>${esc(d.name)}</b> <span class="modal-text">[${d.faces.join(',')}] ${esc(d.desc)}</span></li>`;
   }).join('');
-  const modal = h(`
+  const relicItems = run.relics.length
+    ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${r.icon} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
+    : '<li class="modal-text">유물 없음</li>';
+  app.append(h(`
     <div class="modal-back">
       <div class="modal">
-        <h3>덱 (${run.deck.length}장)</h3>
-        <ul class="deck-list">${items}</ul>
+        <h3>주사위 (5)</h3><ul class="deck-list">${diceItems}</ul>
+        <h3>유물</h3><ul class="deck-list">${relicItems}</ul>
         <button class="btn primary" id="modal-close">닫기</button>
       </div>
-    </div>`);
-  app.append(modal);
-  document.getElementById('modal-close').addEventListener('click', () =>
-    app.querySelector('.modal-back').remove());
+    </div>`));
+  document.getElementById('modal-close').addEventListener('click', () => app.querySelector('.modal-back').remove());
 }
 
 function enterNode(type) {
   currentNodeType = type;
   if (type === 'rest') { showRest(); return; }
-  const encounter = rollEncounter(run, type);
-  battle = createBattle(run, encounter);
-  selectedCard = -1;
+  battle = createBattle(run, rollEncounter(run, type));
+  selectedCat = null;
   renderBattle();
 }
 
@@ -159,12 +142,10 @@ function showRest() {
     <div class="screen center rest-screen">
       <div class="rest-art">🔥</div>
       <h2>모닥불</h2>
-      <p>잠시 숨을 돌린다.</p>
       <button class="btn primary" id="rest-btn">휴식 (HP ${Math.floor(run.maxHp * DB.act1.rest.healRatio)} 회복)</button>
     </div>`));
   document.getElementById('rest-btn').addEventListener('click', () => {
-    const healed = applyRest(run);
-    saveRun(run);
+    const healed = applyRest(run); saveRun(run);
     app.querySelector('.rest-screen').innerHTML =
       `<div class="rest-art">✨</div><h2>+${healed} HP</h2><p>❤️ ${run.hp}/${run.maxHp}</p>
        <button class="btn primary" id="rest-done">숲으로</button>`;
@@ -173,120 +154,78 @@ function showRest() {
 }
 
 // ---------- 전투 ----------
-function resourceBarHtml() {
-  const res = DB.weapons[battle.weaponId].resource;
-  const p = battle.player;
-  if (res.type === 'frenzy') {
-    const stage = frenzyStage(battle);
-    const segs = [];
-    for (let i = 1; i <= DB.frenzy.max; i++) {
-      segs.push(`<i class="fseg ${i <= p.frenzy ? 'on s-' + stage.id : ''}"></i>`);
-    }
-    return `<div class="frenzy-wrap"><span class="res-label">열광 ${p.frenzy} <b class="stage-${stage.id}">${stage.name}</b></span>
-      <div class="frenzy-bar">${segs.join('')}</div></div>`;
-  }
-  if (res.type === 'ammo') {
-    const pips = [];
-    for (let i = 1; i <= res.max; i++) pips.push(`<i class="pip ${i <= p.resource ? 'on' : ''}"></i>`);
-    return `<div class="res-wrap"><span class="res-label">탄환 ${p.resource}/${res.max}</span><div class="pips">${pips.join('')}</div></div>`;
-  }
-  return `<div class="res-wrap"><span class="res-label">기름 <b class="oil">${p.resource}</b>/${res.max} <small>(+${res.turnStartGain}/턴)</small></span></div>`;
-}
-
-function statusesHtml(unit) {
-  return Object.entries(unit.statuses).map(([k, v]) => {
-    const s = DB.statuses[k];
-    return s ? `<span class="status" title="${esc(s.desc)}">${s.icon}${v}</span>` : '';
-  }).join('');
-}
-
-function intentHtml(e) {
-  const dmg = previewMoveDamage(battle, e);
-  const parts = [];
-  if (dmg) parts.push(`⚔️${dmg}`);
-  for (const ef of e.nextMove.effects) {
-    if (ef.op === 'block') parts.push(`🛡${ef.amount}`);
-    if (ef.op === 'applyStatus') parts.push(ef.target === 'self' ? '↑' : '☠');
-  }
-  return `<span class="intent" title="${esc(e.nextMove.name)}">${parts.join(' ') || '❓'}</span>`;
-}
-
-function cardCostHtml(card) {
-  const res = DB.weapons[battle.weaponId].resource;
-  if (res.type === 'frenzy') {
-    const delta = (card.cost || 0) + (card.frenzy || 0);
-    if (delta > 0) return `<span class="cost frenzy-up">+${delta}🔥</span>`;
-    if (delta < 0) return `<span class="cost frenzy-down">${delta}🔥</span>`;
-    return `<span class="cost zero">0</span>`;
-  }
-  return `<span class="cost">${card.cost}${res.icon}</span>`;
+function breakdownText(bd) {
+  if (bd.isZero) return '0점 버리기';
+  const parts = [`기본 ${bd.base}`];
+  if (bd.gold) parts.push(`+금박 ${bd.gold}`);
+  if (bd.mult !== 1) parts.push(`×${bd.mult}`);
+  if (bd.bonus) parts.push(`+${bd.bonus}`);
+  if (bd.flat) parts.push(`+${bd.flat}`);
+  return parts.join(' ');
 }
 
 function renderBattle() {
   const p = battle.player;
+  const e = battle.enemy;
+  const previews = previewAll(battle);
+  const lastR = battle.lastResult;
   app.innerHTML = '';
   app.append(h(`
     <div class="screen battle-screen">
       <header class="topbar">
-        <span>${NODE_META[currentNodeType].icon} ${run.floor}층</span>
-        <span class="hp">❤️ ${p.hp}/${p.maxHp} ${p.block > 0 ? `🛡${p.block}` : ''}</span>
+        <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
+        <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
+        <span class="hp">❤️ ${p.hp}/${p.maxHp}</span>
       </header>
-      <div class="enemy-zone">
-        ${battle.enemies.map(e => `
-          <button class="enemy ${selectedCard >= 0 ? 'targetable' : ''}" data-uid="${e.uid}">
-            ${intentHtml(e)}
-            <span class="enemy-art">${e.tier === 'boss' ? '🐺' : e.tier === 'elite' ? '💀' : '🌑'}</span>
-            <span class="enemy-name">${esc(e.name)}</span>
-            <span class="bar"><i style="width:${Math.max(0, e.hp / (e.maxHpInit || e.hp) * 100)}%"></i></span>
-            <span class="enemy-hp">${e.hp} ${e.block > 0 ? `🛡${e.block}` : ''} ${statusesHtml(e)}</span>
+      <div class="enemy-panel">
+        <span class="intent">${intentOf(battle)} <small>${esc(e.nextMove.name)}</small></span>
+        <span class="enemy-art">${e.tier === 'boss' ? '🐺' : e.tier === 'elite' ? '💀' : '🌑'}</span>
+        <span class="enemy-name">${esc(e.name)}</span>
+        <span class="bar"><i style="width:${Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
+        <span class="enemy-hp">${e.hp}/${e.maxHpInit}</span>
+        ${lastR ? `<span class="last-result">${esc(lastR.catName)}: ${breakdownText(lastR)} = <b>${lastR.total}</b> ${lastR.bonusHits.map(esc).join(' ')}</span>` : ''}
+      </div>
+      <div class="dice-zone">
+        ${battle.dice.map((d, i) => {
+          const def = battle.diceDefs[i];
+          return `<button class="die ${d.held ? 'held' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}" data-idx="${i}" title="${esc(def.name)}">
+            <span class="pip">${PIPS[d.face] || d.face}</span>
+            <small>${d.held ? '홀드' : ''}</small>
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="roll-bar">
+        <button class="btn primary" id="reroll-btn" ${battle.rollsLeft <= 0 ? 'disabled' : ''}>
+          🎲 리롤 (${battle.rollsLeft})
+        </button>
+        <span class="turn-hint">${selectedCat ? '한 번 더 탭하면 확정' : '주사위 탭=홀드 · 족보 탭=선택'}</span>
+      </div>
+      <div class="sheet-zone">
+        ${previews.map(({ cat, used, bd }) => `
+          <button class="sheet-row ${used ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''} ${!used && bd.total === 0 ? 'zero' : ''}"
+            data-cat="${cat.id}" ${used ? 'disabled' : ''}>
+            <span class="sheet-name">${esc(cat.name)}</span>
+            <span class="sheet-preview">${used ? '사용됨' : bd.total > 0 ? bd.total : '0'}</span>
           </button>`).join('')}
       </div>
-      <div class="player-zone">
-        ${resourceBarHtml()}
-        <span class="player-statuses">${statusesHtml(p)}</span>
-      </div>
-      <div class="hand-zone">
-        ${battle.hand.map((c, i) => `
-          <button class="card r-${c.rarity} ${i === selectedCard ? 'selected' : ''} ${canPlay(battle, c) ? '' : 'unplayable'}" data-idx="${i}">
-            ${cardCostHtml(c)}
-            <span class="card-name">${esc(c.name)}</span>
-            <span class="card-text">${esc(c.text)}</span>
-          </button>`).join('')}
-      </div>
-      <footer class="bottombar">
-        <span class="pile">${battle.drawPile.length}🂠</span>
-        <span class="turn-hint" id="hint">${selectedCard >= 0 ? '적을 탭하거나 카드를 다시 탭해 사용' : ''}</span>
-        <button class="btn primary" id="end-turn">턴 종료</button>
-        <span class="pile">${battle.discardPile.length}🗑</span>
-      </footer>
     </div>`));
 
-  app.querySelectorAll('.card').forEach(el => {
+  app.querySelectorAll('.die').forEach(el => {
+    el.addEventListener('click', () => { toggleHold(battle, parseInt(el.dataset.idx, 10)); renderBattle(); });
+  });
+  document.getElementById('reroll-btn').addEventListener('click', () => {
+    selectedCat = null;
+    if (reroll(battle)) renderBattle();
+  });
+  app.querySelectorAll('.sheet-row:not([disabled])').forEach(el => {
     el.addEventListener('click', () => {
-      const i = parseInt(el.dataset.idx, 10);
-      if (selectedCard === i) { tryPlay(i, null); return; }
-      selectedCard = i; renderBattle();
+      const catId = el.dataset.cat;
+      if (selectedCat !== catId) { selectedCat = catId; renderBattle(); return; }
+      selectedCat = null;
+      confirmCategory(battle, catId);
+      afterAction();
     });
   });
-  app.querySelectorAll('.enemy').forEach(el => {
-    el.addEventListener('click', () => {
-      if (selectedCard >= 0) tryPlay(selectedCard, el.dataset.uid);
-    });
-  });
-  document.getElementById('end-turn').addEventListener('click', () => {
-    selectedCard = -1;
-    endTurn(battle);
-    afterAction();
-  });
-}
-
-function tryPlay(idx, targetUid) {
-  const card = battle.hand[idx];
-  if (!card) { selectedCard = -1; renderBattle(); return; }
-  if (!canPlay(battle, card)) { selectedCard = -1; renderBattle(); return; }
-  selectedCard = -1;
-  playCard(battle, idx, targetUid);
-  afterAction();
 }
 
 function afterAction() {
@@ -299,30 +238,54 @@ function afterAction() {
 
 // ---------- 보상 ----------
 function showReward() {
-  const choices = rollCardRewards(run, currentNodeType);
+  const choices = rollRewards(run, currentNodeType);
   app.innerHTML = '';
   app.append(h(`
     <div class="screen center reward-screen">
       <h2>승리!</h2>
-      <p>전리품 — 카드 한 장을 덱에 넣는다</p>
+      <p>전리품 — 하나를 고른다</p>
       <div class="reward-cards">
         ${choices.map((c, i) => `
-          <button class="card r-${c.rarity}" data-idx="${i}">
-            <span class="cost">${c.weapon === 'scythe' ? ((c.cost || 0) + (c.frenzy || 0) >= 0 ? '+' : '') + ((c.cost || 0) + (c.frenzy || 0)) + '🔥' : c.cost}</span>
-            <span class="card-name">${esc(c.name)}</span>
-            <span class="card-text">${esc(c.text)}</span>
-            <span class="card-rarity">${c.rarity}</span>
+          <button class="card r-${c.item.tier}" data-idx="${i}">
+            <span class="cost">${c.kind === 'die' ? '🎲 주사위' : (c.item.icon || '🪬') + ' 유물'}</span>
+            <span class="card-name">${esc(c.item.name)}</span>
+            <span class="card-text">${c.kind === 'die' ? `[${c.item.faces.join(',')}]<br>` : ''}${esc(c.item.desc)}</span>
+            <span class="card-rarity">${c.item.tier}</span>
           </button>`).join('')}
       </div>
       <button class="btn ghost" id="skip-btn">넘어가기</button>
     </div>`));
   app.querySelectorAll('.reward-cards .card').forEach(el => {
     el.addEventListener('click', () => {
-      run.deck.push(choices[parseInt(el.dataset.idx, 10)]);
-      saveRun(run); showMap();
+      const c = choices[parseInt(el.dataset.idx, 10)];
+      if (c.kind === 'relic') { run.relics.push(c.item.id); saveRun(run); showMap(); }
+      else showReplaceDie(c.item);
     });
   });
   document.getElementById('skip-btn').addEventListener('click', () => { saveRun(run); showMap(); });
+}
+
+function showReplaceDie(newDie) {
+  app.append(h(`
+    <div class="modal-back">
+      <div class="modal">
+        <h3>${esc(newDie.name)} 획득 — 어느 주사위와 교체?</h3>
+        <ul class="deck-list">
+          ${run.dice.map((id, i) => {
+            const d = DB.diceById[id];
+            return `<li><button class="btn replace-btn" data-idx="${i}"><b>${esc(d.name)}</b> [${d.faces.join(',')}]</button></li>`;
+          }).join('')}
+        </ul>
+        <button class="btn ghost" id="replace-cancel">취소 (보상 화면으로)</button>
+      </div>
+    </div>`));
+  app.querySelectorAll('.replace-btn').forEach(el => {
+    el.addEventListener('click', () => {
+      run.dice[parseInt(el.dataset.idx, 10)] = newDie.id;
+      saveRun(run); showMap();
+    });
+  });
+  document.getElementById('replace-cancel').addEventListener('click', () => app.querySelector('.modal-back').remove());
 }
 
 // ---------- 엔딩 ----------
@@ -332,7 +295,7 @@ function showEnd(victory) {
     <div class="screen center end-screen">
       <div class="rest-art">${victory ? '🌅' : '🥀'}</div>
       <h2>${victory ? '늑대를 쓰러뜨렸다' : '숲에 삼켜졌다'}</h2>
-      <p>${victory ? '소녀는 아침 해를 본다. — 1막 클리어' : `${run.floor}층에서 쓰러짐`}</p>
+      <p>${victory ? '운명의 주사위는 소녀의 편이었다. — 1막 클리어' : `${run.floor}층에서 쓰러짐`}</p>
       <button class="btn primary" id="restart-btn">${victory ? '새로운 런' : '다시 도전'}</button>
     </div>`));
   document.getElementById('restart-btn').addEventListener('click', showTitle);

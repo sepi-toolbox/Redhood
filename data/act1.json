@@ -1,6 +1,6 @@
 {
-  "_version": 1,
-  "player": { "maxHp": 70 },
+  "_version": 2,
+  "player": { "maxHp": 70, "startDice": ["normal", "normal", "normal", "normal", "normal"] },
   "map": {
     "floors": 11,
     "choicesMin": 2,
@@ -11,15 +11,15 @@
   },
   "encounters": {
     "easyFloors": [1, 2, 3],
-    "easy": [["crow", "crow"], ["thorn_bush"], ["forest_spider"]],
-    "hard": [["stray_dog", "crow"], ["will_o_wisp", "forest_spider"], ["twig_golem"], ["stray_dog", "stray_dog"]],
+    "easy": [["crow"], ["will_o_wisp"], ["forest_spider"]],
+    "hard": [["stray_dog"], ["thorn_bush"], ["twig_golem"]],
     "elite": [["alpha_dog"]],
     "boss": [["wolf"]]
   },
   "rewards": {
-    "battle": { "cardChoices": 3, "rarityWeights": { "common": 70, "uncommon": 25, "rare": 5 } },
-    "elite":  { "cardChoices": 3, "rarityWeights": { "common": 45, "uncommon": 40, "rare": 15 } },
-    "boss":   { "cardChoices": 0, "rarityWeights": {} }
+    "battle": { "choices": 3, "pool": { "dice": 60, "relic": 40 }, "tierWeights": { "common": 60, "uncommon": 33, "rare": 7 } },
+    "elite":  { "choices": 3, "pool": { "dice": 50, "relic": 50 }, "tierWeights": { "common": 25, "uncommon": 50, "rare": 25 } },
+    "boss":   { "choices": 0 }
   },
   "rest": { "healRatio": 0.3 }
 }

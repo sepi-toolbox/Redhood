@@ -1,0 +1,20 @@
+[
+  { "id": "silver_bullet", "name": "은탄환", "icon": "🔫", "tier": "rare",
+    "desc": "에이스 족보 점수 5배.",
+    "hook": { "type": "categoryMult", "category": "ones", "mult": 5 } },
+  { "id": "red_cloak", "name": "붉은 망토", "icon": "🧣", "tier": "uncommon",
+    "desc": "매 턴 리롤 +1.",
+    "hook": { "type": "extraReroll", "amount": 1 } },
+  { "id": "hunters_charm", "name": "사냥꾼의 부적", "icon": "🪬", "tier": "uncommon",
+    "desc": "풀하우스 점수 +15.",
+    "hook": { "type": "categoryBonus", "category": "fullHouse", "bonus": 15 } },
+  { "id": "wolf_fang", "name": "늑대 이빨", "icon": "🦷", "tier": "common",
+    "desc": "족보를 확정할 때마다 추가 피해 +3.",
+    "hook": { "type": "flatDamage", "amount": 3 } },
+  { "id": "breadcrumbs", "name": "빵부스러기", "icon": "🍞", "tier": "common",
+    "desc": "0점으로 족보를 버리면 HP 3 회복.",
+    "hook": { "type": "healOnZero", "amount": 3 } },
+  { "id": "ledger", "name": "가계부", "icon": "📒", "tier": "uncommon",
+    "desc": "상단 보너스 발동 기준 63 → 50.",
+    "hook": { "type": "upperBonusThreshold", "value": 50 } }
+]

@@ -1,23 +1,19 @@
-// run.js — 런 상태, 맵 생성, 보상, 세이브
+// run.js — 런 상태, 맵 생성, 보상, 세이브 (v2: 주사위/유물)
 import { DB } from './data.js';
-import { rng, shuffle } from './engine.js';
+import { rng } from './engine.js';
 
-const SAVE_KEY = 'redhood_run_v1';
+const SAVE_KEY = 'redhood_run_v2';
 
-export function newRun(weaponId) {
+export function newRun() {
   const maxHp = DB.act1.player.maxHp;
-  const run = {
-    weapon: weaponId,
+  return {
     hp: maxHp, maxHp,
-    deck: expandDeck(DB.weapons[weaponId].startingDeck),
+    dice: DB.act1.player.startDice.slice(),
+    relics: [],
     floor: 0,
     map: generateMap(),
-    chosen: [],
   };
-  return run;
 }
-
-function expandDeck(ids) { return ids.map(id => ({ ...DB.cardById[id] })); }
 
 // ---------- 맵 ----------
 export function generateMap() {
@@ -37,7 +33,7 @@ export function generateMap() {
 function rollNodeType(cfg, floor, existing) {
   const w = { ...cfg.nodeWeights };
   if (!cfg.eliteFloors.includes(floor)) delete w.elite;
-  if (existing.some(nd => nd.type === 'elite')) delete w.elite; // 한 층에 엘리트 중복 방지
+  if (existing.some(nd => nd.type === 'elite')) delete w.elite;
   const total = Object.values(w).reduce((a, b) => a + b, 0);
   let roll = rng.next() * total;
   for (const [type, weight] of Object.entries(w)) { roll -= weight; if (roll <= 0) return type; }
@@ -47,37 +43,41 @@ function rollNodeType(cfg, floor, existing) {
 // ---------- 조우 ----------
 export function rollEncounter(run, nodeType) {
   const enc = DB.act1.encounters;
-  const floor = run.floor;
   if (nodeType === 'boss') return pickArr(enc.boss);
   if (nodeType === 'elite') return pickArr(enc.elite);
-  return enc.easyFloors.includes(floor) ? pickArr(enc.easy) : pickArr(enc.hard);
+  return enc.easyFloors.includes(run.floor) ? pickArr(enc.easy) : pickArr(enc.hard);
 }
 function pickArr(arr) { return arr[Math.floor(rng.next() * arr.length)].slice(); }
 
-// ---------- 보상 ----------
-export function rollCardRewards(run, nodeType) {
+// ---------- 보상: 주사위/유물 혼합 3택1 ----------
+export function rollRewards(run, nodeType) {
   const cfg = DB.act1.rewards[nodeType];
-  if (!cfg || cfg.cardChoices === 0) return [];
-  const pool = DB.cards.filter(c =>
-    (c.weapon === run.weapon || c.weapon === 'neutral') && c.rarity !== 'basic');
+  if (!cfg || cfg.choices === 0) return [];
   const picks = [];
-  const used = new Set();
+  const usedIds = new Set();
   let guard = 0;
-  while (picks.length < cfg.cardChoices && guard++ < 200) {
-    const rarity = rollRarity(cfg.rarityWeights);
-    const candidates = pool.filter(c => c.rarity === rarity && !used.has(c.id));
-    if (candidates.length === 0) continue;
-    const card = candidates[Math.floor(rng.next() * candidates.length)];
-    used.add(card.id); picks.push({ ...card });
+  while (picks.length < cfg.choices && guard++ < 200) {
+    const isDie = rollWeight(cfg.pool) === 'dice';
+    const tier = rollWeight(cfg.tierWeights);
+    let pool;
+    if (isDie) {
+      pool = DB.dice.filter(d => d.tier === tier && d.id !== 'normal' && !usedIds.has('d_' + d.id));
+    } else {
+      pool = DB.relics.filter(r => r.tier === tier && !run.relics.includes(r.id) && !usedIds.has('r_' + r.id));
+    }
+    if (pool.length === 0) continue;
+    const item = pool[Math.floor(rng.next() * pool.length)];
+    usedIds.add((isDie ? 'd_' : 'r_') + item.id);
+    picks.push({ kind: isDie ? 'die' : 'relic', item });
   }
   return picks;
 }
 
-function rollRarity(weights) {
+function rollWeight(weights) {
   const total = Object.values(weights).reduce((a, b) => a + b, 0);
   let roll = rng.next() * total;
-  for (const [rarity, w] of Object.entries(weights)) { roll -= w; if (roll <= 0) return rarity; }
-  return 'common';
+  for (const [key, w] of Object.entries(weights)) { roll -= w; if (roll <= 0) return key; }
+  return Object.keys(weights)[0];
 }
 
 // ---------- 휴식 ----------
@@ -89,20 +89,18 @@ export function applyRest(run) {
 
 // ---------- 세이브 ----------
 export function saveRun(run) {
-  try {
-    const slim = { ...run, deck: run.deck.map(c => c.id), _v: 1 };
-    localStorage.setItem(SAVE_KEY, JSON.stringify(slim));
-  } catch (e) { /* 저장 실패는 치명적이지 않음 */ }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 2 })); } catch (e) {}
 }
 
 export function loadRun() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
-    const slim = JSON.parse(raw);
-    if (slim._v !== 1) { clearSave(); return null; }
-    if (!slim.deck.every(id => DB.cardById[id])) { clearSave(); return null; }
-    return { ...slim, deck: expandDeck(slim.deck) };
+    const s = JSON.parse(raw);
+    if (s._v !== 2) { clearSave(); return null; }
+    if (!s.dice.every(id => DB.diceById[id])) { clearSave(); return null; }
+    if (!s.relics.every(id => DB.relicById[id])) { clearSave(); return null; }
+    return s;
   } catch (e) { return null; }
 }
 

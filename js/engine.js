@@ -1,10 +1,10 @@
-// engine.js — 전투 상태 머신 + 효과 DSL 인터프리터
+// engine.js — 전투 상태 머신: 굴림/홀드/리롤 → 족보 확정·피해 → 적 반격
 import { DB } from './data.js';
+import { evalCategory, computeDamage, rollFace, relicValue } from './yahtzee.js';
 
-export const rng = { next: Math.random }; // 테스트 시 교체 가능
+export const rng = { next: Math.random };
 
 function ri(min, max) { return min + Math.floor(rng.next() * (max - min + 1)); }
-function pick(arr) { return arr[Math.floor(rng.next() * arr.length)]; }
 
 export function shuffle(arr) {
   const a = arr.slice();
@@ -17,179 +17,125 @@ export function shuffle(arr) {
 
 // ---------- 전투 생성 ----------
 export function createBattle(run, encounterIds) {
-  const weapon = DB.weapons[run.weapon];
-  const res = weapon.resource;
+  const enemyDef = DB.enemyById[encounterIds[0]];
   const battle = {
-    weaponId: run.weapon,
     over: false, result: null, turn: 1,
-    player: {
-      hp: run.hp, maxHp: run.maxHp, block: 0, statuses: {},
-      resource: res.type === 'frenzy' ? 0 : res.battleStart,
-      frenzy: res.type === 'frenzy' ? res.battleStart : 0,
+    player: { hp: run.hp, maxHp: run.maxHp },
+    diceDefs: run.dice.map(id => DB.diceById[id]),
+    dice: run.dice.map(() => ({ face: 1, held: false })),
+    relics: run.relics.map(id => DB.relicById[id]),
+    rollsLeft: 0,
+    used: {},               // categoryId -> true (전투당 1회 규칙)
+    upperTotal: 0,
+    upperBonusFired: false,
+    enemy: {
+      defId: enemyDef.id, name: enemyDef.name, tier: enemyDef.tier,
+      hp: ri(enemyDef.hp[0], enemyDef.hp[1]), maxHpInit: 0,
+      patternState: { index: 0, recent: [] }, phaseIndex: 0, nextMove: null,
     },
-    enemies: encounterIds.map((id, i) => spawnEnemy(id, i)),
-    drawPile: shuffle(run.deck.slice()),
-    hand: [], discardPile: [], exhaustPile: [],
-    log: [],
+    lastResult: null,       // 마지막 확정 breakdown (UI 표시용)
   };
-  startPlayerTurn(battle, true);
+  battle.enemy.maxHpInit = battle.enemy.hp;
+  chooseMove(battle.enemy);
+  startTurn(battle);
   return battle;
 }
 
-function spawnEnemy(id, idx) {
-  const def = DB.enemyById[id];
-  return {
-    uid: `${id}_${idx}`, defId: id, name: def.name, tier: def.tier,
-    hp: ri(def.hp[0], def.hp[1]), maxHp: 0, block: 0, statuses: {},
-    patternState: { index: 0, recent: [] }, phaseIndex: 0, nextMove: null,
-  };
+// ---------- 턴 ----------
+function startTurn(battle) {
+  battle.rollsLeft = relicValue(battle.relics, 'extraReroll', DB.scoring.rerollsPerTurn);
+  for (const d of battle.dice) d.held = false;
+  rollDice(battle, true);
 }
 
-// ---------- 턴 흐름 ----------
-function startPlayerTurn(battle, first = false) {
-  const p = battle.player;
-  p.block = 0;
-  const res = DB.weapons[battle.weaponId].resource;
-  if (res.type !== 'frenzy' && res.turnStartGain > 0) {
-    p.resource = Math.min(res.max, p.resource + res.turnStartGain);
-  }
-  for (const e of battle.enemies) chooseMove(battle, e);
-  draw(battle, 5);
-  if (first) battle.log.push('전투 시작.');
+function rollDice(battle, all = false) {
+  battle.dice.forEach((d, i) => {
+    if (all || !d.held) d.face = rollFace(battle.diceDefs[i], rng.next);
+  });
 }
 
-export function endTurn(battle) {
-  if (battle.over) return;
-  // 플레이어 턴 종료: 손패 버림, 화상, 열광 폭주 자해, 상태 감쇠
-  const p = battle.player;
-  battle.discardPile.push(...battle.hand); battle.hand = [];
-  if (p.statuses.burn) loseHp(battle, p, p.statuses.burn, '화상');
-  const stage = frenzyStage(battle);
-  if (stage && stage.effects && stage.effects.turnEndSelfDamage) {
-    loseHp(battle, p, stage.effects.turnEndSelfDamage, '폭주');
-  }
-  decayStatuses(p);
-  if (battle.over) return;
-
-  // 적 턴
-  for (const e of battle.enemies) {
-    if (e.hp <= 0 || battle.over) continue;
-    e.block = 0;
-    if (e.statuses.bleed) loseHp(battle, e, 1, '출혈');
-    if (e.hp <= 0) continue;
-    execMoveEffects(battle, e, e.nextMove);
-    if (e.statuses.burn) loseHp(battle, e, e.statuses.burn, '화상');
-    decayStatuses(e);
-  }
-  battle.enemies = battle.enemies.filter(e => e.hp > 0);
-  if (checkBattleEnd(battle)) return;
-
-  battle.turn += 1;
-  startPlayerTurn(battle);
-}
-
-function decayStatuses(unit) {
-  for (const key of Object.keys(unit.statuses)) {
-    const decay = (DB.statuses[key] && DB.statuses[key].decay) || 0;
-    if (decay > 0) {
-      unit.statuses[key] -= decay;
-      if (unit.statuses[key] <= 0) delete unit.statuses[key];
-    }
-  }
-}
-
-// ---------- 카드 사용 ----------
-export function canPlay(battle, card) {
-  if (battle.over) return false;
-  const res = DB.weapons[battle.weaponId].resource;
-  if (res.type === 'frenzy') return true; // 낫: 항상 사용 가능, 대가는 열광
-  return battle.player.resource >= card.cost;
-}
-
-export function playCard(battle, handIndex, targetUid = null) {
-  const card = battle.hand[handIndex];
-  if (!card || !canPlay(battle, card)) return false;
-  const p = battle.player;
-  const res = DB.weapons[battle.weaponId].resource;
-
-  const context = { ammoBefore: p.resource };
-  if (res.type === 'frenzy') {
-    const delta = (card.cost || 0) + (card.frenzy || 0);
-    p.frenzy = Math.max(0, Math.min(DB.frenzy.max, p.frenzy + delta));
-  } else {
-    p.resource -= card.cost;
-  }
-
-  if (p.statuses.bleed) loseHp(battle, p, 1, '출혈');
-
-  battle.hand.splice(handIndex, 1);
-  const target = targetUid ? battle.enemies.find(e => e.uid === targetUid) : battle.enemies[0];
-  if (!battle.over) execCardEffects(battle, card, target, context);
-
-  if ((card.keywords || []).includes('exhaust')) battle.exhaustPile.push(card);
-  else battle.discardPile.push(card);
-
-  battle.enemies = battle.enemies.filter(e => e.hp > 0);
-  if (checkBattleEnd(battle)) return true;
-
-  // 열광 한계 트리거
-  if (res.type === 'frenzy' && p.frenzy >= DB.frenzy.max) {
-    const limit = DB.frenzy.stages.find(s => s.id === 'limit');
-    battle.log.push('한계 돌파! 손패를 모두 잃고 턴이 끝난다.');
-    if (limit.trigger.discardHand) { battle.discardPile.push(...battle.hand); battle.hand = []; }
-    p.frenzy = limit.trigger.setFrenzy;
-    if (limit.trigger.endTurn) endTurn(battle);
-  }
+export function reroll(battle) {
+  if (battle.over || battle.rollsLeft <= 0) return false;
+  if (battle.dice.every(d => d.held)) return false;
+  battle.rollsLeft -= 1;
+  rollDice(battle);
   return true;
 }
 
-function execCardEffects(battle, card, target, ctx) {
-  for (const ef of card.effects) {
-    if (battle.over) return;
-    switch (ef.op) {
-      case 'damage':
-        dealAttack(battle, battle.player, targetsOf(battle, card, target), ef.amount, ef.times || 1);
-        break;
-      case 'damageIfLastAmmo': {
-        const amt = ctx.ammoBefore - card.cost <= 0 ? ef.amount : ef.fallback;
-        dealAttack(battle, battle.player, targetsOf(battle, card, target), amt, 1);
-        break;
-      }
-      case 'damagePerFrenzy':
-        dealAttack(battle, battle.player, targetsOf(battle, card, target), battle.player.frenzy * ef.perStack, 1);
-        break;
-      case 'block': gainBlock(battle.player, ef.amount, battle); break;
-      case 'draw': draw(battle, ef.amount); break;
-      case 'gainResource': {
-        const res = DB.weapons[battle.weaponId].resource;
-        if (res.type !== 'frenzy') battle.player.resource = Math.min(res.max, battle.player.resource + ef.amount);
-        break;
-      }
-      case 'applyStatus': applyStatusFromCard(battle, ef, target); break;
-      case 'heal': battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + ef.amount); break;
-      case 'setFrenzy': battle.player.frenzy = Math.max(0, Math.min(DB.frenzy.max, ef.value)); break;
-      case 'discardHand': battle.discardPile.push(...battle.hand); battle.hand = []; break;
-      case 'selfDamage': loseHp(battle, battle.player, ef.amount, '자해'); break;
-      default: console.warn('알 수 없는 op:', ef.op);
+export function toggleHold(battle, i) {
+  if (battle.over) return;
+  battle.dice[i].held = !battle.dice[i].held;
+}
+
+// ---------- 미리보기 ----------
+export function previewAll(battle) {
+  const faces = battle.dice.map(d => d.face);
+  return DB.scoring.categories.map(cat => {
+    const used = DB.scoring.oncePerBattle && battle.used[cat.id];
+    const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics);
+    return { cat, used, bd };
+  });
+}
+
+// ---------- 족보 확정 ----------
+export function confirmCategory(battle, catId) {
+  if (battle.over) return null;
+  const cat = DB.scoring.categories.find(c => c.id === catId);
+  if (!cat) return null;
+  if (DB.scoring.oncePerBattle && battle.used[catId]) return null;
+
+  const faces = battle.dice.map(d => d.face);
+  const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics);
+  battle.lastResult = { catName: cat.name, ...bd, bonusHits: [] };
+
+  // 피해 적용
+  if (bd.total > 0) battle.enemy.hp -= bd.total;
+
+  // 0점 버리기 → 빵부스러기
+  if (bd.isZero) {
+    const heal = battle.relics.filter(r => r.hook.type === 'healOnZero')
+      .reduce((s, r) => s + r.hook.amount, 0);
+    if (heal > 0) {
+      battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + heal);
+      battle.lastResult.bonusHits.push(`HP +${heal}`);
     }
   }
+
+  // 상단 보너스 (기본 점수 기준으로 누적 — 금박·배수 제외)
+  if (cat.kind === 'upper') {
+    battle.upperTotal += bd.base;
+    const threshold = relicValue(battle.relics, 'upperBonusThreshold', DB.scoring.upperBonus.threshold);
+    if (!battle.upperBonusFired && battle.upperTotal >= threshold) {
+      battle.upperBonusFired = true;
+      battle.enemy.hp -= DB.scoring.upperBonus.damage;
+      battle.lastResult.bonusHits.push(`상단 보너스 ${DB.scoring.upperBonus.damage}!`);
+    }
+  }
+
+  battle.used[catId] = true;
+  // 13칸 소진 → 리필
+  if (DB.scoring.oncePerBattle &&
+      DB.scoring.categories.every(c => battle.used[c.id])) {
+    if (DB.scoring.sheetExhausted === 'refill') battle.used = {};
+  }
+
+  // 승리 판정
+  if (battle.enemy.hp <= 0) {
+    battle.enemy.hp = 0; battle.over = true; battle.result = 'victory';
+    return battle.lastResult;
+  }
+
+  // 적 턴
+  enemyAct(battle);
+  if (battle.over) return battle.lastResult;
+
+  battle.turn += 1;
+  startTurn(battle);
+  return battle.lastResult;
 }
 
-function targetsOf(battle, card, target) {
-  if (card.target === 'allEnemies') return battle.enemies.filter(e => e.hp > 0);
-  return target && target.hp > 0 ? [target] : battle.enemies.filter(e => e.hp > 0).slice(0, 1);
-}
-
-function applyStatusFromCard(battle, ef, target) {
-  let units;
-  if (ef.target === 'self') units = [battle.player];
-  else if (ef.target === 'allEnemies') units = battle.enemies.filter(e => e.hp > 0);
-  else units = target && target.hp > 0 ? [target] : [];
-  for (const u of units) u.statuses[ef.status] = (u.statuses[ef.status] || 0) + ef.stacks;
-}
-
-// ---------- 적 행동 ----------
-function currentPattern(battle, enemy) {
+// ---------- 적 ----------
+function currentPattern(enemy) {
   const def = DB.enemyById[enemy.defId];
   if (!def.phases) return def.pattern;
   const ratio = enemy.hp / enemy.maxHpInit;
@@ -201,10 +147,9 @@ function currentPattern(battle, enemy) {
   return def.phases[idx].pattern;
 }
 
-function chooseMove(battle, enemy) {
+function chooseMove(enemy) {
   const def = DB.enemyById[enemy.defId];
-  if (!enemy.maxHpInit) enemy.maxHpInit = enemy.hp;
-  const pat = currentPattern(battle, enemy);
+  const pat = currentPattern(enemy);
   const st = enemy.patternState;
   let moveId;
   if (pat.mode === 'sequence') {
@@ -213,8 +158,8 @@ function chooseMove(battle, enemy) {
   } else {
     const entries = Object.entries(pat.weights).filter(([id]) => {
       if (!pat.noRepeat) return true;
-      const recent = st.recent.slice(-pat.noRepeat + 1);
-      return !(recent.length === pat.noRepeat - 1 && recent.every(r => r === id) && recent.length > 0);
+      const recent = st.recent.slice(-(pat.noRepeat - 1));
+      return !(recent.length === pat.noRepeat - 1 && recent.every(r => r === id));
     });
     const total = entries.reduce((s, [, w]) => s + w, 0);
     let roll = rng.next() * total;
@@ -225,94 +170,24 @@ function chooseMove(battle, enemy) {
   enemy.nextMove = { id: moveId, ...def.moves[moveId] };
 }
 
-function execMoveEffects(battle, enemy, move) {
-  for (const ef of move.effects) {
-    if (battle.over) return;
-    switch (ef.op) {
-      case 'damage': dealAttack(battle, enemy, [battle.player], ef.amount, ef.times || 1); break;
-      case 'block': gainBlock(enemy, ef.amount, battle); break;
-      case 'applyStatus': {
-        const unit = ef.target === 'self' ? enemy : battle.player;
-        unit.statuses[ef.status] = (unit.statuses[ef.status] || 0) + ef.stacks;
-        break;
+function enemyAct(battle) {
+  const e = battle.enemy;
+  for (const ef of e.nextMove.effects) {
+    if (ef.op === 'damage') {
+      battle.player.hp -= ef.amount;
+      if (battle.player.hp <= 0) {
+        battle.player.hp = 0; battle.over = true; battle.result = 'defeat';
+        return;
       }
-      case 'heal': enemy.hp = Math.min(enemy.maxHpInit || enemy.hp, enemy.hp + ef.amount); break;
-      default: console.warn('알 수 없는 적 op:', ef.op);
     }
+    // 'charge' = 행동 없음 (다음 수 예고만)
   }
+  chooseMove(e);
 }
 
-// ---------- 피해 계산 ----------
-export function previewMoveDamage(battle, enemy) {
-  // 의도 표시용: 피해 op 합산 (힘/약화/취약/열광 반영)
-  let total = 0, hits = 0, per = 0;
-  for (const ef of (enemy.nextMove ? enemy.nextMove.effects : [])) {
-    if (ef.op !== 'damage') continue;
-    const times = ef.times || 1;
-    per = calcDamage(battle, enemy, battle.player, ef.amount);
-    hits += times; total += per * times;
-  }
-  return hits > 1 ? `${per}×${hits}` : hits === 1 ? `${total}` : null;
-}
-
-function calcDamage(battle, attacker, defender, base) {
-  let amt = base + (attacker.statuses.strength || 0);
-  if (attacker.statuses.weak) amt = Math.floor(amt * 0.75);
-  if (defender.statuses.vulnerable) amt = Math.floor(amt * 1.5);
-  if (defender === battle.player) {
-    const stage = frenzyStage(battle);
-    if (stage && stage.effects && stage.effects.damageTakenMult) {
-      amt = Math.floor(amt * stage.effects.damageTakenMult);
-    }
-  }
-  return Math.max(0, amt);
-}
-
-function dealAttack(battle, attacker, defenders, base, times) {
-  for (let t = 0; t < times; t++) {
-    for (const d of defenders) {
-      if (battle.over || d.hp <= 0) continue;
-      const amt = calcDamage(battle, attacker, d, base);
-      const absorbed = Math.min(d.block, amt);
-      d.block -= absorbed;
-      const hpLoss = amt - absorbed;
-      if (hpLoss > 0) loseHp(battle, d, hpLoss, null);
-    }
-  }
-}
-
-function gainBlock(unit, amount, battle) { unit.block += amount; }
-
-function loseHp(battle, unit, amount, source) {
-  unit.hp -= amount;
-  if (unit === battle.player && unit.hp <= 0) {
-    unit.hp = 0; battle.over = true; battle.result = 'defeat';
-  }
-}
-
-export function frenzyStage(battle) {
-  if (DB.weapons[battle.weaponId].resource.type !== 'frenzy') return null;
-  const f = battle.player.frenzy;
-  return DB.frenzy.stages.find(s => f >= s.range[0] && f <= s.range[1]) || null;
-}
-
-// ---------- 드로우 / 종료 ----------
-function draw(battle, n) {
-  for (let i = 0; i < n; i++) {
-    if (battle.hand.length >= 10) return;
-    if (battle.drawPile.length === 0) {
-      if (battle.discardPile.length === 0) return;
-      battle.drawPile = shuffle(battle.discardPile); battle.discardPile = [];
-    }
-    battle.hand.push(battle.drawPile.pop());
-  }
-}
-
-function checkBattleEnd(battle) {
-  if (battle.result === 'defeat') return true;
-  if (battle.enemies.every(e => e.hp <= 0) || battle.enemies.length === 0) {
-    battle.over = true; battle.result = 'victory';
-    return true;
-  }
-  return false;
+export function intentOf(battle) {
+  const mv = battle.enemy.nextMove;
+  if (!mv) return '';
+  const dmg = mv.effects.filter(e => e.op === 'damage').reduce((s, e) => s + e.amount, 0);
+  return dmg > 0 ? `⚔️${dmg}` : '💤';
 }

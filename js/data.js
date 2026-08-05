@@ -1,21 +1,21 @@
-// data.js — JSON 로더 + 인덱싱
+// data.js — JSON 로더 + 인덱싱 + 검증
 export const DB = {
-  weapons: null, cards: null, cardById: {}, enemies: null, enemyById: {},
-  statuses: null, frenzy: null, act1: null,
+  dice: null, diceById: {}, relics: null, relicById: {},
+  scoring: null, enemies: null, enemyById: {}, act1: null,
 };
 
 export async function loadAll() {
-  const [weapons, cards, enemies, statuses, frenzy, act1] = await Promise.all([
-    fetchJson('./data/weapons.json'),
-    fetchJson('./data/cards.json'),
+  const [dice, relics, scoring, enemies, act1] = await Promise.all([
+    fetchJson('./data/dice.json'),
+    fetchJson('./data/relics.json'),
+    fetchJson('./data/scoring.json'),
     fetchJson('./data/enemies.json'),
-    fetchJson('./data/statuses.json'),
-    fetchJson('./data/frenzy.json'),
     fetchJson('./data/act1.json'),
   ]);
-  DB.weapons = weapons; DB.cards = cards; DB.enemies = enemies;
-  DB.statuses = statuses; DB.frenzy = frenzy; DB.act1 = act1;
-  DB.cardById = {}; for (const c of cards) DB.cardById[c.id] = c;
+  DB.dice = dice; DB.relics = relics; DB.scoring = scoring;
+  DB.enemies = enemies; DB.act1 = act1;
+  DB.diceById = {}; for (const d of dice) DB.diceById[d.id] = d;
+  DB.relicById = {}; for (const r of relics) DB.relicById[r.id] = r;
   DB.enemyById = {}; for (const e of enemies) DB.enemyById[e.id] = e;
   validate();
   return DB;
@@ -28,11 +28,16 @@ async function fetchJson(path) {
 }
 
 function validate() {
-  // 시작 덱의 카드 id가 실제로 존재하는지 검사 — 데이터 작업 실수를 즉시 표면화
-  for (const wid of Object.keys(DB.weapons)) {
-    if (wid.startsWith('_')) continue;
-    for (const cid of DB.weapons[wid].startingDeck) {
-      if (!DB.cardById[cid]) throw new Error(`weapons.json: ${wid} 시작 덱에 없는 카드 id "${cid}"`);
+  for (const id of DB.act1.player.startDice) {
+    if (!DB.diceById[id]) throw new Error(`act1.json: startDice에 없는 주사위 id "${id}"`);
+  }
+  for (const d of DB.dice) {
+    if (!Array.isArray(d.faces) || d.faces.length !== 6) throw new Error(`dice.json: ${d.id} faces는 6면이어야 함`);
+  }
+  const catIds = new Set(DB.scoring.categories.map(c => c.id));
+  for (const r of DB.relics) {
+    if (r.hook.category && !catIds.has(r.hook.category)) {
+      throw new Error(`relics.json: ${r.id}가 없는 족보 "${r.hook.category}" 참조`);
     }
   }
   for (const group of ['easy', 'hard', 'elite', 'boss']) {

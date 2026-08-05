@@ -1,6 +1,6 @@
 // REDHOOD 서비스 워커 — 오프라인 캐시
-// 배포 시 버전을 올리면 이전 캐시가 정리되고 새 파일이 받아진다.
-const CACHE = 'redhood-v1';
+// ⚠ 판을 바꾸면 CACHE 번호를 반드시 +1 (runbook 규칙)
+const CACHE = 'redhood-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -8,13 +8,13 @@ const ASSETS = [
   './css/style.css',
   './js/main.js',
   './js/data.js',
+  './js/yahtzee.js',
   './js/engine.js',
   './js/run.js',
-  './data/weapons.json',
-  './data/cards.json',
+  './data/dice.json',
+  './data/relics.json',
+  './data/scoring.json',
   './data/enemies.json',
-  './data/statuses.json',
-  './data/frenzy.json',
   './data/act1.json',
   './assets/icon-192.png',
   './assets/icon-512.png',

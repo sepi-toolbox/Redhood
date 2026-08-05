@@ -1,64 +1,69 @@
 [
-  { "id": "crow", "name": "굶주린 까마귀", "tier": "normal", "hp": [11, 14],
+  { "id": "crow", "name": "굶주린 까마귀", "tier": "normal", "hp": [40, 46],
     "moves": {
-      "peck":  { "name": "쪼기", "effects": [{ "op": "damage", "amount": 4 }] },
-      "caw":   { "name": "불길한 울음", "effects": [{ "op": "applyStatus", "status": "weak", "stacks": 1, "target": "player" }] },
-      "dive":  { "name": "급강하", "effects": [{ "op": "damage", "amount": 6 }] }
+      "peck": { "name": "쪼기", "effects": [{ "op": "damage", "amount": 5 }] },
+      "dive": { "name": "급강하", "effects": [{ "op": "damage", "amount": 8 }] },
+      "circle": { "name": "선회", "effects": [{ "op": "charge" }] }
     },
-    "pattern": { "mode": "weighted", "weights": { "peck": 3, "caw": 1, "dive": 2 }, "noRepeat": 2 } },
+    "pattern": { "mode": "weighted", "weights": { "peck": 3, "dive": 2, "circle": 1 }, "noRepeat": 2 } },
 
-  { "id": "thorn_bush", "name": "가시덤불", "tier": "normal", "hp": [22, 26],
+  { "id": "thorn_bush", "name": "가시덤불", "tier": "normal", "hp": [55, 60],
     "moves": {
-      "scratch": { "name": "할퀴기", "effects": [{ "op": "damage", "amount": 7 }] },
-      "harden":  { "name": "웅크림", "effects": [{ "op": "block", "amount": 6 }] }
+      "scratch": { "name": "할퀴기", "effects": [{ "op": "damage", "amount": 6 }] },
+      "coil": { "name": "가시 세우기", "effects": [{ "op": "charge" }] },
+      "lash": { "name": "덩굴 채찍", "effects": [{ "op": "damage", "amount": 13 }] }
     },
-    "pattern": { "mode": "sequence", "order": ["scratch", "scratch", "harden"], "loop": true } },
+    "pattern": { "mode": "sequence", "order": ["scratch", "coil", "lash"], "loop": true } },
 
-  { "id": "forest_spider", "name": "숲거미", "tier": "normal", "hp": [14, 18],
+  { "id": "forest_spider", "name": "숲거미", "tier": "normal", "hp": [42, 48],
     "moves": {
-      "bite": { "name": "물기", "effects": [{ "op": "damage", "amount": 5 }, { "op": "applyStatus", "status": "bleed", "stacks": 2, "target": "player" }] },
-      "web":  { "name": "거미줄", "effects": [{ "op": "applyStatus", "status": "weak", "stacks": 2, "target": "player" }] }
+      "bite": { "name": "물기", "effects": [{ "op": "damage", "amount": 7 }] },
+      "skitter": { "name": "숨기", "effects": [{ "op": "charge" }] },
+      "ambush": { "name": "기습", "effects": [{ "op": "damage", "amount": 12 }] }
     },
-    "pattern": { "mode": "sequence", "order": ["web", "bite", "bite"], "loop": true } },
+    "pattern": { "mode": "sequence", "order": ["bite", "bite", "skitter", "ambush"], "loop": true } },
 
-  { "id": "stray_dog", "name": "들개", "tier": "normal", "hp": [16, 20],
+  { "id": "stray_dog", "name": "들개", "tier": "normal", "hp": [48, 54],
     "moves": {
-      "bite":  { "name": "물어뜯기", "effects": [{ "op": "damage", "amount": 6 }] },
-      "growl": { "name": "으르렁", "effects": [{ "op": "applyStatus", "status": "strength", "stacks": 2, "target": "self" }] }
+      "bite": { "name": "물어뜯기", "effects": [{ "op": "damage", "amount": 8 }] },
+      "growl": { "name": "으르렁", "effects": [{ "op": "charge" }] },
+      "maul": { "name": "사냥", "effects": [{ "op": "damage", "amount": 14 }] }
     },
-    "pattern": { "mode": "weighted", "weights": { "bite": 3, "growl": 1 }, "noRepeat": 2 } },
+    "pattern": { "mode": "weighted", "weights": { "bite": 3, "growl": 1, "maul": 1 }, "noRepeat": 2 } },
 
-  { "id": "will_o_wisp", "name": "도깨비불", "tier": "normal", "hp": [12, 16],
+  { "id": "will_o_wisp", "name": "도깨비불", "tier": "normal", "hp": [38, 42],
     "moves": {
-      "scorch":  { "name": "지지기", "effects": [{ "op": "damage", "amount": 3 }, { "op": "applyStatus", "status": "burn", "stacks": 1, "target": "player" }] },
-      "flicker": { "name": "명멸", "effects": [{ "op": "block", "amount": 5 }] }
+      "scorch": { "name": "지지기", "effects": [{ "op": "damage", "amount": 6 }] },
+      "flicker": { "name": "명멸", "effects": [{ "op": "charge" }] },
+      "flare": { "name": "불꽃 폭발", "effects": [{ "op": "damage", "amount": 11 }] }
     },
-    "pattern": { "mode": "sequence", "order": ["scorch", "flicker", "scorch"], "loop": true } },
+    "pattern": { "mode": "sequence", "order": ["scorch", "flicker", "flare"], "loop": true } },
 
-  { "id": "twig_golem", "name": "옹이 골렘", "tier": "normal", "hp": [28, 32],
+  { "id": "twig_golem", "name": "옹이 골렘", "tier": "normal", "hp": [62, 68],
     "moves": {
-      "slam":   { "name": "내리찍기", "effects": [{ "op": "damage", "amount": 9 }] },
-      "brace":  { "name": "뿌리내림", "effects": [{ "op": "block", "amount": 8 }] }
+      "slam": { "name": "내리찍기", "effects": [{ "op": "damage", "amount": 9 }] },
+      "root": { "name": "뿌리내림", "effects": [{ "op": "charge" }] },
+      "crush": { "name": "짓뭉개기", "effects": [{ "op": "damage", "amount": 16 }] }
     },
-    "pattern": { "mode": "sequence", "order": ["brace", "slam", "slam"], "loop": true } },
+    "pattern": { "mode": "sequence", "order": ["slam", "root", "crush"], "loop": true } },
 
-  { "id": "alpha_dog", "name": "우두머리 들개", "tier": "elite", "hp": [46, 46],
+  { "id": "alpha_dog", "name": "우두머리 들개", "tier": "elite", "hp": [100, 100],
     "moves": {
-      "bite":   { "name": "물어뜯기", "effects": [{ "op": "damage", "amount": 10 }] },
-      "howl":   { "name": "울부짖음", "effects": [{ "op": "applyStatus", "status": "strength", "stacks": 2, "target": "self" }] },
-      "pounce": { "name": "덮치기", "effects": [{ "op": "damage", "amount": 4, "times": 3 }] }
+      "bite": { "name": "물어뜯기", "effects": [{ "op": "damage", "amount": 11 }] },
+      "howl": { "name": "울부짖음", "effects": [{ "op": "charge" }] },
+      "frenzy": { "name": "광란", "effects": [{ "op": "damage", "amount": 20 }] }
     },
-    "pattern": { "mode": "sequence", "order": ["howl", "bite", "pounce"], "loop": true } },
+    "pattern": { "mode": "sequence", "order": ["bite", "bite", "howl", "frenzy"], "loop": true } },
 
-  { "id": "wolf", "name": "늑대", "tier": "boss", "hp": [90, 90],
+  { "id": "wolf", "name": "늑대", "tier": "boss", "hp": [160, 160],
     "moves": {
-      "bite":   { "name": "물어뜯기", "effects": [{ "op": "damage", "amount": 12 }] },
-      "howl":   { "name": "울부짖음", "effects": [{ "op": "applyStatus", "status": "weak", "stacks": 2, "target": "player" }, { "op": "block", "amount": 6 }] },
-      "pounce": { "name": "덮치기", "effects": [{ "op": "damage", "amount": 5, "times": 3 }] },
-      "maul":   { "name": "갈기갈기", "effects": [{ "op": "damage", "amount": 8 }, { "op": "applyStatus", "status": "bleed", "stacks": 3, "target": "player" }] }
+      "bite": { "name": "물어뜯기", "effects": [{ "op": "damage", "amount": 13 }] },
+      "lurk": { "name": "웅크리기", "effects": [{ "op": "charge" }] },
+      "pounce": { "name": "덮치기", "effects": [{ "op": "damage", "amount": 24 }] },
+      "rend": { "name": "갈기갈기", "effects": [{ "op": "damage", "amount": 17 }] }
     },
     "phases": [
-      { "untilHpRatio": 0.5, "pattern": { "mode": "sequence", "order": ["bite", "howl", "bite", "pounce"], "loop": true } },
-      { "untilHpRatio": 0.0, "pattern": { "mode": "weighted", "weights": { "bite": 2, "pounce": 3, "maul": 2 }, "noRepeat": 2 } }
+      { "untilHpRatio": 0.5, "pattern": { "mode": "sequence", "order": ["bite", "lurk", "pounce"], "loop": true } },
+      { "untilHpRatio": 0.0, "pattern": { "mode": "weighted", "weights": { "bite": 2, "rend": 3, "pounce": 1 }, "noRepeat": 2 } }
     ] }
 ]

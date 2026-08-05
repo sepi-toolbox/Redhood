@@ -1,0 +1,22 @@
+{
+  "_version": 2,
+  "oncePerBattle": true,
+  "sheetExhausted": "refill",
+  "upperBonus": { "threshold": 63, "damage": 35 },
+  "rerollsPerTurn": 2,
+  "categories": [
+    { "id": "ones",   "name": "에이스", "kind": "upper", "face": 1 },
+    { "id": "twos",   "name": "듀스",   "kind": "upper", "face": 2 },
+    { "id": "threes", "name": "트레이", "kind": "upper", "face": 3 },
+    { "id": "fours",  "name": "포스",   "kind": "upper", "face": 4 },
+    { "id": "fives",  "name": "파이브", "kind": "upper", "face": 5 },
+    { "id": "sixes",  "name": "식스",   "kind": "upper", "face": 6 },
+    { "id": "threeKind", "name": "트리플",   "kind": "ofKind", "count": 3, "score": "sumAll" },
+    { "id": "fourKind",  "name": "포카드",   "kind": "ofKind", "count": 4, "score": "sumAll" },
+    { "id": "fullHouse", "name": "풀하우스", "kind": "fullHouse", "score": 25 },
+    { "id": "smallStraight", "name": "스몰 스트레이트", "kind": "straight", "length": 4, "score": 30 },
+    { "id": "largeStraight", "name": "라지 스트레이트", "kind": "straight", "length": 5, "score": 40 },
+    { "id": "yahtzee", "name": "야찌", "kind": "ofKind", "count": 5, "score": 50 },
+    { "id": "chance", "name": "찬스", "kind": "chance", "score": "sumAll" }
+  ]
+}
