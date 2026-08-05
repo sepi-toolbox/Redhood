@@ -1,0 +1,67 @@
+REDHOOD 특수 주사위 스킨 13종 — 완성형 프롬프트 (한 블록씩 통째로 복사해서 사용)
+각 프롬프트는 스타일 블록까지 포함된 완성본. 스타일 키 이미지를 첨부하고 붙여넣기만 하면 됨.
+
+──────────────────────────── die_gold.png (금박 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a die gilded in beaten gold leaf, glowing warm, tiny sparkles, dark ink pips.
+
+──────────────────────────── die_cursed.png (저주 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a die carved from blackened bone, cracks glowing ember-red, faint dark aura, sinister.
+
+──────────────────────────── die_fang.png (송곳니 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a die carved from a wolf fang, ivory-yellow, tiny bite marks, one pip shaped like a droplet of blood.
+
+──────────────────────────── die_straw.png (밀짚 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a die woven from golden straw like a tiny thatched cube, visible straw weave texture, dark pips.
+
+──────────────────────────── die_ember.png (잿불 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a charcoal die with softly glowing warm embers inside its pips, thin smoke wisp.
+
+──────────────────────────── die_moonlit.png (달빛 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a translucent pale-blue crystal die glowing with soft moonlight, hazy dreamlike edges.
+
+──────────────────────────── die_bramble.png (가시덤불 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a die wrapped in thorny bramble vines with tiny red rose thorns growing from its edges.
+
+──────────────────────────── die_lead.png (납 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a heavy dull grey lead die, dented and scratched, matte metal, feels weighty.
+
+──────────────────────────── die_even.png (짝눈 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a die painted half aged-cream half slate-blue, showing a face with two pips, calm and orderly.
+
+──────────────────────────── die_odd.png (홀눈 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a die painted half aged-cream half wine-red, showing a face with three pips, slightly crooked and mischievous.
+
+──────────────────────────── die_high.png (높은 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a proud upright ivory die with gold-rimmed pips showing a five, polished, slightly haughty.
+
+──────────────────────────── die_ace.png (외눈 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a strange pale die whose face shows one single huge pip painted like a staring eye, unsettling.
+
+──────────────────────────── die_normal.png (나무 주사위)
+
+Dark fairytale storybook illustration for a mobile roguelike dice game. Hand-painted gouache and ink, visible brush texture, thick confident dark outlines, muted moody palette: near-black brown, deep blood red, antique gold, aged cream. Grimm brothers mood — eerie but charming. No text, no letters, no watermark. Match the exact art style of the attached image.
+A single six-sided die, centered, front-facing flat view, transparent background, readable at 64px: a humble hand-carved wooden die, warm brown grain, worn rounded corners, dark ink pips showing a five.
