@@ -159,14 +159,21 @@ export function confirmCategory(battle, catId) {
     applyAbility(battle, cat, bd);
   }
 
-  // 상단 보너스 (기본 점수 기준, 전투당 1회)
+  // 상단 보너스 (기본 점수 기준). repeat: 누적이 기준을 넘을 때마다 발동, 초과분 이월
   if (cat.kind === 'upper') {
     battle.upperTotal += bd.base;
-    const threshold = relicValue(battle.relics, 'upperBonusThreshold', DB.scoring.upperBonus.threshold);
-    if (!battle.upperBonusFired && battle.upperTotal >= threshold) {
+    const cfg = DB.scoring.upperBonus;
+    const threshold = relicValue(battle.relics, 'upperBonusThreshold', cfg.threshold);
+    if (cfg.repeat) {
+      while (battle.upperTotal >= threshold) {
+        battle.upperTotal -= threshold;
+        battle.enemy.hp -= cfg.damage;
+        battle.lastResult.bonusHits.push(`상단 보너스 ${cfg.damage}!`);
+      }
+    } else if (!battle.upperBonusFired && battle.upperTotal >= threshold) {
       battle.upperBonusFired = true;
-      battle.enemy.hp -= DB.scoring.upperBonus.damage;
-      battle.lastResult.bonusHits.push(`상단 보너스 ${DB.scoring.upperBonus.damage}!`);
+      battle.enemy.hp -= cfg.damage;
+      battle.lastResult.bonusHits.push(`상단 보너스 ${cfg.damage}!`);
     }
   }
 

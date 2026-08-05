@@ -3,8 +3,9 @@
   "rerollsPerTurn": 2,
   "levelCap": 3,
   "upperBonus": {
-    "threshold": 63,
-    "damage": 35
+    "threshold": 40,
+    "damage": 25,
+    "repeat": true
   },
   "categories": [
     {

@@ -195,6 +195,12 @@ function showRest() {
 }
 
 // ---------- 전투 ----------
+function upperThreshold() {
+  let v = DB.scoring.upperBonus.threshold;
+  for (const r of battle.relics) if (r.hook.type === 'upperBonusThreshold') v = r.hook.value;
+  return v;
+}
+
 function breakdownText(bd) {
   if (bd.isZero) return '0점 버리기';
   const parts = [`기본 ${bd.base}`];
@@ -241,6 +247,7 @@ function renderBattle() {
           🎲 리롤 (${battle.rollsLeft})
         </button>
         <span class="turn-hint">${selectedCat ? '한 번 더 탭하면 확정' : '주사위 탭=홀드 · 족보 탭=선택'}</span>
+        <span class="upper-meter" title="상단 점수 누적 — 기준마다 추가 피해">☀ ${battle.upperTotal}/${upperThreshold()}</span>
       </div>
       <div class="sheet-zone">
         ${previews.map(({ cat, level, seal, locked, bd }) => `
