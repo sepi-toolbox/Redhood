@@ -3,7 +3,7 @@
     "id": "silver_bullet",
     "name": "은탄환",
     "icon": "🔫",
-    "tier": "rare",
+    "tier": "epic",
     "desc": "에이스 족보 점수 5배.",
     "hook": {
       "type": "categoryMult",
@@ -15,7 +15,7 @@
     "id": "red_cloak",
     "name": "붉은 망토",
     "icon": "🧣",
-    "tier": "uncommon",
+    "tier": "rare",
     "desc": "매 턴 리롤 +1.",
     "hook": {
       "type": "extraReroll",

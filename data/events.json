@@ -1,0 +1,92 @@
+{
+  "_version": 1,
+  "weapons": [
+    { "id": "gun",      "name": "사냥꾼의 총", "icon": "🔫",
+      "desc": "멀리서, 크게, 한 방.",
+      "start": { "chance": "instinct", "sixes": "wolfshot", "fourKind": "heavy_blow" } },
+    { "id": "scythe",   "name": "녹슨 낫", "icon": "🗡️",
+      "desc": "숲을 베어 넘기는 큰 호선.",
+      "start": { "chance": "instinct", "threeKind": "triple_axe", "smallStraight": "hunt_drive" } },
+    { "id": "lantern",  "name": "붉은 랜턴", "icon": "🏮",
+      "desc": "어둠을 밀어내고 숨을 고른다.",
+      "start": { "chance": "whisper", "threes": "herbs", "fullHouse": "cottage" } },
+    { "id": "shovel",   "name": "무덤지기의 삽", "icon": "⛏️",
+      "desc": "파고, 막고, 버틴다.",
+      "start": { "chance": "instinct", "fours": "oak_shield", "twos": "thorn_fence" } },
+    { "id": "crossbow", "name": "물푸레 쇠뇌", "icon": "🏹",
+      "desc": "조용히 재고, 정확히 맞힌다.",
+      "start": { "chance": "instinct", "fives": "powder", "smallStraight": "windpath" } },
+    { "id": "dagger",   "name": "빵칼 단검", "icon": "🔪",
+      "desc": "작고 빠른 손놀림의 연속.",
+      "start": { "chance": "whisper", "ones": "needle", "twos": "cloak_hem" } }
+  ],
+  "intro": {
+    "id": "intro",
+    "npc": { "name": "잿빛 방물장수", "art": "🧙" },
+    "lines": [
+      "…빨간 두건이로구나. 이 숲에 맨손으로 들어갈 셈이냐?",
+      "골라 보렴. 값은… 나중에 받으마."
+    ],
+    "offerCount": 3,
+    "resultLine": "방물장수는 웃음도 없이 보따리를 닫았다. \"숲이 너를 기억할 게다.\""
+  },
+  "events": [
+    {
+      "id": "ash_crone",
+      "npc": { "name": "잿빛 노파", "art": "🧓" },
+      "lines": [
+        "오두막 앞, 노파가 검은 솥을 젓고 있다.",
+        "\"길손이구나. 이 숲엔 공짜가 없단다.\""
+      ],
+      "choices": [
+        { "text": "🧪 검은 물약을 마신다", "sub": "HP 15 회복",
+          "effects": [ { "op": "heal", "amount": 15 } ],
+          "result": "쓰디쓴 물약이 상처를 봉한다." },
+        { "text": "🩸 피의 거래", "sub": "HP -8, 무작위 유물 획득",
+          "effects": [ { "op": "loseHp", "amount": 8 }, { "op": "gainRelic" } ],
+          "result": "노파가 웃으며 보따리에서 무언가를 꺼내 쥐여 준다." },
+        { "text": "🚪 조용히 지나친다", "sub": "",
+          "effects": [],
+          "result": "노파의 시선이 등 뒤에 오래 남는다." }
+      ]
+    },
+    {
+      "id": "signpost",
+      "npc": { "name": "부러진 이정표", "art": "🪧" },
+      "lines": [
+        "글자가 긁혀 나간 이정표가 갈림길에 서 있다.",
+        "밑동의 흙이 최근에 파헤쳐진 듯 부드럽다."
+      ],
+      "choices": [
+        { "text": "🪓 밑동을 파헤친다", "sub": "무작위 족보 변형 획득",
+          "effects": [ { "op": "gainVariant" } ],
+          "result": "기름먹인 천에 싸인 낡은 두루마리 조각이 나왔다." },
+        { "text": "🙏 무사한 여행을 빈다", "sub": "최대 HP +4",
+          "effects": [ { "op": "maxHp", "amount": 4 } ],
+          "result": "몸이 조금 단단해진 기분이다." },
+        { "text": "🚶 갈 길을 간다", "sub": "",
+          "effects": [],
+          "result": "바람이 이정표를 삐걱, 흔들었다." }
+      ]
+    },
+    {
+      "id": "altar",
+      "npc": { "name": "이끼 낀 제단", "art": "🕯️" },
+      "lines": [
+        "숲 한가운데, 누구의 것인지 모를 제단.",
+        "촛불이 아직 따뜻하다."
+      ],
+      "choices": [
+        { "text": "🙇 무릎 꿇고 기도한다", "sub": "HP 8 회복",
+          "effects": [ { "op": "heal", "amount": 8 } ],
+          "result": "촛불이 한 번 크게 흔들리고, 통증이 가라앉았다." },
+        { "text": "🎲 제물을 훔친다", "sub": "무작위 주사위 획득 (교체)",
+          "effects": [ { "op": "gainDie" } ],
+          "result": "제단 위의 주사위가 손안에서 차갑게 식어 있다." },
+        { "text": "🚶 떠난다", "sub": "",
+          "effects": [],
+          "result": "돌아보지 않는 편이 좋을 것 같았다." }
+      ]
+    }
+  ]
+}

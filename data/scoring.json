@@ -1,5 +1,5 @@
 {
-  "_version": 5,
+  "_version": 6,
   "rerollsPerTurn": 2,
   "upperBonus": {
     "threshold": 40,
@@ -12,7 +12,6 @@
       "name": "찬스",
       "kind": "chance",
       "score": "sumTop3",
-      "startOwned": true,
       "tier": "common",
       "ruleText": "조건 없음 — 항상 성립. 가장 높은 눈 3개의 합만큼 피해.",
       "example": [
@@ -41,15 +40,13 @@
           "abilityText": "다음 턴 리롤 +1",
           "tier": "uncommon"
         }
-      ],
-      "startVariant": "instinct"
+      ]
     },
     {
       "id": "ones",
       "name": "에이스",
       "kind": "upper",
       "face": 1,
-      "startOwned": false,
       "tier": "common",
       "ruleText": "굴린 주사위 중 [1]의 합만큼 피해.",
       "example": [
@@ -90,7 +87,6 @@
       "name": "듀스",
       "kind": "upper",
       "face": 2,
-      "startOwned": true,
       "tier": "common",
       "ruleText": "굴린 주사위 중 [2]의 합만큼 피해.",
       "example": [
@@ -124,15 +120,13 @@
           "abilityText": "방어도 +7",
           "tier": "uncommon"
         }
-      ],
-      "startVariant": "cloak_hem"
+      ]
     },
     {
       "id": "threes",
       "name": "트레이",
       "kind": "upper",
       "face": 3,
-      "startOwned": false,
       "tier": "common",
       "ruleText": "굴린 주사위 중 [3]의 합만큼 피해.",
       "example": [
@@ -177,7 +171,6 @@
       "name": "포스",
       "kind": "upper",
       "face": 4,
-      "startOwned": false,
       "tier": "common",
       "ruleText": "굴린 주사위 중 [4]의 합만큼 피해.",
       "example": [
@@ -218,7 +211,6 @@
       "name": "파이브",
       "kind": "upper",
       "face": 5,
-      "startOwned": false,
       "tier": "common",
       "ruleText": "굴린 주사위 중 [5]의 합만큼 피해.",
       "example": [
@@ -263,7 +255,6 @@
       "name": "식스",
       "kind": "upper",
       "face": 6,
-      "startOwned": false,
       "tier": "common",
       "ruleText": "굴린 주사위 중 [6]의 합만큼 피해.",
       "example": [
@@ -300,7 +291,6 @@
       "kind": "ofKind",
       "count": 3,
       "score": "matchedSumX2",
-      "startOwned": true,
       "tier": "common",
       "ruleText": "같은 눈 3개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해.",
       "example": [
@@ -338,8 +328,7 @@
           "abilityText": "방어도 4 + 다음 턴 리롤 +1",
           "tier": "uncommon"
         }
-      ],
-      "startVariant": "triple_axe"
+      ]
     },
     {
       "id": "fourKind",
@@ -347,7 +336,6 @@
       "kind": "ofKind",
       "count": 4,
       "score": "matchedSumX2",
-      "startOwned": false,
       "tier": "rare",
       "ruleText": "같은 눈 4개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해.",
       "example": [
@@ -388,7 +376,6 @@
       "name": "풀하우스",
       "kind": "fullHouse",
       "score": 25,
-      "startOwned": false,
       "tier": "uncommon",
       "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25.",
       "example": [
@@ -436,7 +423,6 @@
       "kind": "straight",
       "length": 4,
       "score": 30,
-      "startOwned": false,
       "tier": "uncommon",
       "ruleText": "연속된 눈 4개(예: 2·3·4·5)면 성립. 모든 적에게 피해 30.",
       "target": "allEnemies",
@@ -479,7 +465,6 @@
       "kind": "straight",
       "length": 5,
       "score": 40,
-      "startOwned": false,
       "tier": "rare",
       "ruleText": "연속된 눈 5개(1~5 또는 2~6)면 성립. 모든 적에게 피해 40.",
       "target": "allEnemies",
@@ -520,7 +505,7 @@
             }
           ],
           "abilityText": "회피 + 다음 피해 +8",
-          "tier": "rare"
+          "tier": "epic"
         }
       ]
     },
@@ -530,8 +515,7 @@
       "kind": "ofKind",
       "count": 5,
       "score": 50,
-      "startOwned": false,
-      "tier": "rare",
+      "tier": "epic",
       "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50.",
       "example": [
         6,
@@ -555,7 +539,7 @@
             }
           ],
           "abilityText": "적 행동 취소 + 방어도 20",
-          "tier": "rare"
+          "tier": "epic"
         },
         {
           "id": "blood_moon",
@@ -570,7 +554,7 @@
             }
           ],
           "abilityText": "적 행동 취소 + 다음 피해 +15",
-          "tier": "rare"
+          "tier": "epic"
         }
       ]
     }

@@ -1,7 +1,7 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
-import { newRun, rollEncounter, rollRewards, applyRest, saveRun, loadRun, clearSave, hasSave } from './run.js';
+import { newRun, rollEncounter, rollRewards, applyRest, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects } from './run.js';
 
 const app = document.getElementById('app');
 let run = null;
@@ -82,7 +82,7 @@ function showTitle() {
       <button class="btn ghost hidden" id="install-btn">📲 홈 화면에 설치</button>
       <p class="hint">iOS는 공유 버튼 → "홈 화면에 추가"</p>
     </div>`));
-  document.getElementById('start-btn').addEventListener('click', () => { run = newRun(); saveRun(run); showMap(); });
+  document.getElementById('start-btn').addEventListener('click', () => { run = newRun(); showIntro(); });
   const cont = document.getElementById('continue-btn');
   if (cont) cont.addEventListener('click', () => { const r = loadRun(); if (r) { run = r; showMap(); } });
   const install = document.getElementById('install-btn');
@@ -94,11 +94,107 @@ function showTitle() {
   }
 }
 
+// ---------- 대화 이벤트 화면 ----------
+// 배틀 화면과 같은 골격: 적 위치=NPC, 주사위 위치=검은 그라데이션 대사판, 족보 위치=선택지
+function eventFrame(npc, linesHtml, choicesHtml) {
+  const hpPct = Math.max(0, run.hp / run.maxHp * 100);
+  return `
+    <div class="screen battle-screen event-screen">
+      <header class="topbar">
+        <span>💬 ${run.floor > 0 ? `${run.floor}층 · ` : ''}만남</span>
+        <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
+        <span></span>
+      </header>
+      <div class="enemy-zone npc-zone">
+        <div class="npc">
+          <span class="npc-art">${npc.art}</span>
+          <span class="npc-name">${esc(npc.name)}</span>
+        </div>
+      </div>
+      <div class="dialogue-panel">${linesHtml}</div>
+      <div class="sheet-zone choice-zone">${choicesHtml}</div>
+      <div class="player-bar">
+        <span class="pb-side"></span>
+        <div class="hp-gauge">
+          <div class="hp-fill" style="width:${hpPct}%"></div>
+          <span class="hp-text">❤️ ${run.hp} / ${run.maxHp}</span>
+        </div>
+        <span class="pb-side"></span>
+      </div>
+    </div>`;
+}
+
+function variantName(cid, vid) {
+  const c = DB.scoring.categories.find(x => x.id === cid);
+  const v = c && (c.variants || []).find(x => x.id === vid);
+  return v ? v.name : vid;
+}
+
+// 인트로: 첫 NPC — 무기 3종 무작위 제안, 선택 무기에 따라 시작 족보 결정
+function showIntro() {
+  const intro = DB.events.intro;
+  const weapons = offerWeapons(intro.offerCount || 3);
+  app.innerHTML = '';
+  app.append(h(eventFrame(intro.npc,
+    intro.lines.map(l => `<p class="npc-line">${esc(l)}</p>`).join(''),
+    weapons.map((w, i) => `
+      <button class="sheet-row choice-row weapon-choice" data-idx="${i}">
+        <span class="choice-main">${w.icon} <b>${esc(w.name)}</b></span>
+        <span class="choice-sub">${esc(w.desc)}</span>
+        <span class="choice-cats">📜 ${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</span>
+      </button>`).join(''))));
+  app.querySelectorAll('.weapon-choice').forEach(el => {
+    el.addEventListener('click', () => {
+      const w = weapons[parseInt(el.dataset.idx, 10)];
+      chooseWeapon(run, w.id);
+      saveRun(run);
+      showEventResult(intro.npc,
+        `<p class="npc-line">${esc(intro.resultLine || '')}</p>
+         <p class="event-effect">${w.icon} ${esc(w.name)} — 📜 ${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</p>`);
+    });
+  });
+}
+
+// 지도의 대화 이벤트 방
+function showEvent(ev) {
+  app.innerHTML = '';
+  app.append(h(eventFrame(ev.npc,
+    ev.lines.map(l => `<p class="npc-line">${esc(l)}</p>`).join(''),
+    ev.choices.map((ch, i) => `
+      <button class="sheet-row choice-row" data-idx="${i}">
+        <span class="choice-main">${esc(ch.text)}</span>
+        ${ch.sub ? `<span class="choice-sub">${esc(ch.sub)}</span>` : ''}
+      </button>`).join(''))));
+  app.querySelectorAll('.choice-row').forEach(el => {
+    el.addEventListener('click', () => {
+      const ch = ev.choices[parseInt(el.dataset.idx, 10)];
+      const { messages, pendingDie } = applyEventEffects(run, ch.effects);
+      saveRun(run);
+      showEventResult(ev.npc,
+        `<p class="npc-line">${esc(ch.result || '')}</p>
+         ${messages.length ? `<p class="event-effect">${messages.map(esc).join(' · ')}</p>` : ''}`,
+        pendingDie);
+    });
+  });
+}
+
+// 선택 결과 화면 — pendingDie가 있으면 '길을 나선다' 전에 교체 모달
+function showEventResult(npc, linesHtml, pendingDie = null) {
+  app.innerHTML = '';
+  app.append(h(eventFrame(npc, linesHtml,
+    `<button class="btn primary" id="event-done">길을 나선다</button>`)));
+  document.getElementById('event-done').addEventListener('click', () => {
+    if (pendingDie) showReplaceDie(pendingDie, () => { saveRun(run); showMap(); });
+    else { saveRun(run); showMap(); }
+  }, { once: true });
+}
+
 // ---------- 맵 ----------
 const NODE_META = {
   battle: { icon: '⚔️', label: '전투' },
   elite: { icon: '💀', label: '엘리트' },
   rest: { icon: '🔥', label: '휴식' },
+  event: { icon: '💬', label: '만남' },
   boss: { icon: '🐺', label: '보스' },
 };
 
@@ -185,6 +281,7 @@ function showBagModal() {
 function enterNode(type) {
   currentNodeType = type;
   if (type === 'rest') { showRest(); return; }
+  if (type === 'event') { showEvent(pickEvent(run)); return; }
   battle = createBattle(run, rollEncounter(run, type));
   selectedCat = null; busy = false;
   targetUid = aliveEnemies(battle)[0]?.uid || null; // 기본 표적: 맨 왼쪽
@@ -643,7 +740,7 @@ function showRewardCards(choices, box) {
           const isCat = c.kind === 'category';
           const isNew = isCat && !c.item.owned;
           return `
-          <button class="card pop-in r-${c.item.tier} ${c.item.tier === 'rare' ? 'shiny-rare' : c.item.tier === 'uncommon' ? 'shiny-un' : ''} ${isNew ? 'new-cat' : ''}"
+          <button class="card pop-in r-${c.item.tier} ${c.item.tier === 'epic' ? 'shiny-epic' : c.item.tier === 'rare' ? 'shiny-rare' : c.item.tier === 'uncommon' ? 'shiny-un' : ''} ${isNew ? 'new-cat' : ''}"
             data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
             ${isNew ? '<span class="new-badge">새 족보!</span>' : ''}
             <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : `📜 ${esc(isCat ? c.item.cat.name : '족보')}`}</span>
@@ -675,27 +772,32 @@ function showRewardCards(choices, box) {
   document.getElementById('skip-btn').addEventListener('click', () => { saveRun(run); showMap(); });
 }
 
-function showReplaceDie(newDie) {
+function showReplaceDie(newDie, onDone = null) {
   app.append(h(`
     <div class="modal-back">
       <div class="modal">
         <h3>${esc(newDie.name)} 획득 — 어느 주사위와 교체?</h3>
+        <p class="modal-text">${esc(newDie.desc || '')}</p>
         <ul class="deck-list">
           ${run.dice.map((id, i) => {
             const d = DB.diceById[id];
             return `<li><button class="btn replace-btn" data-idx="${i}"><b>${esc(d.name)}</b> [${d.faces.join(',')}]</button></li>`;
           }).join('')}
         </ul>
-        <button class="btn ghost" id="replace-cancel">취소 (보상 화면으로)</button>
+        <button class="btn ghost" id="replace-cancel">${onDone ? '가지지 않는다' : '취소 (보상 화면으로)'}</button>
       </div>
     </div>`));
   app.querySelectorAll('.replace-btn').forEach(el => {
     el.addEventListener('click', () => {
       run.dice[parseInt(el.dataset.idx, 10)] = newDie.id;
-      saveRun(run); showMap();
+      saveRun(run);
+      if (onDone) onDone(); else showMap();
     });
   });
-  document.getElementById('replace-cancel').addEventListener('click', () => app.querySelector('.modal-back').remove());
+  document.getElementById('replace-cancel').addEventListener('click', () => {
+    app.querySelector('.modal-back').remove();
+    if (onDone) onDone();
+  });
 }
 
 // ---------- 엔딩 ----------

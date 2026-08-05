@@ -53,8 +53,9 @@ function startTurn(battle, first = false) {
       if (battle.sealed[id] <= 0) delete battle.sealed[id];
     }
   }
-  battle.player.block = 0;
-  battle.rollsLeft = relicValue(battle.relics, 'extraReroll', DB.scoring.rerollsPerTurn) + battle.nextTurnRerolls;
+  battle.player.block = dicePassive(battle, 'turnBlock'); // 패시브 주사위(가시덤불 등): 턴 시작 방어
+  battle.rollsLeft = relicValue(battle.relics, 'extraReroll', DB.scoring.rerollsPerTurn)
+    + dicePassive(battle, 'extraReroll') + battle.nextTurnRerolls;
   battle.nextTurnRerolls = 0;
   battle.rolled = false;
   for (const d of battle.dice) { d.held = false; d.face = 0; }
@@ -113,6 +114,41 @@ export function previewAll(battle) {
     }
   }
   return out;
+}
+
+// ---------- 주사위 효과 (v0.10: 효과 스펙트럼) ----------
+// when: 'passive'(보유만으로) / 'confirm'(기여 무관, 족보 확정 시) / 'contribute'(피해에 기여한 경우만)
+function dicePassive(battle, op) {
+  let v = 0;
+  for (const d of battle.diceDefs) {
+    if (d.effect && d.effect.when === 'passive' && d.effect.op === op) v += d.effect.amount;
+  }
+  return v;
+}
+
+function applyDiceEffects(battle, bd) {
+  const contributing = new Set(bd.contributing || []);
+  battle.diceDefs.forEach((def, i) => {
+    const ef = def.effect;
+    if (!ef) return;
+    const active = ef.when === 'confirm' || (ef.when === 'contribute' && contributing.has(i));
+    if (!active) return;
+    switch (ef.op) {
+      case 'selfDamage':
+        battle.player.hp -= ef.amount;
+        battle.lastResult.bonusHits.push(`🎲🩸-${ef.amount}`);
+        if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; }
+        break;
+      case 'heal':
+        battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + ef.amount);
+        battle.lastResult.bonusHits.push(`🎲+${ef.amount}HP`);
+        break;
+      case 'block':
+        battle.player.block += ef.amount;
+        battle.lastResult.bonusHits.push(`🎲🛡${ef.amount}`);
+        break;
+    }
+  });
 }
 
 // ---------- 부가 능력 ----------
@@ -192,6 +228,8 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   }
 
   applyAbility(battle, variant, bd, targets);
+  applyDiceEffects(battle, bd);
+  if (battle.over && battle.result === 'defeat') return battle.lastResult; // 저주 주사위 등으로 자멸
 
   // 상단 보너스 — 발동분은 같은 대상(들)에게
   if (cat.kind === 'upper') {

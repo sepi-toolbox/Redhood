@@ -17,7 +17,8 @@
     "nodeWeights": {
       "battle": 6,
       "elite": 1.5,
-      "rest": 1.5
+      "rest": 1.5,
+      "event": 2
     },
     "eliteFloors": [
       5,
@@ -93,9 +94,10 @@
         "relic": 25
       },
       "tierWeights": {
-        "common": 60,
-        "uncommon": 33,
-        "rare": 7
+        "common": 56,
+        "uncommon": 32,
+        "rare": 9,
+        "epic": 3
       }
     },
     "elite": {
@@ -106,9 +108,10 @@
         "relic": 30
       },
       "tierWeights": {
-        "common": 20,
-        "uncommon": 50,
-        "rare": 30
+        "common": 15,
+        "uncommon": 45,
+        "rare": 30,
+        "epic": 10
       }
     },
     "boss": {

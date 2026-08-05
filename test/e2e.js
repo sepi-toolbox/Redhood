@@ -9,6 +9,15 @@ async function settle(page) {
   await page.waitForTimeout(3800);
 }
 
+// v0.10: 시작 시 무기 선택 인트로 통과
+async function passIntro(page) {
+  await page.waitForSelector('.weapon-choice', { timeout: 8000 });
+  await page.locator('.weapon-choice').first().click();
+  await page.waitForSelector('#event-done');
+  await page.locator('#event-done').click();
+  await page.waitForSelector('.map-screen');
+}
+
 async function playTurn(page) {
   // 1) 굴림 버튼이 있으면 굴린다
   const rollBtn = page.locator('#roll-btn');
@@ -59,7 +68,7 @@ async function playTurn(page) {
 
   // ---------- 굴림 연출·게이지 확인 ----------
   await page.locator('#start-btn').click();
-  await page.waitForSelector('.map-screen');
+  await passIntro(page);
   await page.locator('.map-row.next .map-node').first().click();
   await page.waitForSelector('.battle-screen');
   const blankCount = await page.locator('.die.blank').count();
@@ -84,7 +93,19 @@ async function playTurn(page) {
       if (await nodes.count() === 0) break;
       await nodes.first().click(); await page.waitForTimeout(80); continue;
     }
-    if (await page.locator('.battle-screen').count()) {
+    if (await page.locator('.event-screen').count()) {
+      const done = page.locator('#event-done');
+      if (await done.count()) { await done.click(); }
+      else {
+        const ch = page.locator('.choice-row');
+        if (await ch.count()) await ch.first().click();
+      }
+      await page.waitForTimeout(180);
+      const rep = page.locator('.replace-btn');
+      if (await rep.count()) { await rep.first().click(); await page.waitForTimeout(120); }
+      continue;
+    }
+    if (await page.locator('.battle-screen:not(.event-screen)').count()) {
       const enemyN = await page.locator('.enemy').count();
       if (enemyN > 1 && !sawMulti) {
         sawMulti = true;
@@ -125,7 +146,7 @@ async function playTurn(page) {
     await page.goto('http://localhost:8777/index.html');
     await page.waitForSelector('#start-btn');
     await page.locator('#start-btn').click();
-    await page.waitForSelector('.map-screen');
+    await passIntro(page);
     await page.locator('.map-row.next .map-node').first().click();
     await page.waitForSelector('.battle-screen');
     if (await page.locator('.enemy').count() < 2) continue;

@@ -2,21 +2,25 @@
 export const DB = {
   dice: null, diceById: {}, relics: null, relicById: {},
   scoring: null, enemies: null, enemyById: {}, act1: null,
+  events: null, weaponById: {}, eventById: {},
 };
 
 export async function loadAll() {
-  const [dice, relics, scoring, enemies, act1] = await Promise.all([
+  const [dice, relics, scoring, enemies, act1, events] = await Promise.all([
     fetchJson('./data/dice.json'),
     fetchJson('./data/relics.json'),
     fetchJson('./data/scoring.json'),
     fetchJson('./data/enemies.json'),
     fetchJson('./data/act1.json'),
+    fetchJson('./data/events.json'),
   ]);
   DB.dice = dice; DB.relics = relics; DB.scoring = scoring;
-  DB.enemies = enemies; DB.act1 = act1;
+  DB.enemies = enemies; DB.act1 = act1; DB.events = events;
   DB.diceById = {}; for (const d of dice) DB.diceById[d.id] = d;
   DB.relicById = {}; for (const r of relics) DB.relicById[r.id] = r;
   DB.enemyById = {}; for (const e of enemies) DB.enemyById[e.id] = e;
+  DB.weaponById = {}; for (const w of events.weapons) DB.weaponById[w.id] = w;
+  DB.eventById = {}; for (const ev of events.events) DB.eventById[ev.id] = ev;
   validate();
   return DB;
 }
@@ -46,5 +50,31 @@ function validate() {
         if (!DB.enemyById[eid]) throw new Error(`act1.json: encounters.${group}에 없는 적 id "${eid}"`);
       }
     }
+  }
+  // 무기 시작 족보(변형) 존재 검증
+  const catById = {};
+  for (const c of DB.scoring.categories) catById[c.id] = c;
+  for (const w of DB.events.weapons) {
+    for (const [cid, vid] of Object.entries(w.start)) {
+      const c = catById[cid];
+      if (!c) throw new Error(`events.json: 무기 ${w.id}가 없는 족보 "${cid}" 참조`);
+      if (!(c.variants || []).some(v => v.id === vid)) throw new Error(`events.json: 무기 ${w.id}가 없는 변형 "${cid}:${vid}" 참조`);
+    }
+  }
+  // 이벤트 효과 op 검증
+  const OPS = new Set(['heal', 'loseHp', 'maxHp', 'gainRelic', 'gainVariant', 'gainDie']);
+  for (const ev of DB.events.events) {
+    for (const ch of ev.choices) {
+      for (const ef of (ch.effects || [])) {
+        if (!OPS.has(ef.op)) throw new Error(`events.json: ${ev.id}에 미지원 효과 "${ef.op}"`);
+      }
+    }
+  }
+  // 주사위 효과 검증
+  const DIE_OPS = { contribute: ['selfDamage', 'heal', 'block'], confirm: ['heal', 'block'], passive: ['extraReroll', 'turnBlock'] };
+  for (const d of DB.dice) {
+    if (!d.effect) continue;
+    const ops = DIE_OPS[d.effect.when];
+    if (!ops || !ops.includes(d.effect.op)) throw new Error(`dice.json: ${d.id} 미지원 효과 ${d.effect.when}/${d.effect.op}`);
   }
 }
