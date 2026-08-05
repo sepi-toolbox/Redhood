@@ -2,33 +2,216 @@
   "_version": 4,
   "rerollsPerTurn": 2,
   "levelCap": 3,
-  "upperBonus": { "threshold": 63, "damage": 35 },
+  "upperBonus": {
+    "threshold": 63,
+    "damage": 35
+  },
   "categories": [
-    { "id": "ones",   "name": "에이스", "kind": "upper", "face": 1, "startOwned": false, "tier": "common",
-      "ability": [{ "op": "rerollNext", "amount": 1 }], "abilityText": "다음 턴 리롤 +1" },
-    { "id": "twos",   "name": "듀스",   "kind": "upper", "face": 2, "startOwned": true, "tier": "common",
-      "ability": [{ "op": "block", "scoreMult": 2 }], "abilityText": "방어도 +점수×2" },
-    { "id": "threes", "name": "트레이", "kind": "upper", "face": 3, "startOwned": false, "tier": "common",
-      "ability": [{ "op": "heal", "amount": 3 }], "abilityText": "HP 3 회복" },
-    { "id": "fours",  "name": "포스",   "kind": "upper", "face": 4, "startOwned": false, "tier": "common",
-      "ability": [{ "op": "block", "scoreMult": 1 }], "abilityText": "방어도 +점수" },
-    { "id": "fives",  "name": "파이브", "kind": "upper", "face": 5, "startOwned": false, "tier": "common",
-      "ability": [{ "op": "buffNext", "amount": 5 }], "abilityText": "다음 족보 피해 +5" },
-    { "id": "sixes",  "name": "식스",   "kind": "upper", "face": 6, "startOwned": false, "tier": "common",
-      "ability": [], "abilityText": "부가 없음 — 순수 화력" },
-    { "id": "chance", "name": "찬스",   "kind": "chance", "score": "sumAll", "startOwned": true, "tier": "common",
-      "ability": [], "abilityText": "언제나 성립" },
-    { "id": "threeKind", "name": "트리플", "kind": "ofKind", "count": 3, "score": "sumAll", "startOwned": true, "tier": "common",
-      "ability": [{ "op": "cleanse" }], "abilityText": "봉인 해제" },
-    { "id": "fourKind", "name": "포카드", "kind": "ofKind", "count": 4, "score": "sumAll", "startOwned": false, "tier": "rare",
-      "ability": [{ "op": "stun" }], "abilityText": "적 다음 행동 취소" },
-    { "id": "fullHouse", "name": "풀하우스", "kind": "fullHouse", "score": 25, "startOwned": false, "tier": "uncommon",
-      "ability": [{ "op": "block", "amount": 15 }], "abilityText": "방어도 +15" },
-    { "id": "smallStraight", "name": "스몰 스트레이트", "kind": "straight", "length": 4, "score": 30, "startOwned": false, "tier": "uncommon",
-      "ability": [{ "op": "dodge" }], "abilityText": "이번 적 공격 회피" },
-    { "id": "largeStraight", "name": "라지 스트레이트", "kind": "straight", "length": 5, "score": 40, "startOwned": false, "tier": "rare",
-      "ability": [{ "op": "dodge" }, { "op": "rerollNext", "amount": 1 }], "abilityText": "회피 + 다음 턴 리롤 +1" },
-    { "id": "yahtzee", "name": "야찌", "kind": "ofKind", "count": 5, "score": 50, "startOwned": false, "tier": "rare",
-      "ability": [{ "op": "stun" }, { "op": "block", "amount": 20 }], "abilityText": "적 행동 취소 + 방어도 20" }
+    {
+      "id": "ones",
+      "name": "에이스",
+      "kind": "upper",
+      "face": 1,
+      "startOwned": false,
+      "tier": "common",
+      "ability": [
+        {
+          "op": "rerollNext",
+          "amount": 1
+        }
+      ],
+      "abilityText": "다음 턴 리롤 +1",
+      "ruleText": "굴린 주사위 중 [1]의 합만큼 피해."
+    },
+    {
+      "id": "twos",
+      "name": "듀스",
+      "kind": "upper",
+      "face": 2,
+      "startOwned": true,
+      "tier": "common",
+      "ability": [
+        {
+          "op": "block",
+          "scoreMult": 2
+        }
+      ],
+      "abilityText": "방어도 +점수×2",
+      "ruleText": "굴린 주사위 중 [2]의 합만큼 피해."
+    },
+    {
+      "id": "threes",
+      "name": "트레이",
+      "kind": "upper",
+      "face": 3,
+      "startOwned": false,
+      "tier": "common",
+      "ability": [
+        {
+          "op": "heal",
+          "amount": 3
+        }
+      ],
+      "abilityText": "HP 3 회복",
+      "ruleText": "굴린 주사위 중 [3]의 합만큼 피해."
+    },
+    {
+      "id": "fours",
+      "name": "포스",
+      "kind": "upper",
+      "face": 4,
+      "startOwned": false,
+      "tier": "common",
+      "ability": [
+        {
+          "op": "block",
+          "scoreMult": 1
+        }
+      ],
+      "abilityText": "방어도 +점수",
+      "ruleText": "굴린 주사위 중 [4]의 합만큼 피해."
+    },
+    {
+      "id": "fives",
+      "name": "파이브",
+      "kind": "upper",
+      "face": 5,
+      "startOwned": false,
+      "tier": "common",
+      "ability": [
+        {
+          "op": "buffNext",
+          "amount": 5
+        }
+      ],
+      "abilityText": "다음 족보 피해 +5",
+      "ruleText": "굴린 주사위 중 [5]의 합만큼 피해."
+    },
+    {
+      "id": "sixes",
+      "name": "식스",
+      "kind": "upper",
+      "face": 6,
+      "startOwned": false,
+      "tier": "common",
+      "ability": [],
+      "abilityText": "부가 없음 — 순수 화력",
+      "ruleText": "굴린 주사위 중 [6]의 합만큼 피해."
+    },
+    {
+      "id": "chance",
+      "name": "찬스",
+      "kind": "chance",
+      "score": "sumAll",
+      "startOwned": true,
+      "tier": "common",
+      "ability": [],
+      "abilityText": "언제나 성립",
+      "ruleText": "조건 없음 — 항상 성립. 주사위 5개 전체 합만큼 피해."
+    },
+    {
+      "id": "threeKind",
+      "name": "트리플",
+      "kind": "ofKind",
+      "count": 3,
+      "score": "sumAll",
+      "startOwned": true,
+      "tier": "common",
+      "ability": [
+        {
+          "op": "cleanse"
+        }
+      ],
+      "abilityText": "봉인 해제",
+      "ruleText": "같은 눈 3개 이상이면 성립. 주사위 5개 전체 합만큼 피해."
+    },
+    {
+      "id": "fourKind",
+      "name": "포카드",
+      "kind": "ofKind",
+      "count": 4,
+      "score": "sumAll",
+      "startOwned": false,
+      "tier": "rare",
+      "ability": [
+        {
+          "op": "stun"
+        }
+      ],
+      "abilityText": "적 다음 행동 취소",
+      "ruleText": "같은 눈 4개 이상이면 성립. 주사위 5개 전체 합만큼 피해."
+    },
+    {
+      "id": "fullHouse",
+      "name": "풀하우스",
+      "kind": "fullHouse",
+      "score": 25,
+      "startOwned": false,
+      "tier": "uncommon",
+      "ability": [
+        {
+          "op": "block",
+          "amount": 15
+        }
+      ],
+      "abilityText": "방어도 +15",
+      "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25."
+    },
+    {
+      "id": "smallStraight",
+      "name": "스몰 스트레이트",
+      "kind": "straight",
+      "length": 4,
+      "score": 30,
+      "startOwned": false,
+      "tier": "uncommon",
+      "ability": [
+        {
+          "op": "dodge"
+        }
+      ],
+      "abilityText": "이번 적 공격 회피",
+      "ruleText": "연속된 눈 4개(예: 2·3·4·5)면 성립. 피해 30."
+    },
+    {
+      "id": "largeStraight",
+      "name": "라지 스트레이트",
+      "kind": "straight",
+      "length": 5,
+      "score": 40,
+      "startOwned": false,
+      "tier": "rare",
+      "ability": [
+        {
+          "op": "dodge"
+        },
+        {
+          "op": "rerollNext",
+          "amount": 1
+        }
+      ],
+      "abilityText": "회피 + 다음 턴 리롤 +1",
+      "ruleText": "연속된 눈 5개(1~5 또는 2~6)면 성립. 피해 40."
+    },
+    {
+      "id": "yahtzee",
+      "name": "야찌",
+      "kind": "ofKind",
+      "count": 5,
+      "score": 50,
+      "startOwned": false,
+      "tier": "rare",
+      "ability": [
+        {
+          "op": "stun"
+        },
+        {
+          "op": "block",
+          "amount": 20
+        }
+      ],
+      "abilityText": "적 행동 취소 + 방어도 20",
+      "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50."
+    }
   ]
 }

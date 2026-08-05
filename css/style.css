@@ -150,6 +150,8 @@ body {
 }
 .deck-list { overflow-y: auto; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; }
 .modal-text { color: #9c8f7a; font-size: 12px; }
+.info-rule { font-size: 14px; line-height: 1.6; }
+.info-ability { font-size: 13.5px; color: #e8b64b; }
 .replace-btn { width: 100%; text-align: left; font-size: 13.5px; padding: 10px 12px; }
 
 /* ---------- 가로 회전 가드 ---------- */

@@ -26,6 +26,42 @@ window.addEventListener('beforeinstallprompt', (e) => {
 function h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content; }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
+// 길게 누르기(450ms) → onLong 실행. 발동 시 이어지는 click은 무시된다.
+function addLongPress(el, onLong) {
+  let timer = null, fired = false;
+  const start = () => { fired = false; timer = setTimeout(() => { fired = true; onLong(); }, 450); };
+  const cancel = () => clearTimeout(timer);
+  el.addEventListener('touchstart', start, { passive: true });
+  el.addEventListener('touchend', cancel);
+  el.addEventListener('touchmove', cancel);
+  el.addEventListener('mousedown', start);
+  el.addEventListener('mouseup', cancel);
+  el.addEventListener('mouseleave', cancel);
+  el.addEventListener('click', (e) => {
+    if (fired) { e.stopImmediatePropagation(); e.preventDefault(); fired = false; }
+  }, true);
+  el.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
+function showCategoryInfo(catId, level) {
+  const cat = DB.scoring.categories.find(c => c.id === catId);
+  if (!cat) return;
+  app.append(h(`
+    <div class="modal-back" id="cat-info">
+      <div class="modal">
+        <h3>${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}</h3>
+        <p class="info-rule">${esc(cat.ruleText || '')}</p>
+        <p class="info-ability">✨ ${esc(cat.abilityText || '부가 없음')}</p>
+        ${level > 1 ? `<p class="modal-text">레벨 보정: 피해 ×${level} (부가 능력은 고정)</p>` : ''}
+        <p class="modal-text">0점으로 확정하면 부가 능력은 발동하지 않는다.</p>
+        <button class="btn primary" id="cat-info-close">닫기</button>
+      </div>
+    </div>`));
+  const back = document.getElementById('cat-info');
+  document.getElementById('cat-info-close').addEventListener('click', () => back.remove());
+  back.addEventListener('click', (e) => { if (e.target === back) back.remove(); });
+}
+
 const PIPS = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' };
 
 // ---------- 타이틀 ----------
@@ -209,7 +245,7 @@ function renderBattle() {
       <div class="sheet-zone">
         ${previews.map(({ cat, level, seal, locked, bd }) => `
           <button class="sheet-row ${locked ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''} ${!locked && bd.total === 0 ? 'zero' : ''}"
-            data-cat="${cat.id}" ${locked ? 'disabled' : ''}>
+            data-cat="${cat.id}" data-locked="${locked ? 1 : 0}">
             <span class="sheet-main">
               <span class="sheet-name">${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}</span>
               <span class="sheet-ability">${esc(cat.abilityText || '')}</span>
@@ -226,9 +262,11 @@ function renderBattle() {
     selectedCat = null;
     if (reroll(battle)) renderBattle();
   });
-  app.querySelectorAll('.sheet-row:not([disabled])').forEach(el => {
+  app.querySelectorAll('.sheet-row').forEach(el => {
+    const catId = el.dataset.cat;
+    addLongPress(el, () => showCategoryInfo(catId, battle.categories[catId] || 1));
     el.addEventListener('click', () => {
-      const catId = el.dataset.cat;
+      if (el.dataset.locked === '1') return; // 봉인된 족보: 탭 무시 (길게 눌러 설명은 가능)
       if (selectedCat !== catId) { selectedCat = catId; renderBattle(); return; }
       selectedCat = null;
       confirmCategory(battle, catId);
