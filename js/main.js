@@ -57,7 +57,7 @@ function showCategoryInfo(catId, level) {
         <p class="info-rule">${esc(cat.ruleText || '')}</p>
         <p class="info-ability">✨ ${esc(cat.abilityText || '부가 없음')}</p>
         <p class="modal-text">예시: ${(cat.example || []).map(f => PIPS[f]).join(' ')}</p>
-        ${level > 1 ? `<p class="modal-text">레벨 보정: 피해 ×${level} (부가 능력은 고정)</p>` : ''}
+        ${level > 1 ? `<p class="modal-text">레벨 보정: ${cat.levelFlat !== undefined ? `피해 +${cat.levelFlat * (level - 1)}` : `피해 ×${level}`} (부가 능력은 고정)</p>` : ''}
         <p class="modal-text">성립하지 않으면 선택할 수 없다.</p>
         <button class="btn primary" id="cat-info-close">닫기</button>
       </div>
@@ -205,11 +205,12 @@ function upperThreshold() {
 }
 
 function breakdownText(bd) {
-  if (bd.isZero) return '0점 버리기';
+  if (bd.isZero) return '불발';
   const parts = [`기본 ${bd.base}`];
   if (bd.gold) parts.push(`+금박 ${bd.gold}`);
-  if (bd.level > 1) parts.push(`×Lv${bd.level}`);
+  if (bd.level > 1 && !bd.levelFlatBonus) parts.push(`×Lv${bd.level}`);
   if (bd.mult !== 1) parts.push(`×${bd.mult}`);
+  if (bd.levelFlatBonus) parts.push(`+Lv${bd.levelFlatBonus}`);
   if (bd.bonus) parts.push(`+${bd.bonus}`);
   if (bd.flat) parts.push(`+${bd.flat}`);
   return parts.join(' ');
@@ -251,7 +252,8 @@ function renderBattle(opts = {}) {
         ${battle.dice.map((d, i) => {
           const def = battle.diceDefs[i];
           const blank = !battle.rolled;
-          return `<button class="die ${blank ? 'blank' : ''} ${d.held ? 'held' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}" data-idx="${i}" title="${esc(def.name)}">
+          return `<button class="die ${blank ? 'blank' : ''} ${d.held ? 'held' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}"
+            data-idx="${i}" title="${esc(def.name)}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
             <span class="pip">${blank ? '' : PIPS[d.face] || d.face}</span>
             <small>${d.held ? '홀드' : ''}</small>
           </button>`;
@@ -259,7 +261,7 @@ function renderBattle(opts = {}) {
       </div>
       <div class="roll-bar">
         ${!battle.rolled
-          ? `<button class="btn primary roll-btn" id="roll-btn">🎲 굴린다</button>`
+          ? `<button class="btn primary roll-btn" id="roll-btn">🎲 굴림</button>`
           : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft <= 0 || battle.await ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})</button>`}
       </div>
       <div class="hint-line">${
@@ -332,34 +334,54 @@ function renderBattle(opts = {}) {
   });
 }
 
-// 굴림 연출: 지정된 주사위를 흔들고 왼쪽부터 차례로 값 공개
+// 굴림 연출: 낙하-텀블링-바운스 착지, 왼쪽부터 차례로 멈추며 값 공개
+const dieTilts = [0, 0, 0, 0, 0]; // 착지 후 살짝 기울어진 각도 (물리감)
 function animateRoll(indices) {
   busy = true;
   renderBattle();
   const dieEls = [...app.querySelectorAll('.die')];
   const glyphs = Object.values(PIPS);
-  const timers = [];
+  const stopped = new Set();
+
   indices.forEach((idx) => {
     const el = dieEls[idx];
     if (!el) return;
+    dieTilts[idx] = 0;
+    el.style.setProperty('--tilt', '0deg');
+    el.classList.remove('blank', 'landed');
+    // 시작 타이밍·텀블 속도에 개별 편차 (일제히 던져도 제각각 구르는 느낌)
+    el.style.animationDelay = `${-Math.random() * 0.4}s`;
+    el.style.animationDuration = `${0.34 + Math.random() * 0.14}s`;
     el.classList.add('spinning');
-    el.classList.remove('blank');
     const pip = el.querySelector('.pip');
-    timers.push(setInterval(() => {
+    // 눈이 점점 느리게 바뀜 (구르다 멈추는 감속)
+    let delay = 42;
+    (function cycle() {
+      if (stopped.has(idx)) return;
       pip.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
-    }, 65));
+      delay = Math.min(150, delay * 1.13);
+      setTimeout(cycle, delay);
+    })();
   });
+
   indices.forEach((idx, order) => {
+    const landAt = 460 + order * 170 + Math.random() * 80;
     setTimeout(() => {
       const el = dieEls[idx];
       if (!el) return;
-      clearInterval(timers[order]);
+      stopped.add(idx);
       el.classList.remove('spinning');
+      el.style.animationDelay = '';
+      el.style.animationDuration = '';
+      const tilt = (Math.random() * 7 - 3.5).toFixed(1);
+      dieTilts[idx] = tilt;
+      el.style.setProperty('--tilt', `${tilt}deg`);
       el.classList.add('landed');
       el.querySelector('.pip').textContent = PIPS[battle.dice[idx].face] || battle.dice[idx].face;
-    }, 380 + order * 150);
+    }, landAt);
   });
-  setTimeout(() => { busy = false; renderBattle(); }, 380 + indices.length * 150 + 180);
+
+  setTimeout(() => { busy = false; renderBattle(); }, 460 + indices.length * 170 + 80 + 260);
 }
 
 // 확정 → 베기 연출 → 적 페이즈 → 다음 턴
@@ -431,7 +453,9 @@ function showReward() {
             <span class="card-text">${
               c.kind === 'die' ? `[${c.item.faces.join(',')}]<br>${esc(c.item.desc)}` :
               c.kind === 'relic' ? esc(c.item.desc) :
-              c.newLevel > 1 ? `강화: 점수 ×${c.newLevel}` : `새 족보 획득<br>${esc(c.item.abilityText || '')}`
+              c.newLevel > 1
+                ? (c.item.levelFlat !== undefined ? `강화: 피해 +${c.item.levelFlat * (c.newLevel - 1)}` : `강화: 점수 ×${c.newLevel}`)
+                : `새 족보 획득<br>${esc(c.item.abilityText || '')}`
             }</span>
             <span class="card-rarity">${c.item.tier}</span>
           </button>`).join('')}

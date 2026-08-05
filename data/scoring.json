@@ -137,14 +137,14 @@
       "startOwned": true,
       "tier": "common",
       "ability": [],
-      "abilityText": "언제나 성립 (레벨업 불가)",
+      "abilityText": "언제나 성립",
       "ruleText": "조건 없음 — 항상 성립. 가장 높은 눈 3개의 합만큼 피해.",
-      "maxLevel": 1,
       "example": [
         6,
         5,
         3
-      ]
+      ],
+      "levelFlat": 2
     },
     {
       "id": "threeKind",

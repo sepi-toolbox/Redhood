@@ -130,30 +130,39 @@ body {
   background: #efe6d5; color: #1b1512; border: 2px solid #4a3b30;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   cursor: pointer; position: relative;
+  transform: rotate(var(--tilt, 0deg));
 }
 .die .pip { font-size: 38px; line-height: 1; }
 .die small { font-size: 9px; font-weight: 700; color: #7e1f1f; height: 11px; }
-.die.held { border-color: #c9302f; box-shadow: 0 0 0 2px rgba(201,48,47,.4); transform: translateY(-4px); }
+.die.held { border-color: #c9302f; box-shadow: 0 0 0 2px rgba(201,48,47,.4); transform: translateY(-4px) rotate(var(--tilt, 0deg)); }
 .die.gold { background: #f5d97a; border-color: #b08948; }
 .die.special { background: #d9d2e8; }
 .die.blank { background: #241c18; border-style: dashed; border-color: #3c2f26; }
 
-/* 굴림 연출 */
-@keyframes diceSpin {
-  0% { transform: translateY(0) rotate(0); }
-  25% { transform: translateY(-7px) rotate(-9deg); }
-  50% { transform: translateY(2px) rotate(7deg); }
-  75% { transform: translateY(-4px) rotate(-5deg); }
-  100% { transform: translateY(0) rotate(0); }
+/* 굴림 연출 — 낙하하며 구르는 텀블링 (개별 delay/duration은 JS가 부여) */
+@keyframes diceTumble {
+  0%   { transform: translateY(-16px) rotate(-16deg) scale(1.07); }
+  22%  { transform: translateY(3px)  rotate(9deg)  scale(.96, .9); }
+  40%  { transform: translateY(-12px) rotate(21deg) scale(1.05); }
+  58%  { transform: translateY(1px)  rotate(-7deg) scale(.97, .93); }
+  76%  { transform: translateY(-7px) rotate(-18deg) scale(1.03); }
+  100% { transform: translateY(-15px) rotate(12deg) scale(1.06); }
 }
-.die.spinning { animation: diceSpin .3s linear infinite; }
-.die.spinning .pip { opacity: .55; }
+.die.spinning {
+  animation: diceTumble .4s linear infinite alternate;
+  box-shadow: 0 10px 10px -6px rgba(0,0,0,.55);
+}
+.die.spinning .pip { opacity: .5; filter: blur(0.6px); }
+
+/* 착지 — 떨어져 눌렸다가(스쿼시) 튀어오르고 기울어진 채 멈춤 */
 @keyframes diceLand {
-  0% { transform: scale(1.28); }
-  55% { transform: scale(.94); }
-  100% { transform: scale(1); }
+  0%   { transform: translateY(-20px) rotate(var(--tilt, 0deg)) scale(1.16); }
+  38%  { transform: translateY(3px)   rotate(var(--tilt, 0deg)) scale(1.1, .82); }
+  62%  { transform: translateY(-7px)  rotate(var(--tilt, 0deg)) scale(.96, 1.05); }
+  82%  { transform: translateY(1px)   rotate(var(--tilt, 0deg)) scale(1.02, .97); }
+  100% { transform: translateY(0)     rotate(var(--tilt, 0deg)) scale(1); }
 }
-.die.landed { animation: diceLand .24s ease-out; }
+.die.landed { animation: diceLand .32s cubic-bezier(.34, 1.2, .64, 1); }
 
 .roll-bar { flex: none; display: flex; justify-content: center; padding: 4px 14px 0; }
 .roll-btn { min-width: 170px; font-size: 17px; }
