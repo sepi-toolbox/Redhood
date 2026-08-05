@@ -183,8 +183,15 @@ function enterNode(type) {
   currentNodeType = type;
   if (type === 'rest') { showRest(); return; }
   battle = createBattle(run, rollEncounter(run, type));
-  selectedCat = null; targetUid = null; busy = false;
+  selectedCat = null; busy = false;
+  targetUid = aliveEnemies(battle)[0]?.uid || null; // 기본 표적: 맨 왼쪽
   renderBattle();
+}
+
+// 표적 유지: 죽었으면 다음(맨 왼쪽 생존)으로 자동 이동
+function syncTarget() {
+  const alive = aliveEnemies(battle);
+  if (!alive.some(e => e.uid === targetUid)) targetUid = alive[0]?.uid || null;
 }
 
 // ---------- 휴식 ----------
@@ -232,8 +239,7 @@ function renderBattle(opts = {}) {
   const p = battle.player;
   const previews = previewAll(battle);
   const lastR = battle.lastResult;
-  const selDef = selectedCatDef();
-  const targeting = selDef && !isAoE(selDef) && aliveEnemies(battle).length > 1;
+  const multi = aliveEnemies(battle).length > 1;
   const hpPct = Math.max(0, p.hp / p.maxHp * 100);
   app.innerHTML = '';
   app.append(h(`
@@ -245,7 +251,8 @@ function renderBattle(opts = {}) {
       </header>
       <div class="enemy-zone">
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
-          <button class="enemy ${targeting ? 'targetable' : ''} ${targetUid === e.uid && selDef && !isAoE(selDef) ? 'targeted' : ''}" data-uid="${e.uid}">
+          <button class="enemy ${multi && targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
+            ${multi && targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
             <span class="intent">${intentOf(e)} <small>${esc(e.nextMove.name)}</small></span>
             <span class="enemy-art">${e.tier === 'boss' ? '🐺' : e.tier === 'elite' ? '💀' : '🌑'}</span>
             <span class="enemy-name">${esc(e.name)}</span>
@@ -274,8 +281,8 @@ function renderBattle(opts = {}) {
       </div>
       <div class="hint-line">${
         !battle.rolled ? '굴려서 턴을 시작한다' :
-        targeting && selDef ? '공격할 적을 탭하라 (족보 다시 탭 = 첫 번째 적)' :
-        selectedCat ? '한 번 더 탭하면 확정' : '주사위 탭=홀드 · 족보 길게 누르면 설명'
+        selectedCat ? '한 번 더 탭하면 확정' :
+        multi ? '적 탭=표적 변경 · 주사위 탭=홀드' : '주사위 탭=홀드 · 족보 길게 누르면 설명'
       }</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, level, seal, locked, bd }) => `
@@ -318,16 +325,15 @@ function renderBattle(opts = {}) {
     const rerolled = battle.dice.map((d, i) => (d.held ? -1 : i)).filter(i => i >= 0);
     if (reroll(battle)) animateRoll(rerolled);
   });
-  // 적 (타겟 지정)
+  // 적 탭 = 표적 변경 (언제든, 확정과 무관)
   app.querySelectorAll('.enemy').forEach(el => {
     el.addEventListener('click', () => {
       if (busy) return;
       const uid = el.dataset.uid;
-      if (selectedCat) {
-        const def = selectedCatDef();
-        if (def && !isAoE(def)) { tryConfirm(selectedCat, uid); return; }
-      }
-      targetUid = uid; renderBattle();
+      const alive = aliveEnemies(battle);
+      if (!alive.some(e => e.uid === uid)) return;
+      targetUid = uid;
+      renderBattle();
     });
   });
   // 족보
@@ -399,7 +405,7 @@ function tryConfirm(catId, uid) {
   selectedCat = null;
   const res = confirmCategory(battle, catId, uid);
   if (!res) { busy = false; renderBattle(); return; }
-  targetUid = null;
+  syncTarget(); // 표적이 죽었으면 다음 적으로
   renderBattle();
   playHitEffects(battle.lastHits);
   const hitDelay = battle.lastHits.length > 0 ? 620 : 220;
@@ -409,6 +415,7 @@ function tryConfirm(catId, uid) {
     const hpBefore = battle.player.hp;
     enemyPhase(battle);
     if (battle.over) { playerDeathFx(); return; } // 사망 연출
+    syncTarget();
     renderBattle({ playerHit: battle.player.hp < hpBefore });
     busy = false;
   }, hitDelay);
