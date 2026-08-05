@@ -43,9 +43,9 @@ export function evalCategory(cat, faces) {
   }
 }
 
-// 최종 피해 = (기본 + 금박 기여) × Π(categoryMult) + Σ(categoryBonus) + Σ(flatDamage)
+// 최종 피해 = (기본 + 금박 기여) × 족보 레벨 × Π(categoryMult) + Σ(categoryBonus) + Σ(flatDamage)
 // 기본+금박이 0이면 "칸 버리기" — 배수·가산 없이 0 (healOnZero 대상)
-export function computeDamage(cat, faces, diceDefs, relics) {
+export function computeDamage(cat, faces, diceDefs, relics, level = 1) {
   const ev = evalCategory(cat, faces);
   let gold = 0;
   for (const i of ev.contributing) {
@@ -53,7 +53,7 @@ export function computeDamage(cat, faces, diceDefs, relics) {
   }
   const core = ev.base + gold;
   if (!ev.valid || core === 0) {
-    return { valid: ev.valid, base: ev.base, gold: 0, mult: 1, bonus: 0, flat: 0, total: 0, isZero: true };
+    return { valid: ev.valid, base: ev.base, gold: 0, level, mult: 1, bonus: 0, flat: 0, total: 0, isZero: true };
   }
   let mult = 1, bonus = 0, flat = 0;
   for (const r of relics) {
@@ -62,8 +62,8 @@ export function computeDamage(cat, faces, diceDefs, relics) {
     if (h.type === 'categoryBonus' && h.category === cat.id) bonus += h.bonus;
     if (h.type === 'flatDamage') flat += h.amount;
   }
-  const total = Math.floor(core * mult) + bonus + flat;
-  return { valid: true, base: ev.base, gold, mult, bonus, flat, total, isZero: false };
+  const total = Math.floor(core * level * mult) + bonus + flat;
+  return { valid: true, base: ev.base, gold, level, mult, bonus, flat, total, isZero: false };
 }
 
 export function rollFace(dieDef, rngf) {

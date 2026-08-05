@@ -2,14 +2,17 @@
 import { DB } from './data.js';
 import { rng } from './engine.js';
 
-const SAVE_KEY = 'redhood_run_v2';
+const SAVE_KEY = 'redhood_run_v3';
 
 export function newRun() {
   const maxHp = DB.act1.player.maxHp;
+  const categories = {};
+  for (const c of DB.scoring.categories) if (c.startOwned) categories[c.id] = 1;
   return {
     hp: maxHp, maxHp,
     dice: DB.act1.player.startDice.slice(),
     relics: [],
+    categories,          // id -> level
     floor: 0,
     map: generateMap(),
   };
@@ -49,26 +52,35 @@ export function rollEncounter(run, nodeType) {
 }
 function pickArr(arr) { return arr[Math.floor(rng.next() * arr.length)].slice(); }
 
-// ---------- 보상: 주사위/유물 혼합 3택1 ----------
+// ---------- 보상: 족보/주사위/유물 혼합 3택1 ----------
 export function rollRewards(run, nodeType) {
   const cfg = DB.act1.rewards[nodeType];
   if (!cfg || cfg.choices === 0) return [];
+  const levelCap = DB.scoring.levelCap;
   const picks = [];
   const usedIds = new Set();
   let guard = 0;
-  while (picks.length < cfg.choices && guard++ < 200) {
-    const isDie = rollWeight(cfg.pool) === 'dice';
+  while (picks.length < cfg.choices && guard++ < 300) {
+    const kind = rollWeight(cfg.pool);
     const tier = rollWeight(cfg.tierWeights);
     let pool;
-    if (isDie) {
+    if (kind === 'dice') {
       pool = DB.dice.filter(d => d.tier === tier && d.id !== 'normal' && !usedIds.has('d_' + d.id));
-    } else {
+    } else if (kind === 'relic') {
       pool = DB.relics.filter(r => r.tier === tier && !run.relics.includes(r.id) && !usedIds.has('r_' + r.id));
+    } else {
+      // 족보: 미보유=신규 획득, 보유=레벨업 (레벨캡 도달 시 제외)
+      pool = DB.scoring.categories.filter(c =>
+        c.tier === tier && !usedIds.has('c_' + c.id) && (run.categories[c.id] || 0) < levelCap);
     }
     if (pool.length === 0) continue;
     const item = pool[Math.floor(rng.next() * pool.length)];
-    usedIds.add((isDie ? 'd_' : 'r_') + item.id);
-    picks.push({ kind: isDie ? 'die' : 'relic', item });
+    usedIds.add((kind === 'dice' ? 'd_' : kind === 'relic' ? 'r_' : 'c_') + item.id);
+    picks.push({
+      kind: kind === 'dice' ? 'die' : kind === 'relic' ? 'relic' : 'category',
+      item,
+      newLevel: kind === 'category' ? (run.categories[item.id] || 0) + 1 : undefined,
+    });
   }
   return picks;
 }
@@ -89,7 +101,7 @@ export function applyRest(run) {
 
 // ---------- 세이브 ----------
 export function saveRun(run) {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 2 })); } catch (e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 3 })); } catch (e) {}
 }
 
 export function loadRun() {
@@ -97,9 +109,11 @@ export function loadRun() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw);
-    if (s._v !== 2) { clearSave(); return null; }
+    if (s._v !== 3) { clearSave(); return null; }
     if (!s.dice.every(id => DB.diceById[id])) { clearSave(); return null; }
     if (!s.relics.every(id => DB.relicById[id])) { clearSave(); return null; }
+    const catIds = new Set(DB.scoring.categories.map(c => c.id));
+    if (!Object.keys(s.categories || {}).every(id => catIds.has(id))) { clearSave(); return null; }
     return s;
   } catch (e) { return null; }
 }

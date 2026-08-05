@@ -113,12 +113,17 @@ function showBagModal() {
     const d = DB.diceById[id];
     return `<li><b>${esc(d.name)}</b> <span class="modal-text">[${d.faces.join(',')}] ${esc(d.desc)}</span></li>`;
   }).join('');
+  const catItems = DB.scoring.categories
+    .filter(c => run.categories[c.id])
+    .map(c => `<li><b>${esc(c.name)}</b> Lv${run.categories[c.id]}${c.cooldown ? ` <span class="modal-text">쿨다운 ${c.cooldown}턴</span>` : ''}</li>`)
+    .join('');
   const relicItems = run.relics.length
     ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${r.icon} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
     : '<li class="modal-text">유물 없음</li>';
   app.append(h(`
     <div class="modal-back">
       <div class="modal">
+        <h3>족보</h3><ul class="deck-list">${catItems}</ul>
         <h3>주사위 (5)</h3><ul class="deck-list">${diceItems}</ul>
         <h3>유물</h3><ul class="deck-list">${relicItems}</ul>
         <button class="btn primary" id="modal-close">닫기</button>
@@ -158,6 +163,7 @@ function breakdownText(bd) {
   if (bd.isZero) return '0점 버리기';
   const parts = [`기본 ${bd.base}`];
   if (bd.gold) parts.push(`+금박 ${bd.gold}`);
+  if (bd.level > 1) parts.push(`×Lv${bd.level}`);
   if (bd.mult !== 1) parts.push(`×${bd.mult}`);
   if (bd.bonus) parts.push(`+${bd.bonus}`);
   if (bd.flat) parts.push(`+${bd.flat}`);
@@ -201,11 +207,11 @@ function renderBattle() {
         <span class="turn-hint">${selectedCat ? '한 번 더 탭하면 확정' : '주사위 탭=홀드 · 족보 탭=선택'}</span>
       </div>
       <div class="sheet-zone">
-        ${previews.map(({ cat, used, bd }) => `
-          <button class="sheet-row ${used ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''} ${!used && bd.total === 0 ? 'zero' : ''}"
-            data-cat="${cat.id}" ${used ? 'disabled' : ''}>
-            <span class="sheet-name">${esc(cat.name)}</span>
-            <span class="sheet-preview">${used ? '사용됨' : bd.total > 0 ? bd.total : '0'}</span>
+        ${previews.map(({ cat, level, cd, seal, locked, bd }) => `
+          <button class="sheet-row ${locked ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''} ${!locked && bd.total === 0 ? 'zero' : ''}"
+            data-cat="${cat.id}" ${locked ? 'disabled' : ''}>
+            <span class="sheet-name">${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}</span>
+            <span class="sheet-preview">${seal ? `🔒${seal}` : cd ? `⏳${cd}` : bd.total > 0 ? bd.total : '0'}</span>
           </button>`).join('')}
       </div>
     </div>`));
@@ -247,9 +253,13 @@ function showReward() {
       <div class="reward-cards">
         ${choices.map((c, i) => `
           <button class="card r-${c.item.tier}" data-idx="${i}">
-            <span class="cost">${c.kind === 'die' ? '🎲 주사위' : (c.item.icon || '🪬') + ' 유물'}</span>
-            <span class="card-name">${esc(c.item.name)}</span>
-            <span class="card-text">${c.kind === 'die' ? `[${c.item.faces.join(',')}]<br>` : ''}${esc(c.item.desc)}</span>
+            <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : '📜 족보'}</span>
+            <span class="card-name">${esc(c.item.name)}${c.kind === 'category' && c.newLevel > 1 ? ` Lv${c.newLevel}` : ''}</span>
+            <span class="card-text">${
+              c.kind === 'die' ? `[${c.item.faces.join(',')}]<br>${esc(c.item.desc)}` :
+              c.kind === 'relic' ? esc(c.item.desc) :
+              c.newLevel > 1 ? `강화: 점수 ×${c.newLevel}` : `새 족보 획득${c.item.cooldown ? `<br>쿨다운 ${c.item.cooldown}턴` : ''}`
+            }</span>
             <span class="card-rarity">${c.item.tier}</span>
           </button>`).join('')}
       </div>
@@ -259,6 +269,7 @@ function showReward() {
     el.addEventListener('click', () => {
       const c = choices[parseInt(el.dataset.idx, 10)];
       if (c.kind === 'relic') { run.relics.push(c.item.id); saveRun(run); showMap(); }
+      else if (c.kind === 'category') { run.categories[c.item.id] = c.newLevel; saveRun(run); showMap(); }
       else showReplaceDie(c.item);
     });
   });

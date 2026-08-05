@@ -115,6 +115,7 @@ body {
   color: #e8dcc8; padding: 9px 12px; cursor: pointer; font-size: 13.5px;
 }
 .sheet-row .sheet-preview { font-weight: 700; color: #e8b64b; font-size: 15px; }
+.sheet-row .lv { color: #b08948; font-size: 11px; }
 .sheet-row.zero .sheet-preview { color: #6f6353; }
 .sheet-row.selected { border-color: #e8b64b; background: #2a2118; }
 .sheet-row.used { opacity: .35; }

@@ -53,5 +53,13 @@ eq('0점 버리기 isZero', zero.isZero, true);
 // 금박이 찬스에 기여: [6,6,5,4,1] 합22 + 금박(0번 눈6) = 28
 eq('금박 찬스 기여', computeDamage(C.chance, [6, 6, 5, 4, 1], [G, N, N, N, N], []).total, 28);
 
+// v0.3 족보 레벨: (기본+금박)×레벨×유물배수+가산
+// 찬스 Lv2: (22+6)×2 = 56
+eq('찬스 Lv2', computeDamage(C.chance, [6, 6, 5, 4, 1], [G, N, N, N, N], [], 2).total, 56);
+// 에이스 Lv3 + 은탄환 + 금박(눈1): (4+1)×3×5 +3 = 78
+eq('에이스 Lv3+은탄환+금박+이빨', computeDamage(C.ones, [1, 1, 1, 1, 6], [G, N, N, N, N], [silver, fang], 3).total, 78);
+// 레벨이 있어도 0점은 0점
+eq('Lv3이어도 0점 버리기', computeDamage(C.ones, [2, 3, 4, 5, 6], plain5, [], 3).total, 0);
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);

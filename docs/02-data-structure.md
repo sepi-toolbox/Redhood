@@ -1,6 +1,12 @@
 # REDHOOD · 데이터 구조 설계
 
-문서 버전 v0.2 (2026-08-05) · 대응 컨셉 문서: 01-concept.md v0.2 (주사위 전환)
+문서 버전 v0.3 (2026-08-05) · 대응 컨셉 문서: 01-concept.md v0.3 (족보 드랍·레벨·쿨다운)
+
+**v0.3 변경 요약**: scoring.json에서 `oncePerBattle`/`sheetExhausted` 제거, 카테고리별
+`startOwned`·`cooldown`·`tier` 추가, 최상위에 `levelCap`. act1.json에 `hpScalePerFloor`,
+rewards.pool에 `category` 추가. 적 op에 `seal`(마지막 사용 족보 봉인) 추가.
+세이브 `_v: 3` — `categories: {id: level}` 필드 추가. 피해식은
+`(기본+금박) × 레벨 × Π(categoryMult) + Σ(categoryBonus) + Σ(flatDamage)`.
 
 정본 원칙은 유지한다: **엔진은 해석만, 수치·구성은 전부 JSON.**
 밸런싱 = data/ 수정으로 끝난다. 카드 시대 파일(cards/weapons/frenzy/statuses)은 삭제
