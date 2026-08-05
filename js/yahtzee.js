@@ -45,8 +45,20 @@ export function evalCategory(cat, faces) {
         : { valid: false, base: 0, contributing: [] };
     }
     case 'chance': {
+      if (cat.score === 'sumTop3Distinct') {
+        // v0.15: 서로 다른 눈 중 높은 3개의 합 — 같은 눈이 뭉칠수록 찬스가 약해진다 (보험 역할 고정)
+        const seen = new Set();
+        const pick = [];
+        for (const i of all.slice().sort((a, b) => faces[b] - faces[a])) {
+          if (seen.has(faces[i])) continue;
+          seen.add(faces[i]);
+          pick.push(i);
+          if (pick.length === 3) break;
+        }
+        return { valid: true, base: pick.reduce((s, i) => s + faces[i], 0), contributing: pick };
+      }
       if (cat.score === 'sumTop3') {
-        // 가장 높은 눈 3개의 합 (보험 역할 — 천장이 되지 않게)
+        // (구) 가장 높은 눈 3개의 합
         const idx = all.slice().sort((a, b) => faces[b] - faces[a]).slice(0, 3);
         return { valid: true, base: idx.reduce((s, i) => s + faces[i], 0), contributing: idx };
       }

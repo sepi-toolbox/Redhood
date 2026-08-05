@@ -260,6 +260,11 @@ function applyAbility(battle, variant, bd, targets) {
         battle.dodgeActive = true;
         battle.lastResult.bonusHits.push('회피!');
         break;
+      case 'upperCharge':
+        // 늑대 사냥탄: 상단 보너스 게이지 추가 적립 (발동 판정은 확정 직후 상단 블록에서)
+        battle.upperTotal += ab.amount;
+        battle.lastResult.bonusHits.push(`☀+${ab.amount}`);
+        break;
     }
   }
 }

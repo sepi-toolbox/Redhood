@@ -17,6 +17,7 @@ const C = {
   large: { id: 'largeStraight', kind: 'straight', length: 5, score: 60 },
   yahtzee: { id: 'yahtzee', kind: 'ofKind', count: 5, score: 70 },
   chance: { id: 'chance', kind: 'chance', score: 'sumTop3' },
+  chanceD: { id: 'chance', kind: 'chance', score: 'sumTop3Distinct' },
 };
 const N = { faces: [1, 2, 3, 4, 5, 6] };
 const G = { faces: [1, 2, 3, 4, 5, 6], gold: true };
@@ -36,6 +37,13 @@ eq('포카드 실패 [4,4,4,2,1]', evalCategory(C.fourKind, [4, 4, 4, 2, 1]).val
 eq('에이스 [1,1,2,3,4]', evalCategory(C.ones, [1, 1, 2, 3, 4]).base, 2);
 eq('찬스 [6,6,5,4,1] 상위3합', evalCategory(C.chance, [6, 6, 5, 4, 1]).base, 17);
 eq('트리플 ×1.5 내림 [3,3,3,1,2] → 13', evalCategory(C.threeKind, [3, 3, 3, 1, 2]).base, 13);
+// v0.15 찬스 개정: 서로 다른 눈 상위 3합 — 뭉칠수록 약해진다
+eq('찬스(개정) [6,6,5,4,1] → 6+5+4', evalCategory(C.chanceD, [6, 6, 5, 4, 1]).base, 15);
+eq('찬스(개정) [6,6,6,6,6] → 6', evalCategory(C.chanceD, [6, 6, 6, 6, 6]).base, 6);
+eq('찬스(개정) [6,6,4,4,2] → 12', evalCategory(C.chanceD, [6, 6, 4, 4, 2]).base, 12);
+eq('찬스(개정) 기여 3개(중복 제외)', evalCategory(C.chanceD, [6, 6, 5, 4, 1]).contributing.length, 3);
+// 금박이 개정 찬스의 채택 눈에 기여: [6,6,5,4,1] 0번(눈6 채택) → 15+6=21
+eq('금박 찬스(개정) 기여', computeDamage(C.chanceD, [6, 6, 5, 4, 1], [G, N, N, N, N], []).total, 21);
 
 // 금박·유물 결합: (기본+금박)×배수+가산
 const silver = { hook: { type: 'categoryMult', category: 'ones', mult: 5 } };

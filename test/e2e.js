@@ -27,11 +27,11 @@ async function playTurn(page) {
   }
   // 2) 가끔 리롤 — 다시 굴릴 주사위를 먼저 마킹 (v0.6 조작)
   if (Math.random() < 0.35) {
-    await page.locator('.die').first().click();
+    await page.locator('.die').first().click({ force: true });
     await page.waitForTimeout(60);
     const rerollBtn = page.locator('#reroll-btn:not([disabled])');
     if (await rerollBtn.count()) { await rerollBtn.click(); await settle(page); }
-    else { await page.locator('.die').first().click(); await page.waitForTimeout(60); }
+    else { await page.locator('.die').first().click({ force: true }); await page.waitForTimeout(60); }
   }
   // 3) 최고 피해 족보 확정 (선택 → 재탭)
   const rows = page.locator('.sheet-row[data-locked="0"]');

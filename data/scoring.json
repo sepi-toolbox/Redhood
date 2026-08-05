@@ -1,5 +1,5 @@
 {
-  "_version": 7,
+  "_version": 8,
   "rerollsPerTurn": 2,
   "upperBonus": {
     "threshold": 40,
@@ -11,9 +11,9 @@
       "id": "chance",
       "name": "찬스",
       "kind": "chance",
-      "score": "sumTop3",
+      "score": "sumTop3Distinct",
       "tier": "common",
-      "ruleText": "조건 없음 — 항상 성립. 가장 높은 눈 3개의 합만큼 피해.",
+      "ruleText": "언제나 성립 — 피해: 서로 다른 눈 중 높은 3개의 합 (같은 눈은 한 번만)",
       "example": [
         6,
         5,
@@ -275,8 +275,13 @@
         {
           "id": "wolfshot",
           "name": "늑대 사냥탄",
-          "ability": [],
-          "abilityText": "부가 없음 — 순수 화력",
+          "ability": [
+            {
+              "op": "upperCharge",
+              "amount": 5
+            }
+          ],
+          "abilityText": "상단 보너스 게이지 +5",
           "tier": "common"
         },
         {
