@@ -1,6 +1,6 @@
-// main.js — 부트스트랩 + 화면(UI) 렌더링 (v2: 주사위)
+// main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
-import { createBattle, reroll, toggleHold, confirmCategory, previewAll, intentOf } from './engine.js';
+import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, saveRun, loadRun, clearSave, hasSave } from './run.js';
 
 const app = document.getElementById('app');
@@ -8,6 +8,8 @@ let run = null;
 let battle = null;
 let currentNodeType = null;
 let selectedCat = null;
+let targetUid = null;   // 단일 공격 대상
+let busy = false;       // 연출 중 입력 잠금
 
 (async function boot() {
   try { await loadAll(); }
@@ -25,6 +27,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 function h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content; }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+const PIPS = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' };
 
 // 길게 누르기(450ms) → onLong 실행. 발동 시 이어지는 click은 무시된다.
 function addLongPress(el, onLong) {
@@ -49,7 +53,7 @@ function showCategoryInfo(catId, level) {
   app.append(h(`
     <div class="modal-back" id="cat-info">
       <div class="modal">
-        <h3>${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}</h3>
+        <h3>${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}${isAoE(cat) ? ' <small class="aoe-tag">전체 공격</small>' : ''}</h3>
         <p class="info-rule">${esc(cat.ruleText || '')}</p>
         <p class="info-ability">✨ ${esc(cat.abilityText || '부가 없음')}</p>
         ${level > 1 ? `<p class="modal-text">레벨 보정: 피해 ×${level} (부가 능력은 고정)</p>` : ''}
@@ -61,8 +65,6 @@ function showCategoryInfo(catId, level) {
   document.getElementById('cat-info-close').addEventListener('click', () => back.remove());
   back.addEventListener('click', (e) => { if (e.target === back) back.remove(); });
 }
-
-const PIPS = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' };
 
 // ---------- 타이틀 ----------
 function showTitle() {
@@ -151,7 +153,7 @@ function showBagModal() {
   }).join('');
   const catItems = DB.scoring.categories
     .filter(c => run.categories[c.id])
-    .map(c => `<li><b>${esc(c.name)}</b> Lv${run.categories[c.id]} <span class="modal-text">${esc(c.abilityText || '')}</span></li>`)
+    .map(c => `<li><b>${esc(c.name)}</b> Lv${run.categories[c.id]}${isAoE(c) ? ' <small class="aoe-tag">전체</small>' : ''} <span class="modal-text">${esc(c.abilityText || '')}</span></li>`)
     .join('');
   const relicItems = run.relics.length
     ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${r.icon} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
@@ -172,7 +174,7 @@ function enterNode(type) {
   currentNodeType = type;
   if (type === 'rest') { showRest(); return; }
   battle = createBattle(run, rollEncounter(run, type));
-  selectedCat = null;
+  selectedCat = null; targetUid = null; busy = false;
   renderBattle();
 }
 
@@ -212,82 +214,200 @@ function breakdownText(bd) {
   return parts.join(' ');
 }
 
-function renderBattle() {
+function selectedCatDef() {
+  return selectedCat ? DB.scoring.categories.find(c => c.id === selectedCat) : null;
+}
+
+function renderBattle(opts = {}) {
   const p = battle.player;
-  const e = battle.enemy;
   const previews = previewAll(battle);
   const lastR = battle.lastResult;
+  const selDef = selectedCatDef();
+  const targeting = selDef && !isAoE(selDef) && aliveEnemies(battle).length > 1;
+  const hpPct = Math.max(0, p.hp / p.maxHp * 100);
   app.innerHTML = '';
   app.append(h(`
     <div class="screen battle-screen">
       <header class="topbar">
         <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
         <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
-        <span class="hp">❤️ ${p.hp}/${p.maxHp}${p.block > 0 ? ` 🛡${p.block}` : ''}${battle.pendingBuff > 0 ? ` ⚡+${battle.pendingBuff}` : ''}</span>
+        <span class="upper-meter" title="상단 점수 누적 — 기준마다 추가 피해">☀ ${battle.upperTotal}/${upperThreshold()}</span>
       </header>
-      <div class="enemy-panel">
-        <span class="intent">${intentOf(battle)} <small>${esc(e.nextMove.name)}</small></span>
-        <span class="enemy-art">${e.tier === 'boss' ? '🐺' : e.tier === 'elite' ? '💀' : '🌑'}</span>
-        <span class="enemy-name">${esc(e.name)}</span>
-        <span class="bar"><i style="width:${Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
-        <span class="enemy-hp">${e.hp}/${e.maxHpInit}</span>
-        ${lastR ? `<span class="last-result">${esc(lastR.catName)}: ${breakdownText(lastR)} = <b>${lastR.total}</b> ${lastR.bonusHits.map(esc).join(' ')}</span>` : ''}
+      <div class="enemy-zone">
+        ${battle.enemies.filter(e => e.hp > 0).map(e => `
+          <button class="enemy ${targeting ? 'targetable' : ''} ${targetUid === e.uid && selDef && !isAoE(selDef) ? 'targeted' : ''}" data-uid="${e.uid}">
+            <span class="intent">${intentOf(e)} <small>${esc(e.nextMove.name)}</small></span>
+            <span class="enemy-art">${e.tier === 'boss' ? '🐺' : e.tier === 'elite' ? '💀' : '🌑'}</span>
+            <span class="enemy-name">${esc(e.name)}</span>
+            <span class="bar"><i style="width:${Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
+            <span class="enemy-hp">${e.hp}/${e.maxHpInit}</span>
+          </button>`).join('')}
+      </div>
+      <div class="mid-line">
+        ${lastR ? `<span class="last-result">${esc(lastR.catName)}: ${breakdownText(lastR)} = <b>${lastR.total}</b> ${lastR.bonusHits.map(esc).join(' ')}</span>` : '<span class="last-result"></span>'}
       </div>
       <div class="dice-zone">
         ${battle.dice.map((d, i) => {
           const def = battle.diceDefs[i];
-          return `<button class="die ${d.held ? 'held' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}" data-idx="${i}" title="${esc(def.name)}">
-            <span class="pip">${PIPS[d.face] || d.face}</span>
+          const blank = !battle.rolled;
+          return `<button class="die ${blank ? 'blank' : ''} ${d.held ? 'held' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}" data-idx="${i}" title="${esc(def.name)}">
+            <span class="pip">${blank ? '' : PIPS[d.face] || d.face}</span>
             <small>${d.held ? '홀드' : ''}</small>
           </button>`;
         }).join('')}
       </div>
       <div class="roll-bar">
-        <button class="btn primary" id="reroll-btn" ${battle.rollsLeft <= 0 ? 'disabled' : ''}>
-          🎲 리롤 (${battle.rollsLeft})
-        </button>
-        <span class="turn-hint">${selectedCat ? '한 번 더 탭하면 확정' : '주사위 탭=홀드 · 족보 탭=선택'}</span>
-        <span class="upper-meter" title="상단 점수 누적 — 기준마다 추가 피해">☀ ${battle.upperTotal}/${upperThreshold()}</span>
+        ${!battle.rolled
+          ? `<button class="btn primary roll-btn" id="roll-btn">🎲 굴린다</button>`
+          : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft <= 0 || battle.await ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})</button>`}
       </div>
-      <div class="sheet-zone">
+      <div class="hint-line">${
+        !battle.rolled ? '굴려서 턴을 시작한다' :
+        targeting && selDef ? '공격할 적을 탭하라 (족보 다시 탭 = 첫 번째 적)' :
+        selectedCat ? '한 번 더 탭하면 확정' : '주사위 탭=홀드 · 족보 길게 누르면 설명'
+      }</div>
+      <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, level, seal, locked, bd }) => `
           <button class="sheet-row ${locked ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''} ${!locked && bd.total === 0 ? 'zero' : ''}"
             data-cat="${cat.id}" data-locked="${locked ? 1 : 0}">
             <span class="sheet-main">
-              <span class="sheet-name">${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}</span>
+              <span class="sheet-name">${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}${isAoE(cat) ? ' <small class="aoe-tag">전체</small>' : ''}</span>
               <span class="sheet-ability">${esc(cat.abilityText || '')}</span>
             </span>
-            <span class="sheet-preview">${seal ? `🔒${seal}` : bd.total > 0 ? bd.total : '0'}</span>
+            <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? bd.total : '0') : '—'}</span>
           </button>`).join('')}
+      </div>
+      <div class="player-bar ${opts.playerHit ? 'hurt' : ''}">
+        <span class="pb-side">${p.block > 0 ? `🛡${p.block}` : ''}</span>
+        <div class="hp-gauge">
+          <div class="hp-fill" style="width:${hpPct}%"></div>
+          <span class="hp-text">❤️ ${p.hp} / ${p.maxHp}</span>
+        </div>
+        <span class="pb-side">${battle.pendingBuff > 0 ? `⚡+${battle.pendingBuff}` : ''}</span>
       </div>
     </div>`));
 
+  // 주사위
   app.querySelectorAll('.die').forEach(el => {
-    el.addEventListener('click', () => { toggleHold(battle, parseInt(el.dataset.idx, 10)); renderBattle(); });
+    el.addEventListener('click', () => {
+      if (busy || !battle.rolled) return;
+      toggleHold(battle, parseInt(el.dataset.idx, 10));
+      renderBattle();
+    });
   });
-  document.getElementById('reroll-btn').addEventListener('click', () => {
+  // 굴림 / 리롤
+  const rollBtn = document.getElementById('roll-btn');
+  if (rollBtn) rollBtn.addEventListener('click', () => {
+    if (busy) return;
+    if (initialRoll(battle)) animateRoll([0, 1, 2, 3, 4]);
+  });
+  const rerollBtn = document.getElementById('reroll-btn');
+  if (rerollBtn) rerollBtn.addEventListener('click', () => {
+    if (busy) return;
     selectedCat = null;
-    if (reroll(battle)) renderBattle();
+    const rerolled = battle.dice.map((d, i) => (d.held ? -1 : i)).filter(i => i >= 0);
+    if (reroll(battle)) animateRoll(rerolled);
   });
+  // 적 (타겟 지정)
+  app.querySelectorAll('.enemy').forEach(el => {
+    el.addEventListener('click', () => {
+      if (busy) return;
+      const uid = el.dataset.uid;
+      if (selectedCat) {
+        const def = selectedCatDef();
+        if (def && !isAoE(def)) { tryConfirm(selectedCat, uid); return; }
+      }
+      targetUid = uid; renderBattle();
+    });
+  });
+  // 족보
   app.querySelectorAll('.sheet-row').forEach(el => {
     const catId = el.dataset.cat;
     addLongPress(el, () => showCategoryInfo(catId, battle.categories[catId] || 1));
     el.addEventListener('click', () => {
-      if (el.dataset.locked === '1') return; // 봉인된 족보: 탭 무시 (길게 눌러 설명은 가능)
+      if (busy || el.dataset.locked === '1') return;
       if (selectedCat !== catId) { selectedCat = catId; renderBattle(); return; }
-      selectedCat = null;
-      confirmCategory(battle, catId);
-      afterAction();
+      tryConfirm(catId, targetUid);
     });
   });
 }
 
-function afterAction() {
-  if (!battle.over) { renderBattle(); return; }
-  run.hp = battle.player.hp;
-  if (battle.result === 'defeat') { clearSave(); showEnd(false); return; }
-  if (currentNodeType === 'boss') { clearSave(); showEnd(true); return; }
-  showReward();
+// 굴림 연출: 지정된 주사위를 흔들고 왼쪽부터 차례로 값 공개
+function animateRoll(indices) {
+  busy = true;
+  renderBattle();
+  const dieEls = [...app.querySelectorAll('.die')];
+  const glyphs = Object.values(PIPS);
+  const timers = [];
+  indices.forEach((idx) => {
+    const el = dieEls[idx];
+    if (!el) return;
+    el.classList.add('spinning');
+    el.classList.remove('blank');
+    const pip = el.querySelector('.pip');
+    timers.push(setInterval(() => {
+      pip.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+    }, 65));
+  });
+  indices.forEach((idx, order) => {
+    setTimeout(() => {
+      const el = dieEls[idx];
+      if (!el) return;
+      clearInterval(timers[order]);
+      el.classList.remove('spinning');
+      el.classList.add('landed');
+      el.querySelector('.pip').textContent = PIPS[battle.dice[idx].face] || battle.dice[idx].face;
+    }, 380 + order * 150);
+  });
+  setTimeout(() => { busy = false; renderBattle(); }, 380 + indices.length * 150 + 180);
+}
+
+// 확정 → 베기 연출 → 적 페이즈 → 다음 턴
+function tryConfirm(catId, uid) {
+  if (busy) return;
+  busy = true;
+  selectedCat = null;
+  const res = confirmCategory(battle, catId, uid);
+  if (!res) { busy = false; renderBattle(); return; }
+  targetUid = null;
+  renderBattle();
+  playHitEffects(battle.lastHits);
+  const hitDelay = battle.lastHits.length > 0 ? 620 : 220;
+
+  setTimeout(() => {
+    if (battle.over) { finishBattle(); return; }
+    const hpBefore = battle.player.hp;
+    enemyPhase(battle);
+    if (battle.over) { finishBattle(); return; }
+    renderBattle({ playerHit: battle.player.hp < hpBefore });
+    busy = false;
+  }, hitDelay);
+}
+
+function playHitEffects(hits) {
+  for (const hit of hits) {
+    const el = app.querySelector(`.enemy[data-uid="${hit.uid}"]`);
+    if (!el) continue;
+    el.classList.add('hit');
+    const slash = document.createElement('span');
+    slash.className = 'slash';
+    el.appendChild(slash);
+    const dmg = document.createElement('span');
+    dmg.className = 'dmg-float';
+    dmg.textContent = `-${hit.amount}`;
+    el.appendChild(dmg);
+    setTimeout(() => { slash.remove(); dmg.remove(); el.classList.remove('hit'); }, 650);
+  }
+}
+
+function finishBattle() {
+  setTimeout(() => {
+    busy = false;
+    run.hp = battle.player.hp;
+    if (battle.result === 'defeat') { clearSave(); showEnd(false); return; }
+    if (currentNodeType === 'boss') { clearSave(); showEnd(true); return; }
+    showReward();
+  }, 500);
 }
 
 // ---------- 보상 ----------

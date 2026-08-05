@@ -1,26 +1,121 @@
 {
   "_version": 3,
-  "player": { "maxHp": 70, "startDice": ["normal", "normal", "normal", "normal", "normal"] },
+  "player": {
+    "maxHp": 70,
+    "startDice": [
+      "normal",
+      "normal",
+      "normal",
+      "normal",
+      "normal"
+    ]
+  },
   "map": {
     "floors": 11,
     "choicesMin": 2,
     "choicesMax": 3,
-    "nodeWeights": { "battle": 6, "elite": 1.5, "rest": 1.5 },
-    "eliteFloors": [5, 6, 7, 8, 9],
-    "fixed": { "1": "battle", "10": "rest", "11": "boss" }
+    "nodeWeights": {
+      "battle": 6,
+      "elite": 1.5,
+      "rest": 1.5
+    },
+    "eliteFloors": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "fixed": {
+      "1": "battle",
+      "10": "rest",
+      "11": "boss"
+    }
   },
   "hpScalePerFloor": 0.1,
   "encounters": {
-    "easyFloors": [1, 2, 3],
-    "easy": [["crow"], ["will_o_wisp"], ["forest_spider"]],
-    "hard": [["stray_dog"], ["thorn_bush"], ["twig_golem"]],
-    "elite": [["alpha_dog"]],
-    "boss": [["wolf"]]
+    "easyFloors": [
+      1,
+      2,
+      3
+    ],
+    "easy": [
+      [
+        "crow"
+      ],
+      [
+        "will_o_wisp"
+      ],
+      [
+        "forest_spider"
+      ],
+      [
+        "crow",
+        "crow"
+      ]
+    ],
+    "hard": [
+      [
+        "stray_dog"
+      ],
+      [
+        "thorn_bush"
+      ],
+      [
+        "twig_golem"
+      ],
+      [
+        "crow",
+        "stray_dog"
+      ],
+      [
+        "will_o_wisp",
+        "forest_spider"
+      ]
+    ],
+    "elite": [
+      [
+        "alpha_dog"
+      ]
+    ],
+    "boss": [
+      [
+        "wolf"
+      ]
+    ]
   },
   "rewards": {
-    "battle": { "choices": 3, "pool": { "category": 40, "dice": 35, "relic": 25 }, "tierWeights": { "common": 60, "uncommon": 33, "rare": 7 } },
-    "elite":  { "choices": 3, "pool": { "category": 40, "dice": 30, "relic": 30 }, "tierWeights": { "common": 20, "uncommon": 50, "rare": 30 } },
-    "boss":   { "choices": 0 }
+    "battle": {
+      "choices": 3,
+      "pool": {
+        "category": 40,
+        "dice": 35,
+        "relic": 25
+      },
+      "tierWeights": {
+        "common": 60,
+        "uncommon": 33,
+        "rare": 7
+      }
+    },
+    "elite": {
+      "choices": 3,
+      "pool": {
+        "category": 40,
+        "dice": 30,
+        "relic": 30
+      },
+      "tierWeights": {
+        "common": 20,
+        "uncommon": 50,
+        "rare": 30
+      }
+    },
+    "boss": {
+      "choices": 0
+    }
   },
-  "rest": { "healRatio": 0.3 }
+  "rest": {
+    "healRatio": 0.3
+  }
 }

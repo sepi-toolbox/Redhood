@@ -173,7 +173,8 @@
         }
       ],
       "abilityText": "이번 적 공격 회피",
-      "ruleText": "연속된 눈 4개(예: 2·3·4·5)면 성립. 피해 30."
+      "ruleText": "연속된 눈 4개(예: 2·3·4·5)면 성립. 모든 적에게 피해 30.",
+      "target": "allEnemies"
     },
     {
       "id": "largeStraight",
@@ -193,7 +194,8 @@
         }
       ],
       "abilityText": "회피 + 다음 턴 리롤 +1",
-      "ruleText": "연속된 눈 5개(1~5 또는 2~6)면 성립. 피해 40."
+      "ruleText": "연속된 눈 5개(1~5 또는 2~6)면 성립. 모든 적에게 피해 40.",
+      "target": "allEnemies"
     },
     {
       "id": "yahtzee",

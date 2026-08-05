@@ -1,4 +1,4 @@
-// engine.js — 전투 상태 머신 v0.4: 부가 능력(방어/회피/스턴/해제/충전/회복/리롤)
+// engine.js — 전투 상태 머신 v0.5: 다중 적, 단일/전체 공격, 굴림 페이즈 분리
 import { DB } from './data.js';
 import { computeDamage, rollFace, relicValue } from './yahtzee.js';
 
@@ -8,35 +8,41 @@ function ri(min, max) { return min + Math.floor(rng.next() * (max - min + 1)); }
 
 // ---------- 전투 생성 ----------
 export function createBattle(run, encounterIds) {
-  const enemyDef = DB.enemyById[encounterIds[0]];
   const scale = 1 + (DB.act1.hpScalePerFloor || 0) * (run.floor - 1);
   const battle = {
     over: false, result: null, turn: 1,
+    await: null,                          // null | 'enemy' (플레이어 확정 후 적 페이즈 대기)
     player: { hp: run.hp, maxHp: run.maxHp, block: 0 },
     diceDefs: run.dice.map(id => DB.diceById[id]),
-    dice: run.dice.map(() => ({ face: 1, held: false })),
+    dice: run.dice.map(() => ({ face: 0, held: false })),
+    rolled: false,                        // 이번 턴 첫 굴림 여부
     relics: run.relics.map(id => DB.relicById[id]),
-    categories: { ...run.categories },   // id -> level
-    sealed: {},                           // id -> 남은 턴
+    categories: { ...run.categories },
+    sealed: {},
     lastUsedCat: null,
     rollsLeft: 0,
-    nextTurnRerolls: 0,                   // rerollNext 능력 누적분
-    pendingBuff: 0,                       // buffNext 능력 (다음 확정 피해 +N)
-    dodgeActive: false,                   // 이번 적 행동 피해 무효
-    stunActive: false,                    // 이번 적 행동 전체 취소
+    nextTurnRerolls: 0,
+    pendingBuff: 0,
+    dodgeActive: false,
     upperTotal: 0,
     upperBonusFired: false,
-    enemy: {
-      defId: enemyDef.id, name: enemyDef.name, tier: enemyDef.tier,
-      hp: Math.round(ri(enemyDef.hp[0], enemyDef.hp[1]) * scale), maxHpInit: 0,
-      patternState: { index: 0, recent: [] }, phaseIndex: 0, nextMove: null,
-    },
+    enemies: encounterIds.map((id, i) => spawnEnemy(id, i, scale)),
     lastResult: null,
+    lastHits: [],                         // [{uid, amount}] — 연출용
   };
-  battle.enemy.maxHpInit = battle.enemy.hp;
-  chooseMove(battle.enemy);
+  for (const e of battle.enemies) chooseMove(e);
   startTurn(battle, true);
   return battle;
+}
+
+function spawnEnemy(id, idx, scale) {
+  const def = DB.enemyById[id];
+  const hp = Math.round(ri(def.hp[0], def.hp[1]) * scale);
+  return {
+    uid: `${id}_${idx}`, defId: id, name: def.name, tier: def.tier,
+    hp, maxHpInit: hp, stunned: false,
+    patternState: { index: 0, recent: [] }, phaseIndex: 0, nextMove: null,
+  };
 }
 
 // ---------- 턴 ----------
@@ -50,30 +56,35 @@ function startTurn(battle, first = false) {
   battle.player.block = 0;
   battle.rollsLeft = relicValue(battle.relics, 'extraReroll', DB.scoring.rerollsPerTurn) + battle.nextTurnRerolls;
   battle.nextTurnRerolls = 0;
-  for (const d of battle.dice) d.held = false;
-  rollDice(battle, true);
+  battle.rolled = false;
+  for (const d of battle.dice) { d.held = false; d.face = 0; }
 }
 
-function rollDice(battle, all = false) {
-  battle.dice.forEach((d, i) => {
-    if (all || !d.held) d.face = rollFace(battle.diceDefs[i], rng.next);
-  });
+export function initialRoll(battle) {
+  if (battle.over || battle.rolled || battle.await) return false;
+  battle.dice.forEach((d, i) => { d.face = rollFace(battle.diceDefs[i], rng.next); });
+  battle.rolled = true;
+  return true;
 }
 
 export function reroll(battle) {
-  if (battle.over || battle.rollsLeft <= 0) return false;
+  if (battle.over || !battle.rolled || battle.await || battle.rollsLeft <= 0) return false;
   if (battle.dice.every(d => d.held)) return false;
   battle.rollsLeft -= 1;
-  rollDice(battle);
+  battle.dice.forEach((d, i) => { if (!d.held) d.face = rollFace(battle.diceDefs[i], rng.next); });
   return true;
 }
 
 export function toggleHold(battle, i) {
-  if (battle.over) return;
+  if (battle.over || !battle.rolled || battle.await) return;
   battle.dice[i].held = !battle.dice[i].held;
 }
 
-// ---------- 미리보기 (소유 족보만) ----------
+export function aliveEnemies(battle) { return battle.enemies.filter(e => e.hp > 0); }
+
+export function isAoE(cat) { return cat.target === 'allEnemies'; }
+
+// ---------- 미리보기 ----------
 export function previewAll(battle) {
   const faces = battle.dice.map(d => d.face);
   return DB.scoring.categories
@@ -81,14 +92,16 @@ export function previewAll(battle) {
     .map(cat => {
       const level = battle.categories[cat.id];
       const seal = battle.sealed[cat.id] || 0;
-      const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics, level);
+      const bd = battle.rolled
+        ? computeDamage(cat, faces, battle.diceDefs, battle.relics, level)
+        : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0, level };
       const total = bd.total > 0 ? bd.total + battle.pendingBuff : bd.total;
-      return { cat, level, seal, locked: seal > 0, bd: { ...bd, total } };
+      return { cat, level, seal, locked: seal > 0 || !battle.rolled, bd: { ...bd, total } };
     });
 }
 
 // ---------- 부가 능력 ----------
-function applyAbility(battle, cat, bd) {
+function applyAbility(battle, cat, bd, targets) {
   for (const ab of (cat.ability || [])) {
     switch (ab.op) {
       case 'block': {
@@ -116,8 +129,8 @@ function applyAbility(battle, cat, bd) {
         break;
       }
       case 'stun':
-        battle.stunActive = true;
-        battle.lastResult.bonusHits.push('적 행동 취소!');
+        for (const t of targets) t.stunned = true;
+        battle.lastResult.bonusHits.push('행동 취소!');
         break;
       case 'dodge':
         battle.dodgeActive = true;
@@ -127,13 +140,21 @@ function applyAbility(battle, cat, bd) {
   }
 }
 
-// ---------- 족보 확정 ----------
-export function confirmCategory(battle, catId) {
-  if (battle.over) return null;
+// ---------- 족보 확정 (플레이어 페이즈) ----------
+export function confirmCategory(battle, catId, targetUid = null) {
+  if (battle.over || !battle.rolled || battle.await) return null;
   const cat = DB.scoring.categories.find(c => c.id === catId);
   const level = battle.categories[catId];
   if (!cat || !level) return null;
   if ((battle.sealed[catId] || 0) > 0) return null;
+
+  const alive = aliveEnemies(battle);
+  let targets;
+  if (isAoE(cat)) targets = alive;
+  else {
+    const t = targetUid ? alive.find(e => e.uid === targetUid) : null;
+    targets = [t || alive[0]];
+  }
 
   const faces = battle.dice.map(d => d.face);
   const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics, level);
@@ -144,11 +165,16 @@ export function confirmCategory(battle, catId) {
   }
   battle.lastResult = { catName: cat.name, ...bd, bonusHits: [] };
   battle.lastUsedCat = catId;
+  battle.lastHits = [];
 
-  if (bd.total > 0) battle.enemy.hp -= bd.total;
+  if (bd.total > 0) {
+    for (const t of targets) {
+      t.hp -= bd.total;
+      battle.lastHits.push({ uid: t.uid, amount: bd.total, killed: t.hp <= 0 });
+    }
+  }
 
   if (bd.isZero) {
-    // 0점 버리기: 부가 능력 미발동 (빵부스러기만)
     const heal = battle.relics.filter(r => r.hook.type === 'healOnZero')
       .reduce((s, r) => s + r.hook.amount, 0);
     if (heal > 0) {
@@ -156,10 +182,10 @@ export function confirmCategory(battle, catId) {
       battle.lastResult.bonusHits.push(`HP +${heal}`);
     }
   } else {
-    applyAbility(battle, cat, bd);
+    applyAbility(battle, cat, bd, targets);
   }
 
-  // 상단 보너스 (기본 점수 기준). repeat: 누적이 기준을 넘을 때마다 발동, 초과분 이월
+  // 상단 보너스 — 발동분은 같은 대상(들)에게
   if (cat.kind === 'upper') {
     battle.upperTotal += bd.base;
     const cfg = DB.scoring.upperBonus;
@@ -167,32 +193,66 @@ export function confirmCategory(battle, catId) {
     if (cfg.repeat) {
       while (battle.upperTotal >= threshold) {
         battle.upperTotal -= threshold;
-        battle.enemy.hp -= cfg.damage;
+        for (const t of targets) {
+          if (t.hp > 0 || battle.lastHits.some(h => h.uid === t.uid)) {
+            t.hp -= cfg.damage;
+            battle.lastHits.push({ uid: t.uid, amount: cfg.damage, killed: t.hp <= 0 });
+          }
+        }
         battle.lastResult.bonusHits.push(`상단 보너스 ${cfg.damage}!`);
       }
     } else if (!battle.upperBonusFired && battle.upperTotal >= threshold) {
       battle.upperBonusFired = true;
-      battle.enemy.hp -= cfg.damage;
+      for (const t of targets) t.hp -= cfg.damage;
       battle.lastResult.bonusHits.push(`상단 보너스 ${cfg.damage}!`);
     }
   }
 
-  if (battle.enemy.hp <= 0) {
-    battle.enemy.hp = 0; battle.over = true; battle.result = 'victory';
+  if (aliveEnemies(battle).length === 0) {
+    battle.over = true; battle.result = 'victory';
     return battle.lastResult;
   }
-
-  enemyAct(battle);
-  battle.dodgeActive = false;
-  battle.stunActive = false;
-  if (battle.over) return battle.lastResult;
-
-  battle.turn += 1;
-  startTurn(battle);
+  battle.await = 'enemy';
   return battle.lastResult;
 }
 
-// ---------- 적 ----------
+// ---------- 적 페이즈 ----------
+export function enemyPhase(battle) {
+  if (battle.over || battle.await !== 'enemy') return;
+  for (const e of aliveEnemies(battle)) {
+    if (battle.over) break;
+    if (e.stunned) { e.stunned = false; chooseMove(e); continue; }
+    for (const ef of e.nextMove.effects) {
+      if (ef.op === 'damage') {
+        if (battle.dodgeActive) continue;
+        let dmg = ef.amount;
+        const absorbed = Math.min(battle.player.block, dmg);
+        battle.player.block -= absorbed;
+        dmg -= absorbed;
+        if (dmg > 0) {
+          battle.player.hp -= dmg;
+          if (battle.player.hp <= 0) {
+            battle.player.hp = 0; battle.over = true; battle.result = 'defeat';
+            return;
+          }
+        }
+      } else if (ef.op === 'seal') {
+        const owned = Object.keys(battle.categories);
+        const target = battle.lastUsedCat && battle.categories[battle.lastUsedCat]
+          ? battle.lastUsedCat
+          : owned[Math.floor(rng.next() * owned.length)];
+        if (target) battle.sealed[target] = Math.max(battle.sealed[target] || 0, ef.turns + 1);
+      }
+    }
+    chooseMove(e);
+  }
+  battle.dodgeActive = false;
+  battle.await = null;
+  battle.turn += 1;
+  startTurn(battle);
+}
+
+// ---------- 적 행동 선택 ----------
 function currentPattern(enemy) {
   const def = DB.enemyById[enemy.defId];
   if (!def.phases) return def.pattern;
@@ -228,39 +288,10 @@ function chooseMove(enemy) {
   enemy.nextMove = { id: moveId, ...def.moves[moveId] };
 }
 
-function enemyAct(battle) {
-  const e = battle.enemy;
-  if (!battle.stunActive) {
-    for (const ef of e.nextMove.effects) {
-      if (ef.op === 'damage') {
-        if (battle.dodgeActive) continue;
-        let dmg = ef.amount;
-        const absorbed = Math.min(battle.player.block, dmg);
-        battle.player.block -= absorbed;
-        dmg -= absorbed;
-        if (dmg > 0) {
-          battle.player.hp -= dmg;
-          if (battle.player.hp <= 0) {
-            battle.player.hp = 0; battle.over = true; battle.result = 'defeat';
-            return;
-          }
-        }
-      } else if (ef.op === 'seal') {
-        const owned = Object.keys(battle.categories);
-        const target = battle.lastUsedCat && battle.categories[battle.lastUsedCat]
-          ? battle.lastUsedCat
-          : owned[Math.floor(rng.next() * owned.length)];
-        if (target) battle.sealed[target] = Math.max(battle.sealed[target] || 0, ef.turns + 1);
-      }
-      // 'charge' = 행동 없음
-    }
-  }
-  chooseMove(e);
-}
-
-export function intentOf(battle) {
-  const mv = battle.enemy.nextMove;
+export function intentOf(enemy) {
+  const mv = enemy.nextMove;
   if (!mv) return '';
+  if (enemy.stunned) return '💫';
   const dmg = mv.effects.filter(e => e.op === 'damage').reduce((s, e) => s + e.amount, 0);
   if (dmg > 0) return `⚔️${dmg}`;
   if (mv.effects.some(e => e.op === 'seal')) return '🔒';
