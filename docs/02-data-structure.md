@@ -11,7 +11,7 @@ op 7종: `block`(amount 또는 scoreMult), `heal`, `rerollNext`, `buffNext`, `cl
 data/
 ├── dice.json       # 주사위 종류 — 면 구성, 특수 태그
 ├── relics.json     # 유물 — 효과 훅
-├── scoring.json    # 족보 테이블 — 판정·점수·전투당 1회 플래그
+├── scoring.json    # 족보 테이블 — 판정·점수·부가 능력
 ├── enemies.json    # 적 — HP, 행동 패턴 (v0.1 패턴 엔진 재사용)
 └── act1.json       # 1막 — 맵, 조우, 보상 풀, 휴식, 플레이어 기본치
 ```
@@ -63,22 +63,33 @@ data/
 
 ```json
 {
-  "oncePerBattle": true,
-  "sheetExhausted": "refill",
+  "rerollsPerTurn": 2,
+  "levelCap": 3,
   "upperBonus": { "threshold": 63, "damage": 35 },
   "categories": [
-    { "id": "ones",   "name": "에이스", "kind": "upper", "face": 1 },
-    { "id": "sixes",  "name": "식스",   "kind": "upper", "face": 6 },
-    { "id": "threeKind", "name": "트리플", "kind": "ofKind", "count": 3, "score": "sumAll" },
-    { "id": "fourKind",  "name": "포카드", "kind": "ofKind", "count": 4, "score": "sumAll" },
-    { "id": "fullHouse", "name": "풀하우스", "kind": "fullHouse", "score": 25 },
-    { "id": "smallStraight", "name": "스몰 스트레이트", "kind": "straight", "length": 4, "score": 30 },
-    { "id": "largeStraight", "name": "라지 스트레이트", "kind": "straight", "length": 5, "score": 40 },
-    { "id": "yahtzee", "name": "야찌", "kind": "ofKind", "count": 5, "score": 50 },
-    { "id": "chance", "name": "찬스", "kind": "chance", "score": "sumAll" }
+    { "id": "twos", "name": "듀스", "kind": "upper", "face": 2, "startOwned": true, "tier": "common",
+      "ability": [{ "op": "block", "scoreMult": 2 }], "abilityText": "방어도 +점수×2" },
+    { "id": "threeKind", "name": "트리플", "kind": "ofKind", "count": 3, "score": "sumAll",
+      "startOwned": true, "tier": "common",
+      "ability": [{ "op": "cleanse" }], "abilityText": "봉인 해제" },
+    { "id": "yahtzee", "name": "야찌", "kind": "ofKind", "count": 5, "score": 50,
+      "startOwned": false, "tier": "rare",
+      "ability": [{ "op": "stun" }, { "op": "block", "amount": 20 }], "abilityText": "적 행동 취소 + 방어도 20" }
   ]
 }
 ```
+
+부가 능력 op (전투 엔진 구현, 0점 확정 시 미발동):
+
+| op | 파라미터 | 효과 |
+|---|---|---|
+| block | amount 또는 scoreMult | 방어도. 확정 직후 적 행동에만 유효 |
+| heal | amount | HP 회복 |
+| rerollNext | amount | 다음 턴 리롤 + |
+| buffNext | amount | 다음 족보 확정 피해 + (0점이면 이월) |
+| cleanse | — | 봉인 전부 해제 |
+| stun | — | 확정 직후 적 행동 전체 취소 |
+| dodge | — | 확정 직후 적 행동의 피해만 무효 (봉인 등은 적용됨) |
 
 kind 판정 규칙 (엔진 구현):
 
@@ -94,44 +105,46 @@ kind 판정 규칙 (엔진 구현):
 
 ## 4. enemies.json
 
-v0.1의 패턴 엔진(sequence / weighted+noRepeat / phases)을 그대로 쓴다.
-효과 op는 `damage`와 `charge`(모으기: 행동 없음, 의도만 예고) 2종으로 축소.
+패턴 엔진(sequence / weighted+noRepeat / phases) 유지.
+적 효과 op 3종: `damage`, `charge`(예고만), `seal`(마지막 사용 족보 N턴 봉인 — 의도 🔒).
 
 ```json
-{ "id": "wolf", "name": "늑대", "tier": "boss", "hp": [160, 160],
+{ "id": "wolf", "name": "늑대", "tier": "boss", "hp": [115, 115],
   "moves": {
-    "bite":   { "name": "물어뜯기", "effects": [{ "op": "damage", "amount": 14 }] },
+    "bite":   { "name": "물어뜯기", "effects": [{ "op": "damage", "amount": 12 }] },
+    "howl":   { "name": "울부짖음", "effects": [{ "op": "seal", "turns": 2 }] },
     "lurk":   { "name": "웅크리기", "effects": [{ "op": "charge" }] },
-    "pounce": { "name": "덮치기", "effects": [{ "op": "damage", "amount": 26 }] }
+    "pounce": { "name": "덮치기", "effects": [{ "op": "damage", "amount": 22 }] }
   },
   "phases": [
-    { "untilHpRatio": 0.5, "pattern": { "mode": "sequence", "order": ["bite", "lurk", "pounce"], "loop": true } },
-    { "untilHpRatio": 0.0, "pattern": { "mode": "weighted", "weights": { "bite": 3, "pounce": 2 }, "noRepeat": 2 } }
+    { "untilHpRatio": 0.5, "pattern": { "mode": "sequence", "order": ["bite", "howl", "lurk", "pounce"], "loop": true } },
+    { "untilHpRatio": 0.0, "pattern": { "mode": "weighted", "weights": { "bite": 2, "rend": 3, "pounce": 1, "howl": 1 }, "noRepeat": 2 } }
   ] }
 ```
 
-**튜닝 기준**: 플레이어 기대 피해 ≈ 턴당 18~22.
-일반 적 HP 45~60 (2~3턴), 엘리트 ~100, 보스 160. 적 공격은 5~9 / 엘리트 ~12.
+**튜닝 기준**: 기본 HP는 1층 기준값이고 층수당 +10% 스케일 (act1.json `hpScalePerFloor`).
+일반 30~55, 엘리트 70, 보스 115(11층 실효 ≈ 230). ⚑ 시작 3족보 체제 기준 재조정 대상 (오픈 이슈 #7).
 
 ## 5. act1.json
 
-v0.1 구조 유지. 바뀌는 것은 보상뿐:
+맵·휴식 구조 유지. 보상은 족보/주사위/유물 3풀 혼합:
 
 ```json
 "rewards": {
-  "battle": { "choices": 3, "pool": { "dice": 60, "relic": 40 }, "tierWeights": { "common": 60, "uncommon": 33, "rare": 7 } },
-  "elite":  { "choices": 3, "pool": { "dice": 50, "relic": 50 }, "tierWeights": { "common": 25, "uncommon": 50, "rare": 25 } }
+  "battle": { "choices": 3, "pool": { "category": 40, "dice": 35, "relic": 25 }, "tierWeights": { "common": 60, "uncommon": 33, "rare": 7 } },
+  "elite":  { "choices": 3, "pool": { "category": 40, "dice": 30, "relic": 30 }, "tierWeights": { "common": 20, "uncommon": 50, "rare": 30 } }
 }
 ```
 
-주사위 획득 시 보유 5개 중 하나와 **교체** (교체 취소 = 스킵 가능).
-같은 유물은 중복 획득 불가 (보상 후보에서 제외).
+족보 보상: 미보유 = 신규 획득, 보유 = 레벨업(캡 도달 시 풀에서 제외).
+주사위 획득 시 보유 5개 중 하나와 **교체** (취소 가능). 같은 유물은 중복 획득 불가.
 
 ## 6. 세이브 (localStorage)
 
 ```json
-{ "_v": 2, "hp": 55, "maxHp": 70, "dice": ["normal","normal","gold","lead","normal"],
-  "relics": ["silver_bullet"], "floor": 4, "map": [...] }
+{ "_v": 4, "hp": 55, "maxHp": 70, "dice": ["normal","normal","gold","lead","normal"],
+  "relics": ["silver_bullet"], "categories": { "chance": 1, "twos": 2, "threeKind": 1, "yahtzee": 1 },
+  "floor": 4, "map": [...] }
 ```
 
 `_v` 불일치 시 런 폐기. 주사위/유물은 id만 저장 — **id는 한번 정하면 불변**.
