@@ -171,7 +171,7 @@ function applyAbility(battle, variant, bd, targets) {
   for (const ab of (variant.ability || [])) {
     switch (ab.op) {
       case 'block': {
-        const amt = ab.amount !== undefined ? ab.amount : bd.total * (ab.scoreMult || 1);
+        const amt = Math.floor(ab.amount !== undefined ? ab.amount : bd.total * (ab.scoreMult || 1));
         battle.player.block += amt;
         battle.lastResult.bonusHits.push(`🛡${amt}`);
         break;

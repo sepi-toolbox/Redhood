@@ -16,12 +16,13 @@ export function evalCategory(cat, faces) {
     case 'ofKind': {
       const ok = Object.values(counts).some(c => c >= cat.count);
       if (!ok) return { valid: false, base: 0, contributing: [] };
-      if (cat.score === 'matchedSumX2') {
-        // 조건을 만족한 같은 눈들의 합 ×2. 눈이 여럿이면 높은 쪽 (성립은 count 기준)
+      if (cat.score === 'matchedSumX2' || cat.score === 'matchedSum') {
+        // 조건을 만족한 같은 눈들의 합 ×배수(내림). 눈이 여럿이면 높은 쪽 (성립은 count 기준)
+        const mult = cat.score === 'matchedSumX2' ? 2 : (cat.mult || 1);
         const face = Math.max(...Object.entries(counts)
           .filter(([, n]) => n >= cat.count).map(([f]) => +f));
         const idx = all.filter(i => faces[i] === face);
-        return { valid: true, base: face * idx.length * 2, contributing: idx };
+        return { valid: true, base: Math.floor(face * idx.length * mult), contributing: idx };
       }
       const base = cat.score === 'sumAll' ? faces.reduce((a, b) => a + b, 0) : cat.score;
       return { valid: true, base, contributing: all };

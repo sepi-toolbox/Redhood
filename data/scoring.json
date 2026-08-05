@@ -1,5 +1,5 @@
 {
-  "_version": 6,
+  "_version": 7,
   "rerollsPerTurn": 2,
   "upperBonus": {
     "threshold": 40,
@@ -63,9 +63,13 @@
             {
               "op": "rerollNext",
               "amount": 1
+            },
+            {
+              "op": "buffNext",
+              "amount": 12
             }
           ],
-          "abilityText": "다음 턴 리롤 +1",
+          "abilityText": "다음 턴 리롤 +1 + 다음 피해 +12",
           "tier": "common"
         },
         {
@@ -74,10 +78,14 @@
           "ability": [
             {
               "op": "heal",
-              "amount": 2
+              "amount": 10
+            },
+            {
+              "op": "block",
+              "amount": 5
             }
           ],
-          "abilityText": "HP 2 회복",
+          "abilityText": "HP 10 회복 + 방어도 5",
           "tier": "uncommon"
         }
       ]
@@ -102,10 +110,10 @@
           "ability": [
             {
               "op": "block",
-              "scoreMult": 2
+              "scoreMult": 3
             }
           ],
-          "abilityText": "방어도 +점수×2",
+          "abilityText": "방어도 +점수×3",
           "tier": "common"
         },
         {
@@ -113,11 +121,15 @@
           "name": "가시 울타리",
           "ability": [
             {
+              "op": "heal",
+              "amount": 3
+            },
+            {
               "op": "block",
-              "amount": 7
+              "amount": 10
             }
           ],
-          "abilityText": "방어도 +7",
+          "abilityText": "HP 3 회복 + 방어도 10",
           "tier": "uncommon"
         }
       ]
@@ -142,10 +154,10 @@
           "ability": [
             {
               "op": "heal",
-              "amount": 3
+              "amount": 7
             }
           ],
-          "abilityText": "HP 3 회복",
+          "abilityText": "HP 7 회복",
           "tier": "common"
         },
         {
@@ -154,14 +166,14 @@
           "ability": [
             {
               "op": "heal",
-              "amount": 2
+              "amount": 4
             },
             {
               "op": "block",
-              "amount": 3
+              "amount": 5
             }
           ],
-          "abilityText": "HP 2 회복 + 방어도 3",
+          "abilityText": "HP 4 회복 + 방어도 5",
           "tier": "uncommon"
         }
       ]
@@ -186,10 +198,10 @@
           "ability": [
             {
               "op": "block",
-              "scoreMult": 1
+              "scoreMult": 0.5
             }
           ],
-          "abilityText": "방어도 +점수",
+          "abilityText": "방어도 +점수의 절반",
           "tier": "common"
         },
         {
@@ -198,10 +210,10 @@
           "ability": [
             {
               "op": "block",
-              "amount": 9
+              "amount": 6
             }
           ],
-          "abilityText": "방어도 +9",
+          "abilityText": "방어도 +6",
           "tier": "uncommon"
         }
       ]
@@ -226,10 +238,10 @@
           "ability": [
             {
               "op": "buffNext",
-              "amount": 5
+              "amount": 3
             }
           ],
-          "abilityText": "다음 족보 피해 +5",
+          "abilityText": "다음 족보 피해 +3",
           "tier": "common"
         },
         {
@@ -237,15 +249,11 @@
           "name": "다섯 발톱",
           "ability": [
             {
-              "op": "buffNext",
+              "op": "heal",
               "amount": 3
-            },
-            {
-              "op": "rerollNext",
-              "amount": 1
             }
           ],
-          "abilityText": "다음 피해 +3 + 다음 턴 리롤 +1",
+          "abilityText": "HP 3 회복",
           "tier": "uncommon"
         }
       ]
@@ -277,10 +285,10 @@
           "ability": [
             {
               "op": "buffNext",
-              "amount": 8
+              "amount": 2
             }
           ],
-          "abilityText": "다음 족보 피해 +8",
+          "abilityText": "다음 족보 피해 +2",
           "tier": "uncommon"
         }
       ]
@@ -290,9 +298,9 @@
       "name": "트리플",
       "kind": "ofKind",
       "count": 3,
-      "score": "matchedSumX2",
+      "score": "matchedSum",
       "tier": "common",
-      "ruleText": "같은 눈 3개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해.",
+      "ruleText": "같은 눈 3개 이상 — 피해: 같은 눈들의 합 ×1.5 (내림)",
       "example": [
         4,
         4,
@@ -328,16 +336,17 @@
           "abilityText": "방어도 4 + 다음 턴 리롤 +1",
           "tier": "uncommon"
         }
-      ]
+      ],
+      "mult": 1.5
     },
     {
       "id": "fourKind",
       "name": "포카드",
       "kind": "ofKind",
       "count": 4,
-      "score": "matchedSumX2",
+      "score": "matchedSum",
       "tier": "rare",
-      "ruleText": "같은 눈 4개 이상이면 성립. 그 같은 눈들의 합 ×2 만큼 피해.",
+      "ruleText": "같은 눈 4개 이상 — 피해: 같은 눈들의 합 ×3",
       "example": [
         4,
         4,
@@ -369,13 +378,14 @@
           "abilityText": "다음 족보 피해 +12",
           "tier": "uncommon"
         }
-      ]
+      ],
+      "mult": 3
     },
     {
       "id": "fullHouse",
       "name": "풀하우스",
       "kind": "fullHouse",
-      "score": 25,
+      "score": 35,
       "tier": "uncommon",
       "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25.",
       "example": [
@@ -405,14 +415,14 @@
           "ability": [
             {
               "op": "heal",
-              "amount": 6
+              "amount": 10
             },
             {
               "op": "block",
-              "amount": 6
+              "amount": 8
             }
           ],
-          "abilityText": "HP 6 회복 + 방어도 6",
+          "abilityText": "HP 10 회복 + 방어도 8",
           "tier": "rare"
         }
       ]
@@ -422,7 +432,7 @@
       "name": "스몰 스트레이트",
       "kind": "straight",
       "length": 4,
-      "score": 30,
+      "score": 28,
       "tier": "uncommon",
       "ruleText": "연속된 눈 4개(예: 2·3·4·5)면 성립. 모든 적에게 피해 30.",
       "target": "allEnemies",
@@ -464,7 +474,7 @@
       "name": "라지 스트레이트",
       "kind": "straight",
       "length": 5,
-      "score": 40,
+      "score": 60,
       "tier": "rare",
       "ruleText": "연속된 눈 5개(1~5 또는 2~6)면 성립. 모든 적에게 피해 40.",
       "target": "allEnemies",
@@ -501,10 +511,10 @@
             },
             {
               "op": "buffNext",
-              "amount": 8
+              "amount": 12
             }
           ],
-          "abilityText": "회피 + 다음 피해 +8",
+          "abilityText": "회피 + 다음 피해 +12",
           "tier": "epic"
         }
       ]
@@ -514,7 +524,7 @@
       "name": "야찌",
       "kind": "ofKind",
       "count": 5,
-      "score": 50,
+      "score": 70,
       "tier": "epic",
       "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50.",
       "example": [
