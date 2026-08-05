@@ -338,7 +338,10 @@ function renderBattle(opts = {}) {
   const previews = previewAll(battle);
   const lastR = battle.lastResult;
   const multi = aliveEnemies(battle).length > 1;
-  const hpPct = Math.max(0, p.hp / p.maxHp * 100);
+  // 방어도는 LoL식: HP바 끝에 회백색 실드 구간으로 겹쳐 표시 (넘치면 바 전체가 재비율)
+  const barTotal = Math.max(p.maxHp, p.hp + p.block);
+  const hpPct = Math.max(0, p.hp / barTotal * 100);
+  const shieldPct = Math.max(0, Math.min(p.block, barTotal - p.hp) / barTotal * 100);
   app.innerHTML = '';
   app.append(h(`
     <div class="screen battle-screen">
@@ -394,10 +397,11 @@ function renderBattle(opts = {}) {
           </button>`).join('')}
       </div>
       <div class="player-bar ${opts.playerHit ? 'hurt' : ''}">
-        <span class="pb-side">${p.block > 0 ? `🛡${p.block}` : ''}</span>
+        <span class="pb-side"></span>
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${hpPct}%"></div>
-          <span class="hp-text">❤️ ${p.hp} / ${p.maxHp}</span>
+          ${p.block > 0 ? `<div class="hp-shield" style="left:${hpPct}%; width:${shieldPct}%"></div>` : ''}
+          <span class="hp-text">❤️ ${p.hp} / ${p.maxHp}${p.block > 0 ? `<span class="shield-num">🛡${p.block}</span>` : ''}</span>
         </div>
         <span class="pb-side">${battle.pendingBuff > 0 ? `⚡+${battle.pendingBuff}` : ''}</span>
       </div>
