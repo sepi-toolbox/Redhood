@@ -17,7 +17,7 @@ export function createBattle(run, encounterIds) {
     dice: run.dice.map(() => ({ face: 0, held: false })),
     rolled: false,                        // 이번 턴 첫 굴림 여부
     relics: run.relics.map(id => DB.relicById[id]),
-    categories: { ...run.categories },
+    categories: Object.fromEntries(Object.entries(run.categories).map(([k, v]) => [k, [...v]])),
     sealed: {},
     lastUsedCat: null,
     rollsLeft: 0,
@@ -94,20 +94,25 @@ export function variantOf(cat, variantId) {
 }
 
 // ---------- 미리보기 ----------
+// v0.9: 족보당 변형을 여러 개 보유(누적) — 같은 족보의 변형은 목록에서 이웃하게 정렬됨
 export function previewAll(battle) {
   const faces = battle.dice.map(d => d.face);
-  return DB.scoring.categories
-    .filter(cat => battle.categories[cat.id])
-    .map(cat => {
-      const variant = variantOf(cat, battle.categories[cat.id]);
-      const seal = battle.sealed[cat.id] || 0;
-      const bd = battle.rolled
-        ? computeDamage(cat, faces, battle.diceDefs, battle.relics)
-        : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 };
-      const total = bd.total > 0 ? bd.total + battle.pendingBuff : bd.total;
-      // 성립하지 않는(또는 0점) 족보는 선택 불가
-      return { cat, variant, seal, locked: seal > 0 || !battle.rolled || total === 0, bd: { ...bd, total } };
-    });
+  const out = [];
+  for (const cat of DB.scoring.categories) {
+    const ownedList = battle.categories[cat.id];
+    if (!ownedList || ownedList.length === 0) continue;
+    const bd0 = battle.rolled
+      ? computeDamage(cat, faces, battle.diceDefs, battle.relics)
+      : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 };
+    const total = bd0.total > 0 ? bd0.total + battle.pendingBuff : bd0.total;
+    const seal = battle.sealed[cat.id] || 0;
+    // 성립하지 않는(또는 0점) 족보는 선택 불가
+    const locked = seal > 0 || !battle.rolled || total === 0;
+    for (const vid of ownedList) {
+      out.push({ cat, variant: variantOf(cat, vid), seal, locked, bd: { ...bd0, total } });
+    }
+  }
+  return out;
 }
 
 // ---------- 부가 능력 ----------
@@ -150,12 +155,12 @@ function applyAbility(battle, variant, bd, targets) {
   }
 }
 
-// ---------- 족보 확정 (플레이어 페이즈) ----------
-export function confirmCategory(battle, catId, targetUid = null) {
+// ---------- 족보 확정 (플레이어 페이즈) — 사용할 변형을 지정 ----------
+export function confirmCategory(battle, catId, variantId, targetUid = null) {
   if (battle.over || !battle.rolled || battle.await) return null;
   const cat = DB.scoring.categories.find(c => c.id === catId);
-  const variantId = battle.categories[catId];
-  if (!cat || !variantId) return null;
+  const ownedList = battle.categories[catId] || [];
+  if (!cat || !ownedList.includes(variantId)) return null;
   const variant = variantOf(cat, variantId);
   if ((battle.sealed[catId] || 0) > 0) return null;
 

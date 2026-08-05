@@ -58,7 +58,7 @@ function showCategoryInfo(catId, variantId) {
         <p class="info-rule">${esc(cat.ruleText || '')}</p>
         <p class="info-ability">✨ ${esc(v.abilityText || '부가 없음')}</p>
         <p class="modal-text">예시: ${(cat.example || []).map(f => PIPS[f]).join(' ')} · 등급: ${esc(v.tier || '')}</p>
-        <p class="modal-text">성립하지 않으면 선택할 수 없다. 같은 족보의 다른 변형을 얻으면 교체할 수 있다.</p>
+        <p class="modal-text">성립하지 않으면 선택할 수 없다. 같은 족보의 다른 변형을 얻으면 나란히 추가된다.</p>
         <button class="btn primary" id="cat-info-close">닫기</button>
       </div>
     </div>`));
@@ -161,11 +161,11 @@ function showBagModal() {
     return `<li><b>${esc(d.name)}</b> <span class="modal-text">[${d.faces.join(',')}] ${esc(d.desc)}</span></li>`;
   }).join('');
   const catItems = DB.scoring.categories
-    .filter(c => run.categories[c.id])
-    .map(c => {
-      const v = (c.variants || []).find(x => x.id === run.categories[c.id]) || {};
+    .filter(c => (run.categories[c.id] || []).length > 0)
+    .map(c => (run.categories[c.id] || []).map(vid => {
+      const v = (c.variants || []).find(x => x.id === vid) || {};
       return `<li><b>${esc(v.name || c.name)}</b> <small class="cat-tag">${esc(c.name)}</small>${isAoE(c) ? ' <small class="aoe-tag">전체</small>' : ''} <span class="modal-text">${esc(v.abilityText || '')}</span></li>`;
-    })
+    }).join(''))
     .join('');
   const relicItems = run.relics.length
     ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${r.icon} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
@@ -288,8 +288,8 @@ function renderBattle(opts = {}) {
       }</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, variant, seal, locked, bd }) => `
-          <button class="sheet-row ${locked ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''}"
-            data-cat="${cat.id}" data-locked="${locked ? 1 : 0}">
+          <button class="sheet-row t-${variant.tier || 'common'} ${locked ? 'used' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
+            data-cat="${cat.id}" data-variant="${variant.id}" data-locked="${locked ? 1 : 0}">
             <span class="sheet-name">${esc(variant.name)} <small class="cat-tag">${esc(cat.name)}</small>${isAoE(cat) ? ' <small class="aoe-tag">전체</small>' : ''}</span>
             <span class="sheet-ability">${esc(variant.abilityText || '')}</span>
             <span class="sheet-example">${(cat.example || []).map(f => PIPS[f]).join('')}</span>
@@ -338,14 +338,16 @@ function renderBattle(opts = {}) {
       renderBattle();
     });
   });
-  // 족보
+  // 족보 — 선택 키는 (족보:변형) 조합, 같은 족보의 다른 변형은 별개 버튼
   app.querySelectorAll('.sheet-row').forEach(el => {
     const catId = el.dataset.cat;
-    addLongPress(el, () => showCategoryInfo(catId, battle.categories[catId]));
+    const variantId = el.dataset.variant;
+    const key = `${catId}:${variantId}`;
+    addLongPress(el, () => showCategoryInfo(catId, variantId));
     el.addEventListener('click', () => {
       if (busy || el.dataset.locked === '1') return;
-      if (selectedCat !== catId) { selectedCat = catId; renderBattle(); return; }
-      tryConfirm(catId, targetUid);
+      if (selectedCat !== key) { selectedCat = key; renderBattle(); return; }
+      tryConfirm(catId, variantId, targetUid);
     });
   });
 }
@@ -401,11 +403,11 @@ function animateRoll(indices) {
 }
 
 // 확정 → 베기 연출 → 적 페이즈 → 다음 턴
-function tryConfirm(catId, uid) {
+function tryConfirm(catId, variantId, uid) {
   if (busy) return;
   busy = true;
   selectedCat = null;
-  const res = confirmCategory(battle, catId, uid);
+  const res = confirmCategory(battle, catId, variantId, uid);
   if (!res) { busy = false; renderBattle(); return; }
   syncTarget(); // 표적이 죽었으면 다음 적으로
   renderBattle();
@@ -640,9 +642,6 @@ function showRewardCards(choices, box) {
         ${choices.map((c, i) => {
           const isCat = c.kind === 'category';
           const isNew = isCat && !c.item.owned;
-          const curName = isCat && c.item.owned
-            ? ((c.item.cat.variants || []).find(v => v.id === run.categories[c.item.cat.id]) || {}).name || ''
-            : '';
           return `
           <button class="card pop-in r-${c.item.tier} ${c.item.tier === 'rare' ? 'shiny-rare' : c.item.tier === 'uncommon' ? 'shiny-un' : ''} ${isNew ? 'new-cat' : ''}"
             data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
@@ -654,7 +653,7 @@ function showRewardCards(choices, box) {
               c.kind === 'relic' ? esc(c.item.desc) :
               isNew
                 ? `새 족보 획득<br>✨ ${esc(c.item.variant.abilityText || '')}`
-                : `교체: ${esc(curName)} →<br>✨ ${esc(c.item.variant.abilityText || '')}`
+                : `${esc(c.item.cat.name)} 변형 추가<br>✨ ${esc(c.item.variant.abilityText || '')}`
             }</span>
             <span class="card-rarity">${c.item.tier}</span>
           </button>`;
@@ -666,7 +665,10 @@ function showRewardCards(choices, box) {
     el.addEventListener('click', () => {
       const c = choices[parseInt(el.dataset.idx, 10)];
       if (c.kind === 'relic') { run.relics.push(c.item.id); saveRun(run); showMap(); }
-      else if (c.kind === 'category') { run.categories[c.item.cat.id] = c.item.variant.id; saveRun(run); showMap(); }
+      else if (c.kind === 'category') {
+        (run.categories[c.item.cat.id] = run.categories[c.item.cat.id] || []).push(c.item.variant.id);
+        saveRun(run); showMap();
+      }
       else showReplaceDie(c.item);
     });
   });

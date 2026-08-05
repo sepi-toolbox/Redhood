@@ -428,6 +428,11 @@ body {
 .sheet-row .sheet-preview { flex: none; min-width: 36px; text-align: right; font-weight: 700; color: #e8b64b; font-size: 18px; }
 .sheet-row .lv { color: #b08948; font-size: 11px; }
 .cat-tag { color: #8a7d68; font-size: 10.5px; font-weight: 400; }
+/* 변형 등급에 따른 버튼 색 (v0.9) — common 갈색 / uncommon 청색 / rare 금색 */
+.sheet-row.t-uncommon { border-color: #4a6d8c; background: #1c2028; }
+.sheet-row.t-uncommon .sheet-name { color: #a8c4dd; }
+.sheet-row.t-rare { border-color: #b08948; background: #28211a; }
+.sheet-row.t-rare .sheet-name { color: #ecc879; }
 .sheet-row.selected { border-color: #e8b64b; background: #2a2118; }
 .sheet-row.used { opacity: .32; }
 .sheet-row.used .sheet-preview { color: #6f6353; }

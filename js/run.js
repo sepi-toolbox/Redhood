@@ -2,17 +2,17 @@
 import { DB } from './data.js';
 import { rng } from './engine.js';
 
-const SAVE_KEY = 'redhood_run_v5';
+const SAVE_KEY = 'redhood_run_v6';
 
 export function newRun() {
   const maxHp = DB.act1.player.maxHp;
   const categories = {};
-  for (const c of DB.scoring.categories) if (c.startOwned) categories[c.id] = c.startVariant;
+  for (const c of DB.scoring.categories) if (c.startOwned) categories[c.id] = [c.startVariant];
   return {
     hp: maxHp, maxHp,
     dice: DB.act1.player.startDice.slice(),
     relics: [],
-    categories,          // 족보 id -> 보유 변형 id
+    categories,          // 족보 id -> 보유 변형 id 배열 (v0.9: 누적 수집)
     floor: 0,
     map: generateMap(),
   };
@@ -53,17 +53,17 @@ export function rollEncounter(run, nodeType) {
 function pickArr(arr) { return arr[Math.floor(rng.next() * arr.length)].slice(); }
 
 // ---------- 보상: 범주(족보/주사위/유물)를 먼저 하나 뽑고, 그 범주 안에서만 3택1 ----------
-// 족보 풀 = (족보, 변형) 쌍. 미보유 족보 → 모든 변형 후보(신규 획득),
-// 보유 족보 → 현재와 다른 변형만 후보(교체 제안). 등급은 변형 등급.
+// 족보 풀 = (족보, 변형) 쌍. 이미 보유한 변형만 제외 — 획득은 교체가 아니라 추가(v0.9).
+// owned = 해당 족보를 하나라도 보유 중인지 (신규 족보 연출 판단용). 등급은 변형 등급.
 function rewardPoolOf(run, kind) {
   if (kind === 'dice') return DB.dice.filter(d => d.id !== 'normal');
   if (kind === 'relic') return DB.relics.filter(r => !run.relics.includes(r.id));
   const pool = [];
   for (const c of DB.scoring.categories) {
-    const owned = run.categories[c.id];
+    const ownedList = run.categories[c.id] || [];
     for (const v of (c.variants || [])) {
-      if (owned && v.id === owned) continue;
-      pool.push({ id: `${c.id}:${v.id}`, tier: v.tier, cat: c, variant: v, owned: !!owned });
+      if (ownedList.includes(v.id)) continue;
+      pool.push({ id: `${c.id}:${v.id}`, tier: v.tier, cat: c, variant: v, owned: ownedList.length > 0 });
     }
   }
   return pool;
@@ -115,7 +115,7 @@ export function applyRest(run) {
 
 // ---------- 세이브 ----------
 export function saveRun(run) {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 5 })); } catch (e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 6 })); } catch (e) {}
 }
 
 export function loadRun() {
@@ -123,14 +123,15 @@ export function loadRun() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw);
-    if (s._v !== 5) { clearSave(); return null; }
+    if (s._v !== 6) { clearSave(); return null; }
     if (!s.dice.every(id => DB.diceById[id])) { clearSave(); return null; }
     if (!s.relics.every(id => DB.relicById[id])) { clearSave(); return null; }
     const byId = {};
     for (const c of DB.scoring.categories) byId[c.id] = c;
-    for (const [cid, vid] of Object.entries(s.categories || {})) {
+    for (const [cid, vids] of Object.entries(s.categories || {})) {
       const c = byId[cid];
-      if (!c || !(c.variants || []).some(v => v.id === vid)) { clearSave(); return null; }
+      if (!c || !Array.isArray(vids) || vids.length === 0) { clearSave(); return null; }
+      if (!vids.every(vid => (c.variants || []).some(v => v.id === vid))) { clearSave(); return null; }
     }
     return s;
   } catch (e) { return null; }
