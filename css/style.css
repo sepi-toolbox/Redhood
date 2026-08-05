@@ -110,10 +110,12 @@ body {
   align-content: start;
 }
 .sheet-row {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
   background: #221a15; border: 1.5px solid #4a3b30; border-radius: 9px;
-  color: #e8dcc8; padding: 9px 12px; cursor: pointer; font-size: 13.5px;
+  color: #e8dcc8; padding: 8px 11px; cursor: pointer; font-size: 13.5px;
 }
+.sheet-main { display: flex; flex-direction: column; gap: 1px; text-align: left; min-width: 0; }
+.sheet-ability { font-size: 10px; color: #8a7d68; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sheet-row .sheet-preview { font-weight: 700; color: #e8b64b; font-size: 15px; }
 .sheet-row .lv { color: #b08948; font-size: 11px; }
 .sheet-row.zero .sheet-preview { color: #6f6353; }

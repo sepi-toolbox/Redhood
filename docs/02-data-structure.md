@@ -1,16 +1,11 @@
 # REDHOOD · 데이터 구조 설계
 
-문서 버전 v0.3 (2026-08-05) · 대응 컨셉 문서: 01-concept.md v0.3 (족보 드랍·레벨·쿨다운)
+문서 버전 v0.4 (2026-08-05) · 대응 컨셉 문서: 01-concept.md v0.4 (부가 능력 시스템)
 
-**v0.3 변경 요약**: scoring.json에서 `oncePerBattle`/`sheetExhausted` 제거, 카테고리별
-`startOwned`·`cooldown`·`tier` 추가, 최상위에 `levelCap`. act1.json에 `hpScalePerFloor`,
-rewards.pool에 `category` 추가. 적 op에 `seal`(마지막 사용 족보 봉인) 추가.
-세이브 `_v: 3` — `categories: {id: level}` 필드 추가. 피해식은
-`(기본+금박) × 레벨 × Π(categoryMult) + Σ(categoryBonus) + Σ(flatDamage)`.
-
-정본 원칙은 유지한다: **엔진은 해석만, 수치·구성은 전부 JSON.**
-밸런싱 = data/ 수정으로 끝난다. 카드 시대 파일(cards/weapons/frenzy/statuses)은 삭제
-(태그 `card-proto`에 보존).
+**v0.4 변경 요약**: 쿨다운 제거. 카테고리별 `ability`(op 배열)·`abilityText` 추가 —
+op 7종: `block`(amount 또는 scoreMult), `heal`, `rerollNext`, `buffNext`, `cleanse`, `stun`, `dodge`.
+0점 확정 시 부가 능력 미발동. startOwned = 찬스·듀스·트리플. 플레이어에 `block` 스탯
+(확정 직후 적 행동에만 유효). 세이브 `_v: 4`, sw 캐시 v4.
 
 ```
 data/

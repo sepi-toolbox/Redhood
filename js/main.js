@@ -115,7 +115,7 @@ function showBagModal() {
   }).join('');
   const catItems = DB.scoring.categories
     .filter(c => run.categories[c.id])
-    .map(c => `<li><b>${esc(c.name)}</b> Lv${run.categories[c.id]}${c.cooldown ? ` <span class="modal-text">쿨다운 ${c.cooldown}턴</span>` : ''}</li>`)
+    .map(c => `<li><b>${esc(c.name)}</b> Lv${run.categories[c.id]} <span class="modal-text">${esc(c.abilityText || '')}</span></li>`)
     .join('');
   const relicItems = run.relics.length
     ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${r.icon} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
@@ -181,7 +181,7 @@ function renderBattle() {
       <header class="topbar">
         <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
         <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
-        <span class="hp">❤️ ${p.hp}/${p.maxHp}</span>
+        <span class="hp">❤️ ${p.hp}/${p.maxHp}${p.block > 0 ? ` 🛡${p.block}` : ''}${battle.pendingBuff > 0 ? ` ⚡+${battle.pendingBuff}` : ''}</span>
       </header>
       <div class="enemy-panel">
         <span class="intent">${intentOf(battle)} <small>${esc(e.nextMove.name)}</small></span>
@@ -207,11 +207,14 @@ function renderBattle() {
         <span class="turn-hint">${selectedCat ? '한 번 더 탭하면 확정' : '주사위 탭=홀드 · 족보 탭=선택'}</span>
       </div>
       <div class="sheet-zone">
-        ${previews.map(({ cat, level, cd, seal, locked, bd }) => `
+        ${previews.map(({ cat, level, seal, locked, bd }) => `
           <button class="sheet-row ${locked ? 'used' : ''} ${selectedCat === cat.id ? 'selected' : ''} ${!locked && bd.total === 0 ? 'zero' : ''}"
             data-cat="${cat.id}" ${locked ? 'disabled' : ''}>
-            <span class="sheet-name">${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}</span>
-            <span class="sheet-preview">${seal ? `🔒${seal}` : cd ? `⏳${cd}` : bd.total > 0 ? bd.total : '0'}</span>
+            <span class="sheet-main">
+              <span class="sheet-name">${esc(cat.name)}${level > 1 ? ` <b class="lv">Lv${level}</b>` : ''}</span>
+              <span class="sheet-ability">${esc(cat.abilityText || '')}</span>
+            </span>
+            <span class="sheet-preview">${seal ? `🔒${seal}` : bd.total > 0 ? bd.total : '0'}</span>
           </button>`).join('')}
       </div>
     </div>`));
@@ -258,7 +261,7 @@ function showReward() {
             <span class="card-text">${
               c.kind === 'die' ? `[${c.item.faces.join(',')}]<br>${esc(c.item.desc)}` :
               c.kind === 'relic' ? esc(c.item.desc) :
-              c.newLevel > 1 ? `강화: 점수 ×${c.newLevel}` : `새 족보 획득${c.item.cooldown ? `<br>쿨다운 ${c.item.cooldown}턴` : ''}`
+              c.newLevel > 1 ? `강화: 점수 ×${c.newLevel}` : `새 족보 획득<br>${esc(c.item.abilityText || '')}`
             }</span>
             <span class="card-rarity">${c.item.tier}</span>
           </button>`).join('')}

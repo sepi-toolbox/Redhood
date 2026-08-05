@@ -2,7 +2,7 @@
 import { DB } from './data.js';
 import { rng } from './engine.js';
 
-const SAVE_KEY = 'redhood_run_v3';
+const SAVE_KEY = 'redhood_run_v4';
 
 export function newRun() {
   const maxHp = DB.act1.player.maxHp;
@@ -101,7 +101,7 @@ export function applyRest(run) {
 
 // ---------- 세이브 ----------
 export function saveRun(run) {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 3 })); } catch (e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 4 })); } catch (e) {}
 }
 
 export function loadRun() {
@@ -109,7 +109,7 @@ export function loadRun() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw);
-    if (s._v !== 3) { clearSave(); return null; }
+    if (s._v !== 4) { clearSave(); return null; }
     if (!s.dice.every(id => DB.diceById[id])) { clearSave(); return null; }
     if (!s.relics.every(id => DB.relicById[id])) { clearSave(); return null; }
     const catIds = new Set(DB.scoring.categories.map(c => c.id));
