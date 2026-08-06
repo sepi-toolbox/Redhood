@@ -1,6 +1,6 @@
 // REDHOOD 서비스 워커 — 오프라인 캐시
 // ⚠ 판을 바꾸면 CACHE 번호를 반드시 +1 (runbook 규칙)
-const CACHE = 'redhood-v78';
+const CACHE = 'redhood-v79';
 const ASSETS = [
   './',
   './index.html',
@@ -204,19 +204,27 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// 네트워크 우선, 실패 시 캐시 (개발 중 최신 반영 우선. 오프라인이면 캐시로 동작)
+// v0.63: 두 갈래 전략
+//  · 코드·데이터(html/css/js/json) — 네트워크 강제 재요청. 판을 올리면 즉시 반영된다.
+//  · 그림·폰트 등 자산 — 캐시 우선. 재렌더마다 네트워크로 다시 받느라
+//    화면이 깜빡이던 문제의 근본 원인이었다. 자산은 판이 바뀌면 CACHE 교체로 갱신된다.
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
-  // v0.61: 코드·스타일은 캐시를 완전히 우회해 항상 최신을 받는다
   const u = new URL(e.request.url);
   const isCode = /\.(?:html|css|js|json)$/.test(u.pathname) || u.pathname.endsWith('/');
+  if (isCode) {
+    e.respondWith(
+      fetch(new Request(e.request, { cache: 'reload' }))
+        .then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return res; })
+        .catch(() => caches.match(e.request, { ignoreSearch: true }))
+    );
+    return;
+  }
   e.respondWith(
-    fetch(isCode ? new Request(e.request, { cache: 'reload' }) : e.request)
-      .then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy));
-        return res;
-      })
-      .catch(() => caches.match(e.request, { ignoreSearch: true }))
+    caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request).then(res => {
+      const copy = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, copy));
+      return res;
+    }))
   );
 });

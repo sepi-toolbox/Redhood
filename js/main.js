@@ -3,6 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
+export const VERSION = 'v0.63'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -107,9 +108,8 @@ function showTitle() {
       ${hasSave() ? `<button class="btn primary" id="continue-btn">이어하기</button>` : ''}
       <button class="btn primary" id="start-btn">숲으로 들어간다</button>
       <button class="btn ghost" id="enlight-btn">🔮 계몽 ${enlight}</button>
-      <p class="hint">야찌 족보로 점수를 내면, 그만큼 늑대가 아프다.</p>
       <button class="btn ghost hidden" id="install-btn">📲 홈 화면에 설치</button>
-      <p class="hint">iOS는 공유 버튼 → "홈 화면에 추가"</p>
+      <p class="hint">${VERSION}</p>
     </div>`));
   document.getElementById('start-btn').addEventListener('click', () => { run = newRun(); showIntro(); });
   document.getElementById('enlight-btn').addEventListener('click', showEnlightModal);
@@ -210,7 +210,7 @@ function eventFrame(npc, linesHtml, choicesHtml) {
         <span class="pb-side"></span>
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${hpPct}%"></div>
-          <span class="hp-text">❤️ ${run.hp} / ${run.maxHp}</span>
+          <span class="hp-text">${run.hp} / ${run.maxHp}</span>
         </div>
         <span class="pb-side"></span>
       </div>
@@ -990,7 +990,7 @@ for (let f = 1; f <= 6; f++) {
 
 function animateRoll(indices) {
   busy = true;
-  renderBattle();
+  updateRollStart(); // v0.63: 여기서 renderBattle()을 부르던 것이 굴림마다 화면 전체가 깜빡이던 원인
   const dieEls = [...app.querySelectorAll('.die')];
   const stopped = new Set();
 
@@ -1041,7 +1041,73 @@ function animateRoll(indices) {
     }, landAt);
   });
 
-  setTimeout(() => { busy = false; renderBattle(); }, 460 + indices.length * 170 + 80 + 260);
+  setTimeout(() => { busy = false; updateAfterRoll(); }, 460 + indices.length * 170 + 80 + 260);
+}
+
+// v0.63: 굴림이 시작될 때 — 구르는 동안 점수를 알 수 없으므로 미리보기를 비우고 입력만 잠근다.
+function updateRollStart() {
+  selectedCat = null;
+  const rb = document.getElementById('reroll-btn');
+  if (rb) rb.disabled = true;
+  app.querySelectorAll('.sheet-zone .combo-row').forEach(el => {
+    el.classList.remove('selected');
+    const prev = el.querySelector('.sheet-preview');
+    if (prev && !prev.textContent.startsWith('🔒')) prev.textContent = '—';
+  });
+  app.querySelectorAll('.die').forEach(el => el.classList.remove('combo-hint'));
+  const hint = app.querySelector('.hint-line');
+  if (hint) hint.textContent = '굴리는 중…';
+}
+
+// v0.63: 굴림 직후 전체 재렌더를 없앤다.
+// 재렌더는 배경·적 그림·주사위·아이콘 <img>를 전부 새로 만들기 때문에
+// 굴릴 때마다 화면 전체가 한 번 깜빡였다. 굴림으로 바뀌는 것만 제자리에서 고친다.
+function updateAfterRoll() {
+  if (!battle || battle.over) { renderBattle(); return; }
+  const previews = previewAll(battle);
+  // 1) 굴림 버튼 → 리롤 버튼 (첫 굴림에서 한 번만 교체)
+  const bar = app.querySelector('.roll-bar');
+  if (bar) {
+    const disabled = battle.rollsLeft <= 0 || battle.await || battle.dice.every(d => d.held);
+    let rb = document.getElementById('reroll-btn');
+    if (!rb) {
+      bar.innerHTML = `<button class="btn primary roll-btn" id="reroll-btn">🎲 리롤 (${battle.rollsLeft})</button>`;
+      rb = document.getElementById('reroll-btn');
+      rb.addEventListener('click', () => {
+        if (busy) return;
+        selectedCat = null;
+        const rerolled = battle.dice.map((d, i) => (d.held ? -1 : i)).filter(i => i >= 0);
+        if (reroll(battle)) animateRoll(rerolled);
+      });
+    } else {
+      rb.textContent = `🎲 리롤 (${battle.rollsLeft})`;
+    }
+    rb.disabled = disabled;
+  }
+  // 2) 족보 시트 — 점수 미리보기와 잠금 상태만 갱신
+  const zone = app.querySelector('.sheet-zone');
+  if (zone) zone.classList.toggle('dim', !battle.rolled);
+  app.querySelectorAll('.sheet-zone .combo-row').forEach(el => {
+    const pv = previews.find(x => x.cat.id === el.dataset.cat && x.variant.id === el.dataset.variant);
+    if (!pv) return;
+    el.classList.toggle('used', !!pv.locked);
+    el.dataset.locked = pv.locked ? '1' : '0';
+    const prev = el.querySelector('.sheet-preview');
+    if (prev) prev.textContent = pv.seal ? `🔒${pv.seal}` : battle.rolled ? (pv.bd.total > 0 ? pv.bd.total : '—') : '—';
+  });
+  // 3) 힌트·주사위 표시·선택 강조
+  const hint = app.querySelector('.hint-line');
+  if (hint) {
+    const multi = aliveEnemies(battle).length > 1;
+    hint.textContent = !battle.rolled ? '굴려서 턴을 시작한다'
+      : selectedCat ? '한 번 더 탭하면 확정'
+      : multi ? '주사위 탭=다시 굴릴 것 선택 · 적 탭=표적 변경' : '주사위 탭=다시 굴릴 것 선택 · 족보 길게 눌러 설명';
+  }
+  updateDiceMarks();
+  app.querySelectorAll('.sheet-row').forEach(el => {
+    el.classList.toggle('selected', `${el.dataset.cat}:${el.dataset.variant}` === selectedCat);
+  });
+  updateComboHint();
 }
 
 // 확정 → 베기 연출 → 적 페이즈 → 다음 턴

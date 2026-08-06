@@ -56,6 +56,7 @@ async function playTurn(page) {
   const errors = [];
   const page = await (await browser.newContext({
     viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2,
+    serviceWorkers: 'block', // v0.63: SW 자동 갱신 리로드가 테스트 중간에 페이지를 되돌리는 것을 막는다
   })).newPage();
   page.on('pageerror', e => errors.push('PAGEERROR: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push('CONSOLE: ' + m.text()); });
