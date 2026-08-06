@@ -1,12 +1,13 @@
 // REDHOOD 서비스 워커 — 오프라인 캐시
 // ⚠ 판을 바꾸면 CACHE 번호를 반드시 +1 (runbook 규칙)
-const CACHE = 'redhood-v75';
+const CACHE = 'redhood-v76';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './css/style.css',
   './assets/fonts/song-myung/index.css',
+  './assets/fonts/song-myung/files/song-myung-korean-400-normal.woff2',
   './js/main.js',
   './js/data.js',
   './js/yahtzee.js',
