@@ -134,13 +134,13 @@ function eventFrame(npc, linesHtml, choicesHtml) {
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
         <span>${run.floor > 0 ? `🪙${run.coins}` : ''}</span>
       </header>
-      <div class="enemy-zone npc-zone">
-        <div class="npc">
-          ${npcArtHtml(npc)}
+      <div class="npc-stage">
+        ${npcArtHtml(npc)}
+        <div class="npc-overlay">
           <span class="npc-name">${esc(npc.name)}</span>
+          <div class="dialogue-panel">${linesHtml}</div>
         </div>
       </div>
-      <div class="dialogue-panel">${linesHtml}</div>
       <div class="sheet-zone choice-zone">${choicesHtml}</div>
       <div class="player-bar">
         <span class="pb-side"></span>

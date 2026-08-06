@@ -672,6 +672,28 @@ body {
 
 /* ---------- 대화 이벤트 (v0.10) ---------- */
 .event-screen .npc-zone { justify-content: center; align-items: center; }
+/* v0.30.1: NPC 무대 — 아트가 대사 영역까지 꽉 차고, 이름·대사는 그 위에 오버레이 */
+.npc-stage {
+  position: relative; flex: 1 1 auto; min-height: 300px; overflow: hidden;
+  display: flex; align-items: flex-start; justify-content: center;
+}
+.npc-stage .npc-art-img {
+  position: absolute; top: 2%; left: 0; right: 0; margin: 0 auto; /* sway(rotate)와 충돌 없는 정렬 */
+  height: 96%; width: auto; max-width: none;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, .55));
+}
+.npc-stage .npc-art { /* 이모지 폴백도 크게 */
+  position: absolute; top: 16%; left: 0; right: 0; text-align: center;
+  font-size: 110px; filter: drop-shadow(0 6px 16px rgba(0, 0, 0, .6));
+}
+.npc-overlay {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 26px 14px 10px;
+  background: linear-gradient(180deg, transparent 0%, rgba(8, 5, 4, .72) 34%, rgba(8, 5, 4, .94) 100%);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.npc-overlay .npc-name { font-weight: 800; color: #e8dcc8; letter-spacing: 1px; font-size: 15.5px; text-shadow: 0 1px 3px #000; }
+.npc-overlay .dialogue-panel { margin: 0; padding: 0; min-height: 0; background: none; border-radius: 0; }
 .npc { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0; }
 .npc-art {
   font-size: 62px;
