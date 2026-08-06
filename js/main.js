@@ -110,6 +110,7 @@ function showTitle() {
 
 // ---------- 캐릭터 아트 (v0.30): 이미지 보유 시 이모지 대체 ----------
 const ENEMY_ART = new Set(['stray_dog']);
+const BG_ART = new Set(['forest']); // 전투 테마 배경 보유 목록
 const NPC_ART = { '잿빛 방물장수': 'peddler', '부러진 이정표': 'signpost' };
 function enemyArtHtml(e) {
   return ENEMY_ART.has(e.defId)
@@ -630,7 +631,13 @@ function renderBattle(opts = {}) {
   const shieldPct = Math.max(0, Math.min(p.block, barTotal - p.hp) / barTotal * 100);
   app.innerHTML = '';
   app.append(h(`
-    <div class="screen battle-screen">
+    <div class="screen battle-screen" style="${(() => {
+      // v0.35: 테마 배경 — 보유한 배경만, 어두운 오버레이로 눌러서 몬스터가 도드라지게
+      const themeId = run.act <= 3 ? themeOf(run).id : null;
+      return BG_ART.has(themeId)
+        ? `background-image: linear-gradient(rgba(16, 12, 10, .34), rgba(16, 12, 10, .5) 42%, #14100f 76%), url('assets/bg/bg_${themeId}.jpg')`
+        : '';
+    })()}">
       <header class="topbar">
         <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
         <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
