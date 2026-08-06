@@ -505,26 +505,33 @@ body {
 /* ---------- 전투: 족보 시트 ---------- */
 .sheet-zone {
   flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column;
-  gap: 6px; padding: 10px 12px;
+  gap: 8px; padding: 10px 12px 10px 38px; /* v0.57: 왼쪽에 원형 아이콘 공간 */
   background: #171210 url('../assets/ui/tex_wood.jpg') center / cover; /* v0.26: 나무 탁자 */
   border-top: 1px solid #2c221c;
 }
 .sheet-zone.dim { opacity: .45; }
-/* v0.25: 족보 줄 = 낡은 종이 띠 (밝은 종이 위 진갈색 글자) */
+/* v0.57: 줄 UI — [원형 아이콘][이름/종류][값]. 아이콘이 종이 왼쪽으로 튀어나온다 */
 .sheet-row {
-  flex: none; display: flex; align-items: center; gap: 8px;
+  flex: none; display: flex; align-items: center; gap: 10px;
   border: solid transparent; border-width: 11px 17px; border-radius: 0;
   border-image: url('../assets/ui/paper_row.png') 55 92 fill stretch;
-  background: none;
-  color: #3a2a1c; padding: 1px 0; cursor: pointer; font-size: 14.5px;
+  background: none; position: relative;
+  color: #3a2a1c; padding: 4px 0; cursor: pointer; font-size: 14.5px;
+  min-height: 54px;
 }
-.sheet-name { flex: none; font-weight: 700; white-space: nowrap; }
-.sheet-ability {
-  flex: 1; min-width: 0; text-align: left; font-size: 10.5px; color: #6b5842;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.row-icon {
+  margin-left: -32px; position: relative; z-index: 1;
+  width: 52px; height: 52px; flex: none; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #3b2c22, #1c1512 70%);
+  border: 2px solid #6b4f38;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .55), inset 0 1px 3px rgba(255, 236, 200, .12);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-.sheet-example { flex: none; font-size: 19px; color: #7a6850; letter-spacing: 1px; }
-.sheet-row .sheet-preview { flex: none; min-width: 36px; text-align: right; font-weight: 700; color: #8f2a20; font-size: 18px; }
+.row-icon .row-ico-img { width: 78%; height: 78%; object-fit: contain; }
+.row-icon .row-ico-tmp { font-size: 21px; font-weight: 700; color: #d8c39b; line-height: 1; }
+.row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; text-align: left; }
+.sheet-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-row .sheet-preview { flex: none; min-width: 40px; text-align: right; font-weight: 700; color: #8f2a20; font-size: 20px; padding-right: 2px; }
 .sheet-row .lv { color: #8a6516; font-size: 11px; }
 .cat-tag { color: #8a7d68; font-size: 10.5px; font-weight: 400; }
 .sheet-row .cat-tag { color: #7a6850; }
@@ -766,8 +773,8 @@ body {
 .npc-line { margin: 0; color: #e8dcc8; font-size: 14.5px; line-height: 1.62; }
 .event-effect { margin: 0; color: #e8b64b; font-weight: 700; font-size: 13.5px; }
 .choice-zone { gap: 8px; padding-top: 6px; justify-content: flex-start; }
-.choice-row { flex-direction: column; align-items: flex-start; gap: 3px; }
-.choice-main { font-weight: 700; font-size: 15px; }
+.choice-row { flex-direction: row; align-items: center; gap: 10px; }
+.choice-main { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* v0.37: 획득 표시 — 선택지 영역의 종이 띠 */
 .gain-box {
   flex: none; border: solid transparent; border-width: 11px 17px; border-radius: 0;
@@ -776,7 +783,7 @@ body {
 }
 .gain-box .event-effect { color: #6b3d17; font-weight: 700; }
 .choice-sub { font-size: 12px; color: #7a5a2e; }
-.choice-cats { font-size: 11.5px; color: #6b5842; }
+.choice-cats { font-size: 11px; color: #6b5842; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- 적 행동 6유형 (v0.11) ---------- */
 .enemy-buffs { color: #cbbfa8; font-weight: 700; }

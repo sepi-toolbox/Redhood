@@ -130,6 +130,25 @@ function npcArtHtml(npc) {
   return `<img class="npc-art npc-art-img${kind}" src="assets/npc/${f}.png" alt="" draggable="false">`;
 }
 
+// ---------- v0.57: 줄 UI 공통 — [원형 아이콘][본문][값] ----------
+// 아이콘 규격: 정사각 1:1, 투명 배경, 원형 안에 들어가는 심볼. 리소스 확보 전 임시 표기 사용.
+function rowIcon(inner) {
+  return `<span class="row-icon">${inner}</span>`;
+}
+// 족보 아이콘 — 전용 리소스가 오면 assets/icons/combo_{variantId}.png 로 자동 교체
+const COMBO_ICON_READY = new Set();
+function comboIcon(cat, variant) {
+  if (COMBO_ICON_READY.has(variant.id)) {
+    return `<img class="row-ico-img" src="assets/icons/combo_${variant.id}.png" alt="" draggable="false">`;
+  }
+  return `<span class="row-ico-tmp">${esc((cat.name || '?').slice(0, 1))}</span>`; // 임시: 족보 종류 첫 글자
+}
+// 선택지 텍스트 맨 앞 이모지를 아이콘 자리로 분리
+function splitLeadEmoji(text) {
+  const m = (text || '').match(/^([\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{FE0F}\u{200D}]+)\s*(.*)$/u);
+  return m ? { icon: m[1], text: m[2] } : { icon: '', text: text || '' };
+}
+
 // ---------- 대화 이벤트 화면 ----------
 // 배틀 화면과 같은 골격: 적 위치=NPC, 주사위 위치=검은 그라데이션 대사판, 족보 위치=선택지
 function eventFrame(npc, linesHtml, choicesHtml) {
@@ -180,9 +199,12 @@ function showIntro() {
     intro.lines.map(l => `<p class="npc-line">${esc(l)}</p>`).join(''),
     weapons.map((w, i) => `
       <button class="sheet-row choice-row weapon-choice" data-idx="${i}">
-        <span class="choice-main">${ico('weapon_' + w.id, 'ico-weapon')} <b>${esc(w.name)}</b></span>
-        <span class="choice-sub">${esc(w.desc)}</span>
-        <span class="choice-cats">📜 ${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</span>
+        ${rowIcon(`<img class="row-ico-img" src="assets/icons/weapon_${w.id}.png" alt="" draggable="false">`)}
+        <span class="row-body">
+          <span class="choice-main">${esc(w.name)}</span>
+          <span class="choice-sub">${esc(w.desc)}</span>
+          <span class="choice-cats">${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</span>
+        </span>
       </button>`).join(''))));
   app.querySelectorAll('.weapon-choice').forEach(el => {
     el.addEventListener('click', () => {
@@ -204,8 +226,11 @@ function showEvent(ev) {
     ev.lines.map(l => `<p class="npc-line">${esc(l)}</p>`).join(''),
     ev.choices.map((ch, i) => `
       <button class="sheet-row choice-row" data-idx="${i}">
-        <span class="choice-main">${esc(ch.text)}</span>
-        ${ch.sub ? `<span class="choice-sub">${esc(ch.sub)}</span>` : ''}
+        ${(() => { const { icon, text } = splitLeadEmoji(ch.text); return rowIcon(icon || '·') + `
+        <span class="row-body">
+          <span class="choice-main">${esc(text)}</span>
+          ${ch.sub ? `<span class="choice-sub">${esc(ch.sub)}</span>` : ''}
+        </span>`; })()}
       </button>`).join(''))));
   app.querySelectorAll('.choice-row').forEach(el => {
     el.addEventListener('click', () => {
@@ -713,9 +738,11 @@ function renderBattle(opts = {}) {
         ${previews.map(({ cat, variant, seal, locked, bd }) => `
           <button class="sheet-row t-${variant.tier || 'common'} ${locked ? 'used' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
             data-cat="${cat.id}" data-variant="${variant.id}" data-locked="${locked ? 1 : 0}">
-            <span class="sheet-name">${esc(variant.name)} <small class="cat-tag">${esc(cat.name)}</small>${isAoE(cat) ? ' <small class="aoe-tag">전체</small>' : ''}</span>
-            <span class="sheet-ability">${esc(variant.abilityText || '')}</span>
-            <span class="sheet-example">${(cat.example || []).map(f => PIPS[f]).join('')}</span>
+            ${rowIcon(comboIcon(cat, variant))}
+            <span class="row-body">
+              <span class="sheet-name">${esc(variant.name)}</span>
+              <small class="cat-tag">${esc(cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
+            </span>
             <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? bd.total : '—') : '—'}</span>
           </button>`).join('')}
       </div>

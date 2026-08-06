@@ -225,6 +225,30 @@ Stylized dark fairytale app icon for the dice game REDHOOD. Match the EXACT pain
 
 ---
 
+## [8] 줄 UI 원형 아이콘 (족보 18종 + 선택지) ⬜
+
+전투 족보 줄·NPC 선택지 줄의 **왼쪽 원형 아이콘**. 현재는 임시 표기(족보 종류 첫 글자 / 선택지 이모지)로 대체 중이며, 리소스가 오면 자동 교체된다.
+
+**규격 (필수)**
+- **정사각 1:1**, 배경은 키잉용 단색 (`one plain flat very dark brown background`)
+- 심볼이 **원 안에 들어가야 함** — 화면에서 지름 52px 원형으로 잘려 표시되므로, 모서리에 중요한 요소를 두지 말 것 (안전 영역 = 중앙 78%)
+- **48px에서 읽히는 단일 심볼**, 배경 장식·테두리·원형 프레임 금지 (프레임은 게임이 그림)
+- 채색은 밝은 쪽으로 — 어두운 원형 바탕 위에 올라간다
+
+**공통 템플릿**
+```
+Stylized dark fairytale icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density. NOT photorealistic, NOT 3D. Square 1:1 image. A single symbol, centered, filling about 75 percent of the frame, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. Bright enough to read against a dark circular background, readable at 48px. No circular frame, no border, no background decoration. The symbol: {묘사}. No text, no letters, no watermark.
+```
+
+**족보 18종 묘사** — [5] 족보 종이의 문양 문장과 동일하게 사용:
+`assets/icons/combo_{variantId}.png` (instinct / whisper / clasped_hands / red_shoes / twin_sisters / two_moons / triple_axe / woodsman_breath / four_fangs / heavy_blow / cottage / hearth / windpath / hunt_drive / moonpath / storm_run / judgment_night / blood_moon)
+
+> 족보 종이 18종([5])과 문양이 같으므로, 한쪽을 뽑으면 다른 쪽으로 재활용 가능.
+
+**연동 방법**: 파일을 올리면 `main.js`의 `COMBO_ICON_READY`에 id를 추가 → 임시 글자에서 그림으로 자동 교체.
+
+---
+
 ## 완료된 리소스 (재생성용 참고)
 
 ### 주사위 6면 시트 ✅ (13종)
