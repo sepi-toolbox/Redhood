@@ -217,9 +217,9 @@ body {
 .enemy .bar.t-normal::before, .enemy .bar.t-elite::before, .enemy .bar.t-boss::before {
   content: ''; position: absolute; inset: 0; background: #2a1d17; z-index: -1;
 }
-.enemy .bar.t-normal { width: 128px; height: 15px; border-width: 4px 15px; border-image: url('../assets/ui/hpbar_normal.png') 26 96 stretch; }
-.enemy .bar.t-elite { width: 136px; height: 19px; border-width: 5px 19px; border-image: url('../assets/ui/hpbar_elite.png') 44 148 stretch; }
-.enemy .bar.t-boss { width: 154px; height: 21px; border-width: 6px 20px 6px 28px; border-image: url('../assets/ui/hpbar_boss.png') 44 120 44 168 stretch; }
+.enemy .bar.t-normal { width: 128px; height: 18px; border-width: 6px 5px 5px 5px; border-image: url('../assets/ui/hpbar_normal.png') 33 29 31 29 stretch; }
+.enemy .bar.t-elite { width: 136px; height: 22px; border-width: 8px 9px 8px 9px; border-image: url('../assets/ui/hpbar_elite.png') 58 65 58 65 stretch; }
+.enemy .bar.t-boss { width: 154px; height: 22px; border-width: 7px 11px 7px 18px; border-image: url('../assets/ui/hpbar_boss.png') 49 77 49 132 stretch; }
 .enemy-hp { font-size: 11.5px; color: #9c8f7a; }
 .mid-line { flex: none; min-height: 18px; text-align: center; padding: 0 12px; }
 .last-result { font-size: 12px; color: #e8b64b; }
@@ -456,10 +456,10 @@ body {
 .pb-side { width: 52px; text-align: center; font-size: 13px; color: #e8b64b; flex: none; }
 /* v0.39: 플레이어 체력바 — 하트·해골 나무틀 (9-슬라이스, 중앙은 게임이 채움) */
 .hp-gauge {
-  position: relative; flex: 1; max-width: 300px; height: 34px;
+  position: relative; flex: 1; max-width: 300px; height: 36px;
   background: none; border-radius: 0; overflow: visible;
-  border: solid transparent; border-width: 8px 34px;
-  border-image: url('../assets/ui/hpbar_player.png') 40 132 stretch;
+  border: solid transparent; border-width: 13px 25px 12px 26px; /* v0.41.1: 창 실측 정합 */
+  border-image: url('../assets/ui/hpbar_player.png') 54 107 51 113 stretch;
 }
 .hp-gauge::before { /* 창 안 어두운 바닥 */
   content: ''; position: absolute; inset: 0; background: #2a1d17; z-index: -1;
