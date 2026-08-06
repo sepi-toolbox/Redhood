@@ -1,6 +1,6 @@
 // REDHOOD 서비스 워커 — 오프라인 캐시
 // ⚠ 판을 바꾸면 CACHE 번호를 반드시 +1 (runbook 규칙)
-const CACHE = 'redhood-v64';
+const CACHE = 'redhood-v65';
 const ASSETS = [
   './',
   './index.html',
@@ -164,6 +164,11 @@ const ASSETS = [
   './assets/enemies/leech.png',
   './assets/enemies/rat_swarm.png',
   './assets/enemies/living_broom.png',
+  './assets/enemies/alpha_dog.png',
+  './assets/enemies/old_pike.png',
+  './assets/enemies/cellar_thing.png',
+  './assets/enemies/old_teddy.png',
+  './assets/enemies/river_hag.png',
   './assets/npc/redhood.png',
   './assets/npc/peddler.png',
   './assets/npc/signpost.png',

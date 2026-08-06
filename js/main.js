@@ -109,7 +109,7 @@ function showTitle() {
 }
 
 // ---------- 캐릭터 아트 (v0.30): 이미지 보유 시 이모지 대체 ----------
-const ENEMY_ART = new Set(['stray_dog', 'wolf', 'crow', 'will_o_wisp', 'forest_spider', 'thorn_bush', 'twig_golem', 'brook_sprite', 'leech', 'rat_swarm', 'living_broom']);
+const ENEMY_ART = new Set(['stray_dog', 'wolf', 'crow', 'will_o_wisp', 'forest_spider', 'thorn_bush', 'twig_golem', 'brook_sprite', 'leech', 'rat_swarm', 'living_broom', 'alpha_dog', 'old_pike', 'cellar_thing', 'old_teddy', 'river_hag']);
 const BG_ART = new Set(['forest']); // 전투 테마 배경 보유 목록
 const NPC_ART = { '잿빛 방물장수': 'peddler', '부러진 이정표': 'signpost', '낯익은 환영': 'redhood' };
 function enemyArtHtml(e) {
