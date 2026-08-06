@@ -1,1 +1,1 @@
-deployed=20260806T134743Z v0.53 sw=v71 enemyart=216px
+deployed=20260806T142346Z main-only v0.53
