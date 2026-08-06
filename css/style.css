@@ -504,7 +504,7 @@ body {
 /* ---------- 전투: 족보 시트 ---------- */
 .sheet-zone {
   flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column;
-  gap: 8px; padding: 10px 12px 10px 38px; /* v0.57: 왼쪽에 원형 아이콘 공간 */
+  gap: 6px; padding: 10px 12px 10px 38px; /* v0.57: 왼쪽에 원형 아이콘 공간 */
   background: #171210 url('../assets/ui/tex_wood.jpg') center / cover; /* v0.26: 나무 탁자 */
   border-top: 1px solid #2c221c;
 }
@@ -540,6 +540,18 @@ body {
 .sheet-row.selected { filter: brightness(1.12) saturate(1.06); } /* v0.59: 발광 제거, 배경만 밝게 */
 .sheet-row.used { opacity: .32; filter: grayscale(.6); }
 .sheet-row.used .sheet-preview { color: #6f6353; }
+/* v0.62: 전투 족보 줄만 v0.53 높이로 원복.
+   아이콘을 absolute로 빼서 줄 높이에 관여하지 못하게 하고, 이름·종류를 한 줄로 합친다.
+   (이벤트/상점 choice-row는 2줄이 필요하므로 영향 없음) */
+.combo-row { gap: 8px; padding-left: 14px; } /* 메달이 종이 왼쪽을 물고 있으므로 글자를 그만큼 밀어준다 */
+.combo-row .row-icon {
+  position: absolute; left: -30px; top: 50%; margin: -18px 0 0 0;
+  width: 36px; height: 36px;
+}
+.combo-row .row-body { flex-direction: row; align-items: baseline; gap: 5px; }
+.combo-row .sheet-name { flex: none; max-width: 62%; }
+.combo-row .cat-tag { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.combo-row .sheet-preview { font-size: 18px; min-width: 36px; }
 
 /* ---------- 보상: 상자 ---------- */
 @keyframes chestDrop {

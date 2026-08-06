@@ -768,7 +768,7 @@ function renderBattle(opts = {}) {
       }</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, variant, seal, locked, bd }) => `
-          <button class="sheet-row t-${variant.tier || 'common'} ${locked ? 'used' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
+          <button class="sheet-row combo-row t-${variant.tier || 'common'} ${locked ? 'used' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
             data-cat="${cat.id}" data-variant="${variant.id}" data-locked="${locked ? 1 : 0}">
             ${rowIcon(comboIcon(cat, variant))}
             <span class="row-body">
