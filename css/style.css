@@ -429,10 +429,7 @@ body {
 }
 .die.mark-reroll .pip-art { transform: translateY(-4px) rotate(var(--tilt, 0deg)); } /* 그림만 살짝 들림 */
 /* v0.42: 선택한 족보의 구성 주사위 — 은은한 금빛 기운 */
-.die.combo-hint .pip-art {
-  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5)) drop-shadow(0 0 7px rgba(232, 182, 75, .55));
-}
-.die.combo-hint { filter: brightness(1.05); }
+.die.combo-hint { filter: brightness(1.14); } /* v0.59: 발광 없이 받침 밝기만 */
 .die.gold { background: #f5d97a; border-color: #b08948; }
 .die.special { background: #d9d2e8; }
 .die.blank { background: #241c18; border-style: dashed; border-color: #3c2f26; }
@@ -540,7 +537,7 @@ body {
 .sheet-row.t-uncommon .sheet-name { color: #2e5876; }
 .sheet-row.t-rare .sheet-name { color: #5d3f86; }
 .sheet-row.t-epic .sheet-name { color: #8a6516; }
-.sheet-row.selected { filter: drop-shadow(0 0 7px #e8b64b) brightness(1.06); }
+.sheet-row.selected { filter: brightness(1.12) saturate(1.06); } /* v0.59: 발광 제거, 배경만 밝게 */
 .sheet-row.used { opacity: .32; filter: grayscale(.6); }
 .sheet-row.used .sheet-preview { color: #6f6353; }
 
