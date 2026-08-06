@@ -702,7 +702,15 @@ body {
   background: linear-gradient(180deg, transparent 0%, rgba(8, 5, 4, .38) 36%, rgba(8, 5, 4, .66) 100%); /* v0.31: 아트 비치게 반투명 */
   display: flex; flex-direction: column; gap: 6px;
 }
-.npc-overlay .npc-name { font-weight: 800; color: #e8dcc8; letter-spacing: 1px; font-size: 15.5px; text-shadow: 0 1px 3px #000, 0 0 8px rgba(0, 0, 0, .8); }
+/* v0.36: 이름표 리본 — 9-슬라이스, 이름 길이에 맞춰 늘어남 */
+.npc-overlay .npc-name {
+  align-self: center; text-align: center;
+  border: solid transparent; border-width: 13px 62px; border-radius: 0;
+  border-image: url('../assets/ui/nameplate.png') 42 300 fill stretch;
+  padding: 0 2px; min-width: 96px;
+  font-weight: 800; color: #e8dcc8; letter-spacing: 1px; font-size: 14.5px;
+  text-shadow: 0 1px 3px #000, 0 0 8px rgba(0, 0, 0, .8);
+}
 .npc-overlay .npc-line { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0, 0, 0, .85); }
 .npc-overlay .dialogue-panel { margin: 0; padding: 0; min-height: 0; background: none; border-radius: 0; }
 .npc { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0; }
@@ -784,20 +792,20 @@ body {
 }
 
 /* ---------- 주사위 아트 렌더링 (v0.20) ---------- */
-/* 아트 주사위: 그림 자체가 몸통 — 버튼 배경/테두리는 상태 표시용으로만 */
-.die.art { background: transparent; border-color: transparent; }
+/* 아트 주사위: 그림 자체가 몸통 — v0.36: 나무 받침(die_pad) 위에 앉음 */
+.die.art {
+  background: transparent url('../assets/ui/die_pad.png') center / contain no-repeat;
+  border-color: transparent;
+}
 .die.art .pip-art {
-  width: 56px; height: 56px; object-fit: contain; pointer-events: none;
+  width: 46px; height: 46px; object-fit: contain; pointer-events: none;
   filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
 }
-.die.art .pip-art.empty {
-  display: block; width: 50px; height: 50px; border-radius: 11px;
-  background: #241c18; border: 2px dashed #3c2f26;
-}
-.die.art.blank { background: transparent; border-color: transparent; }
-.die.art.gold { background: transparent; box-shadow: 0 0 8px rgba(232, 182, 75, .45); border-color: rgba(232, 182, 75, .55); }
-.die.art.special { background: transparent; border-color: rgba(200, 170, 232, .4); }
-.die.art.mark-reroll { background: rgba(201, 48, 47, .07); }
+.die.art .pip-art.empty { display: block; width: 46px; height: 46px; } /* 빈 슬롯 = 받침만 */
+.die.art.blank, .die.art.gold, .die.art.special { border-color: transparent; }
+.die.art.gold { box-shadow: none; filter: drop-shadow(0 0 7px rgba(232, 182, 75, .5)); }
+.die.art.special { filter: drop-shadow(0 0 7px rgba(200, 170, 232, .45)); }
+.die.art.mark-reroll { filter: drop-shadow(0 0 7px rgba(201, 48, 47, .75)); box-shadow: none; } /* 받침 실루엣 붉은 발광 */
 .die.art.spinning .pip-art { opacity: .75; filter: blur(0.7px) drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); }
 
 /* ---------- v0.24 아이콘 아트 (이모지 → 그림) ---------- */
