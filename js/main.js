@@ -209,9 +209,17 @@ function showEvent(ev) {
 
 // 선택 결과 화면 — pendingDie가 있으면 '길을 나선다' 전에 교체 모달
 function showEventResult(npc, linesHtml, pendingDie = null) {
-  app.innerHTML = '';
-  app.append(h(eventFrame(npc, linesHtml,
-    `<button class="btn primary" id="event-done">길을 나선다</button>`)));
+  const choicesHtml = `<button class="btn primary" id="event-done">길을 나선다</button>`;
+  // v0.34: 같은 NPC의 무대가 이미 떠 있으면 화면 전환 없이 대사·선택지만 교체
+  const stage = app.querySelector('.npc-stage');
+  const sameNpc = stage && app.querySelector('.npc-name')?.textContent === npc.name;
+  if (sameNpc) {
+    app.querySelector('.npc-overlay .dialogue-panel').innerHTML = linesHtml;
+    app.querySelector('.choice-zone').innerHTML = choicesHtml;
+  } else {
+    app.innerHTML = '';
+    app.append(h(eventFrame(npc, linesHtml, choicesHtml)));
+  }
   document.getElementById('event-done').addEventListener('click', () => {
     if (pendingDie) showReplaceDie(pendingDie, () => { saveRun(run); showMap(); });
     else { saveRun(run); showMap(); }
