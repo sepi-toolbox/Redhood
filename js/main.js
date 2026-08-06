@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.63'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.64'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -684,6 +684,21 @@ function breakdownText(bd) {
   return parts.join(' ');
 }
 
+// v0.64: 힌트 줄 — 족보를 고르면 그 족보의 설명이 뜬다. 확정 안내는 뒤에 짧게 붙인다.
+function hintHtml() {
+  if (!battle.rolled) return '굴려서 턴을 시작한다';
+  if (selectedCat) {
+    const [cid, vid] = selectedCat.split(':');
+    const cat = DB.scoring.categories.find(c => c.id === cid);
+    const v = (cat?.variants || []).find(x => x.id === vid) || {};
+    const desc = v.abilityText || cat?.ruleText || '';
+    return `<b class="hint-desc">${esc(desc)}</b>${desc ? ' ' : ''}<span class="hint-confirm">· 한 번 더 탭 = 확정</span>`;
+  }
+  return aliveEnemies(battle).length > 1
+    ? '주사위 탭=다시 굴릴 것 선택 · 적 탭=표적 변경'
+    : '주사위 탭=다시 굴릴 것 선택 · 족보 길게 눌러 설명';
+}
+
 function selectedCatDef() {
   return selectedCat ? DB.scoring.categories.find(c => c.id === selectedCat) : null;
 }
@@ -761,11 +776,7 @@ function renderBattle(opts = {}) {
           ? `<button class="btn primary roll-btn" id="roll-btn">🎲 굴림</button>`
           : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft <= 0 || battle.await || battle.dice.every(d => d.held) ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})</button>`}
       </div>
-      <div class="hint-line">${
-        !battle.rolled ? '굴려서 턴을 시작한다' :
-        selectedCat ? '한 번 더 탭하면 확정' :
-        multi ? '주사위 탭=다시 굴릴 것 선택 · 적 탭=표적 변경' : '주사위 탭=다시 굴릴 것 선택 · 족보 길게 눌러 설명'
-      }</div>
+      <div class="hint-line">${hintHtml()}</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, variant, seal, locked, bd }) => `
           <button class="sheet-row combo-row t-${variant.tier || 'common'} ${locked ? 'used' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
@@ -882,7 +893,7 @@ function updateSheetSelection() {
     el.classList.toggle('selected', `${el.dataset.cat}:${el.dataset.variant}` === selectedCat);
   });
   const hint = app.querySelector('.hint-line');
-  if (hint) hint.textContent = '한 번 더 탭하면 확정';
+  if (hint) hint.innerHTML = hintHtml();
   updateComboHint();
 }
 
@@ -1097,12 +1108,7 @@ function updateAfterRoll() {
   });
   // 3) 힌트·주사위 표시·선택 강조
   const hint = app.querySelector('.hint-line');
-  if (hint) {
-    const multi = aliveEnemies(battle).length > 1;
-    hint.textContent = !battle.rolled ? '굴려서 턴을 시작한다'
-      : selectedCat ? '한 번 더 탭하면 확정'
-      : multi ? '주사위 탭=다시 굴릴 것 선택 · 적 탭=표적 변경' : '주사위 탭=다시 굴릴 것 선택 · 족보 길게 눌러 설명';
-  }
+  if (hint) hint.innerHTML = hintHtml();
   updateDiceMarks();
   app.querySelectorAll('.sheet-row').forEach(el => {
     el.classList.toggle('selected', `${el.dataset.cat}:${el.dataset.variant}` === selectedCat);

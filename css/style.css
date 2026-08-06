@@ -459,6 +459,9 @@ body {
 .roll-bar { flex: none; display: flex; justify-content: center; padding: 4px 14px 0; }
 .roll-btn { min-width: 170px; font-size: 17px; }
 .hint-line { flex: none; text-align: center; font-size: 11.5px; color: #b08948; min-height: 17px; padding: 3px 12px 4px; }
+/* v0.64: 족보 선택 시 뜨는 설명 — 설명은 밝게, 확정 안내는 눌러서 */
+.hint-desc { color: #e8b64b; font-weight: 700; }
+.hint-confirm { color: #7e6a4c; font-size: 10.5px; }
 .upper-meter { font-size: 12px; color: #e8b64b; flex: none; }
 .aoe-tag { color: #c9302f; font-size: 10px; font-weight: 700; }
 
