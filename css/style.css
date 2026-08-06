@@ -680,7 +680,7 @@ body {
 .event-screen .npc-zone { justify-content: center; align-items: center; }
 /* v0.30.1: NPC 무대 — 아트가 대사 영역까지 꽉 차고, 이름·대사는 그 위에 오버레이 */
 .npc-stage {
-  position: relative; flex: 1 1 auto; min-height: 300px; overflow: hidden;
+  position: relative; flex: none; height: clamp(300px, 44dvh, 440px); overflow: hidden; /* v0.33: 프레임 고정 — 선택지 수와 무관 */
   display: flex; align-items: flex-start; justify-content: center;
 }
 .npc-stage .npc-art-img {
