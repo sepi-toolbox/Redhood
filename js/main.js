@@ -645,29 +645,43 @@ function renderBattle(opts = {}) {
         <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
         <span>🪙${run.coins} <span class="hp">❤️</span></span>
       </header>
-      <div class="enemy-zone">
-        ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
-          <button class="enemy ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
-            ${targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
-            <span class="intent">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
-            ${enemyArtHtml(e)}
-            <span class="enemy-name">${esc(e.name)}</span>
-            ${(() => {
-              // 적 방어도 LoL식: HP 구간 끝에 회백색 실드 세그먼트
-              const ebTotal = Math.max(e.maxHpInit, e.hp + e.block);
-              const ehpPct = e.final ? 100 : Math.max(0, e.hp / ebTotal * 100);
-              const eshPct = e.final ? 0 : Math.min(e.block, ebTotal - e.hp) / ebTotal * 100;
-              return `<span class="bar t-${e.tier}"><i style="width:${ehpPct}%"></i>${e.block > 0 && !e.final ? `<b class="ebar-shield" style="left:${ehpPct}%;width:${eshPct}%"></b>` : ''}</span>`;
-            })()}
-            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${(() => {
-              const d = e.debuffs || {};
-              const chips = [
-                e.block > 0 ? `${ico('intent_defend')}${e.block}` : '', e.power > 0 ? `${ico('intent_empower')}+${e.power}` : '',
-                d.weak > 0 ? `${ico('status_weak')}${d.weak}` : '', d.bleed > 0 ? `${ico('status_bleed')}${d.bleed}` : '', d.vulnerable > 0 ? `${ico('status_vulnerable')}${d.vulnerable}` : '',
-              ].filter(Boolean).join(' ');
-              return chips ? ` <span class="enemy-buffs">${chips}</span>` : '';
-            })()}</span>
-          </button>`).join('')}
+      <div class="enemy-zone stage-mode">
+        ${(() => {
+          // v0.43: NPC 무대 방식 — 포트레이트 1장(무리는 두 겹) + 아래 체력바 행 (탭=표적, 롱탭=상세)
+          const shown = battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed));
+          const alive = shown.filter(e => e.hp > 0);
+          const lead = alive[0] || shown[0];
+          if (!lead) return '';
+          const pack = alive.length > 1;
+          const stageArt = ENEMY_ART.has(lead.defId)
+            ? `${pack ? `<img class="stage-art back" src="assets/enemies/${lead.defId}.png" alt="" draggable="false">` : ''}
+               <img class="stage-art ${pack ? 'front-pack' : ''}" src="assets/enemies/${lead.defId}.png" alt="" draggable="false">`
+            : `${pack ? `<span class="stage-emoji back">${lead.art}</span>` : ''}<span class="stage-emoji ${pack ? 'front-pack' : ''}">${lead.art}</span>`;
+          const rows = shown.map(e => {
+            const ebTotal = Math.max(e.maxHpInit, e.hp + e.block);
+            const ehpPct = e.final ? 100 : Math.max(0, e.hp / ebTotal * 100);
+            const eshPct = e.final ? 0 : Math.min(e.block, ebTotal - e.hp) / ebTotal * 100;
+            const d = e.debuffs || {};
+            const chips = [
+              e.block > 0 ? `${ico('intent_defend')}${e.block}` : '', e.power > 0 ? `${ico('intent_empower')}+${e.power}` : '',
+              d.weak > 0 ? `${ico('status_weak')}${d.weak}` : '', d.bleed > 0 ? `${ico('status_bleed')}${d.bleed}` : '', d.vulnerable > 0 ? `${ico('status_vulnerable')}${d.vulnerable}` : '',
+            ].filter(Boolean).join(' ');
+            return `
+            <button class="enemy-row ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''} ${e.hp <= 0 ? 'dead' : ''}" data-uid="${e.uid}">
+              <span class="row-top">
+                ${targetUid === e.uid && e.hp > 0 ? '<span class="row-pin">▼</span>' : ''}
+                <span class="intent">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
+                <span class="enemy-name">${esc(e.name)}</span>
+                <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}</span>
+              </span>
+              <span class="row-bot">
+                <span class="bar t-${e.tier}"><i style="width:${ehpPct}%"></i>${e.block > 0 && !e.final ? `<b class="ebar-shield" style="left:${ehpPct}%;width:${eshPct}%"></b>` : ''}</span>
+                ${chips ? `<span class="enemy-buffs">${chips}</span>` : ''}
+              </span>
+            </button>`;
+          }).join('');
+          return `<div class="enemy-stage" id="enemy-stage">${stageArt}</div><div class="enemy-rows">${rows}</div>`;
+        })()}
       </div>
       <div class="mid-line">
         ${lastR ? `<span class="last-result">${esc(lastR.catName)}: ${breakdownText(lastR)} = <b>${lastR.total}</b> ${lastR.bonusHits.map(esc).join(' ')}</span>` : '<span class="last-result"></span>'}
@@ -759,8 +773,8 @@ function renderBattle(opts = {}) {
     const rerolled = battle.dice.map((d, i) => (d.held ? -1 : i)).filter(i => i >= 0);
     if (reroll(battle)) animateRoll(rerolled);
   });
-  // 적 탭 = 표적 변경 (언제든, 확정과 무관) / 길게 누르면 행동 상세 (치트)
-  app.querySelectorAll('.enemy').forEach(el => {
+  // 적 행 탭 = 표적 변경 (언제든, 확정과 무관) / 길게 누르면 행동 상세 (치트) — v0.43: 행 UI
+  app.querySelectorAll('.enemy-row').forEach(el => {
     addLongPress(el, () => showEnemyInfo(el.dataset.uid));
     el.addEventListener('click', () => {
       if (busy) return;
@@ -993,10 +1007,14 @@ function tryConfirm(catId, variantId, uid) {
       .filter(e => !e.stunned)
       .map(e => ({ uid: e.uid, isAtk: e.nextMove.effects.some(f => f.op === 'damage') }));
     actors.forEach((a, i) => setTimeout(() => {
-      const el = app.querySelector(`.enemy[data-uid="${a.uid}"]`);
-      if (!el) return;
-      el.classList.add(a.isAtk ? 'attacking' : 'charging');
-      setTimeout(() => el.classList.remove('attacking', 'charging'), 740);
+      // v0.43: 연출은 무대(포트레이트)가 통째로, 행에는 강조 표시
+      const stage = app.querySelector('#enemy-stage');
+      if (stage) {
+        stage.classList.add(a.isAtk ? 'attacking' : 'charging');
+        setTimeout(() => stage.classList.remove('attacking', 'charging'), 740);
+      }
+      const row = app.querySelector(`.enemy-row[data-uid="${a.uid}"]`);
+      if (row) { row.classList.add('acting'); setTimeout(() => row.classList.remove('acting'), 740); }
     }, i * ATK_MS));
     const atkTotal = actors.length > 0 ? actors.length * ATK_MS + 200 : 300;
 
@@ -1106,44 +1124,48 @@ function playPlayerHitFx(dmg) {
   setTimeout(() => { screen.classList.remove('screen-shake'); veil.remove(); }, 700);
 }
 
-// 족보별 명중 이펙트 — 어려운 족보일수록 화려하게
+// 족보별 명중 이펙트 — v0.43: 무대(포트레이트)에 연출, 피해 수치는 마리별로 나란히
 function playHitEffects(hits, fx = 'slash') {
-  for (const hit of hits) {
-    const el = app.querySelector(`.enemy[data-uid="${hit.uid}"]`);
-    if (!el) continue;
-    el.classList.add('hit');
-    const cleanup = [];
-    const addSlash = (cls, delay = 0) => setTimeout(() => {
-      if (!el.isConnected) return;
-      const s = document.createElement('span');
-      s.className = 'slash ' + cls;
-      el.appendChild(s);
-      cleanup.push(s);
-    }, delay);
-    const addRing = (cls) => {
-      const r = document.createElement('span');
-      r.className = 'impact-ring ' + cls;
-      el.appendChild(r);
-      cleanup.push(r);
-    };
-    switch (fx) {
-      case 'slash2':   addSlash(''); addSlash('rev', 100); break;              // 트리플: X자 이중 베기
-      case 'smash':    addRing('red'); addSlash('', 60); break;                // 포카드: 충격파 + 베기
-      case 'ring':     addRing('gold'); addSlash(''); break;                   // 풀하우스: 금빛 파문
-      case 'wave':     addSlash('wide'); break;                                // 스몰 스트레이트: 넓은 베기
-      case 'bigwave':  addSlash('wide'); addSlash('wide rev', 110); break;     // 라지: 교차 파도
-      case 'judgment': addRing('gold'); addRing('red'); addSlash(''); addSlash('rev', 90); break; // 야찌
-      default:         addSlash('');                                            // 기본 베기
-    }
+  const el = app.querySelector('#enemy-stage');
+  if (!el || hits.length === 0) return;
+  el.classList.add('hit');
+  const cleanup = [];
+  const addSlash = (cls, delay = 0) => setTimeout(() => {
+    if (!el.isConnected) return;
+    const s = document.createElement('span');
+    s.className = 'slash ' + cls;
+    el.appendChild(s);
+    cleanup.push(s);
+  }, delay);
+  const addRing = (cls) => {
+    const r = document.createElement('span');
+    r.className = 'impact-ring ' + cls;
+    el.appendChild(r);
+    cleanup.push(r);
+  };
+  switch (fx) {
+    case 'slash2':   addSlash(''); addSlash('rev', 100); break;              // 트리플: X자 이중 베기
+    case 'smash':    addRing('red'); addSlash('', 60); break;                // 포카드: 충격파 + 베기
+    case 'ring':     addRing('gold'); addSlash(''); break;                   // 풀하우스: 금빛 파문
+    case 'wave':     addSlash('wide'); break;                                // 스몰 스트레이트: 넓은 베기
+    case 'bigwave':  addSlash('wide'); addSlash('wide rev', 110); break;     // 라지: 교차 파도
+    case 'judgment': addRing('gold'); addRing('red'); addSlash(''); addSlash('rev', 90); break; // 야찌
+    default:         addSlash('');                                            // 기본 베기
+  }
+  hits.forEach((hit, idx) => {
     const dmg = document.createElement('span');
     dmg.className = 'dmg-float' + (fx === 'judgment' ? ' big' : '') + (hit.amount === 0 ? ' blocked' : '');
     dmg.textContent = hit.amount > 0 ? `-${hit.amount}` : '🛡막음';
+    if (hits.length > 1) dmg.style.left = `${38 + idx * 24}%`;
     el.appendChild(dmg);
     cleanup.push(dmg);
-    setTimeout(() => { cleanup.forEach(n => n.remove()); el.classList.remove('hit'); }, 720);
-    // 처치 연출: 베인 뒤 무너져 내림
-    if (hit.killed) setTimeout(() => el.classList.add('dying'), 300);
-  }
+    const row = app.querySelector(`.enemy-row[data-uid="${hit.uid}"]`);
+    if (row) { row.classList.add('hit'); setTimeout(() => row.classList.remove('hit'), 620); }
+  });
+  setTimeout(() => { cleanup.forEach(n => n.remove()); el.classList.remove('hit'); }, 720);
+  // 전멸 시에만 무대가 무너져 내림 (일부 처치는 행이 사라지는 것으로 표현)
+  const anyAlive = battle.enemies.some(e => e.hp > 0);
+  if (!anyAlive) setTimeout(() => el.classList.add('dying'), 300);
 }
 
 // 플레이어 사망 연출: 붉은 장막이 덮이고 게이지가 비워진 뒤 엔딩으로

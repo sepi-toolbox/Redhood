@@ -273,7 +273,8 @@ export function rollEncounter(run, nodeType) {
   // 일반: 쉬운 층은 1마리, 이후 55% 1마리 / 45% 2마리
   if (DB.act1.encounters.easyFloors.includes(run.floor)) return [pick(theme.normals)];
   if (rng.next() < 0.55) return [pick(theme.normals)];
-  return [pick(theme.normals), pick(theme.normals)];
+  const m = pick(theme.normals); // v0.43: 다중 조우 = 같은 종의 무리 (포트레이트 1장 + 체력바 2줄)
+  return [m, m];
 }
 function pick(arr) { return arr[Math.floor(rng.next() * arr.length)]; }
 
