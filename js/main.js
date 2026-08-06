@@ -133,7 +133,12 @@ function npcArtHtml(npc) {
 function eventFrame(npc, linesHtml, choicesHtml) {
   const hpPct = Math.max(0, run.hp / run.maxHp * 100);
   return `
-    <div class="screen battle-screen event-screen">
+    <div class="screen battle-screen event-screen" style="${(() => {
+      // v0.53: 만남 화면도 테마 배경 (없으면 숲으로 임시 대체)
+      const themeId = run.act <= 3 ? themeOf(run).id : null;
+      const bgId = BG_ART.has(themeId) ? themeId : 'forest';
+      return `background-image: linear-gradient(rgba(16, 12, 10, .4), rgba(16, 12, 10, .55) 42%, #14100f 80%), url('assets/bg/bg_${bgId}.jpg')`;
+    })()}">
       <header class="topbar">
         <span>💬 ${run.floor > 0 ? `${run.floor}층 · ` : ''}만남</span>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
@@ -638,11 +643,11 @@ function renderBattle(opts = {}) {
   app.innerHTML = '';
   app.append(h(`
     <div class="screen battle-screen" style="${(() => {
-      // v0.35: 테마 배경 — 보유한 배경만, 어두운 오버레이로 눌러서 몬스터가 도드라지게
+      // v0.35: 테마 배경 — 어두운 오버레이로 눌러서 몬스터가 도드라지게
+      // v0.53: 아직 전용 배경이 없는 테마·최종전은 임시로 숲 배경 사용 (자산 확보 시 자동 교체)
       const themeId = run.act <= 3 ? themeOf(run).id : null;
-      return BG_ART.has(themeId)
-        ? `background-image: linear-gradient(rgba(16, 12, 10, .34), rgba(16, 12, 10, .5) 42%, #14100f 76%), url('assets/bg/bg_${themeId}.jpg')`
-        : '';
+      const bgId = BG_ART.has(themeId) ? themeId : 'forest';
+      return `background-image: linear-gradient(rgba(16, 12, 10, .34), rgba(16, 12, 10, .5) 42%, #14100f 76%), url('assets/bg/bg_${bgId}.jpg')`;
     })()}">
       <header class="topbar">
         <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
