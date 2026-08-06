@@ -764,7 +764,7 @@ function showEnemyInfo(uid) {
 // 굴림 연출: 낙하-텀블링-바운스 착지, 왼쪽부터 차례로 멈추며 값 공개
 const dieTilts = [0, 0, 0, 0, 0]; // 착지 후 살짝 기울어진 각도 (물리감)
 // 주사위 아트 (v0.21): 스킨별 6면 — 없는 스킨은 기본 눈(pip)으로 폴백
-const DIE_SKINS = new Set(['normal', 'gold', 'cursed', 'fang', 'straw', 'ember', 'moonlit', 'bramble', 'lead', 'even', 'odd']);
+const DIE_SKINS = new Set(['normal', 'gold', 'cursed', 'fang', 'straw', 'ember', 'moonlit', 'bramble', 'lead', 'even', 'odd', 'high', 'ace']);
 const dieFaceSrc = (defId, f) => DIE_SKINS.has(defId) ? `assets/dice/${defId}${f}.png` : `assets/dice/pip${f}.png`;
 // 프리로드 (연출 중 깜빡임 방지)
 for (let f = 1; f <= 6; f++) {

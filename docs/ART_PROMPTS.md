@@ -94,8 +94,8 @@ Flat hand-painted storybook illustration for a dark fairytale dice game. Gouache
 | 납 die_lead | `heavy dull grey lead with dents and scratches, black pips with pale chalk rims.` |
 | 짝눈 die_even | `painted half aged-cream half slate-blue split diagonally, deep slate-blue pips.` |
 | 홀눈 die_odd | `painted half aged-cream half wine-red split diagonally, deep wine-red pips.` |
-| 높은 die_high | `proud polished ivory with thin gold trim on the edges, dark pips ringed with gold.` |
-| 외눈 die_ace | `strange pale bone, each pip painted like a small staring eye with a dark iris.` |
+| 높은 die_high | `covered in deep crimson royal velvet with gold embroidered trim on the edges, pips are round gold embroidered dots.` |
+| 외눈 die_ace | `pale bone tightly wound with a single thin bright red thread wrapping around it, pips are small red thread knots.` |
 
 ### 1-3. 아이템 일러스트 (보상 카드·가방·상점용 낱장) — 선택
 
