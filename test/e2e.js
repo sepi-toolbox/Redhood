@@ -111,7 +111,7 @@ async function playTurn(page) {
       continue;
     }
     if (await page.locator('.battle-screen:not(.event-screen)').count()) {
-      const enemyN = await page.locator('.enemy-row').count();
+      const enemyN = await page.locator('.enemy').count();
       if (enemyN > 1 && !sawMulti) {
         sawMulti = true;
         console.log(`multi-enemy battle found: ${enemyN} enemies`);
@@ -157,24 +157,24 @@ async function playTurn(page) {
     await passIntro(page);
     await page.locator('.map-node2.reachable').first().click({ force: true });
     await page.waitForSelector('.battle-screen');
-    if (await page.locator('.enemy-row').count() < 2) continue;
-    // 기본 표적 = 첫 행 확인
-    const defaultTarget = await page.locator('.enemy-row').first().getAttribute('class');
-    console.log('default target is first row:', defaultTarget.includes('targeted') ? 'YES' : 'NO');
+    if (await page.locator('.enemy').count() < 2) continue;
+    // 기본 표적 = 맨 왼쪽 확인
+    const defaultTarget = await page.locator('.enemy').first().getAttribute('class');
+    console.log('default target is leftmost:', defaultTarget.includes('targeted') ? 'YES' : 'NO');
     await page.locator('#roll-btn').click(); await settle(page);
-    // 두 번째 행 탭 → 표적 이동 확인 → 찬스 확정 → 그 적이 맞았는지
-    const second = page.locator('.enemy-row').nth(1);
+    // 두 번째 적 탭 → 표적 이동 확인 → 찬스 확정 → 그 적이 맞았는지
+    const second = page.locator('.enemy').nth(1);
     await second.click(); await page.waitForTimeout(80);
-    const secondTargeted = (await page.locator('.enemy-row').nth(1).getAttribute('class')).includes('targeted');
+    const secondTargeted = (await page.locator('.enemy').nth(1).getAttribute('class')).includes('targeted');
     console.log('tap switches target:', secondTargeted ? 'YES' : 'NO');
-    const hpBefore = await page.locator('.enemy-row').nth(1).locator('.enemy-hp').innerText();
+    const hpBefore = await page.locator('.enemy').nth(1).locator('.enemy-hp').innerText();
     const chance = page.locator('.sheet-row').filter({ hasText: '찬스' }).first();
     await chance.click(); await page.waitForTimeout(60);
     const sel2 = page.locator('.sheet-row.selected');
     if (await sel2.count()) await sel2.click();
     await page.waitForTimeout(300);
-    const slashOnStage = await page.locator('#enemy-stage .slash').count().catch(() => 0);
-    console.log(`targeting: second hp before="${hpBefore.trim()}", slash on stage: ${slashOnStage ? 'YES' : 'n/a'}`);
+    const slashOnSecond = await page.locator('.enemy').nth(1).locator('.slash').count().catch(() => 0);
+    console.log(`targeting: second hp before="${hpBefore.trim()}", slash on target: ${slashOnSecond ? 'YES' : 'n/a'}`);
     await page.screenshot({ path: `${SHOT}/06-targeting.png` });
     targetChecked = true;
     await settle(page);
