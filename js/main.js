@@ -179,8 +179,9 @@ function showIntro() {
       chooseWeapon(run, w.id);
       saveRun(run);
       showEventResult(intro.npc,
-        `<p class="npc-line">${esc(intro.resultLine || '')}</p>
-         <p class="event-effect">${ico('weapon_' + w.id, 'ico-weapon')} ${esc(w.name)} — 📜 ${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</p>`);
+        `<p class="npc-line">${esc(intro.resultLine || '')}</p>`,
+        null,
+        `<div class="gain-box"><span class="event-effect">${ico('weapon_' + w.id, 'ico-weapon')} ${esc(w.name)} — ${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</span></div>`);
     });
   });
 }
@@ -201,16 +202,17 @@ function showEvent(ev) {
       const { messages, pendingDie } = applyEventEffects(run, ch.effects);
       saveRun(run);
       showEventResult(ev.npc,
-        `<p class="npc-line">${esc(ch.result || '')}</p>
-         ${messages.length ? `<p class="event-effect">${messages.map(esc).join(' · ')}</p>` : ''}`,
-        pendingDie);
+        `<p class="npc-line">${esc(ch.result || '')}</p>`,
+        pendingDie,
+        messages.length ? `<div class="gain-box"><span class="event-effect">${messages.map(esc).join(' · ')}</span></div>` : '');
     });
   });
 }
 
 // 선택 결과 화면 — pendingDie가 있으면 '길을 나선다' 전에 교체 모달
-function showEventResult(npc, linesHtml, pendingDie = null) {
-  const choicesHtml = `<button class="btn primary" id="event-done">길을 나선다</button>`;
+// v0.37: 획득 표시는 오버레이가 아니라 아래 선택지 영역(gainHtml)으로 — 대사·이름만 이미지 위에
+function showEventResult(npc, linesHtml, pendingDie = null, gainHtml = '') {
+  const choicesHtml = `${gainHtml}<button class="btn primary" id="event-done">길을 나선다</button>`;
   // v0.34: 같은 NPC의 무대가 이미 떠 있으면 화면 전환 없이 대사·선택지만 교체
   const stage = app.querySelector('.npc-stage');
   const sameNpc = stage && app.querySelector('.npc-name')?.textContent === npc.name;
