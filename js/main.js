@@ -649,12 +649,12 @@ function renderBattle(opts = {}) {
         <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
         <span>🪙${run.coins} <span class="hp">❤️</span></span>
       </header>
-      <div class="enemy-zone">
+      <div class="enemy-zone ${multi ? 'multi' : ''}">
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
           <button class="enemy ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
+            ${/* v0.52: 정보(의도·이름·체력바)는 머리 위, 그림은 크게 아래 */ ''}
             ${targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
             <span class="intent">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
-            ${enemyArtHtml(e)}
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
               // 적 방어도 LoL식: HP 구간 끝에 회백색 실드 세그먼트
@@ -671,6 +671,7 @@ function renderBattle(opts = {}) {
               ].filter(Boolean).join(' ');
               return chips ? ` <span class="enemy-buffs">${chips}</span>` : '';
             })()}</span>
+            ${enemyArtHtml(e)}
           </button>`).join('')}
       </div>
       <div class="mid-line">

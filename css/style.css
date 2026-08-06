@@ -161,31 +161,40 @@ body {
 .start-label { font-size: 12.5px; color: #6a4c33; font-weight: 700; font-style: italic; }
 
 /* ---------- 전투: 적 (다중) — 컴팩트 (족보·체력 영역 우선) ---------- */
+/* v0.52: 적 그림을 2배로 — 주사위 영역까지 밀고 내려온다. 정보는 머리 위 */
 .enemy-zone {
-  flex: none; display: flex; justify-content: center; align-items: center; gap: 12px;
-  padding: 4px 10px 2px; min-height: 148px; position: relative; overflow: hidden;
-  background: radial-gradient(ellipse at 50% 0%, rgba(34, 26, 21, .8) 0%, rgba(20, 16, 15, 0) 75%); /* v0.26: 천 위 그림자만 */
+  flex: none; display: flex; justify-content: center; align-items: flex-start; gap: 10px;
+  padding: 4px 8px 0; min-height: 268px; position: relative; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 0%, rgba(34, 26, 21, .8) 0%, rgba(20, 16, 15, 0) 75%);
 }
 .enemy {
-  position: relative; overflow: hidden;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  background: transparent; border: 1.5px dashed transparent; border-radius: 12px;
-  color: #e8dcc8; padding: 8px 10px; max-width: 46%;
+  position: relative; overflow: visible;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: transparent; border: none; border-radius: 12px;
+  color: #e8dcc8; padding: 4px 4px 0; max-width: 50%; flex: 0 1 auto;
 }
-.enemy.targeted { border-color: #c9302f; border-style: solid; background: rgba(201, 48, 47, .06); }
+.enemy.targeted::after { /* 표적 강조 — 그림 뒤 붉은 후광 */
+  content: ''; position: absolute; left: 50%; bottom: 4px; width: 78%; height: 60%;
+  transform: translateX(-50%); border-radius: 50%; pointer-events: none; z-index: -1;
+  background: radial-gradient(ellipse, rgba(201, 48, 47, .3) 0%, transparent 70%);
+}
+.enemy.targeted .enemy-name { color: #f0d9b5; }
 .target-pin {
-  position: absolute; top: 3px; left: 8px;
+  position: absolute; top: -2px; left: 4px;
   color: #c9302f; font-size: 13px; text-shadow: 0 1px 2px #000;
   animation: youBob 1.2s ease-in-out infinite alternate;
 }
 .intent { font-size: 15px; font-weight: 700; color: #e8b64b; }
 .intent small { color: #9c8f7a; font-weight: 400; font-size: 11px; }
-.enemy-art { font-size: 46px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+.enemy-art { font-size: 86px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
 /* v0.30: 몬스터 전신 아트 — 이모지 자리 대체 (v0.35: 배경 위에서 도드라지게 그림자 강화) */
 .enemy-art-img {
-  height: 108px; width: auto; max-width: 100%; object-fit: contain;
-  filter: drop-shadow(0 5px 9px rgba(0, 0, 0, .9)) drop-shadow(0 0 13px rgba(0, 0, 0, .55));
+  height: 216px; width: auto; max-width: 100%; object-fit: contain; /* v0.52: 2배 */
+  filter: drop-shadow(0 6px 11px rgba(0, 0, 0, .9)) drop-shadow(0 0 15px rgba(0, 0, 0, .55));
+  pointer-events: none;
 }
+.enemy-zone.multi .enemy-art-img { height: 176px; } /* 두 마리면 조금 작게 */
+.enemy-zone.multi .enemy-name { font-size: 11.5px; }
 .battle-screen { background-size: cover; background-position: center top; background-repeat: no-repeat; }
 
 /* 적 공격 연출 — 움찔(윈드업) 후 플레이어 쪽으로 내려찍기 */
@@ -206,7 +215,7 @@ body {
 .enemy.charging { animation: enemyCharge .72s ease-in-out; }
 .enemy-name { font-size: 13px; color: #cbbfa8; }
 /* v0.39: 티어별 몬스터 체력바 틀 — 일반(나무)/정예(무쇠 가시)/보스(흑금 해골) */
-.enemy .bar { position: relative; width: 110px; height: 7px; background: #33241d; border-radius: 3px; overflow: hidden; }
+.enemy .bar { position: relative; width: 128px; height: 7px; background: #33241d; border-radius: 3px; overflow: hidden; }
 .enemy .bar i {
   display: block; height: 100%; transition: width .25s;
   background: url('../assets/ui/gauge_red.jpg') left center / auto 100% repeat-x; /* v0.41 */
