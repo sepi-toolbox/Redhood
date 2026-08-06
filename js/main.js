@@ -736,6 +736,7 @@ function renderBattle(opts = {}) {
     setTimeout(restoreSheetScroll, 60);
     setTimeout(restoreSheetScroll, 160);
   }
+  updateComboHint(); // v0.42: 재렌더(리롤 등) 후에도 선택 족보의 구성 주사위 하이라이트 유지
 
   // 주사위 — v0.28: 탭 시 전체 재렌더 대신 제자리 갱신 (이미지 재생성 깜빡임 제거)
   app.querySelectorAll('.die').forEach(el => {
@@ -811,6 +812,18 @@ function updateSheetSelection() {
   });
   const hint = app.querySelector('.hint-line');
   if (hint) hint.textContent = '한 번 더 탭하면 확정';
+  updateComboHint();
+}
+
+// v0.42: 선택한 족보를 이루는 주사위를 은은히 하이라이트
+function updateComboHint() {
+  const dieEls = app.querySelectorAll('.die');
+  dieEls.forEach(el => el.classList.remove('combo-hint'));
+  if (!selectedCat || !battle || !battle.rolled || battle.over) return;
+  const [cid, vid] = selectedCat.split(':');
+  const row = previewAll(battle).find(x => x.cat.id === cid && x.variant.id === vid);
+  if (!row || !row.bd || !(row.bd.total > 0)) return;
+  for (const i of (row.bd.contributing || [])) dieEls[i]?.classList.add('combo-hint');
 }
 
 // ---------- 적 행동 상세 (치트): 적 길게 눌러 예고 행동의 실제 내용 확인 — ❓ 의문도 공개 ----------
