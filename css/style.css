@@ -22,15 +22,20 @@ body {
 .loading { color: #9c8f7a; }
 
 /* ---------- 공용 ---------- */
+/* v0.25: 버튼 텍스쳐 — 어두운 나무판(기본)·붉은 옻칠판(주요), 9-슬라이스 */
 .btn {
-  border: 1px solid #4a3b30; border-radius: 10px;
-  background: #241c18; color: #e8dcc8;
-  font-size: 16px; padding: 12px 22px; cursor: pointer;
+  border: solid transparent; border-width: 14px 26px; border-radius: 0;
+  border-image: url('../assets/ui/btn_ghost.png') 85 150 fill stretch;
+  background: none; color: #e8dcc8;
+  font-size: 16px; padding: 0 2px; cursor: pointer;
 }
-.btn.primary { background: #7e1f1f; border-color: #a33; font-weight: 700; }
-.btn.primary:active { background: #9b2727; }
+.btn:active { filter: brightness(1.18); }
+.btn.primary {
+  border-image-source: url('../assets/ui/btn_primary.png');
+  font-weight: 700; color: #f2e4c8; text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+}
 .btn.primary[disabled] { opacity: .4; }
-.btn.ghost { background: transparent; color: #9c8f7a; font-size: 14px; padding: 8px 14px; }
+.btn.ghost { border-width: 11px 20px; color: #b8a98e; font-size: 14px; }
 
 .topbar, .bottombar {
   display: flex; align-items: center; justify-content: space-between;
@@ -65,21 +70,23 @@ body {
 .map-row.next { opacity: 1; }
 .map-row.done { opacity: .62; }
 .floor-num { width: 24px; text-align: right; color: #7a5c38; font-size: 12.5px; font-weight: 700; flex: none; font-style: italic; }
+/* v0.25: 노드 = 조각 나무 팻말 (위 오목 원반 = 메달 아이콘 자리, 아래 띠 = 라벨) */
 .map-node {
-  flex: 1; max-width: 190px; margin: 0 auto;
-  display: flex; flex-direction: column; align-items: center; gap: 1px;
-  background: rgba(255, 250, 235, .28);
-  border: 2px solid #6a4c33;
-  border-radius: 46% 54% 52% 48% / 55% 47% 53% 45%;  /* 손으로 그린 원 */
-  color: #4a3423; font-size: 21px; padding: 9px 6px;
-  box-shadow: 1px 2px 0 rgba(90, 60, 30, .25);
+  flex: 1; max-width: 190px; margin: 0 auto; position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: url('../assets/ui/node_plate.png') center / 100% 100% no-repeat;
+  border: none; border-radius: 0; box-shadow: none;
+  aspect-ratio: 520 / 318;
+  color: #ead9b0; font-size: 21px; padding: 4% 8% 26%; /* 아이콘은 위 오목 원반 중심으로 */
 }
-.map-node small { font-size: 10.5px; color: #6a4c33; font-weight: 700; }
-.map-row.next .map-node { border-color: #a02c25; cursor: pointer; background: rgba(255, 250, 235, .5); }
-.map-row.next .map-node:active { background: rgba(160, 44, 37, .18); }
+.map-node small {
+  position: absolute; bottom: 20%; left: 0; right: 0; /* 라벨은 아래 나무 띠 안으로 */
+  font-size: 10.5px; color: #e2cfa4; font-weight: 700; text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
+}
+.map-row.next .map-node { cursor: pointer; filter: drop-shadow(0 0 7px rgba(190, 60, 45, .75)) brightness(1.07); }
+.map-row.next .map-node:active { filter: brightness(1.22); }
 .map-row.done .map-node, .map-row.future .map-node { pointer-events: none; }
-.map-row.done .map-node { filter: grayscale(.3) sepia(.3); }
-.map-row.future .map-node { border-style: dashed; }
+.map-row.done .map-node { filter: grayscale(.5) brightness(.85); }
 
 /* 잉크 길 — 지나온 길은 진하게, 다음 길은 그려지는 중, 그 너머는 흐릿한 밑그림 */
 .trail {
@@ -425,29 +432,30 @@ body {
   background: #171210; border-top: 1px solid #2c221c;
 }
 .sheet-zone.dim { opacity: .45; }
+/* v0.25: 족보 줄 = 낡은 종이 띠 (밝은 종이 위 진갈색 글자) */
 .sheet-row {
   flex: none; display: flex; align-items: center; gap: 8px;
-  background: #221a15; border: 1.5px solid #4a3b30; border-radius: 10px;
-  color: #e8dcc8; padding: 11px 13px; cursor: pointer; font-size: 14.5px;
+  border: solid transparent; border-width: 11px 17px; border-radius: 0;
+  border-image: url('../assets/ui/paper_row.png') 55 92 fill stretch;
+  background: none;
+  color: #3a2a1c; padding: 1px 0; cursor: pointer; font-size: 14.5px;
 }
 .sheet-name { flex: none; font-weight: 700; white-space: nowrap; }
 .sheet-ability {
-  flex: 1; min-width: 0; text-align: left; font-size: 10.5px; color: #8a7d68;
+  flex: 1; min-width: 0; text-align: left; font-size: 10.5px; color: #6b5842;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.sheet-example { flex: none; font-size: 19px; color: #9c8f7a; letter-spacing: 1px; }
-.sheet-row .sheet-preview { flex: none; min-width: 36px; text-align: right; font-weight: 700; color: #e8b64b; font-size: 18px; }
-.sheet-row .lv { color: #b08948; font-size: 11px; }
+.sheet-example { flex: none; font-size: 19px; color: #7a6850; letter-spacing: 1px; }
+.sheet-row .sheet-preview { flex: none; min-width: 36px; text-align: right; font-weight: 700; color: #8f2a20; font-size: 18px; }
+.sheet-row .lv { color: #8a6516; font-size: 11px; }
 .cat-tag { color: #8a7d68; font-size: 10.5px; font-weight: 400; }
-/* 등급 4체계 (v0.10) — common 갈색 / uncommon 청색 / rare 보라 / epic 금색 */
-.sheet-row.t-uncommon { border-color: #4a6d8c; background: #1c2028; }
-.sheet-row.t-uncommon .sheet-name { color: #a8c4dd; }
-.sheet-row.t-rare { border-color: #7d5ba6; background: #211c2b; }
-.sheet-row.t-rare .sheet-name { color: #c8aae8; }
-.sheet-row.t-epic { border-color: #b08948; background: #28211a; }
-.sheet-row.t-epic .sheet-name { color: #ecc879; }
-.sheet-row.selected { border-color: #e8b64b; background: #2a2118; }
-.sheet-row.used { opacity: .32; }
+.sheet-row .cat-tag { color: #7a6850; }
+/* 등급 4체계 — 종이 위 이름색: common 갈색 / uncommon 청색 / rare 보라 / epic 금색 */
+.sheet-row.t-uncommon .sheet-name { color: #2e5876; }
+.sheet-row.t-rare .sheet-name { color: #5d3f86; }
+.sheet-row.t-epic .sheet-name { color: #8a6516; }
+.sheet-row.selected { filter: drop-shadow(0 0 7px #e8b64b) brightness(1.06); }
+.sheet-row.used { opacity: .32; filter: grayscale(.6); }
 .sheet-row.used .sheet-preview { color: #6f6353; }
 
 /* ---------- 보상: 상자 ---------- */
@@ -596,9 +604,12 @@ body {
   position: fixed; inset: 0; background: rgba(0,0,0,.7);
   display: flex; align-items: center; justify-content: center; z-index: 50;
 }
+/* v0.25: 모달 = 조각 나무 액자 9-슬라이스 */
 .modal {
-  background: #1e1713; border: 1px solid #3c2f26; border-radius: 14px;
-  max-width: 88vw; max-height: 76dvh; padding: 18px; display: flex; flex-direction: column; gap: 10px;
+  border: solid transparent; border-width: 24px; border-radius: 0;
+  border-image: url('../assets/ui/frame_modal.jpg') 105 fill stretch;
+  background: none;
+  max-width: 88vw; max-height: 76dvh; padding: 6px; display: flex; flex-direction: column; gap: 10px;
   overflow-y: auto;
 }
 .deck-list { overflow-y: auto; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; }
@@ -639,8 +650,8 @@ body {
 .choice-zone { gap: 8px; padding-top: 6px; justify-content: flex-start; }
 .choice-row { flex-direction: column; align-items: flex-start; gap: 3px; }
 .choice-main { font-weight: 700; font-size: 15px; }
-.choice-sub { font-size: 12px; color: #b08948; }
-.choice-cats { font-size: 11.5px; color: #8a7d68; }
+.choice-sub { font-size: 12px; color: #7a5a2e; }
+.choice-cats { font-size: 11.5px; color: #6b5842; }
 
 /* ---------- 적 행동 6유형 (v0.11) ---------- */
 .enemy-buffs { color: #cbbfa8; font-weight: 700; }
