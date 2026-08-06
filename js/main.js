@@ -589,6 +589,8 @@ function selectedCatDef() {
 
 function renderBattle(opts = {}) {
   const p = battle.player;
+  // v0.27: 재렌더 시 족보 목록 스크롤 위치 보존 (아래 족보 탭 → 맨 위로 튀는 문제)
+  const prevSheetScroll = app.querySelector('.sheet-zone')?.scrollTop || 0;
   const previews = previewAll(battle);
   const lastR = battle.lastResult;
   const multi = aliveEnemies(battle).length > 1;
@@ -684,6 +686,17 @@ function renderBattle(opts = {}) {
         <span class="pb-side">${battle.pendingBuff > 0 ? `⚡+${battle.pendingBuff}` : ''}</span>
       </div>
     </div>`));
+
+  // 족보 목록 스크롤 복원 (v0.27) — 늦게 오는 리셋 대비 짧게 두 번 더 고정
+  if (prevSheetScroll > 0) {
+    const restoreSheetScroll = () => {
+      const z = app.querySelector('.sheet-zone');
+      if (z && Math.abs(z.scrollTop - prevSheetScroll) > 2) z.scrollTop = prevSheetScroll;
+    };
+    restoreSheetScroll();
+    setTimeout(restoreSheetScroll, 60);
+    setTimeout(restoreSheetScroll, 160);
+  }
 
   // 주사위
   app.querySelectorAll('.die').forEach(el => {
