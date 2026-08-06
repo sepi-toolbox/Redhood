@@ -207,7 +207,10 @@ body {
 .enemy-name { font-size: 13px; color: #cbbfa8; }
 /* v0.39: 티어별 몬스터 체력바 틀 — 일반(나무)/정예(무쇠 가시)/보스(흑금 해골) */
 .enemy .bar { position: relative; width: 110px; height: 7px; background: #33241d; border-radius: 3px; overflow: hidden; }
-.enemy .bar i { display: block; height: 100%; background: #b3362a; transition: width .25s; }
+.enemy .bar i {
+  display: block; height: 100%; transition: width .25s;
+  background: url('../assets/ui/gauge_red.jpg') left center / auto 100% repeat-x; /* v0.41 */
+}
 .enemy .bar.t-normal, .enemy .bar.t-elite, .enemy .bar.t-boss {
   background: none; border-radius: 0; overflow: visible; border: solid transparent;
 }
@@ -462,17 +465,14 @@ body {
   content: ''; position: absolute; inset: 0; background: #2a1d17; z-index: -1;
 }
 .hp-fill {
-  height: 100%; background: linear-gradient(180deg, #d24a3c, #9b2727);
-  transition: width .3s;
+  height: 100%; transition: width .3s;
+  background: url('../assets/ui/gauge_red.jpg') left center / auto 100% repeat-x; /* v0.41: 핏빛 물감 텍스쳐 — 줄면 오른쪽부터 잘림 */
 }
 /* LoL식 방어도: HP 구간 끝에 회백색 실드 세그먼트가 겹쳐 붙는다 */
 .hp-shield {
   position: absolute; top: 0; bottom: 0;
-  background:
-    repeating-linear-gradient(115deg, rgba(255, 255, 255, .12) 0 5px, transparent 5px 10px),
-    linear-gradient(180deg, #e9e5da, #a9a396);
+  background: url('../assets/ui/gauge_shield.jpg') left center / auto 100% repeat-x; /* v0.41: 잿빛 물감 실드 */
   border-left: 1px solid rgba(0, 0, 0, .35);
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, .35);
   transition: width .3s, left .3s;
 }
 .hp-text {
@@ -800,9 +800,7 @@ body {
 .enemy .bar { position: relative; }
 .enemy .bar b {
   position: absolute; top: 0; bottom: 0;
-  background:
-    repeating-linear-gradient(115deg, rgba(255, 255, 255, .14) 0 3px, transparent 3px 6px),
-    linear-gradient(180deg, #e9e5da, #a9a396);
+  background: url('../assets/ui/gauge_shield.jpg') left center / auto 100% repeat-x; /* v0.41 */
   border-left: 1px solid rgba(0, 0, 0, .4);
   transition: width .25s, left .25s;
 }
