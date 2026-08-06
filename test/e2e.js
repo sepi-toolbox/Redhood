@@ -81,7 +81,7 @@ async function playTurn(page) {
   console.log(`rolling animation active on ${spinning} dice`);
   await page.screenshot({ path: `${SHOT}/02-rolling.png` });
   await settle(page);
-  const facesShown = await page.locator('.die:not(.blank) .pip').allInnerTexts();
+  const facesShown = await page.locator('.die:not(.blank) img.pip-art').evaluateAll(els => els.map(e => e.alt));
   console.log(`after roll faces: [${facesShown.join(' ')}]`);
   await page.screenshot({ path: `${SHOT}/03-rolled.png` });
 

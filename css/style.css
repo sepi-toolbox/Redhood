@@ -693,3 +693,20 @@ body {
   border-left: 1px solid rgba(0, 0, 0, .4);
   transition: width .25s, left .25s;
 }
+
+/* ---------- 주사위 아트 렌더링 (v0.20) ---------- */
+/* 아트 주사위: 그림 자체가 몸통 — 버튼 배경/테두리는 상태 표시용으로만 */
+.die.art { background: transparent; border-color: transparent; }
+.die.art .pip-art {
+  width: 56px; height: 56px; object-fit: contain; pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
+}
+.die.art .pip-art.empty {
+  display: block; width: 50px; height: 50px; border-radius: 11px;
+  background: #241c18; border: 2px dashed #3c2f26;
+}
+.die.art.blank { background: transparent; border-color: transparent; }
+.die.art.gold { background: transparent; box-shadow: 0 0 8px rgba(232, 182, 75, .45); border-color: rgba(232, 182, 75, .55); }
+.die.art.special { background: transparent; border-color: rgba(200, 170, 232, .4); }
+.die.art.mark-reroll { background: rgba(201, 48, 47, .07); }
+.die.art.spinning .pip-art { opacity: .75; filter: blur(0.7px) drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); }

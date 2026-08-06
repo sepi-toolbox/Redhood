@@ -580,9 +580,11 @@ function renderBattle(opts = {}) {
           const def = battle.diceDefs[i];
           const blank = !battle.rolled;
           const marked = battle.rolled && !d.held; // 다시 굴릴 주사위
-          return `<button class="die ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}"
+          return `<button class="die art ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${def.gold ? 'gold' : ''} ${def.id !== 'normal' && !def.gold ? 'special' : ''}"
             data-idx="${i}" title="${esc(def.name)}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
-            <span class="pip">${blank ? '' : PIPS[d.face] || d.face}</span>
+            ${blank
+              ? '<span class="pip-art empty"></span>'
+              : `<img class="pip-art" src="assets/dice/pip${d.face}.png" alt="${d.face}" draggable="false">`}
             <small>${marked ? '다시' : d.confused ? '🌀혼란' : ''}</small>
           </button>`;
         }).join('')}
@@ -760,11 +762,14 @@ function showEnemyInfo(uid) {
 
 // 굴림 연출: 낙하-텀블링-바운스 착지, 왼쪽부터 차례로 멈추며 값 공개
 const dieTilts = [0, 0, 0, 0, 0]; // 착지 후 살짝 기울어진 각도 (물리감)
+// 주사위 아트 프리로드 (연출 중 깜빡임 방지)
+const DIE_FACE_SRC = (f) => `assets/dice/pip${f}.png`;
+for (let f = 1; f <= 6; f++) { const im = new Image(); im.src = DIE_FACE_SRC(f); }
+
 function animateRoll(indices) {
   busy = true;
   renderBattle();
   const dieEls = [...app.querySelectorAll('.die')];
-  const glyphs = Object.values(PIPS);
   const stopped = new Set();
 
   indices.forEach((idx) => {
@@ -777,12 +782,19 @@ function animateRoll(indices) {
     el.style.animationDelay = `${-Math.random() * 0.4}s`;
     el.style.animationDuration = `${0.34 + Math.random() * 0.14}s`;
     el.classList.add('spinning');
-    const pip = el.querySelector('.pip');
-    // 눈이 점점 느리게 바뀜 (구르다 멈추는 감속)
+    // 빈 슬롯이면 이미지 요소로 교체 후 면을 빠르게 교차 (구르다 멈추는 감속)
+    let img = el.querySelector('img.pip-art');
+    if (!img) {
+      const ph = el.querySelector('.pip-art');
+      img = document.createElement('img');
+      img.className = 'pip-art';
+      img.draggable = false;
+      if (ph) ph.replaceWith(img); else el.prepend(img);
+    }
     let delay = 42;
     (function cycle() {
       if (stopped.has(idx)) return;
-      pip.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+      img.src = DIE_FACE_SRC(1 + Math.floor(Math.random() * 6));
       delay = Math.min(150, delay * 1.13);
       setTimeout(cycle, delay);
     })();
@@ -801,7 +813,8 @@ function animateRoll(indices) {
       dieTilts[idx] = tilt;
       el.style.setProperty('--tilt', `${tilt}deg`);
       el.classList.add('landed');
-      el.querySelector('.pip').textContent = PIPS[battle.dice[idx].face] || battle.dice[idx].face;
+      const img = el.querySelector('img.pip-art');
+      if (img) { img.src = DIE_FACE_SRC(battle.dice[idx].face); img.alt = battle.dice[idx].face; }
     }, landAt);
   });
 
