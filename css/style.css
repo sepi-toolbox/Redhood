@@ -304,36 +304,25 @@ body {
 
 /* ---------- 공격 시퀀스: 주사위 전체 발광 → 타격 ---------- */
 .battle-screen { position: relative; overflow: hidden; }
-/* 기본 발광 — 주사위 통째로 빠르게 번쩍임 */
+/* v0.40: 발광 — 백금 섬광 대신 잿불처럼 은은히 달아오르는 톤 (받침 회전 없음) */
 @keyframes dieFlare {
-  0%, 100% { filter: brightness(1); transform: scale(1) rotate(var(--tilt, 0deg)); }
-  50% { filter: brightness(2.1) saturate(1.2); transform: scale(1.09) rotate(var(--tilt, 0deg)); }
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.28) sepia(.12) drop-shadow(0 0 5px rgba(214, 106, 56, .5)); }
 }
-.die.flare {
-  animation: dieFlare .17s ease-in-out 3 alternate;
-  border-color: #e8b64b;
-  box-shadow: 0 0 14px 4px rgba(255, 226, 140, .7);
-}
-/* 중급 (트리플·포카드·풀하우스·스몰) — 금빛 광휘 */
+.die.flare { animation: dieFlare .22s ease-in-out 2 alternate; }
+/* 중급 (트리플·포카드·풀하우스·스몰) */
 @keyframes dieFlareMid {
-  0%, 100% { filter: brightness(1.1) drop-shadow(0 0 3px rgba(232,182,75,.6)); transform: scale(1) rotate(var(--tilt, 0deg)); }
-  50% { filter: brightness(2.4) saturate(1.5) drop-shadow(0 0 12px rgba(255,214,100,.95)); transform: scale(1.13) rotate(var(--tilt, 0deg)); }
+  0%, 100% { filter: brightness(1.04); transform: scale(1); }
+  50% { filter: brightness(1.45) sepia(.16) drop-shadow(0 0 9px rgba(224, 122, 58, .65)); transform: scale(1.04); }
 }
-.die.flare.mid {
-  animation: dieFlareMid .16s ease-in-out 4 alternate;
-  box-shadow: 0 0 20px 7px rgba(255, 210, 100, .85);
-}
-/* 최상급 (라지·야찌) — 백금 섬광 */
+.die.flare.mid { animation: dieFlareMid .2s ease-in-out 3 alternate; }
+/* 최상급 (라지·야찌) */
 @keyframes dieFlareHigh {
-  0% { filter: brightness(1.2); transform: scale(1) rotate(var(--tilt, 0deg)); }
-  45% { filter: brightness(3) saturate(1.6) drop-shadow(0 0 18px #ffe9a8); transform: scale(1.2) rotate(var(--tilt, 0deg)); }
-  100% { filter: brightness(1.6); transform: scale(1.07) rotate(var(--tilt, 0deg)); }
+  0% { filter: brightness(1.08); transform: scale(1); }
+  45% { filter: brightness(1.65) sepia(.2) drop-shadow(0 0 13px rgba(232, 140, 66, .8)); transform: scale(1.07); }
+  100% { filter: brightness(1.2); transform: scale(1.02); }
 }
-.die.flare.high {
-  animation: dieFlareHigh .15s ease-in-out 5 alternate;
-  border-color: #fff0c0;
-  box-shadow: 0 0 26px 10px rgba(255, 230, 150, .95), 0 0 50px 18px rgba(201, 48, 47, .35);
-}
+.die.flare.high { animation: dieFlareHigh .19s ease-in-out 4 alternate; }
 @keyframes explode {
   0%   { transform: translate(-50%, -50%) scale(.25); opacity: 1; }
   60%  { transform: translate(-50%, -50%) scale(1.55); opacity: .85; }
@@ -409,17 +398,20 @@ body {
   background: #efe6d5; color: #1b1512; border: 2px solid #4a3b30;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   cursor: pointer; position: relative;
-  transform: rotate(var(--tilt, 0deg));
 }
 .die .pip { font-size: 42px; line-height: 1; }
-.die small { font-size: 9.5px; font-weight: 700; color: #7e1f1f; height: 12px; }
+.die small { /* v0.40: 라벨은 오버레이 — 주사위가 받침 정중앙에 오도록 */
+  position: absolute; bottom: 1px; left: 0; right: 0; text-align: center;
+  font-size: 9.5px; font-weight: 700; color: #7e1f1f; height: auto;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .7);
+}
 /* 다시 굴릴 주사위로 표시된 상태 */
 .die.mark-reroll {
   border-color: #c9302f; border-style: dashed;
   box-shadow: 0 0 0 2px rgba(201, 48, 47, .35);
-  transform: translateY(-5px) rotate(var(--tilt, 0deg));
   opacity: .92;
 }
+.die.mark-reroll .pip-art { transform: translateY(-4px) rotate(var(--tilt, 0deg)); } /* 그림만 살짝 들림 */
 .die.gold { background: #f5d97a; border-color: #b08948; }
 .die.special { background: #d9d2e8; }
 .die.blank { background: #241c18; border-style: dashed; border-color: #3c2f26; }
@@ -433,10 +425,7 @@ body {
   76%  { transform: translateY(-7px) rotate(-18deg) scale(1.03); }
   100% { transform: translateY(-15px) rotate(12deg) scale(1.06); }
 }
-.die.spinning {
-  animation: diceTumble .4s linear infinite alternate;
-  box-shadow: 0 10px 10px -6px rgba(0,0,0,.55);
-}
+.die.spinning .pip-art { animation: diceTumble .4s linear infinite alternate; }
 .die.spinning .pip { opacity: .5; filter: blur(0.6px); }
 
 /* 착지 — 떨어져 눌렸다가(스쿼시) 튀어오르고 기울어진 채 멈춤 */
@@ -447,7 +436,7 @@ body {
   82%  { transform: translateY(1px)   rotate(var(--tilt, 0deg)) scale(1.02, .97); }
   100% { transform: translateY(0)     rotate(var(--tilt, 0deg)) scale(1); }
 }
-.die.landed { animation: diceLand .32s cubic-bezier(.34, 1.2, .64, 1); }
+.die.landed .pip-art { animation: diceLand .32s cubic-bezier(.34, 1.2, .64, 1); }
 
 .roll-bar { flex: none; display: flex; justify-content: center; padding: 4px 14px 0; }
 .roll-btn { min-width: 170px; font-size: 17px; }
@@ -827,6 +816,7 @@ body {
 .die.art .pip-art {
   width: 46px; height: 46px; object-fit: contain; pointer-events: none;
   filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
+  transform: rotate(var(--tilt, 0deg)); /* v0.40: 기울기는 그림에만 — 받침은 고정 */
 }
 .die.art .pip-art.empty { display: block; width: 46px; height: 46px; } /* 빈 슬롯 = 받침만 */
 .die.art.blank, .die.art.gold, .die.art.special { border-color: transparent; }
