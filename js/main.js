@@ -154,7 +154,7 @@ function showIntro() {
     intro.lines.map(l => `<p class="npc-line">${esc(l)}</p>`).join(''),
     weapons.map((w, i) => `
       <button class="sheet-row choice-row weapon-choice" data-idx="${i}">
-        <span class="choice-main">${w.icon} <b>${esc(w.name)}</b></span>
+        <span class="choice-main">${ico('weapon_' + w.id, 'ico-weapon')} <b>${esc(w.name)}</b></span>
         <span class="choice-sub">${esc(w.desc)}</span>
         <span class="choice-cats">📜 ${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</span>
       </button>`).join(''))));
@@ -165,7 +165,7 @@ function showIntro() {
       saveRun(run);
       showEventResult(intro.npc,
         `<p class="npc-line">${esc(intro.resultLine || '')}</p>
-         <p class="event-effect">${w.icon} ${esc(w.name)} — 📜 ${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</p>`);
+         <p class="event-effect">${ico('weapon_' + w.id, 'ico-weapon')} ${esc(w.name)} — 📜 ${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</p>`);
     });
   });
 }
@@ -390,14 +390,29 @@ function showFinalEnd(turns) {
   document.getElementById('restart-btn').addEventListener('click', showTitle);
 }
 
+// ---------- 아이콘 아트 (v0.24): 이모지 자리 → 그림 아이콘 ----------
+function ico(name, cls = '') {
+  return `<img class="ico ${cls}" src="assets/icons/${name}.png" alt="" draggable="false">`;
+}
+// 적 의도 문자열(engine.intentOf)의 이모지를 그림으로 치환
+function iconifyIntent(s) {
+  return s
+    .replaceAll('⚔️', ico('intent_attack', 'ico-intent'))
+    .replaceAll('🛡', ico('intent_defend', 'ico-intent'))
+    .replaceAll('🌀', ico('intent_confuse', 'ico-intent'))
+    .replaceAll('💪', ico('intent_empower', 'ico-intent'))
+    .replaceAll('💚', ico('intent_heal', 'ico-intent'))
+    .replaceAll('❓', ico('intent_unknown', 'ico-intent'));
+}
+
 // ---------- 맵 ----------
 const NODE_META = {
-  battle: { icon: '⚔️', label: '전투' },
-  elite: { icon: '💀', label: '엘리트' },
-  rest: { icon: '🔥', label: '휴식' },
-  event: { icon: '💬', label: '만남' },
-  shop: { icon: '🧺', label: '상점' },
-  boss: { icon: '🐺', label: '보스' },
+  battle: { icon: ico('node_battle', 'ico-node'), label: '전투' },
+  elite: { icon: ico('node_elite', 'ico-node'), label: '엘리트' },
+  rest: { icon: ico('node_rest', 'ico-node'), label: '휴식' },
+  event: { icon: ico('node_event', 'ico-node'), label: '만남' },
+  shop: { icon: ico('node_shop', 'ico-node'), label: '상점' },
+  boss: { icon: ico('node_boss', 'ico-node'), label: '보스' },
   final: { icon: '🌑', label: '최후' },
 };
 
@@ -503,7 +518,7 @@ function showRest() {
   app.innerHTML = '';
   app.append(h(`
     <div class="screen center rest-screen">
-      <div class="rest-art">🔥</div>
+      <div class="rest-art">${ico('node_rest', 'ico-big')}</div>
       <h2>모닥불</h2>
       <button class="btn primary" id="rest-btn">휴식 (HP ${restHealAmount(run)} 회복)</button>
     </div>`));
@@ -552,7 +567,7 @@ function renderBattle(opts = {}) {
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
           <button class="enemy ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
             ${targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
-            <span class="intent">${intentOf(e)} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
+            <span class="intent">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
             <span class="enemy-art">${e.art}</span>
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
@@ -565,8 +580,8 @@ function renderBattle(opts = {}) {
             <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${(() => {
               const d = e.debuffs || {};
               const chips = [
-                e.block > 0 ? `🛡${e.block}` : '', e.power > 0 ? `💪+${e.power}` : '',
-                d.weak > 0 ? `🔻${d.weak}` : '', d.bleed > 0 ? `🩸${d.bleed}` : '', d.vulnerable > 0 ? `🎯${d.vulnerable}` : '',
+                e.block > 0 ? `${ico('intent_defend')}${e.block}` : '', e.power > 0 ? `${ico('intent_empower')}+${e.power}` : '',
+                d.weak > 0 ? `${ico('status_weak')}${d.weak}` : '', d.bleed > 0 ? `${ico('status_bleed')}${d.bleed}` : '', d.vulnerable > 0 ? `${ico('status_vulnerable')}${d.vulnerable}` : '',
               ].filter(Boolean).join(' ');
               return chips ? ` <span class="enemy-buffs">${chips}</span>` : '';
             })()}</span>
@@ -586,7 +601,7 @@ function renderBattle(opts = {}) {
             ${blank
               ? '<span class="pip-art empty"></span>'
               : `<img class="pip-art" src="${dieFaceSrc(def.id, d.face)}" alt="${d.face}" draggable="false">`}
-            <small>${marked ? '다시' : d.confused ? '🌀혼란' : ''}</small>
+            <small>${marked ? '다시' : d.confused ? `${ico('status_confuse')}혼란` : ''}</small>
           </button>`;
         }).join('')}
       </div>
@@ -614,7 +629,7 @@ function renderBattle(opts = {}) {
         // 내 버프 칩 — 체력바 위, 길게 눌러 상세 (v0.19)
         const b = battle.buffs;
         const chips = [
-          b.strength > 0 ? `🗡️${b.strength}` : '', b.focus > 0 ? `🎲+${b.focus}` : '', b.regen > 0 ? `❤️+${b.regen}` : '',
+          b.strength > 0 ? `${ico('status_strength')}${b.strength}` : '', b.focus > 0 ? `${ico('status_focus')}+${b.focus}` : '', b.regen > 0 ? `${ico('status_regen')}+${b.regen}` : '',
         ].filter(Boolean);
         return chips.length ? `<div class="buff-strip" id="buff-strip">${chips.map(c => `<span class="buff-chip">${c}</span>`).join('')}</div>` : '';
       })()}
@@ -623,7 +638,7 @@ function renderBattle(opts = {}) {
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${hpPct}%"></div>
           ${p.block > 0 ? `<div class="hp-shield" style="left:${hpPct}%; width:${shieldPct}%"></div>` : ''}
-          <span class="hp-text">❤️ ${p.hp} / ${p.maxHp}${p.block > 0 ? `<span class="shield-num">🛡${p.block}</span>` : ''}</span>
+          <span class="hp-text">❤️ ${p.hp} / ${p.maxHp}${p.block > 0 ? `<span class="shield-num">${ico('status_block')}${p.block}</span>` : ''}</span>
         </div>
         <span class="pb-side">${battle.pendingBuff > 0 ? `⚡+${battle.pendingBuff}` : ''}</span>
       </div>
@@ -692,12 +707,12 @@ function enemyEffectText(e, ef) {
       const parts = [];
       if (e.power > 0) parts.push(`+강화 ${e.power}`);
       if (weak > 0) parts.push(`-약화 ${weak}`);
-      return `⚔️ 피해 ${final}` + (parts.length ? ` (기본 ${base} ${parts.join(' ')})` : '');
+      return `${ico('intent_attack')} 피해 ${final}` + (parts.length ? ` (기본 ${base} ${parts.join(' ')})` : '');
     }
-    case 'block': return `🛡 방어 ${ef.amount} 획득`;
-    case 'confuse': return `🌀 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
-    case 'empower': return `💪 강화 — 공격력 +${ef.amount} (전투 내 누적)`;
-    case 'heal': return `💚 자신 HP ${ef.amount} 회복`;
+    case 'block': return `${ico('intent_defend')} 방어 ${ef.amount} 획득`;
+    case 'confuse': return `${ico('intent_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
+    case 'empower': return `${ico('intent_empower')} 강화 — 공격력 +${ef.amount} (전투 내 누적)`;
+    case 'heal': return `${ico('intent_heal')} 자신 HP ${ef.amount} 회복`;
     default: return ef.op;
   }
 }
@@ -707,12 +722,12 @@ function showPlayerBuffs() {
   const b = battle.buffs;
   const confusedNow = battle.dice.filter(d => d.confused).length;
   const items = [
-    b.strength > 0 ? `<li>🗡️ 힘 ${b.strength} — 이번 전투 동안 모든 족보 피해 +${b.strength}</li>` : '',
-    b.focus > 0 ? `<li>🎲 집중 ${b.focus} — 이번 전투 동안 매 턴 리롤 +${b.focus}</li>` : '',
-    b.regen > 0 ? `<li>❤️ 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen}</li>` : '',
-    battle.player.block > 0 ? `<li>🛡 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
-    confusedNow > 0 ? `<li>🌀 혼란 — 이번 턴 주사위 ${confusedNow}개가 뒤틀려 다시 굴릴 수 없음</li>` : '',
-    battle.pendingConfuse > 0 ? `<li>🌀 혼란 예고 — 다음 턴 주사위 ${battle.pendingConfuse}개가 뒤틀린다</li>` : '',
+    b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 이번 전투 동안 모든 족보 피해 +${b.strength}</li>` : '',
+    b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus} — 이번 전투 동안 매 턴 리롤 +${b.focus}</li>` : '',
+    b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen}</li>` : '',
+    battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
+    confusedNow > 0 ? `<li>${ico('status_confuse')} 혼란 — 이번 턴 주사위 ${confusedNow}개가 뒤틀려 다시 굴릴 수 없음</li>` : '',
+    battle.pendingConfuse > 0 ? `<li>${ico('status_confuse')} 혼란 예고 — 다음 턴 주사위 ${battle.pendingConfuse}개가 뒤틀린다</li>` : '',
   ].filter(Boolean).join('');
   app.append(h(`
     <div class="modal-back" id="pbuff-info">
@@ -732,14 +747,14 @@ function showEnemyInfo(uid) {
   const e = battle && battle.enemies.find(x => x.uid === uid);
   if (!e || !e.nextMove) return;
   const mv = e.nextMove;
-  const effects = mv.effects.map(ef => `<li>${esc(enemyEffectText(e, ef))}</li>`).join('');
+  const effects = mv.effects.map(ef => `<li>${enemyEffectText(e, ef)}</li>`).join(''); // enemyEffectText는 내부 생성 HTML(아이콘 포함)
   const d = e.debuffs || {};
   const status = [
-    e.block > 0 ? `<li>🛡 방어 ${e.block} — 다음 행동까지 받는 피해 흡수</li>` : '',
-    e.power > 0 ? `<li>💪 강화 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
-    d.weak > 0 ? `<li>🔻 약화 ${d.weak} — 공격력 -${d.weak}</li>` : '',
-    d.bleed > 0 ? `<li>🩸 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
-    d.vulnerable > 0 ? `<li>🎯 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable}</li>` : '',
+    e.block > 0 ? `<li>${ico('intent_defend')} 방어 ${e.block} — 다음 행동까지 받는 피해 흡수</li>` : '',
+    e.power > 0 ? `<li>${ico('intent_empower')} 강화 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
+    d.weak > 0 ? `<li>${ico('status_weak')} 약화 ${d.weak} — 공격력 -${d.weak}</li>` : '',
+    d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
+    d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable}</li>` : '',
     e.stunned ? '<li>💫 다음 행동 취소됨</li>' : '',
   ].filter(Boolean).join('');
   app.append(h(`
