@@ -1,6 +1,6 @@
 // REDHOOD 서비스 워커 — 오프라인 캐시
 // ⚠ 판을 바꾸면 CACHE 번호를 반드시 +1 (runbook 규칙)
-const CACHE = 'redhood-v76';
+const CACHE = 'redhood-v77';
 const ASSETS = [
   './',
   './index.html',
@@ -207,8 +207,11 @@ self.addEventListener('activate', (e) => {
 // 네트워크 우선, 실패 시 캐시 (개발 중 최신 반영 우선. 오프라인이면 캐시로 동작)
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  // v0.61: 코드·스타일은 캐시를 완전히 우회해 항상 최신을 받는다
+  const u = new URL(e.request.url);
+  const isCode = /\.(?:html|css|js|json)$/.test(u.pathname) || u.pathname.endsWith('/');
   e.respondWith(
-    fetch(e.request)
+    fetch(isCode ? new Request(e.request, { cache: 'reload' }) : e.request)
       .then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));

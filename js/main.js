@@ -14,7 +14,23 @@ let busy = false;       // 연출 중 입력 잠금
 (async function boot() {
   try { await loadAll(); }
   catch (e) { app.innerHTML = `<div class="screen center"><p class="error">${e.message}</p></div>`; return; }
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+  // v0.61: SW를 캐시 없이 등록하고 새 버전이 오면 즉시 교체 (구버전 화면 고착 방지)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
+      reg.update();
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'activated' && navigator.serviceWorker.controller) location.reload();
+        });
+      });
+    }).catch(() => {});
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!reloaded) { reloaded = true; location.reload(); }
+    });
+  }
   showTitle();
 })();
 
