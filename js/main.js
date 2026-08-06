@@ -130,18 +130,35 @@ function npcArtHtml(npc) {
   return `<img class="npc-art npc-art-img${kind}" src="assets/npc/${f}.png" alt="" draggable="false">`;
 }
 
+// v0.58: 표적 표시만 제자리 갱신 — 재렌더 시 이미지가 다시 그려지며 깜빡이던 문제 해소
+function updateTargetMark() {
+  app.querySelectorAll('.enemy').forEach(el => {
+    const e = battle.enemies.find(x => x.uid === el.dataset.uid);
+    el.classList.toggle('targeted', !!e && e.uid === targetUid && e.hp > 0);
+  });
+}
+
 // ---------- v0.57: 줄 UI 공통 — [원형 아이콘][본문][값] ----------
 // 아이콘 규격: 정사각 1:1, 투명 배경, 원형 안에 들어가는 심볼. 리소스 확보 전 임시 표기 사용.
 function rowIcon(inner) {
   return `<span class="row-icon">${inner}</span>`;
 }
 // 족보 아이콘 — 전용 리소스가 오면 assets/icons/combo_{variantId}.png 로 자동 교체
+// 그 전까지는 변형의 능력(버프·디버프)에 대응하는 기존 아이콘을 사용
 const COMBO_ICON_READY = new Set();
+const ABILITY_ICON = {
+  strength: 'status_strength', focus: 'status_focus', regen: 'status_regen',
+  block: 'status_block', weakEnemy: 'status_weak', bleed: 'status_bleed',
+  vulnerable: 'status_vulnerable',
+};
 function comboIcon(cat, variant) {
   if (COMBO_ICON_READY.has(variant.id)) {
     return `<img class="row-ico-img" src="assets/icons/combo_${variant.id}.png" alt="" draggable="false">`;
   }
-  return `<span class="row-ico-tmp">${esc((cat.name || '?').slice(0, 1))}</span>`; // 임시: 족보 종류 첫 글자
+  const ab = variant.ability;
+  const ops = ab ? (Array.isArray(ab) ? ab : [ab]).map(a => a.op) : [];
+  const file = ABILITY_ICON[ops[0]] || 'intent_attack'; // 부가 능력 없는 족보는 공격 아이콘
+  return `<img class="row-ico-img" src="assets/icons/${file}.png" alt="" draggable="false">`;
 }
 // 선택지 텍스트 맨 앞 이모지를 아이콘 자리로 분리
 function splitLeadEmoji(text) {
@@ -203,7 +220,6 @@ function showIntro() {
         <span class="row-body">
           <span class="choice-main">${esc(w.name)}</span>
           <span class="choice-sub">${esc(w.desc)}</span>
-          <span class="choice-cats">${Object.entries(w.start).map(([cid, vid]) => esc(variantName(cid, vid))).join(' · ')}</span>
         </span>
       </button>`).join(''))));
   app.querySelectorAll('.weapon-choice').forEach(el => {
@@ -685,7 +701,7 @@ function renderBattle(opts = {}) {
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
           <button class="enemy ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
             ${/* v0.52: 정보(의도·이름·체력바)는 머리 위, 그림은 크게 아래 */ ''}
-            ${targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
+            <span class="target-pin">▼</span>
             <span class="intent">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
@@ -759,7 +775,7 @@ function renderBattle(opts = {}) {
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${hpPct}%"></div>
           ${p.block > 0 ? `<div class="hp-shield" style="left:${hpPct}%; width:${shieldPct}%"></div>` : ''}
-          <span class="hp-text">❤️ ${p.hp} / ${p.maxHp}${p.block > 0 ? `<span class="shield-num">${ico('status_block')}${p.block}</span>` : ''}</span>
+          <span class="hp-text">${p.hp} / ${p.maxHp}${p.block > 0 ? `<span class="shield-num">${ico('status_block')}${p.block}</span>` : ''}</span>
         </div>
         <span class="pb-side">${battle.pendingBuff > 0 ? `⚡+${battle.pendingBuff}` : ''}</span>
       </div>
@@ -807,7 +823,7 @@ function renderBattle(opts = {}) {
       const alive = aliveEnemies(battle);
       if (!alive.some(e => e.uid === uid)) return;
       targetUid = uid;
-      renderBattle();
+      updateTargetMark(); // v0.58: 전체 재렌더 없이 표적 표시만 갱신
     });
   });
   // 내 버프 — 체력바(또는 버프 칩) 길게 눌러 상세
