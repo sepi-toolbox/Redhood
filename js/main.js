@@ -657,7 +657,7 @@ function renderBattle(opts = {}) {
               const ebTotal = Math.max(e.maxHpInit, e.hp + e.block);
               const ehpPct = e.final ? 100 : Math.max(0, e.hp / ebTotal * 100);
               const eshPct = e.final ? 0 : Math.min(e.block, ebTotal - e.hp) / ebTotal * 100;
-              return `<span class="bar"><i style="width:${ehpPct}%"></i>${e.block > 0 && !e.final ? `<b class="ebar-shield" style="left:${ehpPct}%;width:${eshPct}%"></b>` : ''}</span>`;
+              return `<span class="bar t-${e.tier}"><i style="width:${ehpPct}%"></i>${e.block > 0 && !e.final ? `<b class="ebar-shield" style="left:${ehpPct}%;width:${eshPct}%"></b>` : ''}</span>`;
             })()}
             <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${(() => {
               const d = e.debuffs || {};

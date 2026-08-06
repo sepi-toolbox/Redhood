@@ -205,8 +205,18 @@ body {
 }
 .enemy.charging { animation: enemyCharge .72s ease-in-out; }
 .enemy-name { font-size: 13px; color: #cbbfa8; }
-.enemy .bar { width: 110px; height: 7px; background: #33241d; border-radius: 3px; overflow: hidden; }
+/* v0.39: 티어별 몬스터 체력바 틀 — 일반(나무)/정예(무쇠 가시)/보스(흑금 해골) */
+.enemy .bar { position: relative; width: 110px; height: 7px; background: #33241d; border-radius: 3px; overflow: hidden; }
 .enemy .bar i { display: block; height: 100%; background: #b3362a; transition: width .25s; }
+.enemy .bar.t-normal, .enemy .bar.t-elite, .enemy .bar.t-boss {
+  background: none; border-radius: 0; overflow: visible; border: solid transparent;
+}
+.enemy .bar.t-normal::before, .enemy .bar.t-elite::before, .enemy .bar.t-boss::before {
+  content: ''; position: absolute; inset: 0; background: #2a1d17; z-index: -1;
+}
+.enemy .bar.t-normal { width: 128px; height: 15px; border-width: 4px 15px; border-image: url('../assets/ui/hpbar_normal.png') 26 96 stretch; }
+.enemy .bar.t-elite { width: 136px; height: 19px; border-width: 5px 19px; border-image: url('../assets/ui/hpbar_elite.png') 44 148 stretch; }
+.enemy .bar.t-boss { width: 154px; height: 21px; border-width: 6px 20px 6px 28px; border-image: url('../assets/ui/hpbar_boss.png') 44 120 44 168 stretch; }
 .enemy-hp { font-size: 11.5px; color: #9c8f7a; }
 .mid-line { flex: none; min-height: 18px; text-align: center; padding: 0 12px; }
 .last-result { font-size: 12px; color: #e8b64b; }
@@ -452,13 +462,19 @@ body {
   background: #1b1512; border-top: 1px solid #2c221c;
 }
 .pb-side { width: 52px; text-align: center; font-size: 13px; color: #e8b64b; flex: none; }
+/* v0.39: 플레이어 체력바 — 하트·해골 나무틀 (9-슬라이스, 중앙은 게임이 채움) */
 .hp-gauge {
-  position: relative; flex: 1; max-width: 290px; height: 28px;
-  background: #33241d; border: 1px solid #4a3b30; border-radius: 14px; overflow: hidden;
+  position: relative; flex: 1; max-width: 300px; height: 34px;
+  background: none; border-radius: 0; overflow: visible;
+  border: solid transparent; border-width: 8px 34px;
+  border-image: url('../assets/ui/hpbar_player.png') 40 132 stretch;
+}
+.hp-gauge::before { /* 창 안 어두운 바닥 */
+  content: ''; position: absolute; inset: 0; background: #2a1d17; z-index: -1;
 }
 .hp-fill {
   height: 100%; background: linear-gradient(180deg, #d24a3c, #9b2727);
-  border-radius: 12px 0 0 12px; transition: width .3s;
+  transition: width .3s;
 }
 /* LoL식 방어도: HP 구간 끝에 회백색 실드 세그먼트가 겹쳐 붙는다 */
 .hp-shield {
