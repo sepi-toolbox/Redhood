@@ -440,8 +440,9 @@ function showMap() {
       : onPath ? 'trodden'
       : f < nextFloorIdx ? 'missed' : 'ahead';
     return `<button class="map-node2 ${state} ${nd.type === 'boss' ? 'boss-node' : ''}" data-f="${f}" data-i="${i}"
-      style="left:${x}%;top:${y}px" ${state === 'reachable' ? '' : 'disabled'}>
-      ${NODE_META[nd.type].icon}<small>${NODE_META[nd.type].label}</small>
+      style="left:${x}%;top:${y}px" ${state === 'reachable' ? '' : 'disabled'}
+      aria-label="${NODE_META[nd.type].label}">
+      ${NODE_META[nd.type].icon}
       ${isCur ? '<span class="you-marker n2">🧣</span>' : ''}
     </button>`;
   }).join('')).join('');
