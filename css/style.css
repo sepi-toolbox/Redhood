@@ -113,7 +113,14 @@ body {
   background: none; border: none; padding: 0; width: 66px;
   color: #6a4c33; cursor: default;
 }
-.map-node2 .ico-node { width: 42px; height: 42px; display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .55)); }
+/* v0.28.1: 낙서 아이콘 가독성 — 밝기 보정 자산 + 어두운 후광으로 양피지에서 분리 */
+.map-node2::before {
+  content: ''; position: absolute; left: 50%; top: 20px; width: 58px; height: 58px;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(circle, rgba(10, 6, 4, .5) 0%, rgba(10, 6, 4, .28) 55%, transparent 72%);
+  pointer-events: none;
+}
+.map-node2 .ico-node { width: 42px; height: 42px; display: block; position: relative; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .7)); }
 .map-node2 small { font-size: 9.5px; font-weight: 700; color: #6a4c33; }
 .map-node2.reachable { cursor: pointer; animation: youBob 1.4s ease-in-out infinite alternate; filter: drop-shadow(0 0 7px rgba(160, 44, 37, .7)); }
 .map-node2.reachable small { color: #a02c25; }
