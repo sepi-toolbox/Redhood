@@ -312,6 +312,7 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   if ((battle.sealed[catId] || 0) > 0) return null;
 
   const alive = aliveEnemies(battle);
+  if (alive.length === 0) return null; // v0.32: 전멸 후 중복 확정 가드 (대상 없음)
   let targets;
   if (isAoE(cat)) targets = alive;
   else {

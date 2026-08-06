@@ -515,8 +515,8 @@ function drawMapLinks() {
   const { edges } = run.map;
   const btns = {};
   app.querySelectorAll('.map-node2').forEach(b => { btns[`${b.dataset.f}:${b.dataset.i}`] = b; });
-  // 노드는 translate(-50%, -20px)로 그려지므로 시각적 아이콘 중심 = (offsetLeft, offsetTop)
-  const center = b => ({ x: b.offsetLeft, y: b.offsetTop });
+  // v0.32: 마진 정렬 — 아이콘 중심 = 요소 좌상단 + (반너비, 20px). transform 무관이라 애니메이션에 안전
+  const center = b => ({ x: b.offsetLeft + b.offsetWidth / 2, y: b.offsetTop + 20 });
   const parts = [];
   edges.forEach((fl, f) => fl.forEach((tos, i) => tos.forEach(j => {
     const a = btns[`${f}:${i}`], b = btns[`${f + 1}:${j}`];

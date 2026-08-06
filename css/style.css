@@ -112,9 +112,15 @@ body {
   stroke-dasharray: .5 8; opacity: .45; /* v0.28: 다크 양피지 위 밝은 잉크 */
 }
 .map-links .ink-done { opacity: .8; stroke: #e8dcc8; }
-.map-links .ink-next { opacity: .9; stroke: #e05c4b; }
+/* v0.32: 다음 길 강조 — 붉은 잉크가 흐르며 빛난다 */
+.map-links .ink-next {
+  opacity: 1; stroke: #ff6b52; stroke-width: 3.2;
+  filter: drop-shadow(0 0 4px rgba(224, 92, 75, .9));
+  animation: inkFlow 1.1s linear infinite;
+}
+@keyframes inkFlow { to { stroke-dashoffset: -17; } }
 .map-node2 {
-  position: absolute; transform: translate(-50%, -20px);
+  position: absolute; margin-left: -33px; margin-top: -20px; /* v0.32: transform 대신 마진 정렬 — 애니메이션과 충돌 원천 차단 */
   display: flex; flex-direction: column; align-items: center; gap: 1px;
   background: none; border: none; padding: 0; width: 66px;
   color: #6a4c33; cursor: default;
@@ -128,7 +134,7 @@ body {
 }
 .map-node2 .ico-node { width: 42px; height: 42px; display: block; position: relative; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .7)); }
 .map-node2 small { font-size: 9.5px; font-weight: 700; color: #6a4c33; }
-.map-node2.reachable { cursor: pointer; animation: youBob 1.4s ease-in-out infinite alternate; filter: drop-shadow(0 0 7px rgba(160, 44, 37, .7)); }
+.map-node2.reachable { cursor: pointer; filter: drop-shadow(0 0 6px rgba(190, 60, 45, .55)); } /* v0.32: 정적 발광만, 움직임 없음 */
 .map-node2.reachable small { color: #a02c25; }
 .map-node2.reachable:active { filter: brightness(1.25); }
 .map-node2.trodden { opacity: .85; filter: sepia(.25); }
