@@ -417,6 +417,7 @@ const NODE_META = {
 
 // v0.26: 슬더스식 분기 지도 — 양피지 위 점선 잉크 길 + 메달 도장 노드
 const MAP_ROW_H = 78, MAP_PAD_TOP = 26, MAP_PAD_BOT = 40;
+let mapResizeObs = null; // v0.29: 캔버스 크기 변화 시 잉크길 재작도 (노드-선 어긋남 근본 해결)
 function mapJitter(f, i) { return (((f * 7 + i * 13) % 5) - 2) * 1.1; } // 손그림 흔들림 (결정적)
 function mapNodeXY(canvasH, nd, f, i) {
   const x = 15 + nd.lane * 17.5 + mapJitter(f, i);          // % (lane 0~4 → 15%~85%)
@@ -465,7 +466,14 @@ function showMap() {
         <button class="btn ghost" id="abandon-btn">런 포기</button>
       </footer>
     </div>`));
+  // v0.29: 최초 작도는 레이아웃 확정 후 + 이후 크기 변화(주소창 접힘·회전·폰트 로드)마다 재작도
   drawMapLinks();
+  requestAnimationFrame(drawMapLinks);
+  if (mapResizeObs) mapResizeObs.disconnect();
+  if (window.ResizeObserver) {
+    mapResizeObs = new ResizeObserver(() => drawMapLinks());
+    mapResizeObs.observe(app.querySelector('.map-canvas'));
+  }
   app.querySelectorAll('.map-node2:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => {
       const f = parseInt(btn.dataset.f, 10), i = parseInt(btn.dataset.i, 10);

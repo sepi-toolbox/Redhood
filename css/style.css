@@ -56,12 +56,13 @@ body {
 
 /* ---------- 맵: 양피지 ---------- */
 .map-scroll { flex: 1; overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; }
-/* v0.28: 낡고 해진 다크 양피지 (bg_map) */
+/* v0.29: 양피지가 내용과 함께 스크롤되는 긴 두루마리 — 배경을 캔버스에 부착 */
 .map-scroll.parchment {
-  margin: 10px 12px; border-radius: 6px;
-  background: #1a130e url('../assets/bg/bg_map.jpg') center / cover no-repeat;
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, .5), 0 4px 16px rgba(0, 0, 0, .55);
+  margin: 10px 12px; border-radius: 6px; padding: 0;
+  background: transparent;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .55);
   color: #d9c8a6;
+  overflow-x: hidden; /* 좌우 스크롤 금지 — 상하 전용 */
 }
 .map-row { display: flex; align-items: center; gap: 10px; opacity: .3; position: relative; }
 .map-row.next { opacity: 1; }
@@ -99,7 +100,12 @@ body {
 .trail.t-drawing { opacity: .8; animation: inkDraw .8s ease-out .15s backwards; }
 
 /* ---------- v0.26: 슬더스식 분기 지도 ---------- */
-.map-canvas { position: relative; width: 100%; }
+.map-canvas {
+  position: relative; width: 100%; flex: none; /* v0.29: 플렉스 압축 금지 — 지정 높이 유지 */
+  background: #1a130e url('../assets/bg/bg_map.jpg') center / cover no-repeat;
+  border-radius: 6px;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, .5);
+}
 .map-links { position: absolute; inset: 0; pointer-events: none; }
 .map-links .ink {
   fill: none; stroke: #d9c8a6; stroke-width: 2.6; stroke-linecap: round;
