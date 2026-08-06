@@ -69,7 +69,7 @@ async function playTurn(page) {
   // ---------- 굴림 연출·게이지 확인 ----------
   await page.locator('#start-btn').click();
   await passIntro(page);
-  await page.locator('.map-row.next .map-node').first().click();
+  await page.locator('.map-node2.reachable').first().click({ force: true });
   await page.waitForSelector('.battle-screen');
   const blankCount = await page.locator('.die.blank').count();
   const gaugeText = await page.locator('.hp-text').innerText();
@@ -87,11 +87,11 @@ async function playTurn(page) {
 
   // ---------- 풀런 자동 플레이 ----------
   let guard = 0, ended = null, sawMulti = false, sawSlash = false;
-  while (guard++ < 250) {
+  while (guard++ < 700) {
     if (await page.locator('.map-screen').count()) {
-      const nodes = page.locator('.map-row.next .map-node');
+      const nodes = page.locator('.map-node2.reachable');
       if (await nodes.count() === 0) break;
-      await nodes.first().click(); await page.waitForTimeout(80); continue;
+      await nodes.first().click({ force: true }); await page.waitForTimeout(80); continue;
     }
     if (await page.locator('.shop-screen').count()) {
       await page.locator('#shop-leave').click();
@@ -155,7 +155,7 @@ async function playTurn(page) {
     await page.waitForSelector('#start-btn');
     await page.locator('#start-btn').click();
     await passIntro(page);
-    await page.locator('.map-row.next .map-node').first().click();
+    await page.locator('.map-node2.reachable').first().click({ force: true });
     await page.waitForSelector('.battle-screen');
     if (await page.locator('.enemy').count() < 2) continue;
     // 기본 표적 = 맨 왼쪽 확인

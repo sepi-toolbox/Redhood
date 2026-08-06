@@ -62,6 +62,8 @@ export function newRun() {
     act: 1,              // 1~3막, 4 = 최종전
     theme: pickTheme(1), // 이번 막의 테마 id
     floor: 0,
+    pos: -1,             // 현재 층에서 선 노드 인덱스 (0층이면 -1)
+    path: [],            // 지나온 노드 인덱스 기록 (지도에 발자취 표시용)
     map: generateMap(enlight),
   };
 }
@@ -74,6 +76,8 @@ export function advanceAct(run) {
   run.act += 1;
   run.theme = pickTheme(run.act);
   run.floor = 0;
+  run.pos = -1;
+  run.path = [];
   run.map = generateMap(run.enlight);
   return healed;
 }
@@ -194,19 +198,60 @@ export function applyEventEffects(run, effects) {
   return { messages, pendingDie };
 }
 
-// ---------- 맵 ----------
+// ---------- 맵 (v0.26: 슬더스식 분기 그래프) ----------
+// 무작위 행보(walk) 여러 개를 아래→위로 그어 골격을 만들고, 겹치는 칸은 합친다.
+// floors[f] = [{type, lane}...] (lane 오름차순), edges[f][i] = 다음 층에서 갈 수 있는 노드 인덱스들
+export const MAP_LANES = 5;
 export function generateMap(enlight = 0) {
   const cfg = DB.act1.map;
+  const F = cfg.floors;                       // 마지막 층 = 보스 (단일)
+  const laneSet = Array.from({ length: F - 1 }, () => new Set());
+  const edgePairs = new Set();                // "f:laneA>laneB" (f = 층 인덱스)
+  const starts = [0, 1, 2, 3, 4].sort(() => rng.next() - 0.5).slice(0, 4);
+  for (const s of starts) {
+    let lane = s;
+    for (let f = 0; f < F - 1; f++) {
+      laneSet[f].add(lane);
+      if (f === F - 2) break;                 // 보스 직전 층까지
+      const moves = [lane - 1, lane, lane + 1].filter(l => l >= 0 && l < MAP_LANES);
+      const next = moves[Math.floor(rng.next() * moves.length)];
+      edgePairs.add(`${f}:${lane}>${next}`);
+      lane = next;
+    }
+  }
+  // 층별 노드 배열 (lane 오름차순) + 유형 배정
   const floors = [];
-  for (let f = 1; f <= cfg.floors; f++) {
-    const fixed = cfg.fixed[String(f)];
-    if (fixed) { floors.push([{ type: fixed }]); continue; }
-    const n = cfg.choicesMin + Math.floor(rng.next() * (cfg.choicesMax - cfg.choicesMin + 1));
+  for (let f = 0; f < F - 1; f++) {
+    const lanes = [...laneSet[f]].sort((a, b) => a - b);
     const nodes = [];
-    for (let i = 0; i < n; i++) nodes.push({ type: rollNodeType(cfg, f, nodes, enlight) });
+    for (const lane of lanes) {
+      const fixed = cfg.fixed[String(f + 1)];
+      nodes.push({ type: fixed || rollNodeType(cfg, f + 1, nodes, enlight), lane });
+    }
     floors.push(nodes);
   }
-  return floors;
+  floors.push([{ type: cfg.fixed[String(F)] || 'boss', lane: 2 }]); // 보스 층
+  // 간선 인덱스화
+  const idxOf = (f, lane) => floors[f].findIndex(nd => nd.lane === lane);
+  const edges = floors.map(fl => fl.map(() => []));
+  for (const key of edgePairs) {
+    const [fPart, lanes] = key.split(':');
+    const f = parseInt(fPart, 10);
+    const [a, b] = lanes.split('>').map(Number);
+    const ia = idxOf(f, a), ib = idxOf(f + 1, b);
+    if (ia >= 0 && ib >= 0 && !edges[f][ia].includes(ib)) edges[f][ia].push(ib);
+  }
+  for (const nd of floors[F - 2].map((_, i) => i)) edges[F - 2][nd] = [0]; // 마지막 휴식 → 보스
+  edges[F - 1] = [[]];
+  for (const fl of edges) for (const list of fl) list.sort((a, b) => a - b);
+  return { floors, edges };
+}
+
+// 지금 위치에서 갈 수 있는 다음 층 노드 인덱스들
+export function reachableNodes(run) {
+  if (run.floor === 0) return run.map.floors[0].map((_, i) => i);
+  if (run.floor >= run.map.floors.length) return [];
+  return run.map.edges[run.floor - 1][run.pos] || [];
 }
 
 function rollNodeType(cfg, floor, existing, enlight = 0) {
@@ -417,7 +462,7 @@ export function applyRest(run) {
 
 // ---------- 세이브 ----------
 export function saveRun(run) {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 9 })); } catch (e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...run, _v: 10 })); } catch (e) {}
 }
 
 export function loadRun() {
@@ -425,7 +470,10 @@ export function loadRun() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const s = JSON.parse(raw);
-    if (s._v !== 9) { clearSave(); return null; }
+    if (s._v !== 10) { clearSave(); return null; } // v0.26: 분기 지도로 세이브 구조 변경
+    if (!s.map || !Array.isArray(s.map.floors) || !Array.isArray(s.map.edges)) { clearSave(); return null; }
+    if (typeof s.pos !== 'number') s.pos = -1;
+    if (!Array.isArray(s.path)) s.path = [];
     if (!s.dice.every(id => DB.diceById[id])) { clearSave(); return null; }
     if (!s.relics.every(id => DB.relicById[id])) { clearSave(); return null; }
     if (!s.weapon || !DB.weaponById[s.weapon]) { clearSave(); return null; }

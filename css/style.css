@@ -2,7 +2,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; }
 body {
-  background: #14100f;
+  background: #14100f url('../assets/ui/tex_cloth.jpg') center / cover no-repeat; /* v0.26: 낡은 천 */
   color: #e8dcc8;
   font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
   overflow: hidden;
@@ -39,7 +39,7 @@ body {
 
 .topbar, .bottombar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px; background: #1b1512; font-size: 14px; flex: none;
+  padding: 10px 14px; background: rgba(20, 14, 11, .8); font-size: 14px; flex: none;
 }
 .topbar { border-bottom: 1px solid #2c221c; padding-top: calc(10px + env(safe-area-inset-top)); }
 .bottombar { border-top: 1px solid #2c221c; padding-bottom: calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
@@ -101,6 +101,36 @@ body {
 }
 .trail.t-drawing { opacity: .8; animation: inkDraw .8s ease-out .15s backwards; }
 
+/* ---------- v0.26: 슬더스식 분기 지도 ---------- */
+.map-canvas { position: relative; width: 100%; }
+.map-links { position: absolute; inset: 0; pointer-events: none; }
+.map-links .ink {
+  fill: none; stroke: #6a4c33; stroke-width: 2.6; stroke-linecap: round;
+  stroke-dasharray: .5 8; opacity: .35;
+}
+.map-links .ink-done { opacity: .85; stroke: #4a3423; }
+.map-links .ink-next { opacity: .85; stroke: #a02c25; }
+.map-node2 {
+  position: absolute; transform: translate(-50%, -20px);
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  background: none; border: none; padding: 0; width: 66px;
+  color: #6a4c33; cursor: default;
+}
+.map-node2 .ico-node { width: 40px; height: 40px; display: block; filter: drop-shadow(1px 2px 2px rgba(60, 35, 15, .4)); }
+.map-node2 small { font-size: 9.5px; font-weight: 700; color: #6a4c33; }
+.map-node2.reachable { cursor: pointer; animation: youBob 1.4s ease-in-out infinite alternate; filter: drop-shadow(0 0 7px rgba(160, 44, 37, .7)); }
+.map-node2.reachable small { color: #a02c25; }
+.map-node2.reachable:active { filter: brightness(1.25); }
+.map-node2.trodden { opacity: .85; filter: sepia(.25); }
+.map-node2.missed { opacity: .28; filter: grayscale(.7); }
+.map-node2.ahead { opacity: .85; }
+.map-node2.boss-node .ico-node { width: 56px; height: 56px; }
+.you-marker.n2 { position: absolute; top: -15px; right: 2px; font-size: 18px; animation: youBob 1.6s ease-in-out infinite alternate; }
+.start-label.n2 {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  font-size: 12px; color: #6a4c33; font-weight: 700; font-style: italic; white-space: nowrap;
+}
+
 .you-marker {
   flex: none; font-size: 19px;
   filter: drop-shadow(1px 2px 2px rgba(60, 35, 15, .5));
@@ -114,7 +144,7 @@ body {
 .enemy-zone {
   flex: none; display: flex; justify-content: center; align-items: center; gap: 12px;
   padding: 4px 10px 2px; min-height: 148px; position: relative; overflow: hidden;
-  background: radial-gradient(ellipse at 50% 0%, #221a15 0%, #14100f 75%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(34, 26, 21, .8) 0%, rgba(20, 16, 15, 0) 75%); /* v0.26: 천 위 그림자만 */
 }
 .enemy {
   position: relative; overflow: hidden;
@@ -429,7 +459,8 @@ body {
 .sheet-zone {
   flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column;
   gap: 6px; padding: 10px 12px;
-  background: #171210; border-top: 1px solid #2c221c;
+  background: #171210 url('../assets/ui/tex_wood.jpg') center / cover; /* v0.26: 나무 탁자 */
+  border-top: 1px solid #2c221c;
 }
 .sheet-zone.dim { opacity: .45; }
 /* v0.25: 족보 줄 = 낡은 종이 띠 (밝은 종이 위 진갈색 글자) */

@@ -1,7 +1,7 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
-import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward } from './run.js';
+import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
 const app = document.getElementById('app');
 let run = null;
@@ -416,57 +416,96 @@ const NODE_META = {
   final: { icon: '🌑', label: '최후' },
 };
 
+// v0.26: 슬더스식 분기 지도 — 양피지 위 점선 잉크 길 + 메달 도장 노드
+const MAP_ROW_H = 78, MAP_PAD_TOP = 26, MAP_PAD_BOT = 40;
+function mapJitter(f, i) { return (((f * 7 + i * 13) % 5) - 2) * 1.1; } // 손그림 흔들림 (결정적)
+function mapNodeXY(canvasH, nd, f, i) {
+  const x = 15 + nd.lane * 17.5 + mapJitter(f, i);          // % (lane 0~4 → 15%~85%)
+  const y = canvasH - MAP_PAD_BOT - f * MAP_ROW_H - MAP_ROW_H / 2; // px (아래가 1층)
+  return { x, y };
+}
 function showMap() {
   saveRun(run);
-  const nextFloor = run.floor + 1;
-  const rows = [];
-  for (let f = run.map.length; f >= 1; f--) {
-    const nodes = run.map[f - 1];
-    const cls = f < nextFloor ? 'done' : f === nextFloor ? 'next' : 'future';
-    rows.push(`
-      <div class="map-row ${cls}">
-        <span class="floor-num">${f}</span>
-        ${f === run.floor ? '<span class="you-marker" title="현재 위치">🧣</span>' : ''}
-        ${nodes.map((nd, i) => `
-          <button class="map-node" data-floor="${f}" data-idx="${i}" ${f !== nextFloor ? 'disabled' : ''}>
-            ${NODE_META[nd.type].icon}<small>${NODE_META[nd.type].label}</small>
-          </button>`).join('')}
-      </div>
-      <div class="trail ${f <= run.floor ? 't-done' : f === nextFloor ? 't-drawing' : 't-future'}"></div>`);
-  }
-  rows.push(`
-      <div class="map-row start-row">
-        <span class="floor-num"></span>
-        ${run.floor === 0 ? '<span class="you-marker">🧣</span>' : ''}
-        <span class="start-label">🌲 숲의 입구</span>
-      </div>`);
+  const { floors, edges } = run.map;
+  const F = floors.length;
+  const canvasH = F * MAP_ROW_H + MAP_PAD_TOP + MAP_PAD_BOT;
+  const reach = new Set(run.floor < F ? reachableNodes(run) : []);
+  const nextFloorIdx = run.floor;                            // 다음으로 갈 층 인덱스
+  const pathSet = new Set(run.path.map((i, f) => `${f}:${i}`));
+  const nodesHtml = floors.map((fl, f) => fl.map((nd, i) => {
+    const { x, y } = mapNodeXY(canvasH, nd, f, i);
+    const onPath = pathSet.has(`${f}:${i}`);
+    const isCur = run.floor > 0 && f === run.floor - 1 && i === run.pos;
+    const state = f === nextFloorIdx && reach.has(i) ? 'reachable'
+      : onPath ? 'trodden'
+      : f < nextFloorIdx ? 'missed' : 'ahead';
+    return `<button class="map-node2 ${state} ${nd.type === 'boss' ? 'boss-node' : ''}" data-f="${f}" data-i="${i}"
+      style="left:${x}%;top:${y}px" ${state === 'reachable' ? '' : 'disabled'}>
+      ${NODE_META[nd.type].icon}<small>${NODE_META[nd.type].label}</small>
+      ${isCur ? '<span class="you-marker n2">🧣</span>' : ''}
+    </button>`;
+  }).join('')).join('');
   app.innerHTML = '';
   app.append(h(`
     <div class="screen map-screen">
       <header class="topbar">
-        <span>${themeOf(run).icon} ${run.act}막 · ${esc(themeOf(run).name)} ${run.floor}/${run.map.length}</span>
+        <span>${themeOf(run).icon} ${run.act}막 · ${esc(themeOf(run).name)} ${run.floor}/${F}</span>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
         <span>🪙${run.coins} <span class="hp">❤️ ${run.hp}/${run.maxHp}</span></span>
       </header>
-      <div class="map-scroll parchment">${rows.join('')}</div>
+      <div class="map-scroll parchment">
+        <div class="map-canvas" style="height:${canvasH}px">
+          <svg class="map-links" width="100%" height="${canvasH}" aria-hidden="true"></svg>
+          ${nodesHtml}
+          <span class="start-label n2" style="top:${canvasH - 16}px">${run.floor === 0 ? '🧣 ' : ''}🌲 숲의 입구</span>
+        </div>
+      </div>
       <footer class="bottombar">
         <button class="btn ghost" id="bag-btn">🎲 가방</button>
         <button class="btn ghost" id="abandon-btn">런 포기</button>
       </footer>
     </div>`));
-  app.querySelectorAll('.map-node:not([disabled])').forEach(btn => {
+  drawMapLinks();
+  app.querySelectorAll('.map-node2:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => {
-      run.floor = parseInt(btn.dataset.floor, 10);
-      enterNode(run.map[run.floor - 1][parseInt(btn.dataset.idx, 10)].type);
+      const f = parseInt(btn.dataset.f, 10), i = parseInt(btn.dataset.i, 10);
+      run.floor = f + 1;
+      run.pos = i;
+      run.path[f] = i;
+      enterNode(run.map.floors[f][i].type);
     });
   });
   document.getElementById('bag-btn').addEventListener('click', showBagModal);
   document.getElementById('abandon-btn').addEventListener('click', () => {
     if (confirm('런을 포기할까요?')) { clearSave(); showTitle(); }
   });
+  // 다음 갈 층이 화면 가운데 오도록 스크롤 (시작은 맨 아래)
   const scroll = app.querySelector('.map-scroll');
-  const nextRow = app.querySelector('.map-row.next');
-  if (nextRow) scroll.scrollTop = nextRow.offsetTop - scroll.clientHeight / 2;
+  const target = app.querySelector('.map-node2.reachable');
+  scroll.scrollTop = target ? target.offsetTop - scroll.clientHeight / 2 : canvasH;
+}
+
+// 노드 실제 좌표를 읽어 점선 잉크 길을 그린다 (지나온 길 진하게, 다음 길 강조)
+function drawMapLinks() {
+  const svg = app.querySelector('.map-links');
+  if (!svg) return;
+  const { edges } = run.map;
+  const btns = {};
+  app.querySelectorAll('.map-node2').forEach(b => { btns[`${b.dataset.f}:${b.dataset.i}`] = b; });
+  const center = b => ({ x: b.offsetLeft + b.offsetWidth / 2, y: b.offsetTop + 20 });
+  const parts = [];
+  edges.forEach((fl, f) => fl.forEach((tos, i) => tos.forEach(j => {
+    const a = btns[`${f}:${i}`], b = btns[`${f + 1}:${j}`];
+    if (!a || !b) return;
+    const p1 = center(a), p2 = center(b);
+    const mx = (p1.x + p2.x) / 2 + mapJitter(f, i + j), my = (p1.y + p2.y) / 2;
+    const trodden = run.path[f] === i && run.path[f + 1] === j;
+    const active = f === run.floor - 1 && i === run.pos; // 지금 위치에서 뻗는 길
+    const first = run.floor === 0 && f === 0 ? false : active;
+    parts.push(`<path d="M${p1.x},${p1.y - 8} Q${mx},${my} ${p2.x},${p2.y + 10}"
+      class="ink ${trodden ? 'ink-done' : first ? 'ink-next' : ''}"/>`);
+  })));
+  svg.innerHTML = parts.join('');
 }
 
 function showBagModal() {
