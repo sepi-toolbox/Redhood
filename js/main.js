@@ -108,6 +108,21 @@ function showTitle() {
   }
 }
 
+// ---------- 캐릭터 아트 (v0.30): 이미지 보유 시 이모지 대체 ----------
+const ENEMY_ART = new Set(['stray_dog']);
+const NPC_ART = { '잿빛 방물장수': 'peddler', '부러진 이정표': 'signpost' };
+function enemyArtHtml(e) {
+  return ENEMY_ART.has(e.defId)
+    ? `<img class="enemy-art enemy-art-img" src="assets/enemies/${e.defId}.png" alt="" draggable="false">`
+    : `<span class="enemy-art">${e.art}</span>`;
+}
+function npcArtHtml(npc) {
+  const f = NPC_ART[npc.name];
+  return f
+    ? `<img class="npc-art npc-art-img" src="assets/npc/${f}.png" alt="" draggable="false">`
+    : `<span class="npc-art">${npc.art}</span>`;
+}
+
 // ---------- 대화 이벤트 화면 ----------
 // 배틀 화면과 같은 골격: 적 위치=NPC, 주사위 위치=검은 그라데이션 대사판, 족보 위치=선택지
 function eventFrame(npc, linesHtml, choicesHtml) {
@@ -121,7 +136,7 @@ function eventFrame(npc, linesHtml, choicesHtml) {
       </header>
       <div class="enemy-zone npc-zone">
         <div class="npc">
-          <span class="npc-art">${npc.art}</span>
+          ${npcArtHtml(npc)}
           <span class="npc-name">${esc(npc.name)}</span>
         </div>
       </div>
@@ -618,7 +633,7 @@ function renderBattle(opts = {}) {
           <button class="enemy ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
             ${targetUid === e.uid && e.hp > 0 ? '<span class="target-pin">▼</span>' : ''}
             <span class="intent">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
-            <span class="enemy-art">${e.art}</span>
+            ${enemyArtHtml(e)}
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
               // 적 방어도 LoL식: HP 구간 끝에 회백색 실드 세그먼트

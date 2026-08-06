@@ -171,6 +171,8 @@ body {
 .intent { font-size: 15px; font-weight: 700; color: #e8b64b; }
 .intent small { color: #9c8f7a; font-weight: 400; font-size: 11px; }
 .enemy-art { font-size: 46px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+/* v0.30: 몬스터 전신 아트 — 이모지 자리 대체 */
+.enemy-art-img { height: 108px; width: auto; max-width: 100%; object-fit: contain; }
 
 /* 적 공격 연출 — 움찔(윈드업) 후 플레이어 쪽으로 내려찍기 */
 @keyframes enemyAttack {
@@ -677,6 +679,8 @@ body {
   animation: npcSway 3.4s ease-in-out infinite alternate;
 }
 @keyframes npcSway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+/* v0.30: NPC 흉상/사물 아트 */
+.npc-art-img { height: 148px; width: auto; max-width: 78vw; object-fit: contain; }
 .npc-name { font-weight: 800; color: #e8dcc8; letter-spacing: 1px; font-size: 15px; }
 /* 주사위 자리: 검은 그라데이션 백판 위 대사 */
 .dialogue-panel {
