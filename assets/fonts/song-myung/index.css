@@ -1,0 +1,8 @@
+/* Song Myung — 통합본 (한글 전체 + 라틴). 조각 88개 → 1개로 축소 (v0.60) */
+@font-face {
+  font-family: 'Song Myung';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(./files/song-myung-korean-400-normal.woff2) format('woff2');
+}
