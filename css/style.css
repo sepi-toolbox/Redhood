@@ -161,10 +161,10 @@ body {
 .start-label { font-size: 12.5px; color: #6a4c33; font-weight: 700; font-style: italic; }
 
 /* ---------- 전투: 적 (다중) — 컴팩트 (족보·체력 영역 우선) ---------- */
-/* v0.52: 적 그림을 2배로 — 주사위 영역까지 밀고 내려온다. 정보는 머리 위 */
+/* v0.55: 적 그림은 크게 유지하되 레이아웃 공간은 최소 — 그림이 주사위 쪽으로 넘쳐 겹친다 */
 .enemy-zone {
   flex: none; display: flex; justify-content: center; align-items: flex-start; gap: 10px;
-  padding: 4px 8px 0; min-height: 268px; position: relative; overflow: hidden;
+  padding: 4px 8px 0; min-height: 178px; position: relative; overflow: visible; z-index: 0;
   background: radial-gradient(ellipse at 50% 0%, rgba(34, 26, 21, .8) 0%, rgba(20, 16, 15, 0) 75%);
 }
 .enemy {
@@ -186,14 +186,15 @@ body {
 }
 .intent { font-size: 15px; font-weight: 700; color: #e8b64b; }
 .intent small { color: #9c8f7a; font-weight: 400; font-size: 11px; }
-.enemy-art { font-size: 86px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+.enemy-art { font-size: 86px; margin-bottom: -20px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
 /* v0.30: 몬스터 전신 아트 — 이모지 자리 대체 (v0.35: 배경 위에서 도드라지게 그림자 강화) */
 .enemy-art-img {
-  height: 216px; width: auto; max-width: 100%; object-fit: contain; /* v0.52: 2배 */
+  height: 216px; width: auto; max-width: 100%; object-fit: contain; /* 크기 유지 */
+  margin-bottom: -78px;  /* v0.55: 레이아웃은 138px만 차지, 나머지는 아래로 넘침 */
   filter: drop-shadow(0 6px 11px rgba(0, 0, 0, .9)) drop-shadow(0 0 15px rgba(0, 0, 0, .55));
   pointer-events: none;
 }
-.enemy-zone.multi .enemy-art-img { height: 176px; } /* 두 마리면 조금 작게 */
+.enemy-zone.multi .enemy-art-img { height: 186px; margin-bottom: -62px; }
 .enemy-zone.multi .enemy-name { font-size: 11.5px; }
 .battle-screen { background-size: cover; background-position: center top; background-repeat: no-repeat; }
 
@@ -230,7 +231,7 @@ body {
 .enemy .bar.t-elite { width: 136px; height: 22px; border-width: 8px 9px 8px 9px; border-image: url('../assets/ui/hpbar_elite.png') 58 65 58 65 stretch; }
 .enemy .bar.t-boss { width: 154px; height: 22px; border-width: 7px 11px 7px 18px; border-image: url('../assets/ui/hpbar_boss.png') 49 77 49 132 stretch; }
 .enemy-hp { font-size: 11.5px; color: #9c8f7a; }
-.mid-line { flex: none; min-height: 18px; text-align: center; padding: 0 12px; }
+.mid-line { flex: none; min-height: 18px; text-align: center; padding: 0 12px; position: relative; z-index: 2; }
 .last-result { font-size: 12px; color: #e8b64b; }
 .last-result b { font-size: 14px; }
 
@@ -404,6 +405,7 @@ body {
 /* ---------- 전투: 주사위 ---------- */
 .dice-zone {
   flex: none; display: flex; justify-content: center; gap: 8px; padding: 8px 12px 4px;
+  position: relative; z-index: 2; /* v0.55: 넘쳐 내려온 적 그림 위로 */
 }
 .die {
   width: 62px; height: 70px; border-radius: 13px;
