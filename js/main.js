@@ -493,7 +493,8 @@ function drawMapLinks() {
   const { edges } = run.map;
   const btns = {};
   app.querySelectorAll('.map-node2').forEach(b => { btns[`${b.dataset.f}:${b.dataset.i}`] = b; });
-  const center = b => ({ x: b.offsetLeft + b.offsetWidth / 2, y: b.offsetTop + 20 });
+  // 노드는 translate(-50%, -20px)로 그려지므로 시각적 아이콘 중심 = (offsetLeft, offsetTop)
+  const center = b => ({ x: b.offsetLeft, y: b.offsetTop });
   const parts = [];
   edges.forEach((fl, f) => fl.forEach((tos, i) => tos.forEach(j => {
     const a = btns[`${f}:${i}`], b = btns[`${f + 1}:${j}`];
@@ -503,7 +504,7 @@ function drawMapLinks() {
     const trodden = run.path[f] === i && run.path[f + 1] === j;
     const active = f === run.floor - 1 && i === run.pos; // 지금 위치에서 뻗는 길
     const first = run.floor === 0 && f === 0 ? false : active;
-    parts.push(`<path d="M${p1.x},${p1.y - 8} Q${mx},${my} ${p2.x},${p2.y + 10}"
+    parts.push(`<path d="M${p1.x},${p1.y - 24} Q${mx},${my} ${p2.x},${p2.y + 24}"
       class="ink ${trodden ? 'ink-done' : first ? 'ink-next' : ''}"/>`);
   })));
   svg.innerHTML = parts.join('');
