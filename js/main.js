@@ -121,11 +121,13 @@ function enemyArtHtml(e) {
     ? `<img class="enemy-art enemy-art-img" src="assets/enemies/${e.defId}.png" alt="" draggable="false">`
     : `<span class="enemy-art">${e.art}</span>`;
 }
+// v0.56: 인물은 무대를 꽉 채우게(크롭 허용), 사물은 형태 보존(전체 표시)
+const NPC_PERSON = new Set(['peddler', 'dwarf', 'redhood']);
 function npcArtHtml(npc) {
   const f = NPC_ART[npc.name];
-  return f
-    ? `<img class="npc-art npc-art-img" src="assets/npc/${f}.png" alt="" draggable="false">`
-    : `<span class="npc-art">${npc.art}</span>`;
+  if (!f) return `<span class="npc-art">${npc.art}</span>`;
+  const kind = NPC_PERSON.has(f) ? '' : ' obj';
+  return `<img class="npc-art npc-art-img${kind}" src="assets/npc/${f}.png" alt="" draggable="false">`;
 }
 
 // ---------- 대화 이벤트 화면 ----------
