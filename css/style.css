@@ -49,22 +49,19 @@ body {
 /* ---------- 타이틀 ---------- */
 .title-screen { align-items: center; justify-content: center; gap: 12px; padding: 24px; }
 .title-art { font-size: 40px; }
+.logo { width: min(330px, 86%); filter: drop-shadow(0 0 26px rgba(201, 48, 47, .28)); } /* v0.28 로고 아트 */
 .title-screen h1 { font-size: 42px; letter-spacing: 6px; color: #c9302f; text-shadow: 0 0 24px rgba(201, 48, 47, .35); }
 .subtitle { color: #9c8f7a; margin-bottom: 10px; }
 .hint { font-size: 11.5px; color: #6f6353; }
 
 /* ---------- 맵: 양피지 ---------- */
 .map-scroll { flex: 1; overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; }
+/* v0.28: 낡고 해진 다크 양피지 (bg_map) */
 .map-scroll.parchment {
   margin: 10px 12px; border-radius: 6px;
-  background:
-    radial-gradient(ellipse at 18% 22%, rgba(122, 92, 50, .16), transparent 42%),
-    radial-gradient(ellipse at 82% 64%, rgba(122, 92, 50, .18), transparent 38%),
-    radial-gradient(ellipse at 55% 90%, rgba(95, 65, 32, .14), transparent 34%),
-    radial-gradient(ellipse at 40% 45%, rgba(255, 248, 224, .25), transparent 55%),
-    linear-gradient(158deg, #e8d7ac 0%, #ddc795 48%, #d2ba82 100%);
-  box-shadow: inset 0 0 46px rgba(92, 62, 28, .42), inset 0 0 6px rgba(92, 62, 28, .3), 0 4px 16px rgba(0, 0, 0, .55);
-  color: #4a3423;
+  background: #1a130e url('../assets/bg/bg_map.jpg') center / cover no-repeat;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, .5), 0 4px 16px rgba(0, 0, 0, .55);
+  color: #d9c8a6;
 }
 .map-row { display: flex; align-items: center; gap: 10px; opacity: .3; position: relative; }
 .map-row.next { opacity: 1; }
@@ -105,18 +102,18 @@ body {
 .map-canvas { position: relative; width: 100%; }
 .map-links { position: absolute; inset: 0; pointer-events: none; }
 .map-links .ink {
-  fill: none; stroke: #6a4c33; stroke-width: 2.6; stroke-linecap: round;
-  stroke-dasharray: .5 8; opacity: .35;
+  fill: none; stroke: #d9c8a6; stroke-width: 2.6; stroke-linecap: round;
+  stroke-dasharray: .5 8; opacity: .45; /* v0.28: 다크 양피지 위 밝은 잉크 */
 }
-.map-links .ink-done { opacity: .85; stroke: #4a3423; }
-.map-links .ink-next { opacity: .85; stroke: #a02c25; }
+.map-links .ink-done { opacity: .8; stroke: #e8dcc8; }
+.map-links .ink-next { opacity: .9; stroke: #e05c4b; }
 .map-node2 {
   position: absolute; transform: translate(-50%, -20px);
   display: flex; flex-direction: column; align-items: center; gap: 1px;
   background: none; border: none; padding: 0; width: 66px;
   color: #6a4c33; cursor: default;
 }
-.map-node2 .ico-node { width: 40px; height: 40px; display: block; filter: drop-shadow(1px 2px 2px rgba(60, 35, 15, .4)); }
+.map-node2 .ico-node { width: 42px; height: 42px; display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .55)); }
 .map-node2 small { font-size: 9.5px; font-weight: 700; color: #6a4c33; }
 .map-node2.reachable { cursor: pointer; animation: youBob 1.4s ease-in-out infinite alternate; filter: drop-shadow(0 0 7px rgba(160, 44, 37, .7)); }
 .map-node2.reachable small { color: #a02c25; }
@@ -128,7 +125,7 @@ body {
 .you-marker.n2 { position: absolute; top: -15px; right: 2px; font-size: 18px; animation: youBob 1.6s ease-in-out infinite alternate; }
 .start-label.n2 {
   position: absolute; left: 50%; transform: translateX(-50%);
-  font-size: 12px; color: #6a4c33; font-weight: 700; font-style: italic; white-space: nowrap;
+  font-size: 12px; color: #b9a67f; font-weight: 700; font-style: italic; white-space: nowrap;
 }
 
 .you-marker {

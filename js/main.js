@@ -86,8 +86,7 @@ function showTitle() {
   app.innerHTML = '';
   app.append(h(`
     <div class="screen title-screen">
-      <div class="title-art">🌲🎲🌲</div>
-      <h1>REDHOOD</h1>
+      <img class="logo" src="assets/ui/logo.png" alt="REDHOOD" draggable="false">
       <p class="subtitle">빨간망토의 모험 — 주사위판</p>
       ${hasSave() ? `<button class="btn primary" id="continue-btn">이어하기</button>` : ''}
       <button class="btn primary" id="start-btn">숲으로 들어간다</button>
@@ -442,7 +441,7 @@ function showMap() {
     return `<button class="map-node2 ${state} ${nd.type === 'boss' ? 'boss-node' : ''}" data-f="${f}" data-i="${i}"
       style="left:${x}%;top:${y}px" ${state === 'reachable' ? '' : 'disabled'}
       aria-label="${NODE_META[nd.type].label}">
-      ${NODE_META[nd.type].icon}
+      ${ico('doodle_' + nd.type, 'ico-node')}
       ${isCur ? '<span class="you-marker n2">🧣</span>' : ''}
     </button>`;
   }).join('')).join('');
@@ -698,12 +697,12 @@ function renderBattle(opts = {}) {
     setTimeout(restoreSheetScroll, 160);
   }
 
-  // 주사위
+  // 주사위 — v0.28: 탭 시 전체 재렌더 대신 제자리 갱신 (이미지 재생성 깜빡임 제거)
   app.querySelectorAll('.die').forEach(el => {
     el.addEventListener('click', () => {
       if (busy || !battle.rolled) return;
       toggleHold(battle, parseInt(el.dataset.idx, 10));
-      renderBattle();
+      updateDiceMarks();
     });
   });
   // 굴림 / 리롤
@@ -744,10 +743,34 @@ function renderBattle(opts = {}) {
     addLongPress(el, () => showCategoryInfo(catId, variantId));
     el.addEventListener('click', () => {
       if (busy || el.dataset.locked === '1') return;
-      if (selectedCat !== key) { selectedCat = key; renderBattle(); return; }
+      if (selectedCat !== key) { selectedCat = key; updateSheetSelection(); return; } // v0.28: 제자리 갱신
       tryConfirm(catId, variantId, targetUid);
     });
   });
+}
+
+// v0.28: 재렌더 없는 제자리 갱신 — 주사위 마킹 상태
+function updateDiceMarks() {
+  app.querySelectorAll('.die').forEach(el => {
+    const i = parseInt(el.dataset.idx, 10);
+    const d = battle.dice[i];
+    if (d.confused) return; // 혼란 주사위는 상태 불변 (아이콘 유지)
+    const marked = battle.rolled && !d.held;
+    el.classList.toggle('mark-reroll', marked);
+    const sm = el.querySelector('small');
+    if (sm) sm.textContent = marked ? '다시' : '';
+  });
+  const rb = document.getElementById('reroll-btn');
+  if (rb) rb.disabled = battle.rollsLeft <= 0 || battle.await || battle.dice.every(d => d.held);
+}
+
+// v0.28: 재렌더 없는 제자리 갱신 — 족보 선택 강조
+function updateSheetSelection() {
+  app.querySelectorAll('.sheet-row').forEach(el => {
+    el.classList.toggle('selected', `${el.dataset.cat}:${el.dataset.variant}` === selectedCat);
+  });
+  const hint = app.querySelector('.hint-line');
+  if (hint) hint.textContent = '한 번 더 탭하면 확정';
 }
 
 // ---------- 적 행동 상세 (치트): 적 길게 눌러 예고 행동의 실제 내용 확인 — ❓ 의문도 공개 ----------
