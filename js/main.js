@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.85'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.86'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -487,6 +487,15 @@ const NODE_META = {
 
 // v0.26: 슬더스식 분기 지도 — 양피지 위 점선 잉크 길 + 메달 도장 노드
 let mapResizeObs = null; // v0.29: 캔버스 크기 변화 시 잉크길 재작도 (노드-선 어긋남 근본 해결)
+// v0.86: 보스 노드는 테마별 전용 낙서 아이콘을 쓴다 — 보스만 보고도 어느 구역인지 알 수 있게.
+// 자산이 준비된 보스만 여기에 추가하면 자동 교체되고, 없으면 공용 보스 낙서로 표시된다.
+const BOSS_ICON_READY = new Set([]);
+function nodeDoodle(type) {
+  if (type !== 'boss') return 'doodle_' + type;
+  const bossId = run && run.act <= 3 ? themeOf(run).boss : null;
+  return bossId && BOSS_ICON_READY.has(bossId) ? `doodle_boss_${bossId}` : 'doodle_boss';
+}
+
 // v0.70: 좌표 계산 제거. 층=행, 열=최대 4칸인 표로 배치하고 브라우저가 정한 위치를 읽어 잇는다.
 const MAP_COLS = 4;
 function showMap() {
@@ -509,7 +518,7 @@ function showMap() {
       return `<button class="map-node2 ${state} ${isBoss ? 'boss-node' : ''}" data-f="${f}" data-i="${i}"
         style="${col}" ${state === 'reachable' ? '' : 'disabled'}
         aria-label="${NODE_META[nd.type].label}">
-        ${ico('doodle_' + nd.type, 'ico-node')}
+        ${ico(nodeDoodle(nd.type), 'ico-node')}
       </button>`;
     }).join('');
     return `<div class="map-row2">${cells}</div>`;
@@ -517,10 +526,10 @@ function showMap() {
   app.innerHTML = '';
   app.append(h(`
     <div class="screen map-screen">
-      <header class="topbar">
-        <span>${themeOf(run).icon} ${run.act}막 · ${esc(themeOf(run).name)} ${run.floor}/${F}</span>
+      <header class="topbar map-top">
+        <button class="btn ghost tiny" id="abandon-btn">런 포기</button>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
-        <span>🪙${run.coins} <span class="hp">❤️ ${run.hp}/${run.maxHp}</span></span>
+        <span class="coin-slot">🪙${run.coins}</span>
       </header>
       <div class="map-scroll parchment">
         <div class="map-grid">
@@ -528,10 +537,14 @@ function showMap() {
           ${rowsHtml}
         </div>
       </div>
-      <footer class="bottombar">
-        <button class="btn ghost" id="bag-btn">🎲 가방</button>
-        <button class="btn ghost" id="abandon-btn">런 포기</button>
-      </footer>
+      <div class="player-bar map-foot">
+        <button class="btn ghost tiny" id="bag-btn">🎲 가방</button>
+        <div class="hp-gauge">
+          <div class="hp-fill" style="width:${Math.max(0, run.hp / run.maxHp * 100)}%"></div>
+          <span class="hp-text">${run.hp} / ${run.maxHp}</span>
+        </div>
+        <span class="pb-side"></span>
+      </div>
     </div>`));
   // 배치가 끝난 뒤 실제 위치를 읽어 작도. 크기가 변하면 (주소창 접힘·회전·폰트 로드) 다시 그린다.
   drawMapLinks();
@@ -1176,11 +1189,14 @@ function playAttackSequence() {
         const ez = app.querySelector('.enemy-zone');
         if (ez) {
           const sRect = screen.getBoundingClientRect();
+          const arts = [...ez.querySelectorAll('.enemy-art')].map(a => a.getBoundingClientRect()).filter(r => r.height);
           const r = ez.getBoundingClientRect();
+          const cx = arts.length ? arts.reduce((s2, a) => s2 + a.left + a.width / 2, 0) / arts.length : r.left + r.width / 2;
+          const cy = arts.length ? arts.reduce((s2, a) => s2 + a.top + a.height / 2, 0) / arts.length : r.top + r.height * 0.6;
           const boom = document.createElement('div');
           boom.className = 'explosion';
-          boom.style.left = `${r.left + r.width / 2 - sRect.left}px`;
-          boom.style.top = `${r.top + r.height * 0.6 - sRect.top}px`;
+          boom.style.left = `${cx - sRect.left}px`;
+          boom.style.top = `${cy - sRect.top}px`;
           screen.appendChild(boom);
           setTimeout(() => boom.remove(), 480);
         }
@@ -1230,10 +1246,24 @@ function playPlayerHitFx(dmg) {
 }
 
 // 족보별 명중 이펙트 — 어려운 족보일수록 화려하게
+// v0.86: 이펙트 기준점을 몬스터 '그림'의 한가운데로 맞춘다.
+// 버튼 상자에는 예고·이름·체력바가 함께 들어 있고 그림은 아래로 넘쳐 내려가 있어서,
+// 상자 기준 50%로 치면 베기와 숫자가 몬스터 머리 위쪽에서 터졌다.
+function setFxPivot(el) {
+  const art = el.querySelector('.enemy-art');
+  if (!art) return;
+  const er = el.getBoundingClientRect();
+  const ar = art.getBoundingClientRect();
+  if (!ar.height) return;
+  el.style.setProperty('--fx-x', `${Math.round(ar.left - er.left + ar.width / 2)}px`);
+  el.style.setProperty('--fx-y', `${Math.round(ar.top - er.top + ar.height / 2)}px`);
+}
+
 function playHitEffects(hits, fx = 'slash') {
   for (const hit of hits) {
     const el = app.querySelector(`.enemy[data-uid="${hit.uid}"]`);
     if (!el) continue;
+    setFxPivot(el);
     el.classList.add('hit');
     const cleanup = [];
     const addSlash = (cls, delay = 0) => setTimeout(() => {

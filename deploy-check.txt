@@ -1,1 +1,1 @@
-deploy=20260807T093500Z v0.85 maprules
+deploy=20260807T094634Z v0.86 fxpivot
