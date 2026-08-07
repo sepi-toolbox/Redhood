@@ -467,6 +467,21 @@ function rollSurgeTurn(from, range) {
 }
 function chooseMove(enemy, turn = 1) {
   const def = DB.enemyById[enemy.defId];
+  // v0.75 연계기: 방금 쓴 기술에 followUp이 걸려 있으면 확률에 따라 다음 기술이 확정된다.
+  //   "moves.stalk.followUp": { "move": "pounce", "chance": 0.7 }  (배열로 여러 후보도 가능)
+  //   확정된 연계는 minTurn·강화 행동보다 우선한다 — 말 그대로 무조건 이어진다.
+  const prev = enemy.nextMove;
+  if (prev && prev.followUp && !prev.chained) {
+    const list = Array.isArray(prev.followUp) ? prev.followUp : [prev.followUp];
+    for (const fu of list) {
+      const target = def.moves[fu.move];
+      if (!target) continue;
+      if (target.minTurn > turn) continue;   // 후반 전용 기술은 연계로도 앞당겨지지 않는다
+      if (rng.next() >= (fu.chance != null ? fu.chance : 1)) continue;
+      enemy.nextMove = { id: fu.move, chained: true, ...def.moves[fu.move] };
+      return;
+    }
+  }
   const sc = DB.acts.surge;
   if (sc && def.surgeMove && !enemy.final) {
     if (enemy.nextSurgeTurn == null) enemy.nextSurgeTurn = rollSurgeTurn(0, sc.firstTurn);

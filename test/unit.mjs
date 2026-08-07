@@ -140,7 +140,9 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     }
   }
   eq('첫 강화 행동은 4턴 이전에 없음', Math.min(...firsts) >= 4, true);
-  eq('첫 강화 행동은 6턴을 넘기지 않음', Math.max(...firsts) <= 6, true);
+  // 연계가 걸린 턴에는 강화가 한 턴 밀릴 수 있다 (그래도 7턴은 넘지 않는다)
+  eq('첫 강화 행동은 7턴을 넘기지 않음', Math.max(...firsts) <= 7, true);
+  eq('첫 강화 대부분은 4~6턴', firsts.filter(t => t <= 6).length / firsts.length > 0.85, true);
   eq('첫 강화 턴이 매번 같지는 않음', new Set(firsts).size > 1, true);
   // (B) minTurn 기술은 그 전에 등장하지 않는다
   const heavy = Object.entries(DB.enemyById.stray_dog.moves).find(([, m]) => m.minTurn);
@@ -154,6 +156,43 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     }
   }
   eq('minTurn 이전에 최강기 미등장', leaked, 0);
+}
+
+// v0.75: 연계기 — A를 쓰면 확률에 따라 다음 턴 B가 확정된다
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = Math.random;
+  const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+  const def = DB.enemyById.wolf;
+  const [aId, aMv] = Object.entries(def.moves).find(([, m]) => m.followUp);
+  eq('보스에 연계기가 설정됨', !!aMv.followUp.move, true);
+  let seen = 0, chained = 0, wrong = 0, doubleChain = 0;
+  for (let n = 0; n < 300; n++) {
+    const b = mk('wolf'); const e = b.enemies[0];
+    let prevChained = false;
+    for (let t = 1; t <= 14; t++) {
+      const wasA = e.nextMove.id === aId;
+      // 연계 대상이 후반 전용이면 그 전 턴은 발동률 계산에서 제외한다
+      const unlocked = !(def.moves[aMv.followUp.move].minTurn > t + 1);
+      b.await = 'enemy'; eng.enemyPhase(b);
+      if (wasA && unlocked) { seen++; if (e.nextMove.chained) { chained++; if (e.nextMove.id !== aMv.followUp.move) wrong++; } }
+      if (prevChained && e.nextMove.chained) doubleChain++;
+      prevChained = !!e.nextMove.chained;
+    }
+  }
+  const rate = chained / seen;
+  eq('연계 대상이 정확함', wrong, 0);
+  eq('연계 발동률이 설정값 근처', Math.abs(rate - aMv.followUp.chance) < 0.06, true);
+  eq('후반 전용 기술은 연계로도 앞당겨지지 않음',
+    (() => { let leak = 0;
+      for (let n = 0; n < 200; n++) { const b = mk('wolf'); const e = b.enemies[0];
+        for (let t = 1; t < def.moves[aMv.followUp.move].minTurn; t++) {
+          if (e.nextMove.id === aMv.followUp.move) leak++;
+          b.await = 'enemy'; eng.enemyPhase(b); } }
+      return leak; })(), 0);
+  eq('연계가 무한히 이어지지 않음', doubleChain, 0);
 }
 
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
