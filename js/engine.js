@@ -459,27 +459,48 @@ function currentPattern(enemy) {
   return def.phases[idx].pattern;
 }
 
+// v0.74 트랙 A: 몬스터는 4~6턴마다 한 번 자기 결에 맞는 '힘을 끌어올리는 행동'을 한다.
+// 첫 발동 턴도 4~6 사이로 흔들어 매번 같은 턴에 오지 않게 한다. 예고에 그대로 보인다.
+function rollSurgeTurn(from, range) {
+  const [lo, hi] = range;
+  return from + lo + Math.floor(rng.next() * (hi - lo + 1));
+}
 function chooseMove(enemy, turn = 1) {
   const def = DB.enemyById[enemy.defId];
+  const sc = DB.acts.surge;
+  if (sc && def.surgeMove && !enemy.final) {
+    if (enemy.nextSurgeTurn == null) enemy.nextSurgeTurn = rollSurgeTurn(0, sc.firstTurn);
+    if (turn >= enemy.nextSurgeTurn) {
+      enemy.nextSurgeTurn = rollSurgeTurn(turn, sc.interval);
+      enemy.nextMove = { id: '__surge', surging: true, ...def.surgeMove };
+      return;
+    }
+  }
   const st = enemy.patternState;
   st.count = (st.count || 0) + 1;
   // 계몽 패턴: 3번째 행동마다 강력한 계몽 기술 사용
   if (enemy.enlightened && def.enlightenedMove && st.count % 3 === 0) {
     enemy.nextMove = { id: '__enlightened', ...def.enlightenedMove };
-    applyRage(enemy, turn);
     return;
   }
   const pat = currentPattern(enemy);
   let moveId;
+  // v0.74 트랙 B: minTurn이 붙은 기술은 그 턴 전에는 아예 나오지 않는다 (긴 싸움에서만 보는 수)
+  const unlocked = (id) => !(def.moves[id] && def.moves[id].minTurn > turn);
   if (pat.mode === 'sequence') {
-    moveId = pat.order[st.index % pat.order.length];
+    const order = pat.order.filter(unlocked);
+    const use = order.length ? order : pat.order;
+    moveId = use[st.index % use.length];
     st.index += 1;
   } else {
     const entries = Object.entries(pat.weights).filter(([id]) => {
+      if (!unlocked(id)) return false;
       if (!pat.noRepeat) return true;
       const recent = st.recent.slice(-(pat.noRepeat - 1));
       return !(recent.length === pat.noRepeat - 1 && recent.every(r => r === id));
     });
+    if (entries.length === 0) entries.push(...Object.entries(pat.weights).filter(([id]) => unlocked(id)));
+    if (entries.length === 0) entries.push(...Object.entries(pat.weights));
     const total = entries.reduce((s, [, w]) => s + w, 0);
     let roll = rng.next() * total;
     moveId = entries[entries.length - 1][0];
@@ -487,25 +508,6 @@ function chooseMove(enemy, turn = 1) {
     st.recent.push(moveId);
   }
   enemy.nextMove = { id: moveId, ...def.moves[moveId] };
-  applyRage(enemy, turn);
-}
-
-// v0.73: 격노 — 기준 턴을 넘기면 모든 몬스터가 자기 행동에 '힘 올리기'를 얹는다.
-// 몰래 세지는 게 아니라 예고(의도)에 💪와 '격노'가 그대로 보인다.
-// 일반은 6턴, 정예·보스는 8턴부터 (평균 전투 4~5턴이라 짧은 싸움은 영향 없음).
-function applyRage(enemy, turn) {
-  const cfg = DB.acts.rage;
-  if (!cfg || enemy.final) return;                 // 최종 보스는 자체 escalation 사용
-  const from = cfg.fromTurn[enemy.tier];
-  if (!from || turn < from) return;
-  const amount = cfg.amount[enemy.tier] || 1;
-  const mv = enemy.nextMove;
-  // 이미 강화가 붙은 기술이면 수치만 더한다 (💪가 두 번 뜨지 않게)
-  const had = mv.effects.some(e => e.op === 'empower');
-  const effects = had
-    ? mv.effects.map(e => (e.op === 'empower' ? { ...e, amount: e.amount + amount } : e))
-    : [...mv.effects, { op: 'empower', amount }];
-  enemy.nextMove = { ...mv, name: `${cfg.name} · ${mv.name}`, raging: true, effects };
 }
 
 // 의도 표기 (v0.11): ⚔️공격 / 🛡방어 / 🌀혼란 / 💪강화 / 💚치료 / ❓의문 — 혼합은 병기
