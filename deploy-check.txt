@@ -1,1 +1,1 @@
-deploy=20260807T005106Z v0.68 fixedzone
+deploy=20260807T010007Z v0.69 trollsize
