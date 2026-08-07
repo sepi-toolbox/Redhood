@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.94'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.95'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -197,7 +197,8 @@ function rowIcon(inner) {
 // 자산이 들어온 변형만 여기에 추가하면 그 줄만 전용 판으로 바뀌고, 나머지는 기본 종이 + 능력 아이콘으로 남는다.
 // 규격은 기본 paper_row와 동일(800x212, 9-슬라이스 55 92)이라 CSS는 그림만 갈아끼운다.
 const COMBO_PLATE_READY = new Set(['instinct', 'clasped_hands', 'judgment_night', 'hunt_drive', 'triple_axe', 'twin_sisters',
-  'whisper', 'red_shoes', 'two_moons', 'woodsman_breath', 'heavy_blow']);
+  'whisper', 'red_shoes', 'two_moons', 'woodsman_breath', 'heavy_blow',
+  'cottage', 'windpath', 'four_fangs', 'hearth', 'moonpath']);
 const COMBO_ICON_READY = new Set();
 const ABILITY_ICON = {
   strength: 'status_strength', focus: 'status_focus', regen: 'status_regen',
