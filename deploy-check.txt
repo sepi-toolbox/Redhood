@@ -1,1 +1,1 @@
-deploy=20260807T092430Z v0.84 mapclean
+deploy=20260807T093500Z v0.85 maprules
