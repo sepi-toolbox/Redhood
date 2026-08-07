@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.96'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.97'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -198,14 +198,16 @@ function rowIcon(inner) {
 // 규격은 기본 paper_row와 동일(800x212, 9-슬라이스 55 92)이라 CSS는 그림만 갈아끼운다.
 const COMBO_PLATE_READY = new Set(['instinct', 'clasped_hands', 'judgment_night', 'hunt_drive', 'triple_axe', 'twin_sisters',
   'whisper', 'red_shoes', 'two_moons', 'woodsman_breath', 'heavy_blow',
-  'cottage', 'windpath', 'four_fangs', 'hearth', 'moonpath']);
+  'cottage', 'windpath', 'four_fangs', 'hearth', 'moonpath',
+  'blood_moon', 'storm_run']);
 // v0.96: 판마다 양 끝 장식의 폭이 다르다. 테두리 폭을 17px로 고정해두면
 // 장식이 넓은 판일수록 좌우로 짓눌린다(할머니의 오두막은 원본 대비 62%까지 찌그러졌다).
 // 그래서 판별로 '원본 장식 폭 ÷ 원본 높이 × 줄 높이(45)'를 계산해 테두리 폭을 따로 준다.
 // 값이 없는 판은 20px — 비례 절단의 최소치(45 × 92/212)와 같다.
 const PLATE_EDGE = {
-  cottage: 27, instinct: 27, judgment_night: 26, moonpath: 26, hearth: 25,
-  hunt_drive: 23, windpath: 22, four_fangs: 22, twin_sisters: 21, red_shoes: 21,
+  judgment_night: 30, cottage: 27, instinct: 27, moonpath: 26, hearth: 25,
+  hunt_drive: 23, blood_moon: 23, windpath: 22, four_fangs: 22, twin_sisters: 21,
+  red_shoes: 21, storm_run: 21,
 };
 const plateEdge = (id) => PLATE_EDGE[id] || 20;
 const COMBO_ICON_READY = new Set();
