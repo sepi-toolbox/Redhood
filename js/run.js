@@ -201,13 +201,18 @@ export function applyEventEffects(run, effects) {
 // ---------- 맵 (v0.26: 슬더스식 분기 그래프) ----------
 // 무작위 행보(walk) 여러 개를 아래→위로 그어 골격을 만들고, 겹치는 칸은 합친다.
 // floors[f] = [{type, lane}...] (lane 오름차순), edges[f][i] = 다음 층에서 갈 수 있는 노드 인덱스들
-export const MAP_LANES = 5;
+// v0.70: 열은 최대 4개로 고정. 좌표는 찍지 않고 표(그리드)로 배치하므로
+//        여기서는 "몇 층의 몇 번 열에 무엇이 있는가"와 연결만 정한다.
+export const MAP_LANES = 4;
 export function generateMap(enlight = 0) {
   const cfg = DB.act1.map;
   const F = cfg.floors;                       // 마지막 층 = 보스 (단일)
   const laneSet = Array.from({ length: F - 1 }, () => new Set());
   const edgePairs = new Set();                // "f:laneA>laneB" (f = 층 인덱스)
-  const starts = [0, 1, 2, 3, 4].sort(() => rng.next() - 0.5).slice(0, 4);
+  // 갈래 수를 3~4로 흔들고 시작 열도 매번 새로 뽑는다 (겹치면 그만큼 1층이 좁아진다)
+  const walkCount = 3 + Math.floor(rng.next() * 2);
+  const starts = [];
+  for (let k = 0; k < walkCount; k++) starts.push(Math.floor(rng.next() * MAP_LANES));
   for (const s of starts) {
     let lane = s;
     for (let f = 0; f < F - 1; f++) {
@@ -230,7 +235,7 @@ export function generateMap(enlight = 0) {
     }
     floors.push(nodes);
   }
-  floors.push([{ type: cfg.fixed[String(F)] || 'boss', lane: 2 }]); // 보스 층
+  floors.push([{ type: cfg.fixed[String(F)] || 'boss', lane: 1 }]); // 보스 층 (표에서는 전체 폭 가운데)
   // 간선 인덱스화
   const idxOf = (f, lane) => floors[f].findIndex(nd => nd.lane === lane);
   const edges = floors.map(fl => fl.map(() => []));
@@ -247,7 +252,6 @@ export function generateMap(enlight = 0) {
   return { floors, edges };
 }
 
-// 지금 위치에서 갈 수 있는 다음 층 노드 인덱스들
 export function reachableNodes(run) {
   if (run.floor === 0) return run.map.floors[0].map((_, i) => i);
   if (run.floor >= run.map.floors.length) return [];

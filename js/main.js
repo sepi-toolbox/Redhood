@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.69'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.70'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -475,36 +475,36 @@ const NODE_META = {
 };
 
 // v0.26: 슬더스식 분기 지도 — 양피지 위 점선 잉크 길 + 메달 도장 노드
-const MAP_ROW_H = 78, MAP_PAD_TOP = 26, MAP_PAD_BOT = 40;
 let mapResizeObs = null; // v0.29: 캔버스 크기 변화 시 잉크길 재작도 (노드-선 어긋남 근본 해결)
-function mapJitter(f, i) { return (((f * 7 + i * 13) % 5) - 2) * 1.1; } // 손그림 흔들림 (결정적)
-function mapNodeXY(canvasH, nd, f, i) {
-  const x = 15 + nd.lane * 17.5 + mapJitter(f, i);          // % (lane 0~4 → 15%~85%)
-  const y = canvasH - MAP_PAD_BOT - f * MAP_ROW_H - MAP_ROW_H / 2; // px (아래가 1층)
-  return { x, y };
-}
+// v0.70: 좌표 계산 제거. 층=행, 열=최대 4칸인 표로 배치하고 브라우저가 정한 위치를 읽어 잇는다.
+const MAP_COLS = 4;
 function showMap() {
   saveRun(run);
-  const { floors, edges } = run.map;
+  const { floors } = run.map;
   const F = floors.length;
-  const canvasH = F * MAP_ROW_H + MAP_PAD_TOP + MAP_PAD_BOT;
   const reach = new Set(run.floor < F ? reachableNodes(run) : []);
-  const nextFloorIdx = run.floor;                            // 다음으로 갈 층 인덱스
+  const nextFloorIdx = run.floor;
   const pathSet = new Set(run.path.map((i, f) => `${f}:${i}`));
-  const nodesHtml = floors.map((fl, f) => fl.map((nd, i) => {
-    const { x, y } = mapNodeXY(canvasH, nd, f, i);
-    const onPath = pathSet.has(`${f}:${i}`);
-    const isCur = run.floor > 0 && f === run.floor - 1 && i === run.pos;
-    const state = f === nextFloorIdx && reach.has(i) ? 'reachable'
-      : onPath ? 'trodden'
-      : f < nextFloorIdx ? 'missed' : 'ahead';
-    return `<button class="map-node2 ${state} ${nd.type === 'boss' ? 'boss-node' : ''}" data-f="${f}" data-i="${i}"
-      style="left:${x}%;top:${y}px" ${state === 'reachable' ? '' : 'disabled'}
-      aria-label="${NODE_META[nd.type].label}">
-      ${ico('doodle_' + nd.type, 'ico-node')}
-      ${isCur ? '<span class="you-marker n2">🧣</span>' : ''}
-    </button>`;
-  }).join('')).join('');
+  // DOM 순서 = 1층부터. 화면에서는 column-reverse로 뒤집혀 아래가 1층이 된다.
+  const rowsHtml = floors.map((fl, f) => {
+    const cells = fl.map((nd, i) => {
+      const onPath = pathSet.has(`${f}:${i}`);
+      const isCur = run.floor > 0 && f === run.floor - 1 && i === run.pos;
+      const state = f === nextFloorIdx && reach.has(i) ? 'reachable'
+        : onPath ? 'trodden'
+        : f < nextFloorIdx ? 'missed' : 'ahead';
+      const isBoss = nd.type === 'boss';
+      const lane = Math.max(0, Math.min(MAP_COLS - 1, nd.lane | 0)); // 옛 저장(5열)도 안전하게
+      const col = isBoss ? `grid-column: 1 / -1;` : `grid-column: ${lane + 1};`;
+      return `<button class="map-node2 ${state} ${isBoss ? 'boss-node' : ''}" data-f="${f}" data-i="${i}"
+        style="${col}" ${state === 'reachable' ? '' : 'disabled'}
+        aria-label="${NODE_META[nd.type].label}">
+        ${ico('doodle_' + nd.type, 'ico-node')}
+        ${isCur ? '<span class="you-marker n2">🧣</span>' : ''}
+      </button>`;
+    }).join('');
+    return `<div class="map-row2">${cells}</div>`;
+  }).reverse().join(''); // 화면에서는 위가 보스, 아래가 1층
   app.innerHTML = '';
   app.append(h(`
     <div class="screen map-screen">
@@ -514,10 +514,10 @@ function showMap() {
         <span>🪙${run.coins} <span class="hp">❤️ ${run.hp}/${run.maxHp}</span></span>
       </header>
       <div class="map-scroll parchment">
-        <div class="map-canvas" style="height:${canvasH}px">
-          <svg class="map-links" width="100%" height="${canvasH}" aria-hidden="true"></svg>
-          ${nodesHtml}
-          <span class="start-label n2" style="top:${canvasH - 16}px">${run.floor === 0 ? '🧣 ' : ''}🌲 숲의 입구</span>
+        <div class="map-grid">
+          <svg class="map-links" aria-hidden="true"></svg>
+          ${rowsHtml}
+          <span class="start-label n2">${run.floor === 0 ? '🧣 ' : ''}🌲 숲의 입구</span>
         </div>
       </div>
       <footer class="bottombar">
@@ -525,13 +525,13 @@ function showMap() {
         <button class="btn ghost" id="abandon-btn">런 포기</button>
       </footer>
     </div>`));
-  // v0.29: 최초 작도는 레이아웃 확정 후 + 이후 크기 변화(주소창 접힘·회전·폰트 로드)마다 재작도
+  // 배치가 끝난 뒤 실제 위치를 읽어 작도. 크기가 변하면 (주소창 접힘·회전·폰트 로드) 다시 그린다.
   drawMapLinks();
   requestAnimationFrame(drawMapLinks);
   if (mapResizeObs) mapResizeObs.disconnect();
   if (window.ResizeObserver) {
     mapResizeObs = new ResizeObserver(() => drawMapLinks());
-    mapResizeObs.observe(app.querySelector('.map-canvas'));
+    mapResizeObs.observe(app.querySelector('.map-grid'));
   }
   app.querySelectorAll('.map-node2:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -546,33 +546,45 @@ function showMap() {
   document.getElementById('abandon-btn').addEventListener('click', () => {
     if (confirm('런을 포기할까요?')) { clearSave(); showTitle(); }
   });
-  // 다음 갈 층이 화면 가운데 오도록 스크롤 (시작은 맨 아래)
   const scroll = app.querySelector('.map-scroll');
   const target = app.querySelector('.map-node2.reachable');
-  scroll.scrollTop = target ? target.offsetTop - scroll.clientHeight / 2 : canvasH;
+  scroll.scrollTop = target ? Math.max(0, target.offsetTop - scroll.clientHeight / 2) : scroll.scrollHeight;
 }
 
 // 노드 실제 좌표를 읽어 점선 잉크 길을 그린다 (지나온 길 진하게, 다음 길 강조)
 function drawMapLinks() {
   const svg = app.querySelector('.map-links');
-  if (!svg) return;
+  const grid = app.querySelector('.map-grid');
+  if (!svg || !grid) return;
   const { edges } = run.map;
   const btns = {};
   app.querySelectorAll('.map-node2').forEach(b => { btns[`${b.dataset.f}:${b.dataset.i}`] = b; });
-  // v0.32: 마진 정렬 — 아이콘 중심 = 요소 좌상단 + (반너비, 20px). transform 무관이라 애니메이션에 안전
-  const center = b => ({ x: b.offsetLeft + b.offsetWidth / 2, y: b.offsetTop + 20 });
+  const gr = grid.getBoundingClientRect();
+  // 브라우저가 실제로 배치한 위치를 그대로 읽는다 — 좌표를 직접 찍지 않으므로 어긋날 수 없다
+  const center = (b) => {
+    const r = b.getBoundingClientRect();
+    return { x: r.left - gr.left + r.width / 2, y: r.top - gr.top + r.height / 2 };
+  };
+  const R = 23; // 아이콘 반지름만큼 물러나서 시작·끝
   const parts = [];
   edges.forEach((fl, f) => fl.forEach((tos, i) => tos.forEach(j => {
     const a = btns[`${f}:${i}`], b = btns[`${f + 1}:${j}`];
     if (!a || !b) return;
     const p1 = center(a), p2 = center(b);
-    const mx = (p1.x + p2.x) / 2 + mapJitter(f, i + j), my = (p1.y + p2.y) / 2;
+    const dx = p2.x - p1.x, dy = p2.y - p1.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const x1 = p1.x + ux * R, y1 = p1.y + uy * R;
+    const x2 = p2.x - ux * R, y2 = p2.y - uy * R;
+    if (len <= R * 2) return;
     const trodden = run.path[f] === i && run.path[f + 1] === j;
-    const active = f === run.floor - 1 && i === run.pos; // 지금 위치에서 뻗는 길
+    const active = f === run.floor - 1 && i === run.pos;
     const first = run.floor === 0 && f === 0 ? false : active;
-    parts.push(`<path d="M${p1.x},${p1.y - 24} Q${mx},${my} ${p2.x},${p2.y + 24}"
+    parts.push(`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"
       class="ink ${trodden ? 'ink-done' : first ? 'ink-next' : ''}"/>`);
   })));
+  svg.setAttribute('width', Math.round(gr.width));
+  svg.setAttribute('height', Math.round(grid.scrollHeight));
   svg.innerHTML = parts.join('');
 }
 

@@ -1,1 +1,1 @@
-deploy=20260807T010007Z v0.69 trollsize
+deploy=20260807T020255Z v0.70 gridmap
