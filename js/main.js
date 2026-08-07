@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.68'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.69'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -695,7 +695,7 @@ function renderBattle(opts = {}) {
       </header>
       <div class="enemy-zone ${multi ? 'multi' : ''}">
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
-          <button class="enemy ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
+          <button class="enemy t-${e.tier} ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
             ${/* v0.52: 정보(의도·이름·체력바)는 머리 위, 그림은 크게 아래 */ ''}
             <span class="target-pin">▼</span>
             <span class="intent">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
