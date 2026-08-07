@@ -112,7 +112,7 @@ async function playTurn(page) {
       continue;
     }
     // v0.65: 전리품 목록 — 재화 → 묶음(모달에서 하나 선택) → 나가기
-    if (await page.locator('.loot-overlay').count()) {
+    if (await page.locator('.loot-list').count()) {
       const coin = page.locator('.loot-row[data-act="coins"]');
       if (await coin.count()) { await coin.click(); await page.waitForTimeout(120); continue; }
       const group = page.locator('.loot-row[data-act="group"]');

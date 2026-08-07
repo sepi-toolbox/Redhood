@@ -1,1 +1,1 @@
-deploy=20260807T003549Z v0.66 lootoverlay
+deploy=20260807T004359Z v0.67 lootinsheet
