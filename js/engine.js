@@ -87,6 +87,12 @@ function hasRelic(relics, type) { return relics.some(r => r.hook.type === type);
 
 // ---------- 턴 ----------
 function startTurn(battle, first = false) {
+  // v0.71: 상태이상은 매 턴 1스택씩 빠진다. 단 "이번 턴에 새로 붙은 것"은 깎지 않는다.
+  //        (집중 1을 얻으면 다음 턴에 리롤을 한 번 받고 그 턴 끝에 사라진다 — 효과를 못 보는 일이 없다)
+  battle.decaySnap = {
+    buffs: { ...battle.buffs },
+    enemies: Object.fromEntries(battle.enemies.map(e => [e.uid, { weak: e.debuffs.weak, vulnerable: e.debuffs.vulnerable }])),
+  };
   if (!first) {
     for (const id of Object.keys(battle.sealed)) {
       battle.sealed[id] -= 1;
@@ -361,6 +367,24 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   return battle.lastResult;
 }
 
+// v0.71: 상태이상 지속시간 — 턴이 끝날 때 스택 1 감소.
+// 이번 턴 시작 시점에 이미 있던 스택만 깎으므로, 이번 턴에 얻은 것은 최소 한 번은 효과를 본다.
+function decayStatuses(battle) {
+  const snap = battle.decaySnap;
+  if (!snap) return;
+  for (const k of ['strength', 'focus', 'regen']) {
+    if (snap.buffs[k] > 0 && battle.buffs[k] > 0) battle.buffs[k] -= 1;
+  }
+  for (const e of battle.enemies) {
+    const es = snap.enemies[e.uid];
+    if (!es) continue;
+    for (const k of ['weak', 'vulnerable']) {
+      if (es[k] > 0 && e.debuffs[k] > 0) e.debuffs[k] -= 1;
+    }
+  }
+  battle.decaySnap = null;
+}
+
 // ---------- 적 페이즈 ----------
 export function enemyPhase(battle) {
   if (battle.over || battle.await !== 'enemy') return;
@@ -410,6 +434,7 @@ export function enemyPhase(battle) {
     chooseMove(e);
   }
   battle.dodgeActive = false;
+  decayStatuses(battle); // v0.71: 한 턴에 한 스택씩 소멸
   // 출혈사 등으로 적이 전멸했으면 승리
   if (!battle.over && aliveEnemies(battle).length === 0) {
     battle.over = true;
