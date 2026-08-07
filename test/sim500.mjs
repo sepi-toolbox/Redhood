@@ -158,7 +158,7 @@ console.log(`전투당 평균 턴: ${avg(stats.turns).toFixed(1)}`);
   const tot = stats.turns.length;
   const keys = Object.keys(h).sort((a, b) => (a === '10+' ? 99 : +a) - (b === '10+' ? 99 : +b));
   console.log('전투 길이 분포: ' + keys.map(k => `${k}턴 ${(h[k] / tot * 100).toFixed(1)}%`).join(' / '));
-  console.log(`격노 구간(6턴 이상) 진입: ${(stats.turns.filter(t => t >= 6).length / tot * 100).toFixed(1)}%`);
+  console.log(`장기전(6턴 이상) 비율: ${(stats.turns.filter(t => t >= 6).length / tot * 100).toFixed(1)}%`);
 }
 console.log(`족보 1회 평균 피해: ${avg(stats.dmg).toFixed(1)} (중앙값 ${med(stats.dmg)})`);
 const top = o => Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,8);

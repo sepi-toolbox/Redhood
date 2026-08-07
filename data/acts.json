@@ -196,17 +196,14 @@
     },
     "atkTrim": 0.9
   },
-  "rage": {
-    "name": "격노",
-    "fromTurn": {
-      "normal": 6,
-      "elite": 8,
-      "boss": 8
-    },
-    "amount": {
-      "normal": 2,
-      "elite": 3,
-      "boss": 4
-    }
+  "surge": {
+    "firstTurn": [
+      4,
+      6
+    ],
+    "interval": [
+      4,
+      6
+    ]
   }
 }

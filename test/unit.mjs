@@ -118,30 +118,42 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('0에서 더 내려가지 않음', b.buffs.strength, 0);
 }
 
-// v0.73: 격노 — 기준 턴 전에는 평소대로, 넘긴 뒤에는 모든 몬스터가 눈에 보이게 힘을 올린다
+// v0.74: 두 트랙 — (A) 4~6턴마다 자기 결에 맞는 강화 행동, (B) 일정 턴 이후에만 나오는 기술
 {
   const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = Math.random; // 위 블록에서 고정해둔 난수를 되돌린다
   const mk = (id) => {
-    const run = { hp: 99999, maxHp: 99999, act: 1, floor: 1, enlight: 0, relics: [],
+    const run = { hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
       dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } };
     return eng.createBattle(run, [id], 'battle');
   };
-  const step = (b, n) => { for (let k = 0; k < n; k++) { b.await = 'enemy'; eng.enemyPhase(b); } };
-  const dog = mk('stray_dog');           // 일반 → 6턴부터
-  eq('일반 1턴은 격노 아님', !!dog.enemies[0].nextMove.raging, false);
-  step(dog, 4);                          // 5턴
-  eq('일반 5턴까지 격노 없음', !!dog.enemies[0].nextMove.raging, false);
-  step(dog, 1);                          // 6턴
-  eq('일반 6턴부터 격노', !!dog.enemies[0].nextMove.raging, true);
-  eq('격노는 강화를 동반', dog.enemies[0].nextMove.effects.some(e => e.op === 'empower'), true);
-  const powerBefore = dog.enemies[0].power;
-  step(dog, 1);
-  eq('격노 후 실제로 강해짐', dog.enemies[0].power > powerBefore, true);
-  const boss = mk('river_hag');          // 보스 → 8턴부터 (유예)
-  step(boss, 6);                         // 7턴
-  eq('보스 7턴까지 격노 없음', !!boss.enemies[0].nextMove.raging, false);
-  step(boss, 1);                         // 8턴
-  eq('보스 8턴부터 격노', !!boss.enemies[0].nextMove.raging, true);
+  eq('모든 몬스터가 고유 강화 행동을 가짐', DB.enemies.every(e => e.surgeMove && e.surgeMove.name), true);
+  eq('강화 행동 이름에 공용 라벨 없음', DB.enemies.every(e => !/격노/.test(e.surgeMove.name)), true);
+  // (A) 첫 발동은 4~6턴 사이, 그 전에는 절대 안 나온다
+  let firsts = [];
+  for (let n = 0; n < 200; n++) {
+    const b = mk('stray_dog');
+    for (let t = 1; t <= 12; t++) {
+      if (b.enemies[0].nextMove.surging) { firsts.push(t); break; }
+      b.await = 'enemy'; eng.enemyPhase(b);
+    }
+  }
+  eq('첫 강화 행동은 4턴 이전에 없음', Math.min(...firsts) >= 4, true);
+  eq('첫 강화 행동은 6턴을 넘기지 않음', Math.max(...firsts) <= 6, true);
+  eq('첫 강화 턴이 매번 같지는 않음', new Set(firsts).size > 1, true);
+  // (B) minTurn 기술은 그 전에 등장하지 않는다
+  const heavy = Object.entries(DB.enemyById.stray_dog.moves).find(([, m]) => m.minTurn);
+  eq('최강기에 minTurn이 붙어 있음', !!heavy, true);
+  let leaked = 0;
+  for (let n = 0; n < 200; n++) {
+    const b = mk('stray_dog');
+    for (let t = 1; t < heavy[1].minTurn; t++) {
+      if (b.enemies[0].nextMove.id === heavy[0]) leaked++;
+      b.await = 'enemy'; eng.enemyPhase(b);
+    }
+  }
+  eq('minTurn 이전에 최강기 미등장', leaked, 0);
 }
 
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
