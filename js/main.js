@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.66'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.67'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -1336,17 +1336,17 @@ function renderLoot() {
     rows.push(lootRowHtml(m.icon, g.label || m.name, `${g.choices.length}개 중 하나를 고른다`, `data-act="group" data-idx="${i}"`));
   });
   rows.push(lootRowHtml('\u{1F6AA}', '나가기', '', 'data-act="exit"'));
-  // v0.66: 전투 화면을 지우지 않고 그 위에 얹는다 — 배경·적·주사위가 그대로 보인다
-  document.getElementById('loot-overlay')?.remove();
-  app.append(h(`
-    <div class="loot-overlay" id="loot-overlay">
-      <div class="loot-panel">
-        <h2 class="loot-title">${esc(lootState.title)}</h2>
-        <div class="loot-list">${rows.join('')}</div>
-      </div>
-    </div>`));
-  const ov = document.getElementById('loot-overlay');
-  ov.querySelectorAll('.loot-row').forEach(el => {
+  // v0.67: 전투 프레임을 그대로 두고 족보 목록 영역 안만 전리품 줄로 바꾼다.
+  //        화면을 덮는 오버레이·전용 화면 금지 (성권 지시).
+  const zone = app.querySelector('.sheet-zone');
+  if (!zone) { lootState.onExit(); return; }
+  app.querySelector('.screen')?.classList.add('loot-mode');
+  zone.classList.remove('dim');
+  zone.classList.add('loot-list');
+  zone.innerHTML = rows.join('');
+  const hint = app.querySelector('.hint-line');
+  if (hint) hint.textContent = lootState.title;
+  zone.querySelectorAll('.loot-row').forEach(el => {
     el.addEventListener('click', () => {
       const act = el.dataset.act;
       if (act === 'coins') {
@@ -1356,7 +1356,6 @@ function renderLoot() {
       } else {
         // 재화는 선택의 여지가 없으므로 안 받고 나가도 손해 보지 않게 자동 정산
         if (lootState.coins > 0) { run.coins += lootState.coins; lootState.coins = 0; }
-        ov.remove();
         lootState.onExit();
       }
     });
