@@ -164,11 +164,6 @@ body {
 .map-node2.trodden { opacity: .85; filter: sepia(.25); }
 .map-node2.missed { opacity: .28; filter: grayscale(.7); }
 .map-node2.ahead { opacity: .85; }
-.you-marker.n2 { position: absolute; top: -14px; right: -6px; font-size: 18px; animation: youBob 1.6s ease-in-out infinite alternate; }
-.start-label.n2 {
-  flex: none; text-align: center; padding: 8px 0 2px;
-  font-size: 12px; color: #b9a67f; font-weight: 700; font-style: italic; white-space: nowrap;
-}
 
 .you-marker {
   flex: none; font-size: 19px;

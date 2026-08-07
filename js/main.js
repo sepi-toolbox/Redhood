@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.83'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.84'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -500,7 +500,6 @@ function showMap() {
   const rowsHtml = floors.map((fl, f) => {
     const cells = fl.map((nd, i) => {
       const onPath = pathSet.has(`${f}:${i}`);
-      const isCur = run.floor > 0 && f === run.floor - 1 && i === run.pos;
       const state = f === nextFloorIdx && reach.has(i) ? 'reachable'
         : onPath ? 'trodden'
         : f < nextFloorIdx ? 'missed' : 'ahead';
@@ -511,7 +510,6 @@ function showMap() {
         style="${col}" ${state === 'reachable' ? '' : 'disabled'}
         aria-label="${NODE_META[nd.type].label}">
         ${ico('doodle_' + nd.type, 'ico-node')}
-        ${isCur ? '<span class="you-marker n2">🧣</span>' : ''}
       </button>`;
     }).join('');
     return `<div class="map-row2">${cells}</div>`;
@@ -528,7 +526,6 @@ function showMap() {
         <div class="map-grid">
           <svg class="map-links" aria-hidden="true"></svg>
           ${rowsHtml}
-          <span class="start-label n2">${run.floor === 0 ? '🧣 ' : ''}🌲 숲의 입구</span>
         </div>
       </div>
       <footer class="bottombar">

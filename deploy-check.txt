@@ -1,1 +1,1 @@
-deploy=20260807T091255Z v0.83 bgbright
+deploy=20260807T092430Z v0.84 mapclean
