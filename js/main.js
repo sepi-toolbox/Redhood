@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.91'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.92'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -452,6 +452,7 @@ function afterBossVictory() {
         <button class="btn primary" id="final-btn">마주한다</button>
       </div>`));
     document.getElementById('final-btn').addEventListener('click', startFinalBattle);
+    prefetch('battle', { kind: 'final' }); // 이 화면에 머무는 동안 최종전 곡을 받아둔다
   }
 }
 
@@ -523,6 +524,10 @@ function showMap() {
   saveRun(run);
   const { floors } = run.map;
   const F = floors.length;
+  // v0.92: 보스 테마는 곡당 0.5MB다. 보스방이 두 층 안으로 들어왔을 때만 미리 받는다.
+  if (run.act <= 3 && run.floor >= F - 2) {
+    prefetch('battle', { act: run.act, kind: 'boss', bossId: themeOf(run).boss });
+  }
   const reach = new Set(run.floor < F ? reachableNodes(run) : []);
   const nextFloorIdx = run.floor;
   const pathSet = new Set(run.path.map((i, f) => `${f}:${i}`));
