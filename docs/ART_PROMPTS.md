@@ -1,6 +1,6 @@
-# REDHOOD 아트 리소스 프롬프트 팩 — v4 (키아트 앵커 체계)
+# REDHOOD 아트 리소스 프롬프트 팩 — v5 (남은 전량)
 
-v4 개정: 키아트 3앵커 체계 확립, 저밀도 템플릿 확정(디테일 과다 방지), 1막·NPC 전원 완료 반영.
+v5 개정: 몬스터 44종 체계로 확장 반영(누락 25종 전량 수록), **키잉 실패 방지 규칙**과 **구도 규칙** 추가(높은 주사위·트롤 사고에서 배운 것), 유물 26종 묘사 전량 작성, 진행 현황 v0.77 기준 갱신.
 
 ## 생성 방식 요약
 
@@ -12,32 +12,33 @@ v4 개정: 키아트 3앵커 체계 확립, 저밀도 템플릿 확정(디테일
 |---|---|
 | 몬스터 | `keyart_wolf` (+ 같은 계열 승인본) |
 | 인물 NPC | `keyart_redhood` + `keyart_peddler` |
-| 사물·정물 | `keyart_stilllife` |
+| 사물·정물·유물 | `keyart_stilllife` |
 | 배경 | `keyart_stilllife` |
 
 키아트 원본: `docs/keyart/` (peddler / wolf / stilllife / redhood)
 
 ---
 
-## 진행 현황
+## 진행 현황 (v0.77 기준)
 
 | 항목 | 상태 |
 |---|---|
-| 키아트 4종 | ✅ 완료 — 모든 생성의 앵커 |
-| 주사위 6면 시트 13종 | ✅ 완료 |
-| UI 아이콘 26종 (상태8·의도6·노드6·무기6) | ✅ 완료 |
-| 지도 낙서 아이콘 6종 | ✅ 완료 |
-| UI 텍스쳐·프레임 11종 | ✅ 완료 |
-| 타이틀 로고 | ✅ 완료 |
-| **1막 몬스터 16종** | ✅ 완료 (전원 저밀도 리마스터) |
-| **NPC·사물 12종** | ✅ 완료 |
-| 2막 보스 3종 | ✅ 완료 |
-| **2막 일반 6 + 정예 3** | ⬜ 대기 — [2] |
-| **3막 15종 + 최종 보스** | ⬜ 대기 — [3] |
-| **배경 11종** | ⬜ 대기 — [4] (현재 전부 숲 배경 임시 사용) |
-| **족보 종이 18종** | ⬜ 대기 — [5] |
-| **유물 26종** | ⬜ 대기 — [6] |
-| 앱 아이콘 | ⬜ 대기 — [7] (맨 마지막) |
+| 키아트 4종 | ✅ |
+| 주사위 6면 시트 13종 | ✅ (높은 주사위 v0.77 재추출) |
+| UI 아이콘 26종 (상태8·의도6·노드6·무기6) | ✅ |
+| 지도 낙서 아이콘 6종 | ✅ |
+| UI 텍스쳐·프레임 11종 | ✅ |
+| 타이틀 로고 | ✅ |
+| NPC·사물 12종 | ✅ |
+| 몬스터 19/44종 | 🔶 25종 대기 — [2] [3] |
+| 배경 11종 | ⬜ 대기 — [4] (현재 전부 숲 배경 임시 사용) |
+| 족보 종이 18종 | ⬜ 대기 — [5] |
+| 줄 UI 원형 아이콘 18종 | ⬜ 대기 — [6] ([5]와 문양 공유) |
+| 유물 26종 | ⬜ 대기 — [7] |
+| 앱 아이콘 | ⬜ 대기 — [8] (맨 마지막) |
+
+**우선순위 제안**: 몬스터 25종 → 배경 11종 → 줄 아이콘 18종 → 족보 종이 18종 → 유물 26종 → 앱 아이콘.
+몬스터와 배경이 화면을 가장 크게 차지하고, 줄 아이콘은 지금 임시 아이콘으로 때우고 있어 체감 개선이 큽니다.
 
 ---
 
@@ -45,8 +46,8 @@ v4 개정: 키아트 3앵커 체계 확립, 저밀도 템플릿 확정(디테일
 
 1. **"transparent background" 금지** — 모델이 분홍 체커보드를 그린다. 대신 `one plain flat very dark brown background — solid color, no gradient, no checkerboard`.
 2. **사실주의 방지 필수** — `NOT photorealistic, NOT 3D`.
-3. **디테일 과다 방지 (v4 핵심)** — `SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter`. "rich painterly texture" 같은 표현은 잔디테일을 부르므로 **쓰지 말 것**.
-4. **아웃라인 강조** — `EXTRA-THICK bold black outlines that clearly separate the creature from the background`. 배경 위에서 실루엣이 살아난다.
+3. **디테일 과다 방지** — `SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter`. "rich painterly texture" 같은 표현은 잔디테일을 부르므로 **쓰지 말 것**.
+4. **아웃라인 강조** — `EXTRA-THICK bold black outlines that clearly separate the creature from the background`.
 5. **비율 오류 방지** — 인간형·동물형에는 `Natural body proportions — do NOT give it an oversized head on a tiny body` 포함. (의도적 기형은 예외로 명시)
 6. **주사위 눈 개수** — `Count the pips carefully` 필수.
 7. **글자 금지** — `No text, no letters, no watermark`. 예외는 로고뿐.
@@ -54,87 +55,74 @@ v4 개정: 키아트 3앵커 체계 확립, 저밀도 템플릿 확정(디테일
 9. **9-슬라이스 판** — `perfectly symmetrical left and right, uniform border thickness` 포함해야 늘려도 안 깨진다.
 10. **비율 명시** — 낱장 Square 1:1 / 시트 Landscape 3:2 / 배경 Portrait 2:3.
 
+### v5에서 추가된 규칙 (최근 사고 기록)
+
+11. **배경과 피사체 색이 겹치면 배경 제거가 실패한다.** 높은 주사위(진홍 벨벳)를 어두운 갈색 배경 위에 그리게 했더니, 주사위의 어두운 붉은 면이 배경으로 오인돼 **6번 눈 하나가 통째로 지워지고 옆면 액자가 잘렸다.**
+    → 피사체가 **어두운 적갈색·흑갈색 계열**이면 배경 지정을 바꾼다:
+    `on one plain flat mid-grey background — solid color, no gradient, no checkerboard`
+    (밝은 회색은 게임 팔레트에 안 쓰이므로 안전하게 분리된다. 배경은 어차피 제거되므로 톤이 튀어도 무방)
+12. **넓은 부속물을 넣으면 본체가 작아 보인다.** 트롤에게 "어깨에 걸친 다리 판자"를 넣었더니 그림 폭의 절반을 판자가 먹어서, 같은 크기로 렌더해도 트롤 몸통이 다른 몬스터보다 작게 보였다.
+    → 몬스터는 **몸통이 화면을 꽉 채우게**: `The creature FILLS the frame edge to edge — no wide props, no large background elements, no empty margin around it.`
+    → 소품은 몸에 붙은 작은 것만. 다리·수레·건물 같은 넓은 구조물 금지.
+13. **가로로 넓은 그림은 손해였지만 v0.69에서 폭 제한을 풀어 해소됨.** 그래도 세로가 긴 구도(서 있는 자세)가 여전히 유리하다. 부유형·수평형이 아니면 **세로로 서 있는 실루엣**을 권장.
+14. **몬스터 렌더 크기는 격에 따라 다르다** — 일반 216px / 정예 234px / 보스 254px. 보스는 더 크게 그려지므로 **디테일을 조금 더 넣어도 되지만**, 규칙 3은 유지.
+
 ### 공통 머리 블록 (몬스터)
 
 ```
-Stylized dark fairytale creature for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, keep it as simple and readable as the attached key art. NOT photorealistic, NOT 3D. Natural body proportions — do NOT give it an oversized head on a tiny body. Square 1:1 image. A single creature, FULL BODY from head to feet, facing slightly left, centered, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. Bold silhouette, readable at 96px. The creature: {묘사}. No text, no letters, no watermark.
+Stylized dark fairytale creature for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, keep it as simple and readable as the attached key art. NOT photorealistic, NOT 3D. Natural body proportions — do NOT give it an oversized head on a tiny body. Square 1:1 image. A single creature, FULL BODY from head to feet, facing slightly left, centered, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. The creature FILLS the frame edge to edge — no wide props, no large background elements, no empty margin around it. Bold silhouette, readable at 96px. The creature: {묘사}. No text, no letters, no watermark.
 ```
 
 - 정예 접미: `More imposing, subtle red accents.`
 - 보스 접미: `A grand menacing boss, faint red aura.`
 - 부유형(불꽃·유령·눈알)은 `FULL BODY from head to feet` → `FULL BODY, floating`
 - 비인간형(덤불·촛불떼 등)은 비율 문구 생략 가능
+- **피사체가 어두운 적갈색 계열이면** `very dark brown background` → `mid-grey background` (규칙 11)
 
 ---
 
-## [1] 1막 몬스터 ✅ (16종 완료 — 재생성 시 참고)
+## [2] 2막 몬스터 — 늪·안개숲·무덤 (9종 대기)
 
-| 이름 | id | 묘사 |
-|---|---|---|
-| 들개 | stray_dog | `a mangy stray dog, ribs showing, bared yellow teeth, tail low` |
-| 굶주린 까마귀 | crow | `a starving ragged black crow with one hungry gold-ringed eye` |
-| 도깨비불 | will_o_wisp | `a mischievous pale-blue flame with a faint grinning face` (floating) |
-| 숲거미 | forest_spider | `a plump forest spider with a birch-bark patterned belly, thin angular legs` |
-| 가시덤불 | thorn_bush | `a living bramble bush with one withered rose for a head, two thorny vine arms` |
-| 옹이 골렘 | twig_golem | `a humanoid golem of twisted twigs with one glowing amber knothole eye in its chest` |
-| 개울 정령 | brook_sprite | `a small sprite made of a standing splash of creek water with two pebble eyes` |
-| 거머리 | leech | `a fat rearing leech with a pale segmented belly and a round sucker mouth` |
-| 쥐떼 | rat_swarm | `a writhing mound of black rats forming one shape, a few small red eyes glinting` |
-| 살아있는 빗자루 | living_broom | `an old straw broom come alive, bent like a hunched crone, straw bristling like wild hair` |
-| 우두머리 들개 (정예) | alpha_dog | `a huge scarred alpha hound with a collar of thorns` |
-| 늙은 강꼬치 (정예) | old_pike | `an ancient monstrous pike fish, hook scars around its jaw` (hovering as if underwater) |
-| 지하실의 무언가 (정예) | cellar_thing | `a lanky shadow creature with intentionally too-long arms and fingers, two pale glowing eyes, its lower body fading into darkness` |
-| 늑대 (보스) | wolf | `a massive black fairytale wolf, blood-red eyes, a torn shawl caught on one claw` |
-| 다리 밑 트롤 (보스) | river_hag | `a hulking river troll like a mossy boulder, wet stone-grey skin, a broken wooden bridge plank across its shoulder` |
-| 낡은 곰인형 (보스) | old_teddy | `a giant old teddy bear with one button eye dangling by a thread, straw leaking from burst seams, a stitched smile` |
+보스 3종(늪의 왕·안개의 어머니·파묻힌 자)은 완료. 아래 9종이 남았습니다.
+
+| 이름 | id | 묘사 | 비고 |
+|---|---|---|---|
+| 늪두꺼비 | bog_toad | `a bloated bog toad with warty moss-green skin and a long drooping tongue` | |
+| 모기떼 | mosquito_swarm | `a dense cloud of huge marsh mosquitoes forming a vague face` | floating |
+| 안개 망령 | mist_wraith | `a wraith of pale fog with hollow eyes, its lower half trailing into mist` | floating |
+| 창백한 사슴 | pale_stag | `an unnaturally pale white stag with too many antler points and blank eyes` | 뿔이 넓게 퍼지지 않게 — 위로 뻗게 |
+| 해골 병사 | skeleton | `a leaning skeleton soldier in rusted scraps of armor with a notched sword` | |
+| 무덤 벌레 | grave_worm | `a thick pale grave worm rearing up, a ringed round mouth, a little dark soil at its base` | 흙더미를 넓게 그리지 말 것 |
+| 진흙 골렘 (정예) | mud_golem | `a hulking golem of black grave mud with a few bones and roots stuck in its body` | 규칙 11 적용 (mid-grey 배경) |
+| 목 없는 기사 (정예) | headless_knight | `a headless knight on foot in tarnished armor holding a lance, pale mist where the head should be` | 창은 몸에 붙여 세로로 |
+| 무덤지기 (정예) | grave_keeper | `a gaunt gravekeeper with a lantern and a long shovel, face hidden under a wide hat` | |
+
+## [3] 3막 몬스터 — 꿈·언덕·교회 (16종 대기)
+
+| 이름 | id | 묘사 | 비고 |
+|---|---|---|---|
+| 악몽 토끼 | nightmare_hare | `a wrong-looking dream hare with spiral eyes and a stitched grin` | |
+| 떠도는 눈 | floating_eye | `a single large floating eyeball with a keyhole-shaped iris and a tail of dream smoke` | floating |
+| 꿈나방 | dream_moth | `a huge dusty moth with two sleeping human faces patterned on its wings` | 날개를 위로 세워 세로 구도로 |
+| 속삭이는 폴립 | whisper_polyp | `a fleshy polyp cluster with a few small whispering mouths, faint eerie glow` | 규칙 11 적용 |
+| 얼굴 없는 광신도 | faceless_cultist | `a standing cultist in dark robes whose hood holds only smooth blankness, holding a candle` | |
+| 비명 지르는 돌 | screaming_stone | `a jagged standing stone with a screaming face split across it, a few cracks glowing faintly` | |
+| 속 빈 사제 | hollow_priest | `a priest's robes standing upright with nothing inside, holding a staff` | |
+| 성가대 유령 | choir_ghost | `three translucent choir ghosts sharing one flowing robe, mouths open in silent song` | floating |
+| 촛불 떼 | candle_swarm | `a cluster of small living candle flames with faint faces, gathered into one tall shape` | |
+| 모래 사나이 (정예) | sandman | `the Sandman — a tall figure of flowing sand in a nightcap, hourglass in hand, hollow eyes` | |
+| 언덕의 촉수 (정예) | hill_tentacle | `a colossal tentacle with a few barnacles, rising straight upward, torn earth only at its base` | 언덕을 넓게 그리지 말 것 (규칙 12) |
+| 종지기 (정예) | bell_ringer | `a hunched bell-ringer with a cracked bronze bell for a head, rope in hand` | |
+| 자각몽의 왕 (보스) | lucid_king | `the king of lucid dreams — a regal figure whose crown and robes slowly melt and reform, a crescent-moon face` | |
+| 벌어진 아가리 (보스) | the_maw | `a vast toothed maw — two concentric rings of teeth around a black throat, a few roots dangling in, seen from the front` | 규칙 11 적용 |
+| 거짓 성인 (보스) | false_saint | `a false saint with a tilted golden halo, a serene mask slightly ajar showing darkness, four hands folded in prayer` | |
+| 이름 없는 공포 (최종) | nameless_dread | `a sea of black tentacles beneath one colossal pale lidless eye, a tiny red hood reflected in the pupil. Grander than any boss, mostly darkness` | 규칙 11 적용 (거의 검정이라 필수) |
 
 > 파일명은 코드 id와 일치해야 자동 연동됨 (`assets/enemies/{id}.png`)
 
 ---
 
-## [2] 2막 몬스터 — 늪·안개숲·무덤 (보스 3종 ✅ / 일반·정예 9종 ⬜)
-
-| 이름 | id | 묘사 | 상태 |
-|---|---|---|---|
-| 늪두꺼비 | bog_toad | `a bloated bog toad with warty moss-green skin and a long drooping tongue` | ⬜ |
-| 모기떼 | mosquito_swarm | `a dense cloud of huge marsh mosquitoes forming a vague face` (floating) | ⬜ |
-| 안개 망령 | mist_wraith | `a wraith of pale fog with hollow eyes, its lower half trailing into mist` (floating) | ⬜ |
-| 창백한 사슴 | pale_stag | `an unnaturally pale white stag with too many antler points and blank eyes` | ⬜ |
-| 해골 병사 | skeleton | `a leaning skeleton soldier in rusted scraps of armor with a notched sword` | ⬜ |
-| 무덤 벌레 | grave_worm | `a thick pale grave worm bursting from dark soil, a ringed round mouth` (rearing from soil) | ⬜ |
-| 진흙 골렘 (정예) | mud_golem | `a hulking golem of black grave mud with a few bones and roots stuck in its body` | ⬜ |
-| 목 없는 기사 (정예) | headless_knight | `a headless knight on foot in tarnished armor holding a lance, pale mist where the head should be` | ⬜ |
-| 무덤지기 (정예) | grave_keeper | `a gaunt gravekeeper with a lantern and a long shovel, face hidden under a wide hat` | ⬜ |
-| 늪의 왕 (보스) | swamp_king | `an immense crocodile wearing a rotten wooden crown, gold-green eyes` | ✅ |
-| 안개의 어머니 (보스) | fog_mother | `a towering motherly silhouette woven of fog, a few faint reaching arms, two soft glowing eyes` | ✅ |
-| 파묻힌 자 (보스) | the_buried | `a huge revenant wrapped in roots and burial cloth, a crown of soil` | ✅ |
-
----
-
-## [3] 3막 몬스터 — 꿈·언덕·교회 (15종 + 최종 보스) ⬜
-
-| 이름 | id | 묘사 |
-|---|---|---|
-| 악몽 토끼 | nightmare_hare | `a wrong-looking dream hare with spiral eyes and a stitched grin` |
-| 떠도는 눈 | floating_eye | `a single large floating eyeball with a keyhole-shaped iris and a tail of dream smoke` (floating) |
-| 꿈나방 | dream_moth | `a huge dusty moth with two sleeping human faces patterned on its wings` (wings spread) |
-| 속삭이는 폴립 | whisper_polyp | `a fleshy polyp cluster with a few small whispering mouths, faint eerie glow` |
-| 얼굴 없는 광신도 | faceless_cultist | `a kneeling cultist in dark robes whose hood holds only smooth blankness, holding a candle` |
-| 비명 지르는 돌 | screaming_stone | `a jagged standing stone with a screaming face split across it, a few cracks glowing faintly` |
-| 속 빈 사제 | hollow_priest | `a priest's robes standing upright with nothing inside, holding a staff` |
-| 성가대 유령 | choir_ghost | `three translucent choir ghosts sharing one flowing robe, mouths open in silent song` (floating) |
-| 촛불 떼 | candle_swarm | `a cluster of small living candle flames with faint faces, gathered into one shape` |
-| 모래 사나이 (정예) | sandman | `the Sandman — a tall figure of flowing sand in a nightcap, hourglass in hand, hollow eyes` |
-| 언덕의 촉수 (정예) | hill_tentacle | `a colossal tentacle with a few barnacles bursting from a torn hillside` (bursting upward) |
-| 종지기 (정예) | bell_ringer | `a hunched bell-ringer with a cracked bronze bell for a head, rope in hand` |
-| 자각몽의 왕 (보스) | lucid_king | `the king of lucid dreams — a regal figure whose crown and robes slowly melt and reform, a crescent-moon face` |
-| 벌어진 아가리 (보스) | the_maw | `a vast toothed pit — two concentric rings of teeth around a black throat, a few roots dangling in, seen from the front` |
-| 거짓 성인 (보스) | false_saint | `a false saint with a tilted golden halo, a serene mask slightly ajar showing darkness, four hands folded in prayer` |
-| 이름 없는 공포 (최종) | nameless_dread | `a sea of black tentacles beneath one colossal pale lidless eye, a tiny red hood reflected in the pupil. Grander than any boss, mostly darkness` |
-
----
-
-## [4] 배경 11종 ⬜ (현재 전부 `bg_forest` 임시 사용 중)
+## [4] 배경 11종 (현재 전부 `bg_forest` 임시 사용 중)
 
 **공통 블록** (이 블록 + 아래 씬 한 줄). 세로 2:3, 풀블리드라 키잉 불필요.
 
@@ -153,8 +141,10 @@ Stylized dark fairytale background for a mobile dice game, gothic caricature sty
 | bg_dream | `a melting dreamlike forest where the trees bend wrong, floating doors and clock faces drifting between them, colors slightly wrong.` | ⬜ |
 | bg_hill | `a bare black hill under a slowly spiraling night sky, one thin ancient monolith on the summit, faint red glow behind the clouds.` | ⬜ |
 | bg_church | `the inside of an empty candle-lit church, dusty wooden pews, a broken stained glass window glowing faint red and gold.` | ⬜ |
-| bg_final | `an endless black void, one colossal looming shadow made of slow tentacles with a single enormous pale eye, far above.` (no characters 제외) | ⬜ |
+| bg_final | `an endless black void, one colossal looming shadow made of slow tentacles with a single enormous pale eye, far above.` | ⬜ |
 | bg_title | 별도 블록 — 아래 | ⬜ |
+
+**중요**: 배경은 몬스터보다 도드라지면 안 됩니다. 씬 문장에 사람·생물을 넣지 말고, 아래쪽 절반은 반드시 어둠으로 떨어뜨립니다. 게임에서 위에 어두운 오버레이를 한 겹 더 얹습니다.
 
 **bg_title** (캐릭터 허용):
 ```
@@ -170,9 +160,9 @@ Dark fairytale storybook texture for a mobile dice game. Hand-painted gouache an
 
 ---
 
-## [5] 족보 종이 18종 ⬜
+## [5] 족보 종이 18종
 
-승인된 `paper_row` 틀에 변형별 문양을 얹는다. **가독성 규칙: 문양은 오른쪽 끝에 작고 흐릿하게** (글자가 그 위에 얹힘). 등급 구분은 CSS 담당이므로 종이는 중립 톤.
+승인된 `paper_row` 틀에 변형별 문양을 얹습니다. **가독성 규칙: 문양은 오른쪽 끝에 작고 흐릿하게** (글자가 그 위에 얹힙니다). 등급 구분은 CSS 담당이므로 종이는 중립 톤으로.
 
 **공통 템플릿** (한 장에 3종씩, 총 6장):
 ```
@@ -202,22 +192,88 @@ Stylized dark fairytale UI element for the dice game REDHOOD. Match the EXACT pa
 
 파일: `assets/ui/paper_{variantId}.png` — 없는 변형은 기본 paper_row로 폴백.
 
+**묶음 예시** (6장):
+1. instinct / whisper / clasped_hands
+2. red_shoes / twin_sisters / two_moons
+3. triple_axe / woodsman_breath / four_fangs
+4. heavy_blow / cottage / hearth
+5. windpath / hunt_drive / moonpath
+6. storm_run / judgment_night / blood_moon
+
 ---
 
-## [6] 유물 26종 ⬜
+## [6] 줄 UI 원형 아이콘 18종
+
+전투 족보 줄의 **왼쪽 원형 메달 아이콘**. 현재는 능력 아이콘으로 임시 대체 중이며, 리소스가 오면 자동 교체됩니다.
+
+**규격 (필수)**
+- **정사각 1:1**, 배경은 키잉용 단색
+- 심볼이 **원 안에 들어가야 함** — 화면에서 지름 36px 원형으로 잘려 표시되므로 모서리에 중요한 요소 금지 (안전 영역 = 중앙 78%)
+- **48px에서 읽히는 단일 심볼**, 배경 장식·테두리·원형 프레임 금지 (프레임은 게임이 그림)
+- 채색은 **밝은 쪽으로** — 어두운 원형 바탕 위에 올라갑니다
+
+**공통 템플릿** (한 장에 6종씩, 총 3장 권장):
+```
+Stylized dark fairytale icons for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density. NOT photorealistic, NOT 3D. Landscape 3:2 image. A 3x2 grid of six icons, equal cells, equal spacing, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. Each icon is a single symbol centered in its cell, filling about 75 percent of the cell, bright enough to read against a dark circular background, readable at 48px. No circular frame, no border, no background decoration. IN ORDER — {1} / {2} / {3} // {4} / {5} / {6}. No text, no letters, no watermark.
+```
+
+**문양은 [5] 족보 종이와 동일하게 사용합니다.** 한쪽을 뽑으면 다른 쪽으로 재활용 가능합니다.
+
+파일: `assets/icons/combo_{variantId}.png`
+연동: 파일을 올리면 `main.js`의 `COMBO_ICON_READY`에 id를 추가 → 임시 아이콘에서 자동 교체.
+
+---
+
+## [7] 유물 26종
 
 **공통 템플릿**:
 ```
 Stylized dark fairytale item illustration for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density. NOT photorealistic, NOT 3D. Square 1:1 image. A single small relic item, centered, filling most of the frame, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. Subtle glow, readable at 48px. The item: {묘사}. No text, no letters, no watermark.
 ```
 
-묘사는 `data/relics.json`의 name·desc 참고 (이빨 / 빵부스러기 / 실타래 / 우유 / 장작 / 장갑 / 깃털 / 부적 / 가계부 / 나침반 / 저울 / 양초 / 뼈 / 유리병 반딧불 / 늑대 가죽 / 독사과 / 꿀단지 / 붉은 망토 / 도토리 / 빗장 / 클로버 / 은식칼 / 은탄환 / 골무 / 보름달 목걸이 / 동화책).
+시트로 뽑으려면 6종씩 3x2 그리드([6] 템플릿의 그리드 문구 차용)로 5장 + 1장.
+
+### 일반 유물 17종
+
+| 이름 | id | 묘사 |
+|---|---|---|
+| 늑대 이빨 | wolf_fang | `a single yellowed wolf fang strung on a leather cord` |
+| 빵부스러기 | breadcrumbs | `a small pile of torn bread crumbs on a scrap of cloth` |
+| 붉은 실타래 | spool | `a wooden spool wound with deep red thread, one loose end trailing` |
+| 따뜻한 우유 | warm_milk | `a chipped ceramic cup of warm milk with a faint wisp of steam` |
+| 마른 장작 | firewood | `two split dry logs bound with twine` |
+| 가죽 장갑 | leather_gloves | `a pair of worn brown leather work gloves` |
+| 까마귀 깃털 | crow_feather | `a single glossy black crow feather` |
+| 사냥꾼의 부적 | hunters_charm | `a small bone charm carved with a simple eye, hung on a cord` |
+| 가계부 | ledger | `a thin worn ledger book with a frayed ribbon bookmark` |
+| 이끼 나침반 | moss_compass | `a battered brass compass overgrown with green moss` |
+| 은저울 | silver_scale | `a small tarnished silver balance scale` |
+| 수지 양초 | tallow_candle | `a stubby yellow tallow candle with a steady small flame` |
+| 오래된 뼈 | old_bone | `a short weathered animal bone with hairline cracks` |
+| 유리병 속 반딧불 | glass_jar | `a corked glass jar holding three glowing fireflies` |
+| 늑대 가죽 | wolf_pelt | `a folded grey wolf pelt with the head still attached` |
+| 독사과 조각 | poison_apple | `a dark red apple with one bite taken, the flesh faintly green` |
+| 꿀단지 | honey_pot | `a small clay honey pot with honey dripping down one side` |
+
+### 정예 유물 9종 (`Subtle glow` → `A faint warm golden glow, slightly more ornate` 로 교체)
+
+| 이름 | id | 묘사 |
+|---|---|---|
+| 붉은 망토 | red_cloak | `a small folded bright red hooded cloak` |
+| 도토리 부적 | acorn_charm | `a golden acorn charm on a thin chain` |
+| 문지기의 빗장 | gate_bar | `a heavy iron gate bar with a worn bronze bracket` |
+| 네잎클로버 | clover | `a four-leaf clover pressed under a thin glass disc` |
+| 은식칼 | silver_knife | `an ornate silver table knife with a bone handle` |
+| 은탄환 | silver_bullet | `a single polished silver bullet standing upright` |
+| 운명의 골무 | fate_thimble | `a silver thimble engraved with tiny stars` |
+| 늑대달 목걸이 | wolfmoon_pendant | `a pendant of a full moon with a small wolf silhouette across it` |
+| 할머니의 동화책 | grandma_book | `a small thick storybook with a cracked red leather cover and a brass clasp` |
 
 파일: `assets/relics/{id}.png`
 
 ---
 
-## [7] 앱 아이콘 ⬜ (맨 마지막)
+## [8] 앱 아이콘 (맨 마지막)
 
 ```
 Stylized dark fairytale app icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LOW detail density. NOT photorealistic, NOT 3D. Square 1:1 image, bold and readable at 48px. A red hood silhouette merged with a single ivory die showing five pips, on a near-black forest background, thin antique gold ring border. No text, no letters, no watermark.
@@ -225,31 +281,12 @@ Stylized dark fairytale app icon for the dice game REDHOOD. Match the EXACT pain
 
 ---
 
-## [8] 줄 UI 원형 아이콘 (족보 18종 + 선택지) ⬜
-
-전투 족보 줄·NPC 선택지 줄의 **왼쪽 원형 아이콘**. 현재는 임시 표기(족보 종류 첫 글자 / 선택지 이모지)로 대체 중이며, 리소스가 오면 자동 교체된다.
-
-**규격 (필수)**
-- **정사각 1:1**, 배경은 키잉용 단색 (`one plain flat very dark brown background`)
-- 심볼이 **원 안에 들어가야 함** — 화면에서 지름 52px 원형으로 잘려 표시되므로, 모서리에 중요한 요소를 두지 말 것 (안전 영역 = 중앙 78%)
-- **48px에서 읽히는 단일 심볼**, 배경 장식·테두리·원형 프레임 금지 (프레임은 게임이 그림)
-- 채색은 밝은 쪽으로 — 어두운 원형 바탕 위에 올라간다
-
-**공통 템플릿**
-```
-Stylized dark fairytale icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density. NOT photorealistic, NOT 3D. Square 1:1 image. A single symbol, centered, filling about 75 percent of the frame, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. Bright enough to read against a dark circular background, readable at 48px. No circular frame, no border, no background decoration. The symbol: {묘사}. No text, no letters, no watermark.
-```
-
-**족보 18종 묘사** — [5] 족보 종이의 문양 문장과 동일하게 사용:
-`assets/icons/combo_{variantId}.png` (instinct / whisper / clasped_hands / red_shoes / twin_sisters / two_moons / triple_axe / woodsman_breath / four_fangs / heavy_blow / cottage / hearth / windpath / hunt_drive / moonpath / storm_run / judgment_night / blood_moon)
-
-> 족보 종이 18종([5])과 문양이 같으므로, 한쪽을 뽑으면 다른 쪽으로 재활용 가능.
-
-**연동 방법**: 파일을 올리면 `main.js`의 `COMBO_ICON_READY`에 id를 추가 → 임시 글자에서 그림으로 자동 교체.
-
----
-
 ## 완료된 리소스 (재생성용 참고)
+
+### 몬스터 19종 ✅
+1막 16종(들개·까마귀·도깨비불·숲거미·가시덤불·옹이 골렘·개울 정령·거머리·쥐떼·살아있는 빗자루·우두머리 들개·늙은 강꼬치·지하실의 무언가·늑대·다리 밑 트롤·낡은 곰인형) + 2막 보스 3종(늪의 왕·안개의 어머니·파묻힌 자).
+
+주의: **다리 밑 트롤**은 어깨의 다리 판자가 화면을 먹어 본체가 작아 보였습니다(v0.69에서 크롭으로 보정). 재생성한다면 규칙 12를 적용해 판자를 작게 하거나 빼세요.
 
 ### 주사위 6면 시트 ✅ (13종)
 공통 템플릿 + 재질 한 줄:
@@ -257,6 +294,8 @@ Stylized dark fairytale icon for the dice game REDHOOD. Match the EXACT painting
 Flat hand-painted storybook illustration for a dark fairytale dice game. Gouache on paper, visible brush strokes, thick dark outlines, muted palette: near-black brown, deep blood red, antique gold, aged cream. NOT photorealistic, NOT a 3D render. Landscape 3:2 image. A sprite sheet: a 3x2 grid of six dice, equal size, equal spacing, identical framing, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. The six dice show pip counts 1, 2, 3, 4, 5, 6 IN ORDER (top row: 1, 2, 3 — bottom row: 4, 5, 6). Count the pips carefully. Same painting style as the attached dice sheet. Every die is: {재질}
 ```
 나무 `humble hand-carved warm brown wood with visible grain, dark ink pips.` / 금박 `covered in worn matte gold leaf with tiny painted sparkles.` / 저주 `blackened old bone with thin ember-red cracks, pips glowing ember-red.` / 송곳니 `carved from ivory-yellow wolf fang, pips shaped like small dark blood droplets.` / 밀짚 `woven from golden straw, pips are round dark brown straw knots.` / 잿불 `charcoal grey with faint warm ember glow in its cracks, pips glowing warm orange.` / 달빛 `pale blue crystal with a soft moonlight glow, pips deep midnight-blue.` / 가시덤불 `wrapped in thorny bramble vines with tiny red thorns, dark green pips.` / 납 `heavy dull grey lead with dents and scratches, black pips with pale chalk rims.` / 짝눈 `painted half aged-cream half slate-blue split diagonally.` / 홀눈 `painted half aged-cream half wine-red split diagonally.` / 높은 `covered in deep crimson royal velvet with gold embroidered trim, pips are round gold embroidered dots.` / 외눈 `pale bone tightly wound with a single thin bright red thread, pips are small red thread knots.`
+
+> **높은 주사위 재생성 시 반드시 규칙 11 적용** — 진홍 벨벳이 어두운 배경과 겹쳐 눈 하나가 지워졌던 건이 있습니다. `mid-grey background`로 뽑으세요.
 
 ### UI 아이콘 시트 ✅ (26종)
 `Sprite sheet, {N}x{M} grid, equal cells, on one plain flat very dark brown background. Each icon sits on a small round dark bronze medallion. Bold simple shapes, readable at 32px. IN ORDER — ...`
@@ -282,14 +321,16 @@ Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown i
 ## 통합 규칙 (Claude 처리)
 
 - 전달: 대화에 이미지 업로드 + 이름 한 마디 → 키잉·정규화·슬라이스·커밋·연동 자동
-- 경로: 적 `assets/enemies/{id}.png` / NPC·사물 `assets/npc/{name}.png` / 주사위 `assets/dice/{skin}{face}.png` / 아이콘 `assets/icons/` / UI `assets/ui/` / 배경 `assets/bg/`
+- 경로: 적 `assets/enemies/{id}.png` / NPC·사물 `assets/npc/{name}.png` / 주사위 `assets/dice/{skin}{face}.png` / 아이콘 `assets/icons/` / UI `assets/ui/` / 배경 `assets/bg/` / 유물 `assets/relics/{id}.png`
 - 이미지 없는 항목은 이모지·기존 표시로 폴백 — 부분 적용 가능
-- 붉은 보스 배광은 키잉 시 "붉은 기운만 오른 픽셀"을 배경으로 판정해 제거
+- **키잉 방식 (v0.77 확정)**: 느슨하게 딴 뒤 구멍 메우기 + 최대 연결 성분 추출. 피사체 내부가 배경색과 비슷해도 형태로 복원됩니다. 붉은 보스 배광은 "붉은 기운만 오른 픽셀"을 배경으로 판정해 제거합니다.
+- **여백 정규화**: 주사위는 가로 채움 87%, 몬스터는 알파 바운딩박스에 딱 맞게 크롭. 다른 자산과 크기가 어긋나지 않도록 자동 보정합니다.
 - 자산은 팔레트 PNG로 최적화해 커밋 (배포 용량 관리)
 
-## 배포 규칙 (사고 이후 확정)
+## 배포 규칙
 
-- **작업마다 배포하지 않는다.** 여러 건을 묶어 한 번만 배포 (GitHub Pages 빌드 부담)
+- **작업마다 배포하지 않는다.** 여러 건을 묶어 한 번만 배포
+- 배포는 `gh-pages` 브랜치가 소스 — main에만 푸시하면 빌드가 아예 돌지 않습니다
 - 배포본은 게임 실행 파일만 (`index.html manifest.json sw.js css js data assets .nojekyll`) — docs·test 제외
-- 커밋 서명 금지 (`commit.gpgsign false`)
-- 배포 후 검증: Pages API로 `status: built` 확인 → 라이브 CSS/JS 내용 확인
+- 커밋 서명 금지 (`commit.gpgsign false`), 판마다 `sw.js` CACHE·`VERSION`·`index.html ?v=` 3곳 동시 증가
+- 배포 후 검증: Pages API로 `status: built` 확인 → 라이브 파일 내용 확인
