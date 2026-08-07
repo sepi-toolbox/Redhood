@@ -1,1 +1,1 @@
-deploy=20260807T020255Z v0.70 gridmap
+deploy=20260807T024945Z v0.71 statusdecay

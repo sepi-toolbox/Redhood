@@ -34,7 +34,7 @@
               "amount": 1
             }
           ],
-          "abilityText": "🎲 집중 +1 (전투 동안 매 턴 리롤 +1)",
+          "abilityText": "🎲 집중 +1 (스택마다 리롤 +1, 매 턴 1씩 소멸)",
           "tier": "uncommon"
         }
       ]
@@ -82,7 +82,7 @@
               "amount": 2
             }
           ],
-          "abilityText": "🗡️ 힘 +2 (전투 동안 모든 족보 피해 +2)",
+          "abilityText": "🗡️ 힘 +2 (족보 피해 +2, 매 턴 1씩 소멸)",
           "tier": "uncommon"
         }
       ]

@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.70'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.71'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -911,9 +911,9 @@ function showPlayerBuffs() {
   const b = battle.buffs;
   const confusedNow = battle.dice.filter(d => d.confused).length;
   const items = [
-    b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 이번 전투 동안 모든 족보 피해 +${b.strength}</li>` : '',
-    b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus} — 이번 전투 동안 매 턴 리롤 +${b.focus}</li>` : '',
-    b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen}</li>` : '',
+    b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 모든 족보 피해 +${b.strength} · 매 턴 1 소멸</li>` : '',
+    b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus} — 매 턴 리롤 +${b.focus} · 매 턴 1 소멸</li>` : '',
+    b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen} · 매 턴 1 소멸</li>` : '',
     battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
     confusedNow > 0 ? `<li>${ico('status_confuse')} 혼란 — 이번 턴 주사위 ${confusedNow}개가 뒤틀려 다시 굴릴 수 없음</li>` : '',
     battle.pendingConfuse > 0 ? `<li>${ico('status_confuse')} 혼란 예고 — 다음 턴 주사위 ${battle.pendingConfuse}개가 뒤틀린다</li>` : '',
@@ -941,9 +941,9 @@ function showEnemyInfo(uid) {
   const status = [
     e.block > 0 ? `<li>${ico('intent_defend')} 방어 ${e.block} — 다음 행동까지 받는 피해 흡수</li>` : '',
     e.power > 0 ? `<li>${ico('intent_empower')} 강화 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
-    d.weak > 0 ? `<li>${ico('status_weak')} 약화 ${d.weak} — 공격력 -${d.weak}</li>` : '',
+    d.weak > 0 ? `<li>${ico('status_weak')} 약화 ${d.weak} — 공격력 -${d.weak} · 매 턴 1 소멸</li>` : '',
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
-    d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable}</li>` : '',
+    d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable} · 매 턴 1 소멸</li>` : '',
     e.stunned ? '<li>💫 다음 행동 취소됨</li>' : '',
   ].filter(Boolean).join('');
   app.append(h(`

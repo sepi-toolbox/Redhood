@@ -86,5 +86,37 @@ eq('금박 트리플 매칭 기여', computeDamage(C.threeKind, [4, 4, 4, 2, 1],
 // v0.8: 레벨 폐지 — 배수는 유물만
 eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).total, 17);
 
+// v0.71: 상태이상 지속시간 — 매 턴 1스택 소멸, 단 얻은 턴에는 안 깎인다(효과를 최소 한 번은 본다)
+{
+  const { readFileSync } = await import('fs');
+  globalThis.fetch = async (u) => ({ ok: true, json: async () => JSON.parse(readFileSync(new URL('../' + String(u).replace(/^\.?\//, ''), import.meta.url), 'utf8')) });
+  const { loadAll } = await import('../js/data.js');
+  await loadAll();
+  const eng = await import('../js/engine.js');
+  eng.rng.next = () => 0.5;
+  const run = { hp: 70, maxHp: 70, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } };
+  const b = eng.createBattle(run, ['stray_dog'], 'battle');
+  const baseRerolls = b.rollsLeft;
+  b.buffs.focus += 1; b.buffs.strength += 2; b.buffs.regen += 1;
+  b.enemies[0].debuffs.weak += 2; b.enemies[0].debuffs.vulnerable += 2;
+  b.await = 'enemy'; eng.enemyPhase(b);                       // 1턴 종료 → 2턴
+  eq('부여한 턴에는 안 깎임(집중)', b.buffs.focus, 1);
+  eq('부여한 턴에는 안 깎임(약화)', b.enemies[0].debuffs.weak, 2);
+  eq('집중 효과가 실제로 적용됨', b.rollsLeft, baseRerolls + 1);
+  b.await = 'enemy'; eng.enemyPhase(b);                       // 2턴 종료 → 3턴
+  eq('한 턴 뒤 집중 소멸', b.buffs.focus, 0);
+  eq('한 턴 뒤 힘 1 감소', b.buffs.strength, 1);
+  eq('한 턴 뒤 재생 소멸', b.buffs.regen, 0);
+  eq('한 턴 뒤 약화 1 감소', b.enemies[0].debuffs.weak, 1);
+  eq('한 턴 뒤 취약 1 감소', b.enemies[0].debuffs.vulnerable, 1);
+  eq('집중 소멸 후 리롤 원복', b.rollsLeft, baseRerolls);
+  b.await = 'enemy'; eng.enemyPhase(b);                       // 3턴 종료 → 4턴
+  eq('두 턴 뒤 힘 소멸', b.buffs.strength, 0);
+  eq('두 턴 뒤 약화 소멸', b.enemies[0].debuffs.weak, 0);
+  b.await = 'enemy'; eng.enemyPhase(b);
+  eq('0에서 더 내려가지 않음', b.buffs.strength, 0);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
