@@ -620,6 +620,8 @@ span.enemy-art {
    글자 아래에 밝은 1px 양각을 깔아 중간 톤 판(가죽·벨벳·점판암)에서도 획이 떠 보이게 한다. */
 .sheet-row.combo-row.has-plate .sheet-name,
 .sheet-row.combo-row.has-plate .cat-tag { text-shadow: 0 1px 0 rgba(255, 244, 218, .5); }
+/* 종류 꼬리표는 #7a6850이라 밝은 판 위에서 대비가 2.4:1까지 떨어졌다. 한 단계 낮춰 3.7:1로 올린다. */
+.sheet-row.combo-row.has-plate .cat-tag { color: #5f5140; }
 .sheet-row.selected { filter: brightness(1.12) saturate(1.06); } /* v0.59: 발광 제거, 배경만 밝게 */
 .sheet-row.used { opacity: .32; filter: grayscale(.6); }
 .sheet-row.used .sheet-preview { color: #6f6353; }
