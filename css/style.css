@@ -103,20 +103,28 @@ body {
 }
 .trail.t-drawing { opacity: .8; animation: inkDraw .8s ease-out .15s backwards; }
 
-/* ---------- v0.26: 슬더스식 분기 지도 ---------- */
-.map-canvas {
-  position: relative; width: 100%; flex: none; /* v0.29: 플렉스 압축 금지 — 지정 높이 유지 */
+/* ---------- v0.70: 표(그리드) 기반 분기 지도 — 좌표를 직접 찍지 않는다 ---------- */
+.map-grid {
+  position: relative; /* 링크 SVG의 기준 */
+  display: flex; flex-direction: column; flex: none; /* 내용만큼 늘어나고 위에서부터 스크롤된다 */
+  padding: 20px 10px 10px;
   background: #1a130e url('../assets/bg/bg_map.jpg') center / cover no-repeat;
   border-radius: 6px;
   box-shadow: inset 0 0 40px rgba(0, 0, 0, .5);
+  min-height: 100%;
 }
-.map-links { position: absolute; inset: 0; pointer-events: none; }
+.map-row2 {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  align-items: center; justify-items: center;
+  height: 82px; flex: none;
+}
+.map-links { position: absolute; left: 0; top: 0; pointer-events: none; }
 .map-links .ink {
   fill: none; stroke: #d9c8a6; stroke-width: 2.6; stroke-linecap: round;
-  stroke-dasharray: .5 8; opacity: .45; /* v0.28: 다크 양피지 위 밝은 잉크 */
+  stroke-dasharray: .5 8; opacity: .45;
 }
 .map-links .ink-done { opacity: .8; stroke: #e8dcc8; }
-/* v0.32: 다음 길 강조 — 붉은 잉크가 흐르며 빛난다 */
+/* 다음 길 강조 — 붉은 잉크가 흐르며 빛난다 */
 .map-links .ink-next {
   opacity: 1; stroke: #ff6b52; stroke-width: 3.2;
   filter: drop-shadow(0 0 4px rgba(224, 92, 75, .9));
@@ -124,30 +132,30 @@ body {
 }
 @keyframes inkFlow { to { stroke-dashoffset: -17; } }
 .map-node2 {
-  position: absolute; margin-left: -33px; margin-top: -20px; /* v0.32: transform 대신 마진 정렬 — 애니메이션과 충돌 원천 차단 */
-  display: flex; flex-direction: column; align-items: center; gap: 1px;
-  background: none; border: none; padding: 0; width: 66px;
+  position: relative; /* 그리드 칸 안에 그대로 놓인다 — absolute 좌표 없음 */
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; padding: 0;
+  width: 46px; height: 46px;
   color: #6a4c33; cursor: default;
 }
-/* v0.28.1: 낙서 아이콘 가독성 — 밝기 보정 자산 + 어두운 후광으로 양피지에서 분리 */
+.map-node2.boss-node { width: 60px; height: 60px; }
+/* 낙서 아이콘 가독성 — 어두운 후광으로 양피지에서 분리 */
 .map-node2::before {
-  content: ''; position: absolute; left: 50%; top: 20px; width: 58px; height: 58px;
+  content: ''; position: absolute; left: 50%; top: 50%; width: 58px; height: 58px;
   transform: translate(-50%, -50%); border-radius: 50%;
   background: radial-gradient(circle, rgba(10, 6, 4, .5) 0%, rgba(10, 6, 4, .28) 55%, transparent 72%);
   pointer-events: none;
 }
 .map-node2 .ico-node { width: 42px; height: 42px; display: block; position: relative; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .7)); }
-.map-node2 small { font-size: 9.5px; font-weight: 700; color: #6a4c33; }
-.map-node2.reachable { cursor: pointer; filter: drop-shadow(0 0 6px rgba(190, 60, 45, .55)); } /* v0.32: 정적 발광만, 움직임 없음 */
-.map-node2.reachable small { color: #a02c25; }
+.map-node2.boss-node .ico-node { width: 56px; height: 56px; }
+.map-node2.reachable { cursor: pointer; filter: drop-shadow(0 0 6px rgba(190, 60, 45, .55)); }
 .map-node2.reachable:active { filter: brightness(1.25); }
 .map-node2.trodden { opacity: .85; filter: sepia(.25); }
 .map-node2.missed { opacity: .28; filter: grayscale(.7); }
 .map-node2.ahead { opacity: .85; }
-.map-node2.boss-node .ico-node { width: 56px; height: 56px; }
-.you-marker.n2 { position: absolute; top: -15px; right: 2px; font-size: 18px; animation: youBob 1.6s ease-in-out infinite alternate; }
+.you-marker.n2 { position: absolute; top: -14px; right: -6px; font-size: 18px; animation: youBob 1.6s ease-in-out infinite alternate; }
 .start-label.n2 {
-  position: absolute; left: 50%; transform: translateX(-50%);
+  flex: none; text-align: center; padding: 8px 0 2px;
   font-size: 12px; color: #b9a67f; font-weight: 700; font-style: italic; white-space: nowrap;
 }
 
