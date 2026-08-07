@@ -111,19 +111,8 @@ async function playTurn(page) {
       if (await rep.count()) { await rep.first().click(); await page.waitForTimeout(120); }
       continue;
     }
-    if (await page.locator('.battle-screen:not(.event-screen)').count()) {
-      const enemyN = await page.locator('.enemy').count();
-      if (enemyN > 1 && !sawMulti) {
-        sawMulti = true;
-        console.log(`multi-enemy battle found: ${enemyN} enemies`);
-        await page.screenshot({ path: `${SHOT}/04-multi.png` });
-      }
-      if (!await playTurn(page)) { await page.waitForTimeout(200); }
-      if (!sawSlash && await page.locator('.slash, .dmg-float').count()) sawSlash = true;
-      continue;
-    }
     // v0.65: 전리품 목록 — 재화 → 묶음(모달에서 하나 선택) → 나가기
-    if (await page.locator('.loot-screen').count()) {
+    if (await page.locator('.loot-overlay').count()) {
       const coin = page.locator('.loot-row[data-act="coins"]');
       if (await coin.count()) { await coin.click(); await page.waitForTimeout(120); continue; }
       const group = page.locator('.loot-row[data-act="group"]');
@@ -139,6 +128,17 @@ async function playTurn(page) {
       }
       await page.locator('.loot-row[data-act="exit"]').click();
       await page.waitForTimeout(120);
+      continue;
+    }
+    if (await page.locator('.battle-screen:not(.event-screen)').count()) {
+      const enemyN = await page.locator('.enemy').count();
+      if (enemyN > 1 && !sawMulti) {
+        sawMulti = true;
+        console.log(`multi-enemy battle found: ${enemyN} enemies`);
+        await page.screenshot({ path: `${SHOT}/04-multi.png` });
+      }
+      if (!await playTurn(page)) { await page.waitForTimeout(200); }
+      if (!sawSlash && await page.locator('.slash, .dmg-float').count()) sawSlash = true;
       continue;
     }
     if (await page.locator('.rest-screen').count()) {
