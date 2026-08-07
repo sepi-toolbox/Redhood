@@ -1,4 +1,4 @@
-# REDHOOD 배경 프롬프트 — 10종 (복사용)
+# REDHOOD 배경 프롬프트 — 12종 (복사용)
 
 블록을 통째로 복사해서 쓰세요. 배경은 **키아트를 첨부하지 않아도 됩니다** (스타일 문구가 이미 안에 있습니다). 첨부한다면 `keyart_stilllife`.
 
@@ -102,6 +102,34 @@ Stylized dark fairytale background for a mobile dice game, gothic caricature sty
 
 ---
 
-## 참고: 이미 있는 배경
+## 이미 있는 배경 — 톤 통일을 위한 재생성용
 
-`bg_forest`(깊은 숲)와 `bg_map`(지도 양피지)은 완료 상태입니다. 새 배경들은 `bg_forest`와 톤이 맞아야 하니, 생성할 때 **bg_forest를 참조 이미지로 같이 첨부**하면 일관성이 올라갑니다.
+지금 있는 `bg_forest`와 `bg_map`도 같은 배치에서 다시 뽑으면 전체 톤이 확실히 맞습니다. 아래 두 개를 **가장 먼저** 뽑아서, 마음에 드는 숲을 나머지 9종의 참조 이미지로 쓰는 순서를 권합니다.
+
+### 깊은 숲 — `bg_forest`
+
+*모든 배경의 기준이 되는 그림입니다. 이게 정해지면 나머지는 여기에 맞춥니다.*
+
+```
+Stylized dark fairytale background for a mobile dice game, gothic caricature style: chunky angular shapes, thick dark outlines, flat gouache color planes, minimal detail, NOT photorealistic, NOT 3D. Muted palette: near-black brown, deep blood red, antique gold, aged cream. Vertical mobile game background, portrait 2:3. Distant scenery only, no creatures, no characters, no text, no watermark. Keep it dim and low-contrast so a painted monster standing in front of it stays the brightest thing on screen. Dark vignette at the top, the middle band kept simple and uncluttered, and the lower half fades smoothly into near-black so game UI can sit on it. The scene: an ancient dark pine forest, jagged angular tree trunks crowding both sides, one pale gap of cold light far down the middle, a few tiny red mushrooms on the forest floor.
+```
+
+### 지도 양피지 — `bg_map`
+
+*지도 화면 전용. 다른 배경과 달리 풍경이 아니라 텍스처입니다. 위에 손그림 노드 아이콘과 점선이 얹히므로 **중앙은 반드시 비어 있어야** 합니다. 길이나 지도 그림을 그려 넣으면 실제 노드와 겹쳐서 못 씁니다.*
+
+*숲 배경을 먼저 뽑았다면 **참조 이미지로 첨부**하세요. 팔레트가 맞아야 지도와 전투 화면이 한 게임처럼 보입니다.*
+
+```
+Dark fairytale storybook parchment texture for a mobile dice game. Hand-painted gouache and ink feel, chunky angular shapes, minimal detail, NOT photorealistic, NOT 3D. Muted palette matching the attached forest background: near-black brown, deep umber, aged ochre, faint blood-red stains. Vertical image, portrait 2:3, filling the entire canvas edge to edge. An old darkened parchment map sheet, much darker than ordinary parchment: frayed and torn edges fading into near-black at all four borders, burnt corners, deep folded creases, water stains, a tiny faded compass rose in one corner. The center is slightly lighter and left completely empty and uncluttered — hand-drawn map icons will be placed on top of it later. No text, no letters, no drawings of objects, no paths, no roads, no watermark.
+```
+
+---
+
+## 순서 제안
+
+1. `bg_forest` — 기준점. 마음에 들 때까지 여기서 반복
+2. `bg_map` — 숲을 참조로 첨부
+3. 나머지 9종 — 숲을 참조로 첨부해서 한 번에
+
+이렇게 하면 9개 테마가 전부 한 화가가 그린 것처럼 묶입니다.
