@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.75'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.76'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -109,6 +109,7 @@ function showTitle() {
       <button class="btn primary" id="start-btn">숲으로 들어간다</button>
       <button class="btn ghost" id="enlight-btn">🔮 계몽 ${enlight}</button>
       <button class="btn ghost hidden" id="install-btn">📲 홈 화면에 설치</button>
+      <p class="hint notice">이 앱은 AI를 이용해 제작되었습니다</p>
       <p class="hint">${VERSION}</p>
     </div>`));
   document.getElementById('start-btn').addEventListener('click', () => { run = newRun(); showIntro(); });

@@ -57,6 +57,7 @@ body {
 .title-screen h1 { font-size: 42px; letter-spacing: 6px; color: #c9302f; text-shadow: 0 0 24px rgba(201, 48, 47, .35); }
 .subtitle { color: #9c8f7a; margin-bottom: 10px; }
 .hint { font-size: 11.5px; color: #6f6353; }
+.hint.notice { margin-top: 6px; color: #5f5648; letter-spacing: .2px; } /* v0.76: 로비 AI 제작 안내 */
 
 /* ---------- 맵: 양피지 ---------- */
 .map-scroll { flex: 1; overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; }

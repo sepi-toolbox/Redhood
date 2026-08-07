@@ -1,1 +1,1 @@
-deploy=20260807T034539Z v0.75 chain
+deploy=20260807T034834Z v0.76 ainotice
