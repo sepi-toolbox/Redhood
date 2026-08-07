@@ -1,1 +1,1 @@
-deploy=20260807T084759Z v0.81 bgframe
+deploy=20260807T090042Z v0.82 tablet
