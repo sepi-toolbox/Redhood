@@ -168,6 +168,12 @@ body {
 /* v0.86: 지도 상·하단 — 헤더는 [런 포기][유물][코인], 하단은 [가방][체력바 중앙] */
 .topbar.map-top { gap: 10px; }
 .btn.tiny { border-width: 9px 13px; font-size: 12.5px; }
+/* v0.90: 지도 헤더의 작은 음소거 토글 */
+.mute-mini {
+  background: none; border: none; padding: 2px 4px; font-size: 16px;
+  color: #b8a98e; cursor: pointer; line-height: 1; flex: none;
+}
+.mute-mini:active { filter: brightness(1.3); }
 .player-bar.map-foot {
   justify-content: flex-start; padding-left: 10px; padding-right: 10px;
 }

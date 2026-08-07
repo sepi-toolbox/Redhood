@@ -3,7 +3,9 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.89'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.90'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
+
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -98,6 +100,7 @@ const ENLIGHT_DESC = [
 ];
 
 function showTitle() {
+  setScene('title');
   run = null; battle = null;
   const enlight = loadMeta().enlight;
   app.innerHTML = '';
@@ -109,11 +112,13 @@ function showTitle() {
       <button class="btn primary" id="start-btn">숲으로 들어간다</button>
       <button class="btn ghost" id="enlight-btn">🔮 계몽 ${enlight}</button>
       <button class="btn ghost hidden" id="install-btn">📲 홈 화면에 설치</button>
+      <button class="btn ghost" id="mute-btn">${isMuted() ? '🔇 소리 꺼짐' : '🔊 소리 켜짐'}</button>
       <p class="hint notice">이 앱은 AI를 이용해 제작되었습니다</p>
       <p class="hint">${VERSION}</p>
     </div>`));
   document.getElementById('start-btn').addEventListener('click', () => { run = newRun(); showIntro(); });
   document.getElementById('enlight-btn').addEventListener('click', showEnlightModal);
+  bindMute('mute-btn', (m) => (m ? '🔇 소리 꺼짐' : '🔊 소리 켜짐'));
   const cont = document.getElementById('continue-btn');
   if (cont) cont.addEventListener('click', () => { const r = loadRun(); if (r) { run = r; showMap(); } });
   const install = document.getElementById('install-btn');
@@ -138,6 +143,13 @@ function bgLayer() {
   const themeId = run && run.act <= 3 ? themeOf(run).id : null;
   const bgId = BG_ART.has(themeId) ? themeId : 'forest';   // 전용 배경이 없으면 숲으로 임시 대체
   return `<div class="bg-layer" style="background-image: linear-gradient(rgba(16,12,10,.08), rgba(16,12,10,.24) 60%, #0f0c0b 98%), url('assets/bg/bg_${bgId}.jpg')"></div>`;
+}
+
+// v0.90: 음소거 버튼 — 설정은 저장되고 화면을 다시 그려도 유지된다
+function bindMute(id, label) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('click', () => { el.textContent = label(toggleMute()); });
 }
 
 // ---------- 캐릭터 아트 (v0.30): 이미지 보유 시 이모지 대체 ----------
@@ -209,6 +221,7 @@ function splitLeadEmoji(text) {
 // ---------- 대화 이벤트 화면 ----------
 // 배틀 화면과 같은 골격: 적 위치=NPC, 주사위 위치=검은 그라데이션 대사판, 족보 위치=선택지
 function eventFrame(npc, linesHtml, choicesHtml) {
+  setScene('event');
   const hpPct = Math.max(0, run.hp / run.maxHp * 100);
   return `
     <div class="screen battle-screen event-screen">
@@ -351,6 +364,7 @@ function showEnlightModal() {
 
 // ---------- 상점 (v0.13): 커먼~레어 주사위 + 일반 유물, 화폐는 🪙 ----------
 function showShop() {
+  setScene('shop');
   const stock = rollShopStock(run);
   const sold = new Set();
   const merchant = { name: '잿빛 방물장수', art: '🧙' };
@@ -451,6 +465,7 @@ function startFinalBattle() {
 }
 
 function showFinalEnd(turns) {
+  setScene('end');
   const enlight = loadMeta().enlight;
   app.innerHTML = '';
   app.append(h(`
@@ -503,6 +518,8 @@ function nodeDoodle(type) {
 // v0.70: 좌표 계산 제거. 층=행, 열=최대 4칸인 표로 배치하고 브라우저가 정한 위치를 읽어 잇는다.
 const MAP_COLS = 4;
 function showMap() {
+  setScene('map');
+  prefetch('battle', { act: run.act, kind: 'battle' }); // 다음 전투 곡을 미리 받아둔다
   saveRun(run);
   const { floors } = run.map;
   const F = floors.length;
@@ -534,6 +551,7 @@ function showMap() {
         <button class="btn ghost tiny" id="abandon-btn">런 포기</button>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
         <span class="coin-slot">🪙${run.coins}</span>
+        <button class="mute-mini" id="map-mute">${isMuted() ? '🔇' : '🔊'}</button>
       </header>
       <div class="map-scroll parchment">
         <div class="map-grid">
@@ -568,6 +586,7 @@ function showMap() {
     });
   });
   document.getElementById('bag-btn').addEventListener('click', showBagModal);
+  bindMute('map-mute', (m) => (m ? '🔇' : '🔊'));
   document.getElementById('abandon-btn').addEventListener('click', () => {
     if (confirm('런을 포기할까요?')) { clearSave(); showTitle(); }
   });
@@ -659,6 +678,7 @@ function syncTarget() {
 
 // ---------- 휴식 ----------
 function showRest() {
+  setScene('rest');
   app.innerHTML = '';
   app.append(h(`
     <div class="screen center rest-screen">
@@ -706,6 +726,11 @@ function selectedCatDef() {
 }
 
 function renderBattle(opts = {}) {
+  setScene('battle', {
+    act: run.act,
+    kind: currentNodeType,                                   // battle | elite | boss | final
+    bossId: currentNodeType === 'boss' && run.act <= 3 ? themeOf(run).boss : null,
+  });
   const p = battle.player;
   // v0.27: 재렌더 시 족보 목록 스크롤 위치 보존 (아래 족보 탭 → 맨 위로 튀는 문제)
   const prevSheetScroll = app.querySelector('.sheet-zone')?.scrollTop || 0;
@@ -1533,6 +1558,7 @@ function showReplaceDie(newDie, onDone = null, onCancel = null) {
 
 // ---------- 엔딩 ----------
 function showEnd(victory) {
+  setScene('end');
   app.innerHTML = '';
   app.append(h(`
     <div class="screen center end-screen">
