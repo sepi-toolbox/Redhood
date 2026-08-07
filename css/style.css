@@ -165,6 +165,18 @@ body {
 .map-node2.missed { opacity: .28; filter: grayscale(.7); }
 .map-node2.ahead { opacity: .85; }
 
+/* v0.86: 지도 상·하단 — 헤더는 [런 포기][유물][코인], 하단은 [가방][체력바 중앙] */
+.topbar.map-top { gap: 10px; }
+.btn.tiny { border-width: 9px 13px; font-size: 12.5px; }
+.player-bar.map-foot {
+  justify-content: flex-start; padding-left: 10px; padding-right: 10px;
+}
+/* 체력바는 버튼 폭과 무관하게 화면 정중앙에 고정 */
+.player-bar.map-foot .hp-gauge {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  width: min(214px, 54%); flex: none; max-width: none;
+}
+
 .you-marker {
   flex: none; font-size: 19px;
   filter: drop-shadow(1px 2px 2px rgba(60, 35, 15, .5));
@@ -308,7 +320,7 @@ span.enemy-art {
   100% { transform: rotate(var(--sl, -32deg)) translateX(130%); opacity: 0; }
 }
 .slash {
-  position: absolute; left: -10%; top: 45%; width: 120%; height: 3px;
+  position: absolute; left: -10%; top: var(--fx-y, 45%); width: 120%; height: 3px;
   background: linear-gradient(90deg, transparent, #fff 30%, #ff6b5e 55%, transparent);
   border-radius: 2px; pointer-events: none;
   animation: slashSweep .42s ease-out forwards;
@@ -322,7 +334,7 @@ span.enemy-art {
   100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
 }
 .impact-ring {
-  position: absolute; left: 50%; top: 50%; width: 86px; height: 86px;
+  position: absolute; left: var(--fx-x, 50%); top: var(--fx-y, 50%); width: 86px; height: 86px;
   border-radius: 50%; pointer-events: none;
   animation: ringOut .5s ease-out forwards;
 }
@@ -359,7 +371,7 @@ span.enemy-art {
   100% { transform: translateY(-26px) scale(1); opacity: 0; }
 }
 .dmg-float {
-  position: absolute; top: 34%; left: 50%; margin-left: -18px;
+  position: absolute; top: calc(var(--fx-y, 34%) - 46px); left: var(--fx-x, 50%); margin-left: -18px;
   font-size: 19px; font-weight: 800; color: #ff6b5e;
   text-shadow: 0 1px 3px #000; pointer-events: none;
   animation: dmgFloat .65s ease-out forwards;
