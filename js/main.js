@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.87'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.88'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -181,6 +181,10 @@ function rowIcon(inner) {
 }
 // 족보 아이콘 — 전용 리소스가 오면 assets/icons/combo_{variantId}.png 로 자동 교체
 // 그 전까지는 변형의 능력(버프·디버프)에 대응하는 기존 아이콘을 사용
+// v0.88: 족보 줄 판 — 양피지 띠와 아이콘을 하나로 합친 변형별 전용 그림.
+// 자산이 들어온 변형만 여기에 추가하면 그 줄만 전용 판으로 바뀌고, 나머지는 기본 종이 + 능력 아이콘으로 남는다.
+// 규격은 기본 paper_row와 동일(800x212, 9-슬라이스 55 92)이라 CSS는 그림만 갈아끼운다.
+const COMBO_PLATE_READY = new Set([]);
 const COMBO_ICON_READY = new Set();
 const ABILITY_ICON = {
   strength: 'status_strength', focus: 'status_focus', regen: 'status_regen',
@@ -772,9 +776,10 @@ function renderBattle(opts = {}) {
       <div class="hint-line">${hintHtml()}</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, variant, seal, locked, bd }) => `
-          <button class="sheet-row combo-row t-${variant.tier || 'common'} ${locked ? 'used' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
-            data-cat="${cat.id}" data-variant="${variant.id}" data-locked="${locked ? 1 : 0}">
-            ${rowIcon(comboIcon(cat, variant))}
+          <button class="sheet-row combo-row t-${variant.tier || 'common'} ${locked ? 'used' : ''} ${COMBO_PLATE_READY.has(variant.id) ? 'has-plate' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
+            data-cat="${cat.id}" data-variant="${variant.id}" data-locked="${locked ? 1 : 0}"
+            ${COMBO_PLATE_READY.has(variant.id) ? `style="border-image-source: url('assets/ui/paper_${variant.id}.png')"` : ''}>
+            ${COMBO_PLATE_READY.has(variant.id) ? '' : rowIcon(comboIcon(cat, variant))}
             <span class="row-body">
               <span class="sheet-name">${esc(variant.name)}</span>
               <small class="cat-tag">${esc(cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
