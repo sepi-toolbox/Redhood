@@ -1,1 +1,1 @@
-deploy=20260807T040350Z v0.77 highdice (rebuild)
+deploy=20260807T075510Z v0.78 mon5

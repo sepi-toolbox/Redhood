@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.77'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.78'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -131,7 +131,8 @@ if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
 }
 
 // ---------- 캐릭터 아트 (v0.30): 이미지 보유 시 이모지 대체 ----------
-const ENEMY_ART = new Set(['stray_dog', 'wolf', 'crow', 'will_o_wisp', 'forest_spider', 'thorn_bush', 'twig_golem', 'brook_sprite', 'leech', 'rat_swarm', 'living_broom', 'alpha_dog', 'old_pike', 'cellar_thing', 'old_teddy', 'river_hag', 'swamp_king', 'fog_mother', 'the_buried']);
+const ENEMY_ART = new Set(['stray_dog', 'wolf', 'crow', 'will_o_wisp', 'forest_spider', 'thorn_bush', 'twig_golem', 'brook_sprite', 'leech', 'rat_swarm', 'living_broom', 'alpha_dog', 'old_pike', 'cellar_thing', 'old_teddy', 'river_hag', 'swamp_king', 'fog_mother', 'the_buried',
+  'bog_toad', 'mosquito_swarm', 'mist_wraith', 'pale_stag', 'skeleton']);
 const BG_ART = new Set(['forest']); // 전투 테마 배경 보유 목록
 const NPC_ART = { '잿빛 방물장수': 'peddler', '부러진 이정표': 'signpost', '낯익은 환영': 'redhood',
   '숯쟁이 난쟁이': 'dwarf', '이끼 낀 제단': 'altar', '가라앉은 상자': 'stream_chest',
