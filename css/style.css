@@ -164,7 +164,7 @@ body {
 /* v0.55: 적 그림은 크게 유지하되 레이아웃 공간은 최소 — 그림이 주사위 쪽으로 넘쳐 겹친다 */
 .enemy-zone {
   flex: none; display: flex; justify-content: center; align-items: flex-start; gap: 10px;
-  padding: 4px 8px 0; min-height: 178px; position: relative; overflow: visible; z-index: 0;
+  padding: 4px 8px 0; height: 221px; position: relative; overflow: visible; z-index: 0; /* v0.68: 고정 높이 — 아트 유무·마리 수와 무관하게 아래 영역이 절대 변하지 않는다 */
   background: radial-gradient(ellipse at 50% 0%, rgba(34, 26, 21, .8) 0%, rgba(20, 16, 15, 0) 75%);
 }
 .enemy {
@@ -188,7 +188,14 @@ body {
 .enemy.targeted .target-pin { opacity: 1; }
 .intent { font-size: 15px; font-weight: 700; color: #e8b64b; }
 .intent small { color: #9c8f7a; font-weight: 400; font-size: 11px; }
-.enemy-art { font-size: 86px; margin-bottom: -20px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+.enemy-art { filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .6)); }
+/* v0.68: 아트가 없는 몬스터의 이모지 대체 — 그림과 똑같은 상자를 차지해야 아래 영역이 흔들리지 않는다.
+   (span으로 한정: img에도 .enemy-art 클래스가 붙어 있어 범위를 좁히지 않으면 그림까지 망가진다) */
+span.enemy-art {
+  display: block; text-align: center;
+  height: 216px; line-height: 216px; font-size: 146px;
+  margin-bottom: -78px;
+}
 /* v0.30: 몬스터 전신 아트 — 이모지 자리 대체 (v0.35: 배경 위에서 도드라지게 그림자 강화) */
 .enemy-art-img {
   height: 216px; width: auto; max-width: 100%; object-fit: contain; /* 크기 유지 */
@@ -197,6 +204,7 @@ body {
   pointer-events: none;
 }
 .enemy-zone.multi .enemy-art-img { height: 186px; margin-bottom: -62px; }
+.enemy-zone.multi span.enemy-art { height: 186px; line-height: 186px; font-size: 124px; margin-bottom: -62px; }
 .enemy-zone.multi .enemy-name { font-size: 11.5px; }
 .battle-screen { background-size: cover; background-position: center top; background-repeat: no-repeat; }
 
