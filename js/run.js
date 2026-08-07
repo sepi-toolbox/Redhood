@@ -224,18 +224,13 @@ export function generateMap(enlight = 0) {
       lane = next;
     }
   }
-  // 층별 노드 배열 (lane 오름차순) + 유형 배정
+  // 층별 노드 배열 (lane 오름차순) — 유형은 간선을 만든 뒤에 규칙을 지키며 배정한다
   const floors = [];
   for (let f = 0; f < F - 1; f++) {
-    const lanes = [...laneSet[f]].sort((a, b) => a - b);
-    const nodes = [];
-    for (const lane of lanes) {
-      const fixed = cfg.fixed[String(f + 1)];
-      nodes.push({ type: fixed || rollNodeType(cfg, f + 1, nodes, enlight), lane });
-    }
-    floors.push(nodes);
+    floors.push([...laneSet[f]].sort((a, b) => a - b).map(lane => ({ type: null, lane })));
   }
   floors.push([{ type: cfg.fixed[String(F)] || 'boss', lane: 1 }]); // 보스 층 (표에서는 전체 폭 가운데)
+
   // 간선 인덱스화
   const idxOf = (f, lane) => floors[f].findIndex(nd => nd.lane === lane);
   const edges = floors.map(fl => fl.map(() => []));
@@ -249,7 +244,62 @@ export function generateMap(enlight = 0) {
   for (const nd of floors[F - 2].map((_, i) => i)) edges[F - 2][nd] = [0]; // 마지막 휴식 → 보스
   edges[F - 1] = [[]];
   for (const fl of edges) for (const list of fl) list.sort((a, b) => a - b);
+  assignNodeTypes(cfg, floors, edges, enlight);
   return { floors, edges };
+}
+
+// v0.85: 노드 유형 배정 — 층별로 뽑은 뒤 아래 규칙을 어기면 그 자리만 다시 뽑는다.
+//  1) 휴식 다음에 휴식만 있으면 안 된다 (휴식+다른 것 중 고르는 건 허용)
+//  2) 보스 직전 층은 항상 휴식 → 그 앞 층에서는 휴식이 나오지 않게 막아 (1)과 충돌을 없앤다
+//  3) 갈림길의 두 갈래는 서로 다른 유형이어야 한다
+function assignNodeTypes(cfg, floors, edges, enlight = 0) {
+  const F = floors.length;
+  for (let f = 0; f < F - 1; f++) {
+    const floorNo = f + 1;
+    const fixed = cfg.fixed[String(floorNo)];
+    // 다음 층이 '휴식 고정'이면 이 층에는 휴식을 두지 않는다 (규칙 2 → 규칙 1 보호)
+    const banRest = cfg.fixed[String(floorNo + 1)] === 'rest';
+    const roll = (exclude) => {
+      if (fixed) return fixed;
+      const ban = new Set(exclude || []);
+      if (banRest) ban.add('rest');
+      return rollNodeType(cfg, floorNo, floors[f], enlight, ban);
+    };
+    for (const nd of floors[f]) nd.type = roll();
+    if (fixed) continue;
+
+    // 규칙 3: 한 노드에서 갈라지는 갈래끼리 유형이 겹치면 다시 뽑는다
+    for (let guard = 0; guard < 40; guard++) {
+      let fixedAny = false;
+      if (f > 0) {
+        for (let i = 0; i < floors[f - 1].length; i++) {
+          const kids = edges[f - 1][i] || [];
+          if (kids.length < 2) continue;
+          const seen = new Map();
+          for (const j of kids) {
+            const t = floors[f][j].type;
+            if (seen.has(t)) {
+              floors[f][j].type = roll(kids.map(k => floors[f][k].type));
+              fixedAny = true;
+            } else seen.set(t, j);
+          }
+        }
+      }
+      // 규칙 1: 휴식 노드에서 갈 수 있는 곳이 전부 휴식이면 하나를 바꾼다
+      if (f > 0) {
+        for (let i = 0; i < floors[f - 1].length; i++) {
+          if (floors[f - 1][i].type !== 'rest') continue;
+          const kids = edges[f - 1][i] || [];
+          if (kids.length === 0) continue;
+          if (kids.every(j => floors[f][j].type === 'rest')) {
+            floors[f][kids[0]].type = roll(['rest']);
+            fixedAny = true;
+          }
+        }
+      }
+      if (!fixedAny) break;
+    }
+  }
 }
 
 export function reachableNodes(run) {
@@ -258,11 +308,13 @@ export function reachableNodes(run) {
   return run.map.edges[run.floor - 1][run.pos] || [];
 }
 
-function rollNodeType(cfg, floor, existing, enlight = 0) {
+function rollNodeType(cfg, floor, existing, enlight = 0, ban = null) {
   const w = { ...cfg.nodeWeights };
   if (enlight >= 1 && w.elite) w.elite *= 2; // 계몽 1: 엘리트가 더 자주 나온다
   if (!cfg.eliteFloors.includes(floor)) delete w.elite;
   if (existing.some(nd => nd.type === 'elite')) delete w.elite;
+  if (ban) for (const t of ban) delete w[t];
+  if (Object.keys(w).length === 0) return 'battle'; // 다 막히면 전투로
   const total = Object.values(w).reduce((a, b) => a + b, 0);
   let roll = rng.next() * total;
   for (const [type, weight] of Object.entries(w)) { roll -= weight; if (roll <= 0) return type; }

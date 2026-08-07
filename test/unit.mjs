@@ -195,5 +195,33 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('연계가 무한히 이어지지 않음', doubleChain, 0);
 }
 
+// v0.85: 지도 생성 규칙 — 휴식 강제 연속 금지 / 보스 앞 휴식 / 갈림길 구성 상이
+{
+  const run_ = await import('../js/run.js');
+  const { DB } = await import('../js/data.js');
+  const fixedCfg = DB.act1.map.fixed;
+  let v1 = 0, v2 = 0, v3 = 0;
+  const N = 400;
+  for (let n = 0; n < N; n++) {
+    const { floors, edges } = run_.generateMap(0);
+    const F = floors.length;
+    for (let f = 0; f < F - 1; f++) {
+      for (let i = 0; i < floors[f].length; i++) {
+        const kids = edges[f][i] || [];
+        if (floors[f][i].type === 'rest' && kids.length && kids.every(j => floors[f + 1][j].type === 'rest')) v1++;
+        // 유형이 고정된 층(보스 앞 휴식·보스)은 갈림길 규칙 예외
+        if (!fixedCfg[String(f + 2)] && kids.length >= 2) {
+          const ts = kids.map(j => floors[f + 1][j].type);
+          if (new Set(ts).size !== ts.length) v3++;
+        }
+      }
+    }
+    if (!floors[F - 2].every(nd => nd.type === 'rest')) v2++;
+  }
+  eq('휴식 다음이 휴식뿐인 경우 없음', v1, 0);
+  eq('보스 직전 층은 항상 휴식', v2, 0);
+  eq('갈림길의 두 갈래는 서로 다름', v3, 0);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);

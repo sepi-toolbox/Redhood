@@ -474,7 +474,7 @@ span.enemy-art {
 .die .pip { font-size: 42px; line-height: 1; }
 .die small { /* v0.40: 라벨은 오버레이 — 주사위가 받침 정중앙에 오도록 */
   position: absolute; bottom: 1px; left: 0; right: 0; text-align: center;
-  font-size: 9.5px; font-weight: 700; color: #7e1f1f; height: auto;
+  font-size: 10px; font-weight: 700; color: #ff8d7a; height: auto; letter-spacing: -.2px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, .7);
 }
 /* 다시 굴릴 주사위로 표시된 상태 */
@@ -935,7 +935,29 @@ span.enemy-art {
 .die.art.blank, .die.art.gold, .die.art.special { border-color: transparent; }
 .die.art.gold { box-shadow: none; filter: drop-shadow(0 0 7px rgba(232, 182, 75, .5)); }
 .die.art.special { filter: drop-shadow(0 0 7px rgba(200, 170, 232, .45)); }
-.die.art.mark-reroll { filter: drop-shadow(0 0 7px rgba(201, 48, 47, .75)); box-shadow: none; } /* 받침 실루엣 붉은 발광 */
+/* v0.85: 세 가지 강조를 색으로 확실히 구분하고 세기를 올린다
+   붉은빛 = 다시 굴릴 것 / 금빛 = 지금 고른 족보를 이루는 것 / 보랏빛 = 혼란으로 잠긴 것 */
+.die.art.mark-reroll {
+  box-shadow: none;
+  filter: drop-shadow(0 0 3px rgba(255, 80, 62, .95)) drop-shadow(0 0 11px rgba(201, 48, 47, .9))
+          brightness(.84) saturate(.72);
+}
+.die.art.mark-reroll .pip-art { opacity: .82; }
+.die.art.combo-hint {
+  box-shadow: none;
+  filter: drop-shadow(0 0 4px rgba(255, 219, 132, 1)) drop-shadow(0 0 15px rgba(232, 182, 75, .95))
+          brightness(1.24) saturate(1.18);
+}
+/* 둘 다 해당되면 금빛을 살리되 붉은 기운을 겹쳐 구분한다 */
+.die.art.combo-hint.mark-reroll {
+  filter: drop-shadow(0 0 4px rgba(255, 219, 132, 1)) drop-shadow(0 0 13px rgba(201, 48, 47, .95))
+          brightness(1.12) saturate(1);
+}
+.die.art.combo-hint.mark-reroll .pip-art { opacity: 1; }
+.die.art.confused {
+  box-shadow: none;
+  filter: drop-shadow(0 0 4px rgba(198, 140, 255, 1)) drop-shadow(0 0 15px rgba(125, 91, 166, .95)) saturate(1.15);
+}
 .die.art.spinning .pip-art { opacity: .75; filter: blur(0.7px) drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); }
 
 /* ---------- v0.24 아이콘 아트 (이모지 → 그림) ---------- */
