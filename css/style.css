@@ -221,6 +221,8 @@ span.enemy-art {
 .enemy-zone.multi .enemy.t-boss .enemy-art-img { height: 218px; margin-bottom: -94px; }
 .enemy-zone.multi span.enemy-art { height: 186px; line-height: 186px; font-size: 124px; margin-bottom: -62px; }
 .enemy-zone.multi .enemy-name { font-size: 11.5px; }
+/* v0.73: 격노 예고 — 기준 턴을 넘긴 몬스터의 의도는 붉게 달아오른다 */
+.enemy .intent.raging { color: #ff8a6b; text-shadow: 0 0 8px rgba(224, 92, 75, .7); }
 .battle-screen { background-size: cover; background-position: center top; background-repeat: no-repeat; }
 
 /* 적 공격 연출 — 움찔(윈드업) 후 플레이어 쪽으로 내려찍기 */

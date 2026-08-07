@@ -45,7 +45,7 @@ export function createBattle(run, encounterIds) {
     lastResult: null,
     lastHits: [],                         // [{uid, amount}] — 연출용
   };
-  for (const e of battle.enemies) chooseMove(e);
+  for (const e of battle.enemies) chooseMove(e, 1);
   startTurn(battle, true);
   return battle;
 }
@@ -68,7 +68,7 @@ function spawnEnemy(id, idx, scale) {
     final: !!def.final,
     escalation: def.escalation || 0,      // 최종 보스: 매 턴 공격력 +N
     hp, maxHpInit: hp, stunned: false,
-    atkScale: (def.final ? 1 : scale.atk) * em.atk,
+    atkScale: (def.final ? 1 : scale.atk) * em.atk * (DB.acts.scaling.atkTrim || 1), // v0.73: 초기 수치 하향 (대신 장기전에 격노)
     enlightened,
     block: 0,                             // 방어: 자기 다음 행동 때까지 피해 흡수
     power: 0,                             // 강화: 이후 모든 공격 피해 +power (전투 내 누적)
@@ -398,7 +398,7 @@ export function enemyPhase(battle) {
       e.debuffs.bleed -= 1;
       if (e.hp <= 0) continue; // 출혈사 — 행동 없이 쓰러진다
     }
-    if (e.stunned) { e.stunned = false; chooseMove(e); continue; }
+    if (e.stunned) { e.stunned = false; chooseMove(e, battle.turn + 1); continue; }
     for (const ef of e.nextMove.effects) {
       switch (ef.op) {
         case 'damage': {                                   // ⚔️ 공격 (막·계몽 스케일 + 강화 - 약화)
@@ -431,7 +431,7 @@ export function enemyPhase(battle) {
       }
     }
     if (e.escalation) e.power += e.escalation; // 최종 보스: 매 턴 점진적으로 강해진다
-    chooseMove(e);
+    chooseMove(e, battle.turn + 1);
   }
   battle.dodgeActive = false;
   decayStatuses(battle); // v0.71: 한 턴에 한 스택씩 소멸
@@ -459,13 +459,14 @@ function currentPattern(enemy) {
   return def.phases[idx].pattern;
 }
 
-function chooseMove(enemy) {
+function chooseMove(enemy, turn = 1) {
   const def = DB.enemyById[enemy.defId];
   const st = enemy.patternState;
   st.count = (st.count || 0) + 1;
   // 계몽 패턴: 3번째 행동마다 강력한 계몽 기술 사용
   if (enemy.enlightened && def.enlightenedMove && st.count % 3 === 0) {
     enemy.nextMove = { id: '__enlightened', ...def.enlightenedMove };
+    applyRage(enemy, turn);
     return;
   }
   const pat = currentPattern(enemy);
@@ -486,6 +487,25 @@ function chooseMove(enemy) {
     st.recent.push(moveId);
   }
   enemy.nextMove = { id: moveId, ...def.moves[moveId] };
+  applyRage(enemy, turn);
+}
+
+// v0.73: 격노 — 기준 턴을 넘기면 모든 몬스터가 자기 행동에 '힘 올리기'를 얹는다.
+// 몰래 세지는 게 아니라 예고(의도)에 💪와 '격노'가 그대로 보인다.
+// 일반은 6턴, 정예·보스는 8턴부터 (평균 전투 4~5턴이라 짧은 싸움은 영향 없음).
+function applyRage(enemy, turn) {
+  const cfg = DB.acts.rage;
+  if (!cfg || enemy.final) return;                 // 최종 보스는 자체 escalation 사용
+  const from = cfg.fromTurn[enemy.tier];
+  if (!from || turn < from) return;
+  const amount = cfg.amount[enemy.tier] || 1;
+  const mv = enemy.nextMove;
+  // 이미 강화가 붙은 기술이면 수치만 더한다 (💪가 두 번 뜨지 않게)
+  const had = mv.effects.some(e => e.op === 'empower');
+  const effects = had
+    ? mv.effects.map(e => (e.op === 'empower' ? { ...e, amount: e.amount + amount } : e))
+    : [...mv.effects, { op: 'empower', amount }];
+  enemy.nextMove = { ...mv, name: `${cfg.name} · ${mv.name}`, raging: true, effects };
 }
 
 // 의도 표기 (v0.11): ⚔️공격 / 🛡방어 / 🌀혼란 / 💪강화 / 💚치료 / ❓의문 — 혼합은 병기
