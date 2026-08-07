@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.86'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.87'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -1392,6 +1392,7 @@ function renderLoot() {
   const zone = app.querySelector('.sheet-zone');
   if (!zone) { lootState.onExit(); return; }
   app.querySelector('.screen')?.classList.add('loot-mode');
+  showChest(lootState.groups.length === 0 && lootState.coins <= 0);
   zone.classList.remove('dim');
   zone.classList.add('loot-list');
   zone.innerHTML = rows.join('');
@@ -1417,6 +1418,32 @@ function renderLoot() {
 function syncCoinSlot() {
   const slot = app.querySelector('.coin-slot');
   if (slot && slot.firstChild) slot.firstChild.textContent = `\u{1FA99}${run.coins} `;
+}
+
+// v0.87: 쓰러진 자리에 보물상자를 놓는다.
+// 일반 전투는 나무 상자, 정예·보스는 좋은 상자. 다 가져가면 열린 빈 상자로 바뀐다.
+// 자산이 들어오면 CHEST_ART_READY를 true로 바꾸면 켜진다.
+// (없는 파일을 미리 찔러보면 콘솔에 404가 쌓여 테스트 신호가 더러워지므로 플래그로 막아둔다)
+const CHEST_ART_READY = false;
+function chestSrc(emptied) {
+  if (emptied) return 'assets/ui/chest_open.png';
+  return currentNodeType === 'battle' ? 'assets/ui/chest_normal.png' : 'assets/ui/chest_rare.png';
+}
+function showChest(emptied) {
+  if (!CHEST_ART_READY) return;
+  const ez = app.querySelector('.enemy-zone');
+  if (!ez) return;
+  const src = chestSrc(emptied);
+  const cur = ez.querySelector('.chest-art');
+  if (cur && cur.getAttribute('src') === src) return;   // 이미 같은 상자면 그대로 (깜빡임 방지)
+  const probe = new Image();
+  probe.onload = () => {
+    if (!ez.isConnected) return;
+    ez.classList.add('chest-zone');
+    const tier = currentNodeType === 'boss' ? ' t-boss' : currentNodeType === 'elite' ? ' t-elite' : '';
+    ez.innerHTML = `<img class="chest-art${tier}${emptied ? ' opened' : ''}" src="${src}" alt="" draggable="false">`;
+  };
+  probe.src = src;
 }
 
 // 전리품 묶음 하나를 고르는 모달 — 가로로 긴 선택지 줄, 화면 전환 없음
