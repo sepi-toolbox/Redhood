@@ -14,6 +14,11 @@ const HAVE = new Set([
   'bgm_map', 'bgm_event', 'bgm_shop', 'bgm_rest',
   'bgm_battle1', 'bgm_battle2', 'bgm_battle3',
   'bgm_elite1', 'bgm_elite2', 'bgm_elite3',
+  // v0.92: 보스 9인 전용 테마 + 최종전
+  'bgm_boss_wolf', 'bgm_boss_river_hag', 'bgm_boss_old_teddy',
+  'bgm_boss_swamp_king', 'bgm_boss_fog_mother', 'bgm_boss_the_buried',
+  'bgm_boss_lucid_king', 'bgm_boss_the_maw', 'bgm_boss_false_saint',
+  'bgm_final',
 ]);
 
 // 장면 → 곡 후보 (앞에서부터 있는 것을 쓴다)
