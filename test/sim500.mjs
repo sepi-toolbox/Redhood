@@ -152,6 +152,14 @@ console.log(`클리어(3막 보스 처치): ${stats.wins}판 (${(stats.wins / st
 console.log(`도달 막 분포: ${[1,2,3].map(a => `${a}막 ${stats.acts.filter(x=>x===a).length}`).join(' / ')}`);
 console.log(`평균 도달 층: ${avg(stats.floorReached).toFixed(1)} (중앙값 ${med(stats.floorReached)})`);
 console.log(`전투당 평균 턴: ${avg(stats.turns).toFixed(1)}`);
+{
+  const h = {};
+  for (const t of stats.turns) { const k = t >= 10 ? '10+' : String(t); h[k] = (h[k] || 0) + 1; }
+  const tot = stats.turns.length;
+  const keys = Object.keys(h).sort((a, b) => (a === '10+' ? 99 : +a) - (b === '10+' ? 99 : +b));
+  console.log('전투 길이 분포: ' + keys.map(k => `${k}턴 ${(h[k] / tot * 100).toFixed(1)}%`).join(' / '));
+  console.log(`격노 구간(6턴 이상) 진입: ${(stats.turns.filter(t => t >= 6).length / tot * 100).toFixed(1)}%`);
+}
 console.log(`족보 1회 평균 피해: ${avg(stats.dmg).toFixed(1)} (중앙값 ${med(stats.dmg)})`);
 const top = o => Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,8);
 console.log(`\n가장 많이 쓰인 족보 Top8:`);

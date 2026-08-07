@@ -118,5 +118,31 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('0에서 더 내려가지 않음', b.buffs.strength, 0);
 }
 
+// v0.73: 격노 — 기준 턴 전에는 평소대로, 넘긴 뒤에는 모든 몬스터가 눈에 보이게 힘을 올린다
+{
+  const eng = await import('../js/engine.js');
+  const mk = (id) => {
+    const run = { hp: 99999, maxHp: 99999, act: 1, floor: 1, enlight: 0, relics: [],
+      dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } };
+    return eng.createBattle(run, [id], 'battle');
+  };
+  const step = (b, n) => { for (let k = 0; k < n; k++) { b.await = 'enemy'; eng.enemyPhase(b); } };
+  const dog = mk('stray_dog');           // 일반 → 6턴부터
+  eq('일반 1턴은 격노 아님', !!dog.enemies[0].nextMove.raging, false);
+  step(dog, 4);                          // 5턴
+  eq('일반 5턴까지 격노 없음', !!dog.enemies[0].nextMove.raging, false);
+  step(dog, 1);                          // 6턴
+  eq('일반 6턴부터 격노', !!dog.enemies[0].nextMove.raging, true);
+  eq('격노는 강화를 동반', dog.enemies[0].nextMove.effects.some(e => e.op === 'empower'), true);
+  const powerBefore = dog.enemies[0].power;
+  step(dog, 1);
+  eq('격노 후 실제로 강해짐', dog.enemies[0].power > powerBefore, true);
+  const boss = mk('river_hag');          // 보스 → 8턴부터 (유예)
+  step(boss, 6);                         // 7턴
+  eq('보스 7턴까지 격노 없음', !!boss.enemies[0].nextMove.raging, false);
+  step(boss, 1);                         // 8턴
+  eq('보스 8턴부터 격노', !!boss.enemies[0].nextMove.raging, true);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
