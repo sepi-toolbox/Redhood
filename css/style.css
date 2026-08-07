@@ -608,6 +608,8 @@ span.enemy-art {
 .sheet-row.t-uncommon .sheet-name { color: #2e5876; }
 .sheet-row.t-rare .sheet-name { color: #5d3f86; }
 .sheet-row.t-epic .sheet-name { color: #8a6516; }
+/* v0.89: 족보 줄은 등급을 '판 그림'이 말한다 — 글자색은 통일해 어떤 판 위에서도 같게 읽힌다 */
+.sheet-row.combo-row .sheet-name { color: #3a2a1c; }
 .sheet-row.selected { filter: brightness(1.12) saturate(1.06); } /* v0.59: 발광 제거, 배경만 밝게 */
 .sheet-row.used { opacity: .32; filter: grayscale(.6); }
 .sheet-row.used .sheet-preview { color: #6f6353; }
