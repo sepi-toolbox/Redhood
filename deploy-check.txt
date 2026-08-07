@@ -1,1 +1,1 @@
-deploy=20260807T024945Z v0.71 statusdecay
+deploy=20260807T030240Z v0.72 eliterelic

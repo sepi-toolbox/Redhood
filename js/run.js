@@ -382,6 +382,18 @@ function pickN(pool, n) {
   return out;
 }
 
+// v0.72: 정예는 유물을 반드시 떨어뜨린다. 기본은 일반 유물, 10%로 정예 유물.
+// (일반 유물이 동나면 정예 유물로, 그마저 없으면 빈 배열 → 전리품 목록에서 그 줄이 사라진다)
+export const ELITE_RELIC_UPGRADE = 0.10;
+export function eliteRelicChoices(run) {
+  const normals = DB.relics.filter(r => r.tier === 'normal' && !run.relics.includes(r.id));
+  const elites = DB.relics.filter(r => r.tier === 'elite' && !run.relics.includes(r.id));
+  let pool = rng.next() < ELITE_RELIC_UPGRADE ? elites : normals;
+  if (pool.length === 0) pool = pool === normals ? elites : normals;
+  if (pool.length === 0) return [];
+  return pickN(pool, 3).map(r => ({ kind: 'relic', item: r }));
+}
+
 export function bossRelicChoices(run) {
   return pickN(DB.relics.filter(r => r.tier === 'elite' && !run.relics.includes(r.id)), 3)
     .map(r => ({ kind: 'relic', item: r }));

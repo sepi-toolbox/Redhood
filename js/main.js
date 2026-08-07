@@ -1,9 +1,9 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
-import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
+import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.71'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.72'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -1320,10 +1320,16 @@ const LOOT_META = {
 
 function showReward() {
   const choices = rollRewards(run, currentNodeType);
+  const groups = choices.length ? [{ kind: choices[0].kind, choices }] : [];
+  // v0.72: 정예는 유물 확정 드랍 — 일반 보상과 별개의 줄로 붙는다
+  if (currentNodeType === 'elite') {
+    const relics = eliteRelicChoices(run);
+    if (relics.length) groups.push({ kind: 'relic', choices: relics, label: relics[0].item.tier === 'elite' ? '정예 유물' : '유물' });
+  }
   lootState = {
     title: '승리!',
     coins: lastCoinGain,
-    groups: choices.length ? [{ kind: choices[0].kind, choices }] : [],
+    groups,
     onExit: () => { saveRun(run); showMap(); },
   };
   renderLoot();

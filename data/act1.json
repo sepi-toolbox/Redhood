@@ -101,9 +101,8 @@
     "elite": {
       "choices": 3,
       "pool": {
-        "category": 40,
-        "dice": 30,
-        "relic": 30
+        "category": 55,
+        "dice": 45
       },
       "tierWeights": {
         "uncommon": 60,

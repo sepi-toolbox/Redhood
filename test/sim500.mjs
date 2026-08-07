@@ -120,6 +120,11 @@ for (let i = 0; i < RUNS; i++) {
         run.coins += run_.coinReward(run, node.type);
         const cards = run_.rollRewards(run, node.type);
         takeReward(run, cards[Math.floor(Math.random() * cards.length)]);
+        // v0.72: 정예는 유물 확정 드랍
+        if (node.type === 'elite') {
+          const er = run_.eliteRelicChoices(run);
+          if (er.length) takeReward(run, er[Math.floor(Math.random() * er.length)]);
+        }
       }
     } else if (node.type === 'shop') {
       const stock = run_.rollShopStock(run);
