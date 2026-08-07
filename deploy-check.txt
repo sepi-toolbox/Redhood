@@ -1,1 +1,1 @@
-deploy=20260807T090042Z v0.82 tablet
+deploy=20260807T091255Z v0.83 bgbright
