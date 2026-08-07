@@ -38,6 +38,10 @@ Stylized dark fairytale object for the dice game REDHOOD. Match the EXACT painti
 
 파일: `assets/ui/chest_normal.png` / `chest_rare.png` / `chest_open.png`
 
-전리품 화면에서 몬스터가 있던 자리에 등급에 맞는 상자를 놓고, 목록이 [나가기]만 남으면 `chest_open`으로 교체합니다. 자산이 없으면 상자 없이 지금처럼 표시됩니다.
+연동 코드는 v0.87에 이미 들어가 있습니다. 세 장을 올리면 `main.js`의 `CHEST_ART_READY`를 `true`로 바꾸고 서비스 워커 캐시 목록에 추가하는 것으로 바로 켜집니다.
+
+동작은 이렇습니다. 몬스터가 쓰러진 **바로 그 자리에 같은 크기로** 상자가 떨어집니다. 일반 전투는 216px, 정예는 234px, 보스는 254px로 몬스터 격에 맞춰 커지고, 아래 주사위 영역으로 넘쳐 내려가는 것도 몬스터와 동일합니다. 전리품을 다 가져가서 [나가기]만 남으면 `chest_open`으로 바뀝니다.
+
+**그래서 상자는 몬스터와 같은 무게로 그려져야 합니다.** 작고 귀여운 소품이 아니라 화면 중앙을 차지하는 주인공입니다.
 
 **세 장을 한 시트로 뽑고 싶다면** 위 묘사를 `Landscape 3:2 image. A 1x3 row of three chests, equal size, equal spacing, identical framing` 로 바꾸고 `IN ORDER — {1} / {2} / {3}` 으로 이어 붙이세요. 다만 셋의 크기가 정확히 같아야 화면에서 안 튀므로, 낱장 3번이 더 안전합니다.
