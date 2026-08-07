@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.65'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.66'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -691,7 +691,7 @@ function renderBattle(opts = {}) {
       <header class="topbar">
         <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
         <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
-        <span>🪙${run.coins} <span class="hp">❤️</span></span>
+        <span class="coin-slot">🪙${run.coins} <span class="hp">❤️</span></span>
       </header>
       <div class="enemy-zone ${multi ? 'multi' : ''}">
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
@@ -1329,8 +1329,6 @@ function lootRowHtml(icon, name, sub, attrs) {
 }
 
 function renderLoot() {
-  const themeId = run.act <= 3 ? themeOf(run).id : null;
-  const bgId = BG_ART.has(themeId) ? themeId : 'forest';
   const rows = [];
   if (lootState.coins > 0) rows.push(lootRowHtml(LOOT_META.coins.icon, '재화', `+${lootState.coins}`, 'data-act="coins"'));
   lootState.groups.forEach((g, i) => {
@@ -1338,31 +1336,37 @@ function renderLoot() {
     rows.push(lootRowHtml(m.icon, g.label || m.name, `${g.choices.length}개 중 하나를 고른다`, `data-act="group" data-idx="${i}"`));
   });
   rows.push(lootRowHtml('\u{1F6AA}', '나가기', '', 'data-act="exit"'));
-  app.innerHTML = '';
+  // v0.66: 전투 화면을 지우지 않고 그 위에 얹는다 — 배경·적·주사위가 그대로 보인다
+  document.getElementById('loot-overlay')?.remove();
   app.append(h(`
-    <div class="screen loot-screen" style="background-image: linear-gradient(rgba(16,12,10,.45), rgba(16,12,10,.6) 42%, #14100f 78%), url('assets/bg/bg_${bgId}.jpg')">
-      <header class="topbar">
-        <span>\u{1F3C6} 전리품</span>
-        <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
-        <span>\u{1FA99}${run.coins}</span>
-      </header>
-      <h2 class="loot-title">${esc(lootState.title)}</h2>
-      <div class="sheet-zone choice-zone loot-list">${rows.join('')}</div>
+    <div class="loot-overlay" id="loot-overlay">
+      <div class="loot-panel">
+        <h2 class="loot-title">${esc(lootState.title)}</h2>
+        <div class="loot-list">${rows.join('')}</div>
+      </div>
     </div>`));
-  app.querySelectorAll('.loot-row').forEach(el => {
+  const ov = document.getElementById('loot-overlay');
+  ov.querySelectorAll('.loot-row').forEach(el => {
     el.addEventListener('click', () => {
       const act = el.dataset.act;
       if (act === 'coins') {
-        run.coins += lootState.coins; lootState.coins = 0; saveRun(run); renderLoot();
+        run.coins += lootState.coins; lootState.coins = 0; saveRun(run); syncCoinSlot(); renderLoot();
       } else if (act === 'group') {
         showLootModal(parseInt(el.dataset.idx, 10));
       } else {
         // 재화는 선택의 여지가 없으므로 안 받고 나가도 손해 보지 않게 자동 정산
         if (lootState.coins > 0) { run.coins += lootState.coins; lootState.coins = 0; }
+        ov.remove();
         lootState.onExit();
       }
     });
   });
+}
+
+// 뒤에 남아 있는 전투 화면의 코인 표시만 맞춰준다
+function syncCoinSlot() {
+  const slot = app.querySelector('.coin-slot');
+  if (slot && slot.firstChild) slot.firstChild.textContent = `\u{1FA99}${run.coins} `;
 }
 
 // 전리품 묶음 하나를 고르는 모달 — 가로로 긴 선택지 줄, 화면 전환 없음
