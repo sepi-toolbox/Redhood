@@ -1,1 +1,1 @@
-deploy=20260806T235208Z v0.64 hintdesc
+deploy=20260807T000523Z v0.65 lootlist

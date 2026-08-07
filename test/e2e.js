@@ -122,15 +122,23 @@ async function playTurn(page) {
       if (!sawSlash && await page.locator('.slash, .dmg-float').count()) sawSlash = true;
       continue;
     }
-    if (await page.locator('.reward-screen').count()) {
-      const chest = page.locator('#chest');
-      if (await chest.count()) { await chest.click(); await page.waitForTimeout(700); }
-      const cards = page.locator('.reward-cards .card');
-      if (await cards.count() > 0) {
-        await cards.first().click(); await page.waitForTimeout(80);
-        const rep = page.locator('.replace-btn');
-        if (await rep.count()) { await rep.first().click(); await page.waitForTimeout(80); }
-      } else await page.locator('#skip-btn').click();
+    // v0.65: 전리품 목록 — 재화 → 묶음(모달에서 하나 선택) → 나가기
+    if (await page.locator('.loot-screen').count()) {
+      const coin = page.locator('.loot-row[data-act="coins"]');
+      if (await coin.count()) { await coin.click(); await page.waitForTimeout(120); continue; }
+      const group = page.locator('.loot-row[data-act="group"]');
+      if (await group.count()) {
+        await group.first().click(); await page.waitForTimeout(200);
+        const pick = page.locator('.loot-choice');
+        if (await pick.count()) {
+          await pick.first().click(); await page.waitForTimeout(150);
+          const rep = page.locator('#replace-modal .replace-btn');
+          if (await rep.count()) { await rep.first().click(); await page.waitForTimeout(150); }
+        } else await page.locator('#loot-modal-close').click();
+        continue;
+      }
+      await page.locator('.loot-row[data-act="exit"]').click();
+      await page.waitForTimeout(120);
       continue;
     }
     if (await page.locator('.rest-screen').count()) {

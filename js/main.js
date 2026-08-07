@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.64'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.65'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -122,6 +122,11 @@ function showTitle() {
     });
     if (deferredInstall) install.classList.remove('hidden');
   }
+}
+
+// v0.65: 로컬에서만 열리는 테스트 훅 — 보스 전리품처럼 손으로 도달하기 어려운 화면 검증용
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  window.__dev = { showBossReward: (cb) => showBossReward(cb || (() => showMap())), get run() { return run; } };
 }
 
 // ---------- 캐릭터 아트 (v0.30): 이미지 보유 시 이모지 대체 ----------
@@ -376,57 +381,17 @@ function showShop() {
   render();
 }
 
-// ---------- 보스 전리품: 정예 유물 → 전설(에픽) 족보/주사위 ----------
-function showLootCards(title, subtitle, choices, onPick) {
-  app.innerHTML = '';
-  app.append(h(`
-    <div class="screen center reward-screen">
-      <h2>${title}</h2>
-      <p>${esc(subtitle)}</p>
-      <div class="reward-cards">
-        ${choices.map((c, i) => {
-          const t = c.item.tier;
-          const isCat = c.kind === 'category';
-          return `
-          <button class="card pop-in r-${t} ${SHINY[t] || ''}" data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
-            <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : `📜 ${esc(c.item.cat.name)}`}</span>
-            <span class="card-name">${esc(isCat ? c.item.variant.name : c.item.name)}</span>
-            <span class="card-text">${
-              c.kind === 'die' ? `[${c.item.faces.join(',')}]<br>${esc(c.item.desc)}` :
-              c.kind === 'relic' ? esc(c.item.desc) : `✨ ${esc(c.item.variant.abilityText || '')}`
-            }</span>
-            <span class="card-rarity">${esc(TIER_KO[t] || t)}</span>
-          </button>`;
-        }).join('')}
-      </div>
-      <button class="btn ghost pop-in" id="skip-btn" style="--d:${0.2 + choices.length * 0.22}s">넘어가기</button>
-    </div>`));
-  app.querySelectorAll('.reward-cards .card').forEach(el => {
-    el.addEventListener('click', () => onPick(choices[parseInt(el.dataset.idx, 10)]));
-  });
-  document.getElementById('skip-btn').addEventListener('click', () => onPick(null));
-}
-
+// ---------- 보스 전리품 ----------
+// v0.65: 전용 전면 화면(showLootCards)을 없애고 일반 승리와 같은 전리품 목록 + 모달로 통일
 function showBossReward(onDone) {
-  const stage2 = () => {
-    const legend = bossLegendaryChoices(run);
-    if (legend.length === 0) return onDone();
-    showLootCards('🏆 전리품', '전설의 유산 — 하나를 고른다', legend, (c) => {
-      if (!c) return onDone();
-      if (c.kind === 'category') {
-        (run.categories[c.item.cat.id] = run.categories[c.item.cat.id] || []).push(c.item.variant.id);
-        onDone();
-      } else {
-        showReplaceDie(c.item, onDone, onDone);
-      }
-    });
-  };
   const relics = bossRelicChoices(run);
-  if (relics.length === 0) return stage2();
-  showLootCards('🏆 전리품', '정예 유물 — 하나를 고른다', relics, (c) => {
-    if (c) applyRelicPickup(run, c.item);
-    stage2();
-  });
+  const legend = bossLegendaryChoices(run);
+  const groups = [];
+  if (relics.length) groups.push({ kind: 'relic', choices: relics, label: '정예 유물' });
+  if (legend.length) groups.push({ kind: 'legend', choices: legend, label: '전설의 유산' });
+  if (groups.length === 0) return onDone();
+  lootState = { title: '보스 격파!', coins: 0, groups, onExit: onDone };
+  renderLoot();
 }
 
 // 보스 처치 후: 1·2막 → 회복하고 다음 막 / 3막 → 계몽 +1, 최후의 어둠
@@ -1324,87 +1289,134 @@ function finishBattle() {
     if (currentNodeType === 'boss') { showBossReward(afterBossVictory); return; }
     // 코인 획득 (v0.13 — 계몽 13: -25%)
     lastCoinGain = coinReward(run, currentNodeType);
+    run.coins -= lastCoinGain; // v0.65: 전리품 창의 '재화'를 눌러서 받는다 (coinReward가 미리 더해둔 몫을 되돌림)
     showReward();
   }, 850);
 }
 
-// ---------- 보상: 범주 상자 → 열면 그 범주의 카드 3장이 튀어나옴 ----------
-const KIND_BOX = {
-  category: { icon: '📜', name: '낡은 두루마리', desc: '족보가 잠들어 있다' },
-  die: { icon: '🎲', name: '가죽 주머니', desc: '주사위가 굴러다닌다' },
-  relic: { icon: '🎁', name: '숲의 상자', desc: '유물이 숨겨져 있다' },
+// ---------- 보상: 전리품 목록 ----------
+// v0.65: 전투 승리 → 전리품 목록 한 장. 항목을 누르면 페이지가 바뀌는 대신 모달이 열린다.
+// lootState.groups = [{ kind, choices, label }] — 받으면 그 묶음이 목록에서 사라진다.
+let lootState = null;
+const LOOT_META = {
+  coins: { icon: '\u{1FA99}', name: '재화' },
+  category: { icon: '\u{1F4DC}', name: '족보' },
+  die: { icon: '\u{1F3B2}', name: '주사위' },
+  relic: { icon: '\u{1FAAC}', name: '유물' },
+  legend: { icon: '\u{1F31F}', name: '전설의 유산' },
 };
 
 function showReward() {
   const choices = rollRewards(run, currentNodeType);
-  if (choices.length === 0) { saveRun(run); showMap(); return; }
-  const box = KIND_BOX[choices[0].kind];
-  app.innerHTML = '';
-  app.append(h(`
-    <div class="screen center reward-screen">
-      <h2>승리!</h2>
-      <p class="coin-gain">🪙 +${lastCoinGain} <span class="hint">(보유 ${run.coins})</span></p>
-      <p>${esc(box.desc)}</p>
-      <button class="chest" id="chest">
-        <span class="chest-icon">${box.icon}</span>
-        <span class="chest-name">${esc(box.name)}</span>
-      </button>
-      <p class="hint">탭해서 연다</p>
-    </div>`));
-  document.getElementById('chest').addEventListener('click', function open() {
-    const chest = document.getElementById('chest');
-    chest.classList.add('opening');
-    chest.disabled = true;
-    setTimeout(() => showRewardCards(choices, box), 480);
-  }, { once: true });
+  lootState = {
+    title: '승리!',
+    coins: lastCoinGain,
+    groups: choices.length ? [{ kind: choices[0].kind, choices }] : [],
+    onExit: () => { saveRun(run); showMap(); },
+  };
+  renderLoot();
 }
 
-function showRewardCards(choices, box) {
+function lootRowHtml(icon, name, sub, attrs) {
+  return `
+    <button class="sheet-row choice-row loot-row" ${attrs}>
+      ${rowIcon(`<span class="row-ico-emoji">${icon}</span>`)}
+      <span class="row-body">
+        <span class="choice-main">${esc(name)}</span>
+        ${sub ? `<span class="choice-sub">${esc(sub)}</span>` : ''}
+      </span>
+    </button>`;
+}
+
+function renderLoot() {
+  const themeId = run.act <= 3 ? themeOf(run).id : null;
+  const bgId = BG_ART.has(themeId) ? themeId : 'forest';
+  const rows = [];
+  if (lootState.coins > 0) rows.push(lootRowHtml(LOOT_META.coins.icon, '재화', `+${lootState.coins}`, 'data-act="coins"'));
+  lootState.groups.forEach((g, i) => {
+    const m = LOOT_META[g.kind];
+    rows.push(lootRowHtml(m.icon, g.label || m.name, `${g.choices.length}개 중 하나를 고른다`, `data-act="group" data-idx="${i}"`));
+  });
+  rows.push(lootRowHtml('\u{1F6AA}', '나가기', '', 'data-act="exit"'));
   app.innerHTML = '';
   app.append(h(`
-    <div class="screen center reward-screen">
-      <h2>${box.icon} ${esc(box.name)}</h2>
-      <p>하나를 고른다</p>
-      <div class="reward-cards">
-        ${choices.map((c, i) => {
-          const isCat = c.kind === 'category';
-          const isNew = isCat && !c.item.owned;
-          return `
-          <button class="card pop-in r-${c.item.tier} ${SHINY[c.item.tier] || ''} ${isNew ? 'new-cat' : ''}"
-            data-idx="${i}" style="--d:${0.12 + i * 0.22}s">
-            ${isNew ? '<span class="new-badge">새 족보!</span>' : ''}
-            <span class="cost">${c.kind === 'die' ? '🎲 주사위' : c.kind === 'relic' ? (c.item.icon || '🪬') + ' 유물' : `📜 ${esc(isCat ? c.item.cat.name : '족보')}`}</span>
-            <span class="card-name">${esc(isCat ? c.item.variant.name : c.item.name)}</span>
-            <span class="card-text">${
-              c.kind === 'die' ? `[${c.item.faces.join(',')}]<br>${esc(c.item.desc)}` :
-              c.kind === 'relic' ? esc(c.item.desc) :
-              isNew
-                ? `새 족보 획득<br>✨ ${esc(c.item.variant.abilityText || '')}`
-                : `${esc(c.item.cat.name)} 변형 추가<br>✨ ${esc(c.item.variant.abilityText || '')}`
-            }</span>
-            <span class="card-rarity">${esc(TIER_KO[c.item.tier] || c.item.tier)}</span>
-          </button>`;
-        }).join('')}
-      </div>
-      <button class="btn ghost pop-in" id="skip-btn" style="--d:${0.2 + choices.length * 0.22}s">넘어가기</button>
+    <div class="screen loot-screen" style="background-image: linear-gradient(rgba(16,12,10,.45), rgba(16,12,10,.6) 42%, #14100f 78%), url('assets/bg/bg_${bgId}.jpg')">
+      <header class="topbar">
+        <span>\u{1F3C6} 전리품</span>
+        <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
+        <span>\u{1FA99}${run.coins}</span>
+      </header>
+      <h2 class="loot-title">${esc(lootState.title)}</h2>
+      <div class="sheet-zone choice-zone loot-list">${rows.join('')}</div>
     </div>`));
-  app.querySelectorAll('.reward-cards .card').forEach(el => {
+  app.querySelectorAll('.loot-row').forEach(el => {
     el.addEventListener('click', () => {
-      const c = choices[parseInt(el.dataset.idx, 10)];
-      if (c.kind === 'relic') { applyRelicPickup(run, c.item); saveRun(run); showMap(); }
-      else if (c.kind === 'category') {
-        (run.categories[c.item.cat.id] = run.categories[c.item.cat.id] || []).push(c.item.variant.id);
-        saveRun(run); showMap();
+      const act = el.dataset.act;
+      if (act === 'coins') {
+        run.coins += lootState.coins; lootState.coins = 0; saveRun(run); renderLoot();
+      } else if (act === 'group') {
+        showLootModal(parseInt(el.dataset.idx, 10));
+      } else {
+        // 재화는 선택의 여지가 없으므로 안 받고 나가도 손해 보지 않게 자동 정산
+        if (lootState.coins > 0) { run.coins += lootState.coins; lootState.coins = 0; }
+        lootState.onExit();
       }
-      else showReplaceDie(c.item);
     });
   });
-  document.getElementById('skip-btn').addEventListener('click', () => { saveRun(run); showMap(); });
+}
+
+// 전리품 묶음 하나를 고르는 모달 — 가로로 긴 선택지 줄, 화면 전환 없음
+function showLootModal(gi) {
+  const g = lootState.groups[gi];
+  if (!g) return;
+  app.append(h(`
+    <div class="modal-back" id="loot-modal">
+      <div class="modal loot-modal-box">
+        <h3>${LOOT_META[g.kind].icon} ${esc(g.label || LOOT_META[g.kind].name)} — 하나를 고른다</h3>
+        <div class="loot-choices">
+          ${g.choices.map((c, i) => {
+            const isCat = c.kind === 'category';
+            const isNew = isCat && !c.item.owned;
+            const name = isCat ? c.item.variant.name : c.item.name;
+            const sub = c.kind === 'die' ? `[${c.item.faces.join(',')}] ${c.item.desc || ''}`
+              : c.kind === 'relic' ? (c.item.desc || '')
+              : `${isNew ? '새 족보' : `${c.item.cat.name} 변형`} · ${c.item.variant.abilityText || '부가 없음'}`;
+            return `
+              <button class="sheet-row choice-row loot-choice t-${c.item.tier}" data-idx="${i}">
+                ${rowIcon(`<span class="row-ico-emoji">${LOOT_META[c.kind].icon}</span>`)}
+                <span class="row-body">
+                  <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(TIER_KO[c.item.tier] || '')}</small></span>
+                  <span class="choice-sub">${esc(sub)}</span>
+                </span>
+              </button>`;
+          }).join('')}
+        </div>
+        <button class="btn ghost" id="loot-modal-close">돌아가기</button>
+      </div>
+    </div>`));
+  const back = document.getElementById('loot-modal');
+  const close = () => back.remove();
+  const take = () => { lootState.groups.splice(gi, 1); close(); saveRun(run); renderLoot(); };
+  back.querySelectorAll('.loot-choice').forEach(el => {
+    el.addEventListener('click', () => {
+      const c = g.choices[parseInt(el.dataset.idx, 10)];
+      if (c.kind === 'relic') { applyRelicPickup(run, c.item); take(); }
+      else if (c.kind === 'category') {
+        (run.categories[c.item.cat.id] = run.categories[c.item.cat.id] || []).push(c.item.variant.id);
+        take();
+      } else {
+        // 주사위는 교체 대상 선택이 한 단계 더 필요하다 (모달 위에 모달)
+        showReplaceDie(c.item, take, () => {});
+      }
+    });
+  });
+  document.getElementById('loot-modal-close').addEventListener('click', close);
+  back.addEventListener('click', (e) => { if (e.target === back) close(); });
 }
 
 function showReplaceDie(newDie, onDone = null, onCancel = null) {
   app.append(h(`
-    <div class="modal-back">
+    <div class="modal-back" id="replace-modal">
       <div class="modal">
         <h3>${esc(newDie.name)} 획득 — 어느 주사위와 교체?</h3>
         <p class="modal-text">${esc(newDie.desc || '')}</p>
@@ -1417,15 +1429,17 @@ function showReplaceDie(newDie, onDone = null, onCancel = null) {
         <button class="btn ghost" id="replace-cancel">${onDone ? '가지지 않는다' : '취소 (보상 화면으로)'}</button>
       </div>
     </div>`));
-  app.querySelectorAll('.replace-btn').forEach(el => {
+  const rback = document.getElementById('replace-modal');
+  rback.querySelectorAll('.replace-btn').forEach(el => {
     el.addEventListener('click', () => {
       run.dice[parseInt(el.dataset.idx, 10)] = newDie.id;
       saveRun(run);
+      rback.remove(); // v0.65: 첫 번째 모달이 아니라 자기 자신을 닫는다
       if (onDone) onDone(); else showMap();
     });
   });
-  document.getElementById('replace-cancel').addEventListener('click', () => {
-    app.querySelector('.modal-back').remove();
+  rback.querySelector('#replace-cancel').addEventListener('click', () => {
+    rback.remove();
     if (onCancel) onCancel();
     else if (onDone) onDone();
   });

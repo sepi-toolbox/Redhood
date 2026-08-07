@@ -681,6 +681,24 @@ body {
   animation: stampIn .38s cubic-bezier(.34, 1.3, .64, 1) calc(var(--d, 0s) + .42s) forwards;
 }
 
+/* ---------- v0.65: 전리품 목록 (승리 후 한 장, 선택은 모달로) ---------- */
+.loot-screen { background-size: cover; background-position: center; }
+.loot-title {
+  flex: none; text-align: center; font-size: 22px; color: #e8b64b;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .75); padding: 14px 0 10px;
+}
+.loot-list { flex: 1 1 auto; }
+.loot-row .choice-sub { color: #7a5a2e; }
+/* 모달 안의 전리품 선택지 — 가로로 긴 줄, 세로로 쌓인다 */
+.loot-modal-box { width: 88vw; }
+.loot-choices { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding: 2px 0 2px 12px; }
+.loot-choice { width: 100%; }
+.loot-choice .choice-sub { white-space: normal; line-height: 1.4; }
+.loot-choice.t-uncommon .choice-main { color: #2e5876; }
+.loot-choice.t-rare .choice-main { color: #5d3f86; }
+.loot-choice.t-epic .choice-main { color: #8a6516; }
+.row-ico-emoji { font-size: 21px; line-height: 1; }
+
 /* ---------- 보상/휴식/엔딩 ---------- */
 .reward-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .card {
