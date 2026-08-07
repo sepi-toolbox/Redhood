@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.80'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.81'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -130,6 +130,16 @@ if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
   window.__dev = { showBossReward: (cb) => showBossReward(cb || (() => showMap())), get run() { return run; } };
 }
 
+// v0.81: 배경 층 — 화면 위쪽 띠에만 그린다.
+// 전체에 깔면 그림의 아래쪽(바닥·물가·마룻바닥)이 족보 영역에 통째로 가려져 하늘만 보였다.
+// 띠 안에서 cover로 채우고 세로 55% 지점을 잡아, 위 비네트와 아래 검정을 잘라내고 알맹이만 보여준다.
+// (CSS 변수로 넘기면 브라우저가 URL을 stylesheet 기준으로 풀어버려서, 인라인 배경으로 직접 지정한다)
+function bgLayer() {
+  const themeId = run && run.act <= 3 ? themeOf(run).id : null;
+  const bgId = BG_ART.has(themeId) ? themeId : 'forest';   // 전용 배경이 없으면 숲으로 임시 대체
+  return `<div class="bg-layer" style="background-image: linear-gradient(rgba(16,12,10,.22), rgba(16,12,10,.40) 55%, #14100f 97%), url('assets/bg/bg_${bgId}.jpg')"></div>`;
+}
+
 // ---------- 캐릭터 아트 (v0.30): 이미지 보유 시 이모지 대체 ----------
 const ENEMY_ART = new Set(['stray_dog', 'wolf', 'crow', 'will_o_wisp', 'forest_spider', 'thorn_bush', 'twig_golem', 'brook_sprite', 'leech', 'rat_swarm', 'living_broom', 'alpha_dog', 'old_pike', 'cellar_thing', 'old_teddy', 'river_hag', 'swamp_king', 'fog_mother', 'the_buried',
   'bog_toad', 'mosquito_swarm', 'mist_wraith', 'pale_stag', 'skeleton',
@@ -197,12 +207,8 @@ function splitLeadEmoji(text) {
 function eventFrame(npc, linesHtml, choicesHtml) {
   const hpPct = Math.max(0, run.hp / run.maxHp * 100);
   return `
-    <div class="screen battle-screen event-screen" style="${(() => {
-      // v0.53: 만남 화면도 테마 배경 (없으면 숲으로 임시 대체)
-      const themeId = run.act <= 3 ? themeOf(run).id : null;
-      const bgId = BG_ART.has(themeId) ? themeId : 'forest';
-      return `background-image: linear-gradient(rgba(16, 12, 10, .4), rgba(16, 12, 10, .55) 42%, #14100f 80%), url('assets/bg/bg_${bgId}.jpg')`;
-    })()}">
+    <div class="screen battle-screen event-screen">
+      ${bgLayer()}
       <header class="topbar">
         <span>💬 ${run.floor > 0 ? `${run.floor}층 · ` : ''}만남</span>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
@@ -698,13 +704,8 @@ function renderBattle(opts = {}) {
   const shieldPct = Math.max(0, Math.min(p.block, barTotal - p.hp) / barTotal * 100);
   app.innerHTML = '';
   app.append(h(`
-    <div class="screen battle-screen" style="${(() => {
-      // v0.35: 테마 배경 — 어두운 오버레이로 눌러서 몬스터가 도드라지게
-      // v0.53: 아직 전용 배경이 없는 테마·최종전은 임시로 숲 배경 사용 (자산 확보 시 자동 교체)
-      const themeId = run.act <= 3 ? themeOf(run).id : null;
-      const bgId = BG_ART.has(themeId) ? themeId : 'forest';
-      return `background-image: linear-gradient(rgba(16, 12, 10, .34), rgba(16, 12, 10, .5) 42%, #14100f 76%), url('assets/bg/bg_${bgId}.jpg')`;
-    })()}">
+    <div class="screen battle-screen">
+      ${bgLayer()}
       <header class="topbar">
         <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
         <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>

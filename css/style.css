@@ -226,7 +226,27 @@ span.enemy-art {
 .enemy .intent.surging { color: #ff8a6b; text-shadow: 0 0 8px rgba(224, 92, 75, .7); }
 /* v0.75: 연계로 확정된 다음 수 — 피할 수 없다는 걸 색으로 알린다 */
 .enemy .intent.chained { color: #e8b64b; text-shadow: 0 0 8px rgba(232, 182, 75, .6); }
-.battle-screen { background-size: cover; background-position: center top; background-repeat: no-repeat; }
+/* v0.81: 배경은 화면 위쪽 띠에만 그린다.
+   전체에 깔면 그림의 아래쪽(바닥·물가·마룻바닥)이 족보 영역에 통째로 가려져 하늘만 보였다.
+   띠 안에서 cover로 채우고 세로 55% 지점을 잡아, 위 비네트와 아래 검정을 잘라내고 알맹이만 보여준다.
+   폭이 다른 기기에서도 자동으로 맞는다. */
+.battle-screen { background-color: #14100f; }
+.bg-layer {
+  position: absolute; left: 0; right: 0; top: 0; height: 470px; z-index: 0;
+  background-size: 100% 100%, cover;
+  background-position: center, center 55%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+/* 층 순서를 명시해 둔다 — 적 그림이 아래로 넘쳐도 주사위·굴림 버튼·족보는 항상 그 위 */
+.battle-screen > *:not(.bg-layer) { position: relative; z-index: 1; }
+.battle-screen > .enemy-zone { z-index: 1; }
+.battle-screen > .mid-line,
+.battle-screen > .dice-zone,
+.battle-screen > .roll-bar,
+.battle-screen > .hint-line,
+.battle-screen > .sheet-zone,
+.battle-screen > .player-bar { z-index: 2; }
 
 /* 적 공격 연출 — 움찔(윈드업) 후 플레이어 쪽으로 내려찍기 */
 @keyframes enemyAttack {
@@ -484,9 +504,9 @@ span.enemy-art {
 }
 .die.landed .pip-art { animation: diceLand .32s cubic-bezier(.34, 1.2, .64, 1); }
 
-.roll-bar { flex: none; display: flex; justify-content: center; padding: 4px 14px 0; }
+.roll-bar { flex: none; display: flex; justify-content: center; padding: 4px 14px 0; position: relative; z-index: 2; } /* v0.81: 넘쳐 내려온 적 그림 위로 */
 .roll-btn { min-width: 170px; font-size: 17px; }
-.hint-line { flex: none; text-align: center; font-size: 11.5px; color: #b08948; min-height: 17px; padding: 3px 12px 4px; }
+.hint-line { flex: none; text-align: center; font-size: 11.5px; color: #b08948; min-height: 17px; padding: 3px 12px 4px; position: relative; z-index: 2; }
 /* v0.64: 족보 선택 시 뜨는 설명 — 설명은 밝게, 확정 안내는 눌러서 */
 .hint-desc { color: #e8b64b; font-weight: 700; }
 .hint-confirm { color: #7e6a4c; font-size: 10.5px; }
