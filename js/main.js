@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.82'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.83'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -137,7 +137,7 @@ if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
 function bgLayer() {
   const themeId = run && run.act <= 3 ? themeOf(run).id : null;
   const bgId = BG_ART.has(themeId) ? themeId : 'forest';   // 전용 배경이 없으면 숲으로 임시 대체
-  return `<div class="bg-layer" style="background-image: linear-gradient(rgba(16,12,10,.22), rgba(16,12,10,.40) 55%, #14100f 97%), url('assets/bg/bg_${bgId}.jpg')"></div>`;
+  return `<div class="bg-layer" style="background-image: linear-gradient(rgba(16,12,10,.08), rgba(16,12,10,.24) 60%, #0f0c0b 98%), url('assets/bg/bg_${bgId}.jpg')"></div>`;
 }
 
 // ---------- 캐릭터 아트 (v0.30): 이미지 보유 시 이모지 대체 ----------
