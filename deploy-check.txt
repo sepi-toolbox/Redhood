@@ -1,1 +1,1 @@
-deploy=20260807T035648Z v0.77 highdice
+deploy=20260807T075510Z v0.78 mon5

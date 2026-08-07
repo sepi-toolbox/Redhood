@@ -1,4 +1,6 @@
-# REDHOOD 몬스터 프롬프트 — 남은 25종 (복사용)
+# REDHOOD 몬스터 프롬프트 — 남은 20종 (복사용)
+
+> ✅ 표시는 완료된 항목입니다 (2026-08-07: 늪두꺼비·모기떼·안개 망령·창백한 사슴·해골 병사).
 
 각 블록을 통째로 복사해서 쓰세요. **키아트 `keyart_wolf`를 반드시 첨부**합니다.
 생성한 그림은 대화에 올리고 이름만 알려주시면 키잉·정규화·연동까지 처리합니다.
@@ -12,31 +14,31 @@
 
 ## 2막
 
-### 늪두꺼비 — `bog_toad` (일반)
+### ✅ 늪두꺼비 — `bog_toad` (일반)
 
 ```
 Stylized dark fairytale creature for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, keep it as simple and readable as the attached key art. NOT photorealistic, NOT 3D. Natural body proportions — do NOT give it an oversized head on a tiny body. Square 1:1 image. A single creature, FULL BODY from head to feet, facing slightly left, centered, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. The creature FILLS the frame edge to edge — no wide props, no large background elements, no empty margin around it. Bold silhouette, readable at 96px. The creature: a bloated bog toad with warty moss-green skin and a long drooping tongue. No text, no letters, no watermark.
 ```
 
-### 모기떼 — `mosquito_swarm` (일반)
+### ✅ 모기떼 — `mosquito_swarm` (일반)
 
 ```
 Stylized dark fairytale creature for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, keep it as simple and readable as the attached key art. NOT photorealistic, NOT 3D. Square 1:1 image. A single creature, FULL BODY, floating, facing slightly left, centered, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. The creature FILLS the frame edge to edge — no wide props, no large background elements, no empty margin around it. Bold silhouette, readable at 96px. The creature: a dense cloud of huge marsh mosquitoes forming a vague face. No text, no letters, no watermark.
 ```
 
-### 안개 망령 — `mist_wraith` (일반)
+### ✅ 안개 망령 — `mist_wraith` (일반)
 
 ```
 Stylized dark fairytale creature for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, keep it as simple and readable as the attached key art. NOT photorealistic, NOT 3D. Natural body proportions — do NOT give it an oversized head on a tiny body. Square 1:1 image. A single creature, FULL BODY, floating, facing slightly left, centered, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. The creature FILLS the frame edge to edge — no wide props, no large background elements, no empty margin around it. Bold silhouette, readable at 96px. The creature: a wraith of pale fog with hollow eyes, its lower half trailing into mist. No text, no letters, no watermark.
 ```
 
-### 창백한 사슴 — `pale_stag` (일반)
+### ✅ 창백한 사슴 — `pale_stag` (일반)
 
 ```
 Stylized dark fairytale creature for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, keep it as simple and readable as the attached key art. NOT photorealistic, NOT 3D. Natural body proportions — do NOT give it an oversized head on a tiny body. Square 1:1 image. A single creature, FULL BODY from head to feet, facing slightly left, centered, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. The creature FILLS the frame edge to edge — no wide props, no large background elements, no empty margin around it. Bold silhouette, readable at 96px. The creature: an unnaturally pale white stag with too many antler points and blank eyes, antlers reaching upward rather than spreading wide. No text, no letters, no watermark.
 ```
 
-### 해골 병사 — `skeleton` (일반)
+### ✅ 해골 병사 — `skeleton` (일반)
 
 ```
 Stylized dark fairytale creature for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, keep it as simple and readable as the attached key art. NOT photorealistic, NOT 3D. Natural body proportions — do NOT give it an oversized head on a tiny body. Square 1:1 image. A single creature, FULL BODY from head to feet, facing slightly left, centered, on one plain flat very dark brown background — solid color, no gradient, no checkerboard. The creature FILLS the frame edge to edge — no wide props, no large background elements, no empty margin around it. Bold silhouette, readable at 96px. The creature: a leaning skeleton soldier in rusted scraps of armor with a notched sword. No text, no letters, no watermark.
