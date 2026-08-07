@@ -39,7 +39,11 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "followUp": {
+          "move": "dive",
+          "chance": 0.5
+        }
       }
     },
     "pattern": {
@@ -101,7 +105,11 @@
             "amount": 2
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "flare",
+          "chance": 0.5
+        }
       },
       "flare": {
         "name": "불꽃 폭발",
@@ -172,7 +180,11 @@
             "op": "confuse",
             "amount": 2
           }
-        ]
+        ],
+        "followUp": {
+          "move": "ambush",
+          "chance": 0.5
+        }
       },
       "ambush": {
         "name": "기습",
@@ -243,7 +255,11 @@
             "op": "empower",
             "amount": 3
           }
-        ]
+        ],
+        "followUp": {
+          "move": "maul",
+          "chance": 0.5
+        }
       },
       "maul": {
         "name": "사냥",
@@ -322,7 +338,11 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "followUp": {
+          "move": "lash",
+          "chance": 0.5
+        }
       },
       "lash": {
         "name": "덩굴 채찍",
@@ -393,7 +413,11 @@
             "op": "block",
             "amount": 10
           }
-        ]
+        ],
+        "followUp": {
+          "move": "crush",
+          "chance": 0.5
+        }
       },
       "crush": {
         "name": "짓뭉개기",
@@ -478,7 +502,11 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "followUp": {
+          "move": "surge",
+          "chance": 0.5
+        }
       },
       "surge": {
         "name": "급류",
@@ -554,7 +582,11 @@
             "amount": 6
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "followUp": {
+          "move": "swell",
+          "chance": 0.5
+        }
       },
       "swell": {
         "name": "부풀기",
@@ -634,7 +666,11 @@
             "op": "empower",
             "amount": 2
           }
-        ]
+        ],
+        "followUp": {
+          "move": "swarm",
+          "chance": 0.5
+        }
       }
     },
     "pattern": {
@@ -701,7 +737,11 @@
             "op": "block",
             "amount": 7
           }
-        ]
+        ],
+        "followUp": {
+          "move": "sweep",
+          "chance": 0.5
+        }
       }
     },
     "pattern": {
@@ -763,7 +803,11 @@
             "op": "empower",
             "amount": 3
           }
-        ]
+        ],
+        "followUp": {
+          "move": "frenzy",
+          "chance": 0.6
+        }
       },
       "frenzy": {
         "name": "광란",
@@ -836,7 +880,11 @@
             "amount": 8
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "thrash",
+          "chance": 0.6
+        }
       },
       "thrash": {
         "name": "요동",
@@ -904,7 +952,11 @@
             "amount": 3
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "pounce",
+          "chance": 0.6
+        }
       },
       "pounce": {
         "name": "덮침",
@@ -980,7 +1032,11 @@
             "amount": 2
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "pounce",
+          "chance": 0.7
+        }
       },
       "pounce": {
         "name": "덮치기",
@@ -1101,7 +1157,11 @@
             "op": "confuse",
             "amount": 2
           }
-        ]
+        ],
+        "followUp": {
+          "move": "drown",
+          "chance": 0.7
+        }
       },
       "drown": {
         "name": "내려찍기",
@@ -1203,7 +1263,11 @@
             "amount": 2
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "rip",
+          "chance": 0.7
+        }
       },
       "rip": {
         "name": "솔기 뜯기",
@@ -1304,7 +1368,11 @@
             "op": "block",
             "amount": 8
           }
-        ]
+        ],
+        "followUp": {
+          "move": "spit",
+          "chance": 0.5
+        }
       },
       "spit": {
         "name": "독침 뱉기",
@@ -1380,7 +1448,11 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "followUp": {
+          "move": "drain",
+          "chance": 0.5
+        }
       },
       "scatter": {
         "name": "흩어지기",
@@ -1451,7 +1523,11 @@
             "amount": 9
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "wail",
+          "chance": 0.5
+        }
       },
       "wail": {
         "name": "곡소리",
@@ -1527,7 +1603,11 @@
             "amount": 3
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "trample",
+          "chance": 0.5
+        }
       },
       "trample": {
         "name": "짓밟기",
@@ -1594,7 +1674,11 @@
             "op": "block",
             "amount": 9
           }
-        ]
+        ],
+        "followUp": {
+          "move": "bone_throw",
+          "chance": 0.5
+        }
       },
       "bone_throw": {
         "name": "뼈 던지기",
@@ -1666,7 +1750,11 @@
             "amount": 2
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "erupt",
+          "chance": 0.5
+        }
       },
       "erupt": {
         "name": "분출",
@@ -1737,7 +1825,11 @@
             "op": "block",
             "amount": 12
           }
-        ]
+        ],
+        "followUp": {
+          "move": "quake",
+          "chance": 0.6
+        }
       },
       "quake": {
         "name": "진동",
@@ -1816,7 +1908,11 @@
             "op": "block",
             "amount": 6
           }
-        ]
+        ],
+        "followUp": {
+          "move": "cleave",
+          "chance": 0.6
+        }
       },
       "cleave": {
         "name": "참격",
@@ -1883,7 +1979,11 @@
             "op": "confuse",
             "amount": 2
           }
-        ]
+        ],
+        "followUp": {
+          "move": "inter",
+          "chance": 0.6
+        }
       },
       "inter": {
         "name": "매장",
@@ -1955,7 +2055,11 @@
             "amount": 12
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "death_roll",
+          "chance": 0.7
+        }
       },
       "death_roll": {
         "name": "죽음의 회전",
@@ -2056,7 +2160,11 @@
             "op": "block",
             "amount": 14
           }
-        ]
+        ],
+        "followUp": {
+          "move": "smother",
+          "chance": 0.7
+        }
       },
       "smother": {
         "name": "질식",
@@ -2161,7 +2269,11 @@
             "op": "block",
             "amount": 10
           }
-        ]
+        ],
+        "followUp": {
+          "move": "grave_call",
+          "chance": 0.7
+        }
       },
       "grave_call": {
         "name": "무덤의 부름",
@@ -2262,7 +2374,11 @@
             "op": "block",
             "amount": 7
           }
-        ]
+        ],
+        "followUp": {
+          "move": "shriek",
+          "chance": 0.5
+        }
       },
       "shriek": {
         "name": "끽 소리",
@@ -2324,7 +2440,11 @@
             "op": "confuse",
             "amount": 2
           }
-        ]
+        ],
+        "followUp": {
+          "move": "beam",
+          "chance": 0.5
+        }
       },
       "beam": {
         "name": "시선 광선",
@@ -2406,7 +2526,11 @@
             "amount": 8
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "followUp": {
+          "move": "cocoon",
+          "chance": 0.5
+        }
       },
       "cocoon": {
         "name": "고치",
@@ -2475,7 +2599,11 @@
             "op": "empower",
             "amount": 2
           }
-        ]
+        ],
+        "followUp": {
+          "move": "pulse",
+          "chance": 0.5
+        }
       },
       "lash": {
         "name": "촉수질",
@@ -2556,7 +2684,11 @@
             "amount": 3
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "sacrifice",
+          "chance": 0.5
+        }
       },
       "sacrifice": {
         "name": "제물",
@@ -2631,7 +2763,11 @@
             "op": "block",
             "amount": 12
           }
-        ]
+        ],
+        "followUp": {
+          "move": "crack",
+          "chance": 0.5
+        }
       },
       "crack": {
         "name": "균열",
@@ -2711,7 +2847,11 @@
             "op": "empower",
             "amount": 4
           }
-        ]
+        ],
+        "followUp": {
+          "move": "collapse",
+          "chance": 0.6
+        }
       },
       "collapse": {
         "name": "붕괴",
@@ -2800,7 +2940,11 @@
             "op": "block",
             "amount": 10
           }
-        ]
+        ],
+        "followUp": {
+          "move": "smash",
+          "chance": 0.6
+        }
       },
       "smash": {
         "name": "내려찍기",
@@ -2873,7 +3017,11 @@
             "amount": 4
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "peal",
+          "chance": 0.6
+        }
       },
       "peal": {
         "name": "큰 종소리",
@@ -2949,7 +3097,11 @@
             "amount": 3
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "followUp": {
+          "move": "nightmare",
+          "chance": 0.7
+        }
       },
       "nightmare": {
         "name": "악몽",
@@ -3050,7 +3202,11 @@
             "op": "empower",
             "amount": 4
           }
-        ]
+        ],
+        "followUp": {
+          "move": "swallow_light",
+          "chance": 0.7
+        }
       },
       "swallow_light": {
         "name": "빛 삼키기",
@@ -3168,7 +3324,11 @@
             "op": "block",
             "amount": 10
           }
-        ]
+        ],
+        "followUp": {
+          "move": "judgment",
+          "chance": 0.7
+        }
       },
       "judgment": {
         "name": "심판",
@@ -3270,7 +3430,11 @@
             "op": "damage",
             "amount": 14
           }
-        ]
+        ],
+        "followUp": {
+          "move": "unmake",
+          "chance": 0.7
+        }
       },
       "unmake": {
         "name": "지운다",
@@ -3339,7 +3503,11 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "followUp": {
+          "move": "strike",
+          "chance": 0.5
+        }
       },
       "strike": {
         "name": "지팡이 내리치기",
@@ -3428,7 +3596,11 @@
             "amount": 11
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "followUp": {
+          "move": "hymn",
+          "chance": 0.5
+        }
       },
       "rest_note": {
         "name": "쉼표",
@@ -3499,7 +3671,11 @@
             "op": "empower",
             "amount": 2
           }
-        ]
+        ],
+        "followUp": {
+          "move": "flareup",
+          "chance": 0.5
+        }
       },
       "flareup": {
         "name": "확 타오르기",
