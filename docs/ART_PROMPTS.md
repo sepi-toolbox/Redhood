@@ -30,14 +30,14 @@ v5 개정: 몬스터 44종 체계로 확장 반영(누락 25종 전량 수록), 
 | UI 텍스쳐·프레임 11종 | ✅ |
 | 타이틀 로고 | ✅ |
 | NPC·사물 12종 | ✅ |
-| 몬스터 24/44종 | 🔶 20종 대기 — [2] [3] |
+| **몬스터 44/44종** | ✅ 전량 완료 (2026-08-07) |
 | 배경 11종 | ⬜ 대기 — [4] (현재 전부 숲 배경 임시 사용) |
 | 족보 종이 18종 | ⬜ 대기 — [5] |
 | 줄 UI 원형 아이콘 18종 | ⬜ 대기 — [6] ([5]와 문양 공유) |
 | 유물 26종 | ⬜ 대기 — [7] |
 | 앱 아이콘 | ⬜ 대기 — [8] (맨 마지막) |
 
-**우선순위 제안**: 몬스터 25종 → 배경 11종 → 줄 아이콘 18종 → 족보 종이 18종 → 유물 26종 → 앱 아이콘.
+**우선순위 제안**: 배경 10종 → 줄 아이콘 18종 → 족보 종이 18종 → 유물 26종 → 앱 아이콘.
 몬스터와 배경이 화면을 가장 크게 차지하고, 줄 아이콘은 지금 임시 아이콘으로 때우고 있어 체감 개선이 큽니다.
 
 ---
@@ -81,9 +81,9 @@ Stylized dark fairytale creature for the dice game REDHOOD. Match the EXACT pain
 
 ---
 
-## [2] 2막 몬스터 — 늪·안개숲·무덤 (9종 대기)
+## [2] 2막 몬스터 — 늪·안개숲·무덤 ✅ 완료 (재생성 시 참고)
 
-보스 3종(늪의 왕·안개의 어머니·파묻힌 자)은 완료. 아래 9종이 남았습니다.
+12종 전량 완료. 아래는 재생성용 기록입니다.
 
 | 이름 | id | 묘사 | 비고 |
 |---|---|---|---|
@@ -97,7 +97,7 @@ Stylized dark fairytale creature for the dice game REDHOOD. Match the EXACT pain
 | 목 없는 기사 (정예) | headless_knight | `a headless knight on foot in tarnished armor holding a lance, pale mist where the head should be` | 창은 몸에 붙여 세로로 |
 | 무덤지기 (정예) | grave_keeper | `a gaunt gravekeeper with a lantern and a long shovel, face hidden under a wide hat` | |
 
-## [3] 3막 몬스터 — 꿈·언덕·교회 (16종 대기)
+## [3] 3막 몬스터 — 꿈·언덕·교회 ✅ 완료 (재생성 시 참고)
 
 | 이름 | id | 묘사 | 비고 |
 |---|---|---|---|

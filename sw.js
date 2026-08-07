@@ -1,6 +1,6 @@
 // REDHOOD 서비스 워커 — 오프라인 캐시
 // ⚠ 판을 바꾸면 CACHE 번호를 반드시 +1 (runbook 규칙)
-const CACHE = 'redhood-v94';
+const CACHE = 'redhood-v95';
 const ASSETS = [
   './',
   './index.html',
@@ -178,6 +178,26 @@ const ASSETS = [
   './assets/enemies/mist_wraith.png',
   './assets/enemies/pale_stag.png',
   './assets/enemies/skeleton.png',
+  './assets/enemies/grave_worm.png',
+  './assets/enemies/mud_golem.png',
+  './assets/enemies/headless_knight.png',
+  './assets/enemies/grave_keeper.png',
+  './assets/enemies/nightmare_hare.png',
+  './assets/enemies/floating_eye.png',
+  './assets/enemies/dream_moth.png',
+  './assets/enemies/whisper_polyp.png',
+  './assets/enemies/faceless_cultist.png',
+  './assets/enemies/screaming_stone.png',
+  './assets/enemies/hollow_priest.png',
+  './assets/enemies/choir_ghost.png',
+  './assets/enemies/candle_swarm.png',
+  './assets/enemies/sandman.png',
+  './assets/enemies/hill_tentacle.png',
+  './assets/enemies/bell_ringer.png',
+  './assets/enemies/lucid_king.png',
+  './assets/enemies/the_maw.png',
+  './assets/enemies/false_saint.png',
+  './assets/enemies/nameless_dread.png',
   './assets/npc/redhood.png',
   './assets/npc/peddler.png',
   './assets/npc/signpost.png',
