@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.79'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.80'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 const app = document.getElementById('app');
 let run = null;
 let battle = null;
@@ -136,7 +136,7 @@ const ENEMY_ART = new Set(['stray_dog', 'wolf', 'crow', 'will_o_wisp', 'forest_s
   'grave_worm', 'mud_golem', 'headless_knight', 'grave_keeper', 'nightmare_hare', 'floating_eye', 'dream_moth',
   'whisper_polyp', 'faceless_cultist', 'screaming_stone', 'hollow_priest', 'choir_ghost', 'candle_swarm', 'sandman',
   'hill_tentacle', 'bell_ringer', 'lucid_king', 'the_maw', 'false_saint', 'nameless_dread']);
-const BG_ART = new Set(['forest']); // 전투 테마 배경 보유 목록
+const BG_ART = new Set(['forest', 'stream', 'cabin']); // 전투 테마 배경 보유 목록
 const NPC_ART = { '잿빛 방물장수': 'peddler', '부러진 이정표': 'signpost', '낯익은 환영': 'redhood',
   '숯쟁이 난쟁이': 'dwarf', '이끼 낀 제단': 'altar', '가라앉은 상자': 'stream_chest',
   '늪 위의 불빛': 'swamp_light', '안개 속 목소리': 'voice_in_mist',

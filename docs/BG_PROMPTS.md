@@ -1,5 +1,8 @@
 # REDHOOD 배경 프롬프트 — 12종 (복사용)
 
+> ✅ 완료: `bg_map`(양피지) · `bg_forest`(깊은 숲) · `bg_stream`(차가운 개울) · `bg_cabin`(빈 오두막) — 2026-08-07
+> 남은 8종은 완성된 `bg_forest`를 참조 이미지로 첨부해서 뽑으세요.
+
 블록을 통째로 복사해서 쓰세요. 배경은 **키아트를 첨부하지 않아도 됩니다** (스타일 문구가 이미 안에 있습니다). 첨부한다면 `keyart_stilllife`.
 
 **규격**: 세로 2:3 (게임에서 768×1152로 저장). 풀블리드라 배경 제거가 필요 없습니다.
@@ -15,13 +18,13 @@
 
 ## 1막
 
-### 차가운 개울 — `bg_stream`
+### ✅ 차가운 개울 — `bg_stream`
 
 ```
 Stylized dark fairytale background for a mobile dice game, gothic caricature style: chunky angular shapes, thick dark outlines, flat gouache color planes, minimal detail, NOT photorealistic, NOT 3D. Muted palette: near-black brown, deep blood red, antique gold, aged cream. Vertical mobile game background, portrait 2:3. Distant scenery only, no creatures, no characters, no text, no watermark. Keep it dim and low-contrast so a painted monster standing in front of it stays the brightest thing on screen. Dark vignette at the top, the middle band kept simple and uncluttered, and the lower half fades smoothly into near-black so game UI can sit on it. The scene: a cold moonlit stream winding through angular mossy stones in a dark forest, thin mist drifting over the black water, a few pale reeds at the edges.
 ```
 
-### 빈 오두막 — `bg_cabin`
+### ✅ 빈 오두막 — `bg_cabin`
 *실내라 중앙이 밝아지기 쉬움 — 창빛을 한쪽으로만*
 
 ```
@@ -106,7 +109,7 @@ Stylized dark fairytale background for a mobile dice game, gothic caricature sty
 
 지금 있는 `bg_forest`와 `bg_map`도 같은 배치에서 다시 뽑으면 전체 톤이 확실히 맞습니다. 아래 두 개를 **가장 먼저** 뽑아서, 마음에 드는 숲을 나머지 9종의 참조 이미지로 쓰는 순서를 권합니다.
 
-### 깊은 숲 — `bg_forest`
+### ✅ 깊은 숲 — `bg_forest`
 
 *모든 배경의 기준이 되는 그림입니다. 이게 정해지면 나머지는 여기에 맞춥니다.*
 
@@ -114,7 +117,7 @@ Stylized dark fairytale background for a mobile dice game, gothic caricature sty
 Stylized dark fairytale background for a mobile dice game, gothic caricature style: chunky angular shapes, thick dark outlines, flat gouache color planes, minimal detail, NOT photorealistic, NOT 3D. Muted palette: near-black brown, deep blood red, antique gold, aged cream. Vertical mobile game background, portrait 2:3. Distant scenery only, no creatures, no characters, no text, no watermark. Keep it dim and low-contrast so a painted monster standing in front of it stays the brightest thing on screen. Dark vignette at the top, the middle band kept simple and uncluttered, and the lower half fades smoothly into near-black so game UI can sit on it. The scene: an ancient dark pine forest, jagged angular tree trunks crowding both sides, one pale gap of cold light far down the middle, a few tiny red mushrooms on the forest floor.
 ```
 
-### 지도 양피지 — `bg_map`
+### ✅ 지도 양피지 — `bg_map`
 
 *지도 화면 전용. 다른 배경과 달리 풍경이 아니라 텍스처입니다. 위에 손그림 노드 아이콘과 점선이 얹히므로 **중앙은 반드시 비어 있어야** 합니다. 길이나 지도 그림을 그려 넣으면 실제 노드와 겹쳐서 못 씁니다.*
 
