@@ -614,7 +614,10 @@ span.enemy-art {
 /* v0.62: 전투 족보 줄만 v0.53 높이로 원복.
    아이콘을 absolute로 빼서 줄 높이에 관여하지 못하게 하고, 이름·종류를 한 줄로 합친다.
    (이벤트/상점 choice-row는 2줄이 필요하므로 영향 없음) */
-.combo-row { gap: 8px; padding-left: 20px; } /* 메달이 종이 왼쪽을 물고 있으므로 글자를 그만큼 밀어준다 */
+.combo-row { gap: 8px; padding-left: 20px; }
+/* v0.88: 전용 판을 쓰는 줄은 메달을 감추고 판 전체를 쓴다 (아이콘이 판 그림에 녹아 있다) */
+.combo-row.has-plate { padding-left: 6px; }
+.combo-row.has-plate .row-icon { display: none; } /* 메달이 종이 왼쪽을 물고 있으므로 글자를 그만큼 밀어준다 */
 .combo-row .row-icon {
   position: absolute; left: -20px; top: 50%; margin: -18px 0 0 0;
   width: 36px; height: 36px;
