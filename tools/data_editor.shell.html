@@ -162,7 +162,6 @@ function ovw(v){
   put('턴당 리롤', field('scoring:rerollsPerTurn','턴당 리롤'));
   put('한 막의 층수', field('act1:map.floors','층수'));
   put('층당 적 HP 증가', field('act1:hpScalePerFloor','층당 HP 증가'));
-  put('전역 공격 보정', field('acts:scaling.atkTrim','공격 보정'));
   put('보스 처치 회복 비율', field('acts:bossHealRatio','보스 회복'));
   put('강화 첫 발동 턴', rangeF('acts:surge.firstTurn','강화 첫 턴'));
   put('강화 재발동 간격', rangeF('acts:surge.interval','강화 간격'));
@@ -324,7 +323,6 @@ function tabConst(v){
   box('전역 배율',[
     ...Object.keys(DB.acts.scaling.hp).map(k=>[k+'막 HP 배율', field(`acts:scaling.hp.${k}`,k+'막 HP')]),
     ...Object.keys(DB.acts.scaling.atk).map(k=>[k+'막 공격 배율', field(`acts:scaling.atk.${k}`,k+'막 공격')]),
-    ['전역 공격 보정', field('acts:scaling.atkTrim','공격 보정')],
     ['보스 처치 회복', field('acts:bossHealRatio','보스 회복')],
     ['강화 첫 발동', rangeF('acts:surge.firstTurn','강화 첫 턴')],
     ['강화 간격', rangeF('acts:surge.interval','강화 간격')],

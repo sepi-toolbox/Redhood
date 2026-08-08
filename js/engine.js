@@ -68,7 +68,7 @@ function spawnEnemy(id, idx, scale) {
     final: !!def.final,
     escalation: def.escalation || 0,      // 최종 보스: 매 턴 공격력 +N
     hp, maxHpInit: hp, stunned: false,
-    atkScale: (def.final ? 1 : scale.atk) * em.atk * (DB.acts.scaling.atkTrim || 1), // v0.73: 초기 수치 하향 (대신 장기전에 격노)
+    atkScale: (def.final ? 1 : scale.atk) * em.atk,   // v1.0: 전역 보정 제거 — 낮춘 값은 enemies.json 의 기본 피해에 이미 반영돼 있다
     enlightened,
     block: 0,                             // 방어: 자기 다음 행동 때까지 피해 흡수
     power: 0,                             // 강화: 이후 모든 공격 피해 +power (전투 내 누적)

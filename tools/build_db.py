@@ -90,7 +90,7 @@ rows = [
  ('한 막의 층수', act1['map']['floors']),
  ('층당 적 HP 증가', act1['hpScalePerFloor']),
  ('막별 HP 배율', ' / '.join(f"{k}막 ×{v}" for k, v in acts['scaling']['hp'].items())),
- ('막별 공격 배율', ' / '.join(f"{k}막 ×{v}" for k, v in acts['scaling']['atk'].items()) + f" (전역 보정 ×{acts['scaling']['atkTrim']})"),
+ ('막별 공격 배율', ' / '.join(f"{k}막 ×{v}" for k, v in acts['scaling']['atk'].items())),
  ('강화 행동 주기', f"첫 발동 {acts['surge']['firstTurn'][0]}~{acts['surge']['firstTurn'][1]}턴, 이후 {acts['surge']['interval'][0]}~{acts['surge']['interval'][1]}턴마다"),
  ('보스 처치 회복', f"최대 HP의 {int(acts['bossHealRatio']*100)}%"),
  ('최종 보스', EN[acts['finalBoss']]['name']),
