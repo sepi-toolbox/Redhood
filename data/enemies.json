@@ -208,7 +208,7 @@
         "effects": [
           {
             "op": "poison",
-            "amount": 3
+            "amount": 4
           },
           {
             "op": "damage",
@@ -216,7 +216,7 @@
           }
         ],
         "cooldown": 1,
-        "lockTurn": 5
+        "lockTurn": 4
       },
       "web": {
         "name": "거미줄",
@@ -243,14 +243,14 @@
         "effects": [
           {
             "op": "poison",
-            "amount": 6
+            "amount": 8
           },
           {
             "op": "damage",
-            "amount": 2
+            "amount": 3
           }
         ],
-        "minTurn": 5,
+        "minTurn": 4,
         "cooldown": 1
       }
     },
@@ -333,7 +333,7 @@
             "amount": 5
           }
         ],
-        "minTurn": 6,
+        "minTurn": 5,
         "cooldown": 5
       }
     },
@@ -415,7 +415,7 @@
             "amount": 5
           }
         ],
-        "minTurn": 6,
+        "minTurn": 5,
         "cooldown": 6
       }
     },
