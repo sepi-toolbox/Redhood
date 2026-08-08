@@ -1,4 +1,8 @@
-# REDHOOD 배경음 프롬프트 — v2 (복사용)
+# REDHOOD 배경음 프롬프트 — v3 (복사용)
+
+> ✅ **20/21곡 적용 완료** (2026-08-08, v0.92). 남은 것은 **`bgm_title` 한 곡과 스팅어 3개**뿐입니다.
+> 실제로 붙여보니 곡당 OGG+MP3 두 벌로 평균 860KB, 20곡에 18MB입니다. 브라우저는 둘 중 하나만 받고,
+> 곡은 서비스 워커 선캐시에서 빼놔서 필요할 때만 내려받습니다. 보스곡은 지도에서 보스방이 두 층 안으로 들어왔을 때만 미리 받습니다.
 
 Suno · Udio · ElevenLabs Music · Stable Audio 같은 생성 도구에 그대로 넣는 프롬프트입니다.
 
@@ -43,7 +47,7 @@ Suno · Udio · ElevenLabs Music · Stable Audio 같은 생성 도구에 그대�
 
 # 공용 곡
 
-## 타이틀 — `bgm_title`
+## ⬜ 타이틀 — `bgm_title`  ← 남은 곡
 
 *로비. 게임을 켜자마자 나오는 첫인상. 최종전에서 이 선율이 부서진 형태로 다시 나옵니다.*
 
@@ -51,7 +55,7 @@ Suno · Udio · ElevenLabs Music · Stable Audio 같은 생성 도구에 그대�
 Dark fairytale music box lullaby, instrumental, no vocals. Sparse and haunting: a slightly out-of-tune music box carrying a simple minor melody, answered by a lone cello and a distant creaking wooden sound. Slow, around 62 BPM, minor key, lots of silence between phrases. Old and lonely, like a nursery rhyme remembered wrong. Low fidelity, close and intimate, no big orchestra, no percussion. Seamless loop, no fade in, no fade out. 75 seconds.
 ```
 
-## 지도 — `bgm_map`
+## ✅ 지도 — `bgm_map`
 
 *양피지 지도를 보며 다음 길을 고르는 순간.*
 
@@ -59,13 +63,13 @@ Dark fairytale music box lullaby, instrumental, no vocals. Sparse and haunting: 
 Dark fairytale exploration ambience, instrumental, no vocals. A slow fingerpicked nylon guitar figure over a low sustained drone, a few soft hammered dulcimer notes, faint wind and distant crows. Around 70 BPM, minor key, gentle and unresolved, never arriving. Calm but watchful, the feeling of standing at a crossroads in a dark wood. Small ensemble, no drums, no brass. Seamless loop, no fade in, no fade out. 80 seconds.
 ```
 
-## 만남 — `bgm_event`
+## ✅ 만남 — `bgm_event`
 
 ```
 Dark fairytale encounter music, instrumental, no vocals. A single hurdy-gurdy drone with a slow simple melody on a wooden flute, occasional plucked lute notes, very sparse. Around 66 BPM, minor key, curious and slightly wary. Quiet enough to read dialogue over — nothing sudden, nothing loud. Small acoustic ensemble, no drums. Seamless loop, no fade in, no fade out. 60 seconds.
 ```
 
-## 상점 — `bgm_shop`
+## ✅ 상점 — `bgm_shop`
 
 *잿빛 방물장수의 가게. 유일하게 조금 익살스러워도 되는 곳.*
 
@@ -73,7 +77,7 @@ Dark fairytale encounter music, instrumental, no vocals. A single hurdy-gurdy dr
 Dark fairytale merchant shop music, instrumental, no vocals. A lopsided waltz on a wheezy accordion and pizzicato strings, small bells and coin-like metallic clinks on the offbeats, a bassoon walking underneath. Around 96 BPM in 3/4, minor key with a mischievous lilt. Shabby, crooked and a little funny — this merchant is not to be trusted. Small acoustic ensemble, no drums. Seamless loop, no fade in, no fade out. 60 seconds.
 ```
 
-## 휴식 — `bgm_rest`
+## ✅ 휴식 — `bgm_rest`
 
 *모닥불. 숨 돌리는 유일한 순간.*
 
@@ -85,7 +89,7 @@ Dark fairytale campfire music, instrumental, no vocals. A warm slow melody on so
 
 # 일반 전투 — 막별 3곡
 
-## 1막 — `bgm_battle1`
+## ✅ 1막 — `bgm_battle1`
 
 *깊은 숲·개울·오두막. 아직은 감당할 만한 위협.*
 
@@ -93,7 +97,7 @@ Dark fairytale campfire music, instrumental, no vocals. A warm slow melody on so
 Dark fairytale battle music, instrumental, no vocals. A driving low cello ostinato with a hand drum keeping a steady pulse, a sharp fiddle motif cutting in every few bars, tambourine accents. Around 108 BPM, minor key, tense and rhythmic but not epic. Folk instruments only — no synths, no orchestral brass, no choir. Menacing and small-scale, like a chase through trees. Seamless loop, no fade in, no fade out. 70 seconds.
 ```
 
-## 2막 — `bgm_battle2`
+## ✅ 2막 — `bgm_battle2`
 
 *늪·안개숲·무덤가. 더 축축하고 더 무겁게.*
 
@@ -101,7 +105,7 @@ Dark fairytale battle music, instrumental, no vocals. A driving low cello ostina
 Dark fairytale battle music, instrumental, no vocals. A heavy detuned double bass ostinato, a low frame drum on a dragging beat, a bowed musical saw wailing thinly over the top, dry bone-like wooden clicks. Around 100 BPM, minor key, swampy and oppressive, slightly out of tune on purpose. Folk and acoustic only, no synths, no brass. Heavier and sicker than an ordinary fight. Seamless loop, no fade in, no fade out. 70 seconds.
 ```
 
-## 3막 — `bgm_battle3`
+## ✅ 3막 — `bgm_battle3`
 
 *꿈·언덕·교회. 현실이 어긋나기 시작한다.*
 
@@ -115,7 +119,7 @@ Dark fairytale battle music, instrumental, no vocals. An unstable ostinato in an
 
 일반 전투와 같은 악기 계열을 쓰되 **한 단계씩 더 조입니다.** 같은 막의 일반 전투곡과 나란히 들었을 때 "아, 이건 다르다"가 즉시 와야 합니다.
 
-## 1막 정예 — `bgm_elite1`
+## ✅ 1막 정예 — `bgm_elite1`
 
 *우두머리 들개·늙은 강꼬치·지하실의 무언가. 사냥당하는 쪽이 바뀐 순간.*
 
@@ -123,7 +127,7 @@ Dark fairytale battle music, instrumental, no vocals. An unstable ostinato in an
 Dark fairytale elite battle music, instrumental, no vocals. A relentless low cello ostinato with a war drum pounding in half time, a solo fiddle playing a sharp angular motif over it, iron chain rattles and anvil hits on the accents. Around 124 BPM, minor key, driving and dangerous, building pressure without ever releasing. Folk instruments only, no synths, no orchestral brass. Same instrument family as an ordinary forest fight but faster, harder and more predatory. Seamless loop, no fade in, no fade out. 65 seconds.
 ```
 
-## 2막 정예 — `bgm_elite2`
+## ✅ 2막 정예 — `bgm_elite2`
 
 *진흙 골렘·목 없는 기사·무덤지기. 도망칠 수 없게 조여드는.*
 
@@ -131,7 +135,7 @@ Dark fairytale elite battle music, instrumental, no vocals. A relentless low cel
 Dark fairytale elite battle music, instrumental, no vocals. A grinding detuned double bass ostinato under a heavy frame drum on an off-kilter beat, a bowed musical saw sliding upward in long menacing swells, dull iron clanks and dragging chain sounds. Around 112 BPM, minor key, thick and suffocating, the tempo feeling slightly too slow to escape. Acoustic and folk only, no synths, no brass. Heavier and more inevitable than an ordinary swamp fight. Seamless loop, no fade in, no fade out. 65 seconds.
 ```
 
-## 3막 정예 — `bgm_elite3`
+## ✅ 3막 정예 — `bgm_elite3`
 
 *모래 사나이·언덕의 촉수·종지기. 규칙이 무너진 싸움.*
 
@@ -147,7 +151,7 @@ Dark fairytale elite battle music, instrumental, no vocals. A jittery ostinato i
 
 ## 1막
 
-### 늑대 — `bgm_boss_wolf`
+### ✅ 늑대 — `bgm_boss_wolf`
 
 *깊은 숲. 짐승의 추격. 순수한 속도와 이빨.*
 
@@ -155,7 +159,7 @@ Dark fairytale elite battle music, instrumental, no vocals. A jittery ostinato i
 Dark fairytale boss battle music, instrumental, no vocals. A galloping low string ostinato at a relentless pace, a big war drum in a running double pulse, a shrill fiddle screaming a hunting motif, distant wolf-like howls made by bowed strings sliding upward. Around 132 BPM, minor key, a pure predatory chase — fast, lean and merciless, no grandeur. Folk instruments only, no synths, no choir. Seamless loop, no fade in, no fade out. 65 seconds.
 ```
 
-### 다리 밑 트롤 — `bgm_boss_river_hag`
+### ✅ 다리 밑 트롤 — `bgm_boss_river_hag`
 
 *차가운 개울. 바위처럼 느리고 무겁게.*
 
@@ -163,7 +167,7 @@ Dark fairytale boss battle music, instrumental, no vocals. A galloping low strin
 Dark fairytale boss battle music, instrumental, no vocals. A very slow crushing ostinato on the lowest strings, a huge deep drum landing like a boulder every two bars, dripping water sounds and hollow wooden knocks from a bridge, a low bowed drone underneath. Around 76 BPM, minor key, enormously heavy and slow — the sound of something that does not need to hurry. Acoustic only, no synths. Seamless loop, no fade in, no fade out. 65 seconds.
 ```
 
-### 낡은 곰인형 — `bgm_boss_old_teddy`
+### ✅ 낡은 곰인형 — `bgm_boss_old_teddy`
 
 *빈 오두막. 자장가가 잘못 감긴 소리.*
 
@@ -173,7 +177,7 @@ Dark fairytale boss battle music, instrumental, no vocals. A children's lullaby 
 
 ## 2막
 
-### 늪의 왕 — `bgm_boss_swamp_king`
+### ✅ 늪의 왕 — `bgm_boss_swamp_king`
 
 *가라앉는 늪지. 진창 위에 앉은 왕좌.*
 
@@ -181,7 +185,7 @@ Dark fairytale boss battle music, instrumental, no vocals. A children's lullaby 
 Dark fairytale boss battle music, instrumental, no vocals. A slow regal ostinato on low strings with a heavy processional drum, a solo bassoon carrying a lumbering royal motif, thick bubbling swamp sounds and reed rattles underneath. Around 84 BPM, minor key, majestic and filthy at the same time — a crowned thing dragging itself through mud. Acoustic folk and low woodwinds, no synths, no choir. Seamless loop, no fade in, no fade out. 65 seconds.
 ```
 
-### 안개의 어머니 — `bgm_boss_fog_mother`
+### ✅ 안개의 어머니 — `bgm_boss_fog_mother`
 
 *안개 낀 숲. 부드러워서 더 무서운.*
 
@@ -189,7 +193,7 @@ Dark fairytale boss battle music, instrumental, no vocals. A slow regal ostinato
 Dark fairytale boss battle music, instrumental, no lyrics. A slow drifting lullaby on bowed strings with no clear beat, wordless breathy female vowel tones layered far in the background like fog, a soft heartbeat drum barely audible, occasional glass harmonica shimmer. Around 68 BPM, minor key, tender and utterly wrong — comfort that means to smother. No words, only open vowel sounds. Quiet and enveloping rather than loud. Seamless loop, no fade in, no fade out. 70 seconds.
 ```
 
-### 파묻힌 자 — `bgm_boss_the_buried`
+### ✅ 파묻힌 자 — `bgm_boss_the_buried`
 
 *이름 없는 무덤가. 흙 밑에서 올라오는 것.*
 
@@ -199,7 +203,7 @@ Dark fairytale boss battle music, instrumental, no vocals. A low earthen drone w
 
 ## 3막
 
-### 자각몽의 왕 — `bgm_boss_lucid_king`
+### ✅ 자각몽의 왕 — `bgm_boss_lucid_king`
 
 *꿈속. 규칙이 매번 바뀌는 왈츠.*
 
@@ -207,7 +211,7 @@ Dark fairytale boss battle music, instrumental, no vocals. A low earthen drone w
 Dark fairytale boss battle music, instrumental, no vocals. A grand waltz on strings and prepared piano that keeps changing key and meter without warning, melting between 3/4 and 5/4, a stately drum trying to hold it together and failing. Around 104 BPM, minor key, regal and impossible — a coronation dream that rewrites itself as it plays. Acoustic and dreamlike, no synths, no choir. Seamless loop, no fade in, no fade out. 70 seconds.
 ```
 
-### 벌어진 아가리 — `bgm_boss_the_maw`
+### ✅ 벌어진 아가리 — `bgm_boss_the_maw`
 
 *비명 지르는 언덕. 아래에서 들리는 것.*
 
@@ -215,7 +219,7 @@ Dark fairytale boss battle music, instrumental, no vocals. A grand waltz on stri
 Dark fairytale boss battle music, instrumental, no vocals. A vast subsonic drone under slow dissonant string clusters, an enormous slow drum like something chewing, groaning stone and deep hollow wind rising out of a pit, no melody at all for long stretches. Around 72 BPM, atonal and abyssal, pure dread and pressure. Acoustic textures and deep low end, no synths, no choir. Seamless loop, no fade in, no fade out. 70 seconds.
 ```
 
-### 거짓 성인 — `bgm_boss_false_saint`
+### ✅ 거짓 성인 — `bgm_boss_false_saint`
 
 *사람 없는 교회. 성스러운 척하는 것.*
 
@@ -225,7 +229,7 @@ Dark fairytale boss battle music, instrumental, no lyrics. A church pipe organ p
 
 ## 최종전
 
-### 이름 없는 공포 — `bgm_final`
+### ✅ 이름 없는 공포 — `bgm_final`
 
 *이길 수 없는 싸움. 타이틀 선율이 부서진 채 돌아온다.*
 
@@ -271,7 +275,7 @@ Short dark fairytale treasure sting, instrumental, no vocals. A soft golden shim
 
 ---
 
-## 연동 계획 (아직 코드 없음)
+## 연동 — ✅ 완료 (v0.90~v0.92)
 
 받으신 파일을 주시면 이렇게 붙이겠습니다.
 
