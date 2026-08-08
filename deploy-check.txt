@@ -1,2 +1,2 @@
-1786157752
-v1.01 move cooldown
+1786158005
+v1.02 weight zero

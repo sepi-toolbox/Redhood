@@ -521,13 +521,17 @@ function chooseMove(enemy, turn = 1) {
     moveId = use[st.index % use.length];
     st.index += 1;
   } else {
-    const entries = Object.entries(pat.weights).filter(([id]) => {
+    // v1.01: 가중치 0 = 추첨에 안 들어간다. 연계(followUp)로만 나오는 기술을 이렇게 표현한다.
+    //   준비 동작 → 큰 공격 처럼 '반드시 앞선 행동이 있어야 하는' 기술에 쓴다.
+    const entries = Object.entries(pat.weights).filter(([id, w]) => {
+      if (!(w > 0)) return false;
       if (!unlocked(id)) return false;
       if (!pat.noRepeat) return true;
       const recent = st.recent.slice(-(pat.noRepeat - 1));
       return !(recent.length === pat.noRepeat - 1 && recent.every(r => r === id));
     });
-    if (entries.length === 0) entries.push(...Object.entries(pat.weights).filter(([id]) => unlocked(id)));
+    if (entries.length === 0) entries.push(...Object.entries(pat.weights).filter(([id, w]) => w > 0 && unlocked(id)));
+    if (entries.length === 0) entries.push(...Object.entries(pat.weights).filter(([, w]) => w > 0));
     if (entries.length === 0) entries.push(...Object.entries(pat.weights));
     const total = entries.reduce((s, [, w]) => s + w, 0);
     let roll = rng.next() * total;
