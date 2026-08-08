@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.25 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.26 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -139,6 +139,67 @@ function spliceChanged(arrPath, idx){
   refreshCount();
 }
 
+
+/* ---------- 요약 라벨 ---------- *
+ * 기록해 둔 라벨은 그때의 이름이라 나중에 이름을 바꾸면 어긋나고,
+ * 같은 이름을 쓰는 행동이 여럿이면 어느 줄인지도 못 가린다.
+ * 그래서 요약을 뽑는 순간에 경로를 보고 지금 데이터로 다시 만든다. */
+const F_LABEL={name:'이름',cooldown:'쿨다운',minTurn:'해금 턴',lockTurn:'락 턴',hidden:'숨김',
+  'break.damage':'파쇄 피해','break.move':'파쇄 후 행동','followUp.move':'연계 대상','followUp.chance':'연계 확률',
+  defaultMove:'기본 행동','hp.0':'HP 최소','hp.1':'HP 최대',art:'그림',desc:'설명',tier:'등급',name2:'이름'};
+function mvName(e,id){
+  const M={...e.moves,...(e.uniqueMoves||{})}, m=M[id];
+  if(!m) return id;
+  const dup=Object.entries(M).some(([k,x])=>k!==id && x.name===m.name);
+  return dup ? `${m.name}(${id})` : m.name;      // 이름이 겹치면 id 를 붙여 구분한다
+}
+function efLabel(m,k,tail){
+  const ef=((m&&m.effects)||[])[k]||{}, nth='효과'+(k+1);
+  if(!tail) return nth;
+  if(tail==='op') return nth;
+  if(tail==='kind') return nth+' 상태이상 종류';
+  if(tail==='hits') return nth+' 타수';
+  if(tail==='power') return nth+' 폭발 피해';
+  if(tail==='amount') return nth+' '+(ef.op==='status' ? '거는 칸 수' : (OPN[ef.op]||'수치'));
+  return nth+' '+tail;
+}
+function labelFor(path, fallback){
+  try{
+    const [f,rest]=path.split(':'); if(!rest) return fallback;
+    const ks=rest.split('.'), tailOf=(n)=>ks.slice(n).join('.');
+    if(f==='enemies'){
+      const e=DB.enemies[Number(ks[0])]; if(!e) return fallback;
+      if(ks[1]==='moves'||ks[1]==='uniqueMoves'){
+        if(!ks[2]) return fallback;                       // 행동 추가·삭제 같은 서술형은 그대로 둔다
+        const M={...e.moves,...(e.uniqueMoves||{})}, m=M[ks[2]], head=`${e.name} ${mvName(e,ks[2])}`;
+        if(!ks[3]) return head;
+        if(ks[3]==='effects') return ks[4]===undefined ? head+' 효과' : `${head} ${efLabel(m,Number(ks[4]),tailOf(5))}`;
+        return `${head} ${F_LABEL[tailOf(3)]||tailOf(3)}`;
+      }
+      if(ks[1]==='phases'){
+        if(ks[2]===undefined) return fallback;
+        const k=Number(ks[2])+1;
+        if(ks[3]==='untilHpRatio') return `${e.name} 국면${k} HP 임계`;
+        if(ks[3]==='enter') return `${e.name} 국면${k} 진입 행동`;
+        if(ks[3]==='pattern'&&ks[4]==='weights'&&ks[5]) return `${e.name} ${mvName(e,ks[5])} 가중치 국면${k}`;
+        return `${e.name} 국면${k} ${tailOf(3)}`;
+      }
+      if(ks[1]==='pattern'&&ks[2]==='weights'&&ks[3]) return `${e.name} ${mvName(e,ks[3])} 가중치`;
+      return `${e.name} ${F_LABEL[tailOf(1)]||tailOf(1)}`;
+    }
+    if(f==='dice'){ const d=DB.dice[Number(ks[0])]; if(!d) return fallback;
+      if(ks[1]==='faces') return `${d.name} ${Number(ks[2])+1}번 면`;
+      return `${d.name} ${F_LABEL[tailOf(1)]||tailOf(1)}`; }
+    if(f==='relics'){ const r=DB.relics[Number(ks[0])]; if(!r) return fallback;
+      if(tailOf(1)==='hook.amount') return `${r.name} 수치`;
+      return `${r.name} ${F_LABEL[tailOf(1)]||tailOf(1)}`; }
+    if(f==='statuses'&&ks[0]==='list'){ const st=(DB.statuses.list||[])[Number(ks[1])]; if(!st) return fallback;
+      const N={amount:'수치',turns:'지속 턴',name:'이름',text:'설명',rule:'규칙',color:'색'};
+      return `${st.name} ${N[tailOf(2)]||tailOf(2)}`; }
+    return fallback;
+  }catch(err){ return fallback; }
+}
+
 /* ---------- 입력 만들기 ---------- */
 function field(path, label, opt={}){
   let v = readP(path);
@@ -170,7 +231,7 @@ function select(path, label, options, opt={}){
   el.title = label + ' — 원래 ' + (origP(path) ?? '없음');
   el.addEventListener('change', ()=>{
     if(el.value==='' && opt.removable){ removeP(opt.removePath || path); mark(opt.removePath || path, label, undefined); redraw(); return; }
-    if(cur==null && opt.onCreate){ opt.onCreate(el.value); redraw(); return; }
+    if(cur==null && opt.onCreate){ opt.onCreate(el.value); mark(path, label, opt.def); redraw(); return; }
     writeP(path, el.value); mark(path, label, opt.def);
     el.classList.toggle('changed', changed.has(path));
     if (opt.after) opt.after(el.value);
@@ -415,7 +476,7 @@ function tabMoves(v){
       if (uniq || !uo.length) { cell(tr, uniq ? '파쇄 안 됨' : '유니크 없음', 1); cell(tr,'—',1); }
       else {
         cell(tr, field(`${base}.break.damage`, e.name+' '+m.name+' 파쇄 피해', {num:true, def:0,
-          onCreate:(val)=>{ m.break={damage:Number(val)||10, move:uo[0][0]}; }}));
+          onCreate:(val)=>{ m.break={damage:Number(val)||10, move:uo[0][0]}; mark(`${base}.break.move`, e.name+' '+m.name+' 파쇄 후 행동'); }}));
         cell(tr, select(`${base}.break.move`, e.name+' '+m.name+' 파쇄 후 행동',
           [['','— 없음 —'], ...uo.map(([k,mm])=>[k,mm.name])],
           {removable:true, removePath:`${base}.break`,
@@ -432,7 +493,7 @@ function tabMoves(v){
         fuBox.appendChild(r2);
       } else {
         fuBox.appendChild(select(`${base}.followUp.move`, e.name+' '+m.name+' 연계 대상', opts,
-          {onCreate:(v)=>{ m.followUp={move:v, chance:0.5}; mark(`${base}.followUp.move`, e.name+' '+m.name+' 연계 추가'); }}));
+          {onCreate:(v)=>{ m.followUp={move:v, chance:0.5}; mark(`${base}.followUp.move`, e.name+' '+m.name+' 연계 추가'); mark(`${base}.followUp.chance`, e.name+' '+m.name+' 연계 확률'); }}));
       }
       cell(tr, fuBox);
       const noteBox=document.createElement('div');
@@ -779,7 +840,7 @@ document.getElementById('exp').onclick=()=>{
     +'<b>아래 요약을 복사해서 나에게 주기만 해도 됩니다.</b> 전체 JSON이 필요하면 그 아래에서 받으세요.</p>';
   b.appendChild(h);
 
-  const lines=[...changed.entries()].map(([p,c])=>'· '+c.label+' : '+shown(c.before)+' → '+shown(c.after));
+  const lines=[...changed.entries()].map(([p,c])=>'· '+labelFor(p,c.label)+' : '+shown(c.before)+' → '+shown(c.after));
   const sum=document.createElement('textarea'); sum.style.minHeight='120px';
   sum.value='REDHOOD 데이터 변경 '+changed.size+'건\n'+lines.join('\n');
   b.appendChild(sum);
@@ -790,7 +851,7 @@ document.getElementById('exp').onclick=()=>{
   const list=document.createElement('div');
   list.innerHTML='<h4 style="margin:16px 0 4px;font-size:13px;color:#e8b64b">바뀐 값</h4>';
   [...changed.entries()].forEach(([p,c])=>{ const d=document.createElement('div'); d.className='chg';
-    d.innerHTML=c.label+' <s>'+shown(c.before)+'</s> → <b>'+shown(c.after)+'</b>'; list.appendChild(d); });
+    d.innerHTML=labelFor(p,c.label)+' <s>'+shown(c.before)+'</s> → <b>'+shown(c.after)+'</b>'; list.appendChild(d); });
   b.appendChild(list);
 
   touched.forEach(f=>{
