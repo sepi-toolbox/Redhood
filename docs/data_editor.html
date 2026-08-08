@@ -35,7 +35,12 @@
   input.f{background:#0f0c0b;border:1px solid #2b231e;color:var(--ink);border-radius:4px;padding:3px 6px;width:100%;font:inherit;font-size:13px}
   input.f:focus{outline:none;border-color:var(--gold);background:#191412}
   input.f.num{text-align:right;max-width:74px}
-  input.f.changed{background:#1f2e1d;border-color:#4a7a44;color:#d8f0d2}
+  input.f.changed,select.f.changed{background:#1f2e1d;border-color:#4a7a44;color:#d8f0d2}
+  select.f{background:#0f0c0b;border:1px solid #2b231e;color:var(--ink);border-radius:4px;padding:3px 4px;font:inherit;font-size:12.5px;max-width:112px}
+  select.f:focus{outline:none;border-color:var(--gold)}
+  button.mini{padding:1px 6px;font-size:12px;line-height:1.4;border-radius:4px;color:var(--dim)}
+  button.mini:hover{color:var(--ink)}
+  .efrow{display:flex;gap:4px;align-items:center;margin-bottom:2px}
   .sub{color:var(--dim);font-size:11.5px}
   .kv{display:grid;grid-template-columns:190px 1fr;gap:6px 12px;max-width:760px;align-items:center}
   .kv b{font-weight:600;color:#d8c8ab;font-size:13px}
@@ -79,14 +84,26 @@ function readP(p){ const [f,rest]=p.split(':'); return rest? at(DB[f],rest) : DB
 function origP(p){ const [f,rest]=p.split(':'); return rest? at(ORIG[f],rest) : ORIG[f]; }
 function writeP(p,v){ const [f,rest]=p.split(':'); const ks=rest.split('.'); const last=ks.pop();
   const o=ks.reduce((a,k)=>a[k], DB[f]); o[last]=v; }
+function parentOf(p){ const [f,rest]=p.split(':'); const ks=rest.split('.'); const last=ks.pop();
+  return [ks.reduce((a,k)=>a[k], DB[f]), last]; }
+function removeP(p){ const [o,last]=parentOf(p);
+  if(Array.isArray(o)) o.splice(Number(last),1); else delete o[last]; }
+function redraw(){ const y=window.scrollY; draw(); window.scrollTo(0,y); }
 
 /* ---------- 변경 추적 ---------- */
 const changed = new Map();           // path -> {before, after, label}
+function shown(v){
+  if(v===undefined||v===null) return '없음';
+  if(Array.isArray(v)) return v.length+'개';
+  if(typeof v==='object') return Object.entries(v).map(([k,x])=>k+' '+x).join(' ');
+  return String(v);
+}
 function mark(p, label, def){
   const now=readP(p);
   let was=origP(p);
   if(was===undefined && def!==undefined) was=def;      // 원래 없던 항목은 기본값과 비교한다
-  if(String(now)===String(was)) changed.delete(p); else changed.set(p,{before:was,after:now,label});
+  const same = (typeof now==='object'||typeof was==='object') ? JSON.stringify(now)===JSON.stringify(was) : String(now)===String(was);
+  if(same) changed.delete(p); else changed.set(p,{before:was,after:now,label});
   const n=changed.size;
   document.getElementById('cnt').textContent='변경 '+n+'건';
   document.getElementById('exp').disabled=!n;
@@ -113,10 +130,31 @@ function field(path, label, opt={}){
   if (changed.has(path)) i.classList.add('changed');
   return i;
 }
+function select(path, label, options, opt={}){
+  const cur = readP(path);
+  const el = document.createElement('select'); el.className='f';
+  options.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; el.appendChild(o); });
+  el.value = cur==null ? '' : String(cur);
+  el.title = label + ' — 원래 ' + (origP(path) ?? '없음');
+  el.addEventListener('change', ()=>{
+    if(el.value==='' && opt.removable){ removeP(opt.removePath || path); mark(opt.removePath || path, label, undefined); redraw(); return; }
+    if(cur==null && opt.onCreate){ opt.onCreate(el.value); redraw(); return; }
+    writeP(path, el.value); mark(path, label, opt.def);
+    el.classList.toggle('changed', changed.has(path));
+  });
+  if(changed.has(path)) el.classList.add('changed');
+  return el;
+}
+function miniBtn(txt, title, fn){ const b=document.createElement('button'); b.className='mini'; b.textContent=txt;
+  b.title=title; b.onclick=fn; return b; }
 function cell(tr, node, ro){ const td=document.createElement('td'); if(ro) td.className='ro';
   if(node instanceof Node) td.appendChild(node); else td.innerHTML = node==null?'':node; tr.appendChild(td); return td; }
 
 /* ---------- 공통 도우미 ---------- */
+const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['confuse','혼란'],['heal','회복']];
+const ABILITY_OPS=[['strength','힘'],['focus','집중'],['regen','재생'],['block','방어'],['heal','회복'],
+  ['weakEnemy','적 약화'],['bleed','출혈'],['vulnerable','취약'],['stun','기절'],['dodge','회피'],
+  ['rerollNext','다음 턴 리롤'],['buffNext','다음 족보 강화'],['cleanse','정화'],['selfDamage','자해']];
 const OPN={damage:'피해',block:'방어',empower:'힘',confuse:'혼란',heal:'회복',weaken:'약화',
   vulnerable:'취약',bleed:'출혈',regen:'재생',focus:'집중',strength:'힘',weakEnemy:'적 약화',
   loseHp:'HP 감소',gainRelic:'유물 획득',drain:'흡혈'};
@@ -131,7 +169,7 @@ const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.i
 const TABS=[
  ['개요','바뀐 값은 초록으로 표시된다. 다 고쳤으면 오른쪽 위 [내보내기]를 눌러 바뀐 JSON을 받아 나에게 주면 반영해서 배포한다.',ovw],
  ['적','HP와 강화 행동. 개별 행동 수치는 [적행동] 탭에서 고친다.',tabEnemy],
- ['적행동','발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
+ ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
  ['족보','배수(mult)와 변형의 부가 능력 수치.',tabScore],
  ['주사위','여섯 면을 직접 고친다. 면 구성이 곧 성능이다.',tabDice],
  ['유물','효과 수치는 hook.amount 하나로 정해진다.',tabRelic],
@@ -233,15 +271,41 @@ function tabMoves(v){
       tr.dataset.k=(e.id+' '+e.name+' '+mid+' '+m.name).toLowerCase();
       cell(tr,e.name,1);
       cell(tr, field(`enemies:${i}.moves.${mid}.name`,e.name+' '+mid+' 이름'));
-      cell(tr,(m.effects||[]).map(x=>OPN[x.op]||x.op).join(' · ')||'—',1);
-      const wrap=document.createElement('div'); wrap.style.display='flex'; wrap.style.gap='4px';
-      (m.effects||[]).forEach((x,k)=>{ if(x.amount!=null) wrap.appendChild(field(`enemies:${i}.moves.${mid}.effects.${k}.amount`, e.name+' '+m.name+' '+(OPN[x.op]||x.op))); });
+      const base=`enemies:${i}.moves.${mid}`;
+      const efBox=document.createElement('div');
+      (m.effects||[]).forEach((x,k)=>{
+        const row=document.createElement('div'); row.className='efrow';
+        row.appendChild(select(`${base}.effects.${k}.op`, e.name+' '+m.name+' 효과'+(k+1), ENEMY_OPS));
+        row.appendChild(miniBtn('×','이 효과 지우기',()=>{ removeP(`${base}.effects.${k}`); mark(`${base}.effects`, e.name+' '+m.name+' 효과 삭제'); redraw(); }));
+        efBox.appendChild(row);
+      });
+      efBox.appendChild(miniBtn('+ 효과','효과 추가',()=>{
+        (m.effects=m.effects||[]).push({op:'damage',amount:1});
+        mark(`${base}.effects`, e.name+' '+m.name+' 효과 추가'); redraw(); }));
+      cell(tr, efBox);
+      const wrap=document.createElement('div');
+      (m.effects||[]).forEach((x,k)=>{ const r=document.createElement('div'); r.className='efrow';
+        r.appendChild(field(`${base}.effects.${k}.amount`, e.name+' '+m.name+' '+(OPN[x.op]||x.op), {num:true, def:0}));
+        wrap.appendChild(r); });
       cell(tr, wrap.children.length?wrap:'—', !wrap.children.length);
       cell(tr, weightCell(e, i, mid, m), false);
       cell(tr, m.minTurn!=null? field(`enemies:${i}.moves.${mid}.minTurn`,e.name+' '+m.name+' 해금 턴') : '—', m.minTurn==null);
       cell(tr, field(`enemies:${i}.moves.${mid}.cooldown`, e.name+' '+m.name+' 쿨다운', {num:true, def:0}));
-      cell(tr, m.followUp? field(`enemies:${i}.moves.${mid}.followUp.chance`,e.name+' '+m.name+' 연계 확률') : '—', !m.followUp);
-      cell(tr, (m.hidden?'숨김 ':'')+(m.followUp? '→ '+e.moves[m.followUp.move].name : ''),1);
+      const opts=[['','— 없음 —'], ...Object.entries(e.moves).filter(([k])=>k!==mid).map(([k,mm])=>[k,mm.name])];
+      const fuBox=document.createElement('div');
+      if(m.followUp){
+        const r1=document.createElement('div'); r1.className='efrow';
+        r1.appendChild(select(`${base}.followUp.move`, e.name+' '+m.name+' 연계 대상', opts, {removable:true, removePath:`${base}.followUp`}));
+        fuBox.appendChild(r1);
+        const r2=document.createElement('div'); r2.className='efrow';
+        r2.appendChild(field(`${base}.followUp.chance`, e.name+' '+m.name+' 연계 확률'));
+        fuBox.appendChild(r2);
+      } else {
+        fuBox.appendChild(select(`${base}.followUp.move`, e.name+' '+m.name+' 연계 대상', opts,
+          {onCreate:(v)=>{ m.followUp={move:v, chance:0.5}; mark(`${base}.followUp.move`, e.name+' '+m.name+' 연계 추가'); }}));
+      }
+      cell(tr, fuBox);
+      cell(tr, (m.hidden?'숨김':''),1);
       tb.appendChild(tr);
     });
   });
@@ -256,9 +320,18 @@ function tabScore(v){
       cell(tr, c.mult!=null? field(`scoring:categories.${ci}.mult`,c.name+' 배수') : '—', c.mult==null);
       cell(tr, field(`scoring:categories.${ci}.variants.${vi}.name`,vr.id+' 이름'));
       cell(tr, vr.tier||'common',1);
-      cell(tr,(vr.ability||[]).map(a=>OPN[a.op]||a.op).join(' · ')||'없음',1);
-      const w=document.createElement('div'); w.style.display='flex'; w.style.gap='4px';
-      (vr.ability||[]).forEach((a,k)=>{ if(a.amount!=null) w.appendChild(field(`scoring:categories.${ci}.variants.${vi}.ability.${k}.amount`, vr.name+' '+(OPN[a.op]||a.op))); });
+      const vb=`scoring:categories.${ci}.variants.${vi}`;
+      const ab=document.createElement('div');
+      (vr.ability||[]).forEach((a,k)=>{ const r=document.createElement('div'); r.className='efrow';
+        r.appendChild(select(`${vb}.ability.${k}.op`, vr.name+' 능력'+(k+1), ABILITY_OPS));
+        r.appendChild(miniBtn('×','이 능력 지우기',()=>{ removeP(`${vb}.ability.${k}`); mark(`${vb}.ability`, vr.name+' 능력 삭제'); redraw(); }));
+        ab.appendChild(r); });
+      ab.appendChild(miniBtn('+ 능력','능력 추가',()=>{ (vr.ability=vr.ability||[]).push({op:'strength',amount:1});
+        mark(`${vb}.ability`, vr.name+' 능력 추가'); redraw(); }));
+      cell(tr, ab);
+      const w=document.createElement('div');
+      (vr.ability||[]).forEach((a,k)=>{ const r=document.createElement('div'); r.className='efrow';
+        r.appendChild(field(`${vb}.ability.${k}.amount`, vr.name+' '+(OPN[a.op]||a.op), {num:true, def:0})); w.appendChild(r); });
       cell(tr, w.children.length?w:'—', !w.children.length);
       cell(tr, vr.abilityText||'',1);
       tb.appendChild(tr);
@@ -390,7 +463,7 @@ document.getElementById('exp').onclick=()=>{
     +'<b>아래 요약을 복사해서 나에게 주기만 해도 됩니다.</b> 전체 JSON이 필요하면 그 아래에서 받으세요.</p>';
   b.appendChild(h);
 
-  const lines=[...changed.entries()].map(([p,c])=>'· '+c.label+' : '+c.before+' → '+c.after);
+  const lines=[...changed.entries()].map(([p,c])=>'· '+c.label+' : '+shown(c.before)+' → '+shown(c.after));
   const sum=document.createElement('textarea'); sum.style.minHeight='120px';
   sum.value='REDHOOD 데이터 변경 '+changed.size+'건\n'+lines.join('\n');
   b.appendChild(sum);
@@ -401,7 +474,7 @@ document.getElementById('exp').onclick=()=>{
   const list=document.createElement('div');
   list.innerHTML='<h4 style="margin:16px 0 4px;font-size:13px;color:#e8b64b">바뀐 값</h4>';
   [...changed.entries()].forEach(([p,c])=>{ const d=document.createElement('div'); d.className='chg';
-    d.innerHTML=c.label+' <s>'+c.before+'</s> → <b>'+c.after+'</b>'; list.appendChild(d); });
+    d.innerHTML=c.label+' <s>'+shown(c.before)+'</s> → <b>'+shown(c.after)+'</b>'; list.appendChild(d); });
   b.appendChild(list);
 
   touched.forEach(f=>{
