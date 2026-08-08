@@ -20,33 +20,31 @@
         "cooldown": 1
       },
       "dive": {
-        "name": "급강하",
+        "name": "날개쉬기",
         "effects": [
           {
-            "op": "damage",
-            "amount": 15
+            "op": "empower",
+            "amount": 2
           }
         ],
-        "cooldown": 1
+        "cooldown": 2,
+        "minTurn": 2
       },
       "caw": {
-        "name": "어지러운 날갯짓",
+        "name": "흉내내기",
         "effects": [
           {
             "op": "confuse",
             "amount": 2
           }
         ],
-        "followUp": {
-          "move": "dive",
-          "chance": 1.0
-        }
+        "cooldown": 1
       },
       "surge": {
-        "name": "깃털을 곤두세운다",
+        "name": "마구 쪼기",
         "effects": [
           {
-            "op": "empower",
+            "op": "damage",
             "amount": 5
           }
         ],
@@ -58,7 +56,7 @@
       "mode": "weighted",
       "weights": {
         "peck": 1,
-        "dive": 0,
+        "dive": 1,
         "caw": 1,
         "surge": 99
       },

@@ -130,12 +130,22 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('순서(sequence) 패턴이 남아 있지 않음',
     DB.enemies.some(e => ((e.phases || []).map(p => p.pattern).concat(e.pattern ? [e.pattern] : []))
       .some(p => p.mode === 'sequence')), false);
-  eq('최종 보스를 뺀 모두가 힘을 올리는 행동을 가짐',
-    DB.enemies.filter(e => !e.final).every(e => {
-      const id = surgeId(e); return id && e.moves[id].effects.some(x => x.op === 'empower');
-    }), true);
-  eq('강화 행동 이름에 공용 라벨 없음',
-    DB.enemies.filter(e => !e.final).every(e => !/격노/.test(e.moves[surgeId(e)].name)), true);
+  // 효과 종류는 설계자가 자유롭게 정한다 — 여기서 검사할 것은 '장기전에만 나오는 수가 있는가'다
+  eq('최종 보스를 뺀 모두가 후반 전용 행동을 가짐',
+    DB.enemies.filter(e => !e.final).every(e => Object.values(e.moves).some(m => m.minTurn > 0)), true);
+  eq('행동 이름에 공용 라벨 없음',
+    DB.enemies.every(e => Object.values(e.moves).every(m => !/격노/.test(m.name))), true);
+  // 가중치 0인데 아무도 연계로 부르지 않는 '절대 안 나오는 행동'이 없어야 한다
+  const unreachable = [];
+  for (const e of DB.enemies) {
+    const pats = (e.phases || []).map(p => p.pattern).concat(e.pattern ? [e.pattern] : []);
+    const called = new Set(Object.values(e.moves).filter(m => m.followUp).map(m => m.followUp.move));
+    for (const id of Object.keys(e.moves)) {
+      const anyWeight = pats.some(p => (p.weights || {})[id] > 0);
+      if (!anyWeight && !called.has(id)) unreachable.push(`${e.name}/${e.moves[id].name}`);
+    }
+  }
+  eq('절대 등장할 수 없는 행동 없음', unreachable, []);
   // 해금 턴 이전에는 절대 안 나온다
   const def = DB.enemyById.stray_dog; const sid = surgeId(def);
   let early = 0, firsts = [];

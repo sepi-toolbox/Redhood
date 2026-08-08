@@ -400,15 +400,14 @@ export function enemyPhase(battle) {
       if (e.hp <= 0) continue; // 출혈사 — 행동 없이 쓰러진다
     }
     if (e.stunned) { e.stunned = false; chooseMove(e, battle.turn + 1); continue; }
+    // v1.06 연타(hits): 피해 효과에만 적용된다. 다른 효과에서는 무시되므로 0이나 1을 적어두면 된다.
+    //   강화(power)와 약화(weak)가 '한 대마다' 적용되고 방어도 한 대씩 갉히기 때문에,
+    //   한 방이 약해도 강화가 쌓이면 급격히 세지고 얇은 방어로는 다 못 막는다.
     for (const ef of e.nextMove.effects) {
       switch (ef.op) {
-        case 'damage': {                                   // ⚔️ 공격 (막·계몽 스케일 + 강화 - 약화)
+        case 'damage': {                                   // ⚔️ 공격 — hits 만큼 한 대씩 따로 때린다
           if (battle.dodgeActive) break;
-          // v1.06 연타: hits 만큼 '한 대씩' 따로 때린다.
-          //   강화(power)와 약화(weak)가 타수마다 적용되므로, 한 방이 약해도 강화가 쌓이면 급격히 세진다.
-          //   방어도 한 대씩 갉히기 때문에 얇은 방어로는 다 못 막는다.
-          const hits = Math.max(1, Math.floor(ef.hits || 1));
-          for (let h = 0; h < hits; h++) {
+          for (let h = 0, times = hitCount(ef); h < times; h++) {
             let dmg = hitDamage(e, ef);
             const absorbed = Math.min(battle.player.block, dmg);
             battle.player.block -= absorbed;

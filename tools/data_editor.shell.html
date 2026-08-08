@@ -170,7 +170,7 @@ const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.i
 const TABS=[
  ['개요','바뀐 값은 초록으로 표시된다. 다 고쳤으면 오른쪽 위 [내보내기]를 눌러 바뀐 JSON을 받아 나에게 주면 반영해서 배포한다.',ovw],
  ['적','HP와 강화 행동. 개별 행동 수치는 [적행동] 탭에서 고친다.',tabEnemy],
- ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정". 타수는 피해를 몇 번 나눠 때리는가 — 강화와 약화가 타수마다 적용되므로 한 방이 약해도 강화가 쌓이면 급격히 세진다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
+ ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정". 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
  ['족보','배수(mult)와 변형의 부가 능력 수치.',tabScore],
  ['주사위','여섯 면을 직접 고친다. 면 구성이 곧 성능이다.',tabDice],
  ['유물','효과 수치는 hook.amount 하나로 정해진다.',tabRelic],
@@ -291,8 +291,7 @@ function tabMoves(v){
         else r.appendChild(field(`${base}.effects.${k}.amount`, e.name+' '+m.name+' '+(OPN[x.op]||x.op), {num:true, def:0}));
         wrap.appendChild(r);
         const h=document.createElement('div'); h.className='efrow';
-        if(x.op==='damage') h.appendChild(field(`${base}.effects.${k}.hits`, e.name+' '+m.name+' 타수', {num:true, def:1}));
-        else { const d=document.createElement('span'); d.className='sub'; d.textContent='—'; h.appendChild(d); }
+        h.appendChild(field(`${base}.effects.${k}.hits`, e.name+' '+m.name+' 타수', {num:true, def:1}));
         hitBox.appendChild(h);
       });
       cell(tr, wrap.children.length?wrap:'—', !wrap.children.length);
