@@ -627,7 +627,7 @@
         "mist_veil": 1,
         "torrent": 99,
         "surge": 0,
-        "move1": 1
+        "move1": 0
       }
     },
     "enlightenedMove": {
@@ -1063,50 +1063,48 @@
     ],
     "moves": {
       "snap": {
-        "name": "덥석",
+        "name": "물기",
         "effects": [
           {
             "op": "damage",
             "amount": 11
           }
         ],
-        "cooldown": 2
+        "cooldown": 1
       },
       "dive": {
         "name": "잠수",
         "effects": [
           {
-            "op": "block",
-            "amount": 8
+            "op": "rest",
+            "amount": 10
           }
         ],
         "hidden": true,
         "followUp": {
-          "move": "thrash",
-          "chance": 1
+          "move": "snap",
+          "chance": 0.5
         },
-        "cooldown": 2
+        "cooldown": 1,
+        "break": {
+          "damage": 10,
+          "move": "unique1"
+        }
       },
       "thrash": {
         "name": "요동",
         "effects": [
           {
-            "op": "damage",
-            "amount": 14
+            "op": "status",
+            "kind": "stun",
+            "amount": 1
+          },
+          {
+            "op": "empower",
+            "amount": 2
           }
         ],
         "minTurn": 6,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "지느러미를 곧추세운다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 6
-          }
-        ],
-        "minTurn": 4,
         "cooldown": 3
       }
     },
@@ -1115,8 +1113,7 @@
       "weights": {
         "snap": 1,
         "dive": 1,
-        "thrash": 0,
-        "surge": 3
+        "thrash": 1
       }
     },
     "enlightenedMove": {
@@ -1127,6 +1124,17 @@
           "amount": 20
         }
       ]
+    },
+    "uniqueMoves": {
+      "unique1": {
+        "name": "삼키기",
+        "effects": [
+          {
+            "op": "damage",
+            "amount": 20
+          }
+        ]
+      }
     }
   },
   {
