@@ -74,6 +74,7 @@ function spawnEnemy(id, idx, scale) {
     power: 0,                             // 강화: 이후 모든 공격 피해 +power (전투 내 누적)
     debuffs: { weak: 0, bleed: 0, vulnerable: 0 }, // v0.19: 약화(공격-N)/출혈(행동마다 피해, -1씩 감소)/취약(받는 피해+N)
     patternState: { index: 0, recent: [], count: 0 }, phaseIndex: 0, nextMove: null,
+    cooldown: {},                         // v1.01: 행동 id → 다시 쓸 수 있게 되는 턴. moves.*.cooldown 이 없으면 0(제한 없음)
   };
 }
 
@@ -465,8 +466,18 @@ function rollSurgeTurn(from, range) {
   const [lo, hi] = range;
   return from + lo + Math.floor(rng.next() * (hi - lo + 1));
 }
+// v1.01: 행동별 재사용 대기.
+//   "moves.bristle.cooldown": 4  → 한 번 쓰면 4턴이 지나야 다시 나온다.
+//   값이 없거나 0이면 제한 없음. 해금 턴(minTurn)과 나란히 쓰는 발동 조건이다.
+function onCooldown(enemy, id, turn) { return (enemy.cooldown[id] || 0) > turn; }
+function stampCooldown(enemy, def, id, turn) {
+  const cd = def.moves[id] && def.moves[id].cooldown;
+  if (cd > 0) enemy.cooldown[id] = turn + cd;
+}
+
 function chooseMove(enemy, turn = 1) {
   const def = DB.enemyById[enemy.defId];
+  if (!enemy.cooldown) enemy.cooldown = {};   // 예전 저장본 호환
   // v0.75 연계기: 방금 쓴 기술에 followUp이 걸려 있으면 확률에 따라 다음 기술이 확정된다.
   //   "moves.stalk.followUp": { "move": "pounce", "chance": 0.7 }  (배열로 여러 후보도 가능)
   //   확정된 연계는 minTurn·강화 행동보다 우선한다 — 말 그대로 무조건 이어진다.
@@ -477,7 +488,9 @@ function chooseMove(enemy, turn = 1) {
       const target = def.moves[fu.move];
       if (!target) continue;
       if (target.minTurn > turn) continue;   // 후반 전용 기술은 연계로도 앞당겨지지 않는다
+      if (onCooldown(enemy, fu.move, turn)) continue;   // 대기 중인 기술은 연계로도 못 당긴다
       if (rng.next() >= (fu.chance != null ? fu.chance : 1)) continue;
+      stampCooldown(enemy, def, fu.move, turn);
       enemy.nextMove = { id: fu.move, chained: true, ...def.moves[fu.move] };
       return;
     }
@@ -501,7 +514,7 @@ function chooseMove(enemy, turn = 1) {
   const pat = currentPattern(enemy);
   let moveId;
   // v0.74 트랙 B: minTurn이 붙은 기술은 그 턴 전에는 아예 나오지 않는다 (긴 싸움에서만 보는 수)
-  const unlocked = (id) => !(def.moves[id] && def.moves[id].minTurn > turn);
+  const unlocked = (id) => !(def.moves[id] && def.moves[id].minTurn > turn) && !onCooldown(enemy, id, turn);
   if (pat.mode === 'sequence') {
     const order = pat.order.filter(unlocked);
     const use = order.length ? order : pat.order;
@@ -522,6 +535,7 @@ function chooseMove(enemy, turn = 1) {
     for (const [id, w] of entries) { roll -= w; if (roll <= 0) { moveId = id; break; } }
     st.recent.push(moveId);
   }
+  stampCooldown(enemy, def, moveId, turn);
   enemy.nextMove = { id: moveId, ...def.moves[moveId] };
 }
 
