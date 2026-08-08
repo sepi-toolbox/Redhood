@@ -382,7 +382,7 @@
             "hits": 5
           }
         ],
-        "cooldown": 2
+        "cooldown": 1
       },
       "coil": {
         "name": "줄기 방패",
@@ -392,7 +392,7 @@
             "amount": 6
           }
         ],
-        "cooldown": 2
+        "cooldown": 1
       },
       "lash": {
         "name": "덩굴 채찍",
@@ -415,7 +415,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 5
+            "amount": 3
           }
         ],
         "minTurn": 5,
@@ -1162,7 +1162,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 5
+            "amount": 3
           }
         ],
         "cooldown": 0,
@@ -1259,8 +1259,7 @@
         "name": "물러서기",
         "effects": [
           {
-            "op": "block",
-            "amount": 10
+            "op": "rest"
           }
         ],
         "followUp": {
