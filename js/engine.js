@@ -107,12 +107,13 @@ const stAmount = (d) => {
   return x.amount;
 };
 
-// power: 이 상태이상의 세기 (0이면 기본값) · turns: 지속/심지 턴 (0이면 기본값)
-export function applyStatus(battle, kind, count = 1, power = 0, turns = 0) {
+// 적 행동이 정할 수 있는 건 부패의 폭발 피해(power) 하나뿐이다.
+// 지속 턴은 상태이상 탭의 값으로 전부 고정 — 같은 걸 두 군데서 정하지 않는다.
+export function applyStatus(battle, kind, count = 1, power = 0) {
   if (!stDef(kind)) return 0;
   const def = stDef(kind);
-  if (def.rule !== 'fuse') power = 0;        // 세기를 정할 수 있는 건 부패뿐
-  const life = turns > 0 ? turns : (def.turns || 0);
+  if (def.rule !== 'fuse') power = 0;        // 폭발 피해를 정할 수 있는 건 부패뿐
+  const life = def.turns || 0;
   let put = 0;
   for (let k = 0; k < count; k++) {
     const empty = battle.dice.map((d, i) => (d.st ? -1 : i)).filter(i => i >= 0);
@@ -641,8 +642,8 @@ export function enemyPhase(battle) {
           battle.pendingConfuse += ef.amount;
           break;
         case 'status':                                     // v1.17 주사위에 상태이상을 건다
-          // amount = 몇 칸에 거는가 · power = 세기(0이면 기본) · turns = 지속/심지(0이면 기본)
-          applyStatus(battle, ef.kind, Math.max(1, ef.amount || 1), ef.power || 0, ef.turns || 0);
+          // amount = 몇 칸에 거는가 · power = 부패의 폭발 피해(0이면 기본값)
+          applyStatus(battle, ef.kind, Math.max(1, ef.amount || 1), ef.power || 0);
           break;
         case 'empower':                                    // 💪 강화 — 전투 내 공격력 누적
           e.power = (e.power || 0) + ef.amount;

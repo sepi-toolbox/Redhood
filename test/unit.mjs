@@ -709,15 +709,20 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
   // 적 행동이 세기와 지속까지 정한다
   { const b = mk();
-    b.enemies[0].nextMove = { id: 't', name: '시험', effects: [{ op: 'status', kind: 'rot', amount: 1, power: 33, turns: 3 }] };
+    b.enemies[0].nextMove = { id: 't', name: '시험', effects: [{ op: 'status', kind: 'rot', amount: 1, power: 33 }] };
     b.await = 'enemy'; eng.enemyPhase(b);
     const d = b.dice.find(x => x.st && x.st.kind === 'rot');
-    eq('건 쪽이 정한 세기가 들어간다', d.st.power, 33);
-    eq('심지도 지정한 값 (첫 턴 시작에서 1 탐)', d.st.fuse, 2);
+    eq('적이 정한 폭발 피해가 들어간다', d.st.power, 33);
+    eq('심지는 상태이상 탭 값(2)에서 하나 탄 상태', d.st.fuse, DB.statusById.rot.turns - 1);
     const hp = b.player.hp;
     b.await = 'enemy'; eng.enemyPhase(b);
-    b.await = 'enemy'; eng.enemyPhase(b);
     eq('기본값 10이 아니라 33으로 터진다', hp - b.player.hp >= 33, true);
+  }
+  // 지속 턴은 적 행동이 못 건드린다
+  { const b = mk();
+    eng.applyStatus(b, 'rot', 1, 50);
+    const d = b.dice.find(x => x.st);
+    eq('심지는 언제나 탭 값', d.st.fuse, DB.statusById.rot.turns);
   }
   // 출혈·독·약탈은 눈금 그대로다 — 세기라는 손잡이가 없다
   { const b = mk(); eng.initialRoll(b);

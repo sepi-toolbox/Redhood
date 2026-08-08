@@ -12,7 +12,7 @@ events, acts, act1 = D('events'), D('acts'), D('act1')
 statuses = D('statuses')
 
 EN = {e['id']: e for e in enemies}
-VERSION = 'v1.20'
+VERSION = 'v1.21'
 TODAY = '2026-08-08'
 
 FONT = 'Arial'
@@ -71,11 +71,9 @@ def eff_text(effs):
     for e in effs:
         if e.get('op') == 'status':
             pw = 0 if ST_RULE.get(e.get('kind')) in NO_POWER else (e.get('power') or ST_AMT.get(e.get('kind'), 0))
-            tn = e.get('turns') or ST_TURN.get(e.get('kind'), 0)
             t = f"{ST_NAME.get(e.get('kind'), e.get('kind'))}"
-            if pw: t += f" 세기{pw}"
+            if pw: t += f" 폭발{pw}"
             t += f" {e.get('amount', 1)}칸"
-            if tn: t += f" ({tn}턴)"
             out.append(t)
             continue
         n = OPNAME.get(e.get('op'), e.get('op'))
@@ -254,7 +252,7 @@ for e in ENEMIES:
         rows.append([e['id'], e['name'], '__enlight', e['enlightenedMove']['name'],
                      eff_text(e['enlightenedMove'].get('effects')), '3번째 행동마다', '', '', '', '', '계몽 17~19단계', '', e['tier']])
 sheet('적행동', '적 행동 전량',
-      '상태이상 부여는 [종류 N칸] 으로 읽는다 — 적 행동에서 세기를 정하는 건 부패뿐이고 나머지는 상태이상 시트의 값으로 고정이다. 막 → 테마 → 난이도 순. 발동 조건 다섯 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 락 턴은 "이 턴이 되면 더 안 씀", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정".',
+      '상태이상 부여는 [종류 N칸] 으로 읽는다 — 적마다 다를 수 있는 건 부패의 폭발 피해뿐이고, 지속 턴을 포함한 나머지는 상태이상 시트의 값으로 고정이다. 막 → 테마 → 난이도 순. 발동 조건 다섯 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 락 턴은 "이 턴이 되면 더 안 씀", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정".',
       ['적 id','적 이름','행동 id','행동명','효과','가중치','해금 턴','락 턴','쿨다운','파쇄','비고','연계'], rows, [16,16,16,20,30,18,8,8,8,18,14,22])
 
 # ---------- 7-2. 상태이상 ----------

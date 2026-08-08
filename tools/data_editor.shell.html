@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.20 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.21 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -198,7 +198,7 @@ const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.i
 const TABS=[
  ['개요','바뀐 값은 초록으로 표시된다. 다 고쳤으면 오른쪽 위 [내보내기]를 눌러 바뀐 JSON을 받아 나에게 주면 반영해서 배포한다.',ovw],
  ['적','HP와 기본 행동. 기본 행동은 쓸 수 있는 수가 하나도 없을 때 제약을 전부 무시하고 시동하는 예외 처리 장치다 — 유니크 행동과는 별개이며 아무 행동이나 지정할 수 있다. 개별 행동은 [적행동] 탭에서 고친다.',tabEnemy],
- ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. [상태이상 부여]는 종류·지속을 효과 칸에서 정하고, [수치] 칸은 몇 칸에 거는지다. 세기 칸은 부패에만 나온다 — 나머지는 상태이상 탭의 값으로 고정이다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 락 턴은 "이 턴이 되면 더 안 씀"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 파쇄는 그 행동이 예고된 동안 HP에 그만큼 피해를 받으면 유니크 행동으로 무너지는 것 — 방어도로 막힌 피해는 안 센다. 유니크 행동은 추첨에 안 들어가고 파쇄되지도 않는다. 유니크가 나오는 길은 국면 전환과 파쇄 둘뿐이다. 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
+ ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. [상태이상 부여]는 종류를 효과 칸에서 고르고 [수치] 칸에 몇 칸에 거는지를 적는다. 그 외에 적마다 다를 수 있는 건 부패의 폭발 피해 하나뿐이고, 지속 턴을 포함한 나머지는 전부 상태이상 탭의 값으로 고정이다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 락 턴은 "이 턴이 되면 더 안 씀"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 파쇄는 그 행동이 예고된 동안 HP에 그만큼 피해를 받으면 유니크 행동으로 무너지는 것 — 방어도로 막힌 피해는 안 센다. 유니크 행동은 추첨에 안 들어가고 파쇄되지도 않는다. 유니크가 나오는 길은 국면 전환과 파쇄 둘뿐이다. 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
  ['족보','배수(mult)와 변형의 부가 능력 수치.',tabScore],
  ['주사위','여섯 면을 직접 고친다. 면 구성이 곧 성능이다.',tabDice],
  ['유물','효과 수치는 hook.amount 하나로 정해진다.',tabRelic],
@@ -345,11 +345,6 @@ function tabMoves(v){
             const l1=document.createElement('span'); l1.className='sub'; l1.textContent='폭발';
             row.appendChild(l1); row.appendChild(pw);
           }
-          const tn=field(`${base}.effects.${k}.turns`, e.name+' '+m.name+' 상태이상 지속', {num:true, def:0});
-          tn.style.maxWidth='52px';
-          tn.title='지속/심지 턴 — 0이면 기본값('+(st?(st.turns||'영구'):'?')+')';
-          const l2=document.createElement('span'); l2.className='sub'; l2.textContent='지속';
-          row.appendChild(l2); row.appendChild(tn);
         }
         row.appendChild(miniBtn('×','이 효과 지우기',()=>{ removeP(`${base}.effects.${k}`); mark(`${base}.effects`, e.name+' '+m.name+' 효과 삭제'); redraw(); }));
         efBox.appendChild(row);

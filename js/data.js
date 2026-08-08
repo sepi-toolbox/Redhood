@@ -68,7 +68,8 @@ function validate() {
         if (!ENEMY_OPS.has(ef.op)) throw new Error(`enemies.json: ${e.id}.${mid} 미지원 효과 "${ef.op}"`);
         if (ef.op === 'status') {
           if (!DB.statusById[ef.kind]) throw new Error(`enemies.json: ${e.id}.${mid} 없는 상태이상 "${ef.kind}"`);
-          if (ef.power < 0 || ef.turns < 0) throw new Error(`enemies.json: ${e.id}.${mid} 상태이상 수치/지속이 음수입니다`);
+          if (ef.power < 0) throw new Error(`enemies.json: ${e.id}.${mid} 상태이상 수치가 음수입니다`);
+          if (ef.turns !== undefined) throw new Error(`enemies.json: ${e.id}.${mid} 지속 턴은 statuses.json 에서만 정합니다`);
           const NO_POWER = new Set(['onUseFaceDamage', 'onUseFaceCoin', 'noReroll', 'zeroValue', 'hideFace', 'needReroll', 'linked', 'spread', 'faceLow', 'faceHigh', 'rerollCost']);  // 세기를 적 행동에서 정하는 건 부패뿐
           if (ef.power > 0 && NO_POWER.has(DB.statusById[ef.kind].rule))
             throw new Error(`enemies.json: ${e.id}.${mid} "${ef.kind}" 은(는) 세기를 쓰지 않습니다`);
