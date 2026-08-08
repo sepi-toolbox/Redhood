@@ -150,6 +150,7 @@ function select(path, label, options, opt={}){
     if(cur==null && opt.onCreate){ opt.onCreate(el.value); redraw(); return; }
     writeP(path, el.value); mark(path, label, opt.def);
     el.classList.toggle('changed', changed.has(path));
+    if (opt.after) opt.after(el.value);
   });
   if(changed.has(path)) el.classList.add('changed');
   return el;
@@ -178,11 +179,12 @@ const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.i
 /* ---------- 탭 ---------- */
 const TABS=[
  ['개요','바뀐 값은 초록으로 표시된다. 다 고쳤으면 오른쪽 위 [내보내기]를 눌러 바뀐 JSON을 받아 나에게 주면 반영해서 배포한다.',ovw],
- ['적','HP와 기본 행동. 기본 행동은 모든 수가 쿨다운·락에 걸렸을 때 강제로 쓰는 안전망이다. 개별 행동은 [적행동] 탭에서 고친다.',tabEnemy],
- ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 락 턴은 "이 턴이 되면 더 안 씀"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 파쇄는 그 행동이 예고된 동안 HP에 그만큼 피해를 받으면 유니크 행동으로 무너지는 것 — 방어도로 막힌 피해는 안 센다. 유니크 행동은 추첨에 안 들어가고 파쇄되지도 않는다. 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
+ ['적','HP와 기본 행동. 기본 행동은 쓸 수 있는 수가 하나도 없을 때 제약을 전부 무시하고 시동하는 예외 처리 장치다 — 유니크 행동과는 별개이며 아무 행동이나 지정할 수 있다. 개별 행동은 [적행동] 탭에서 고친다.',tabEnemy],
+ ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 락 턴은 "이 턴이 되면 더 안 씀"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 파쇄는 그 행동이 예고된 동안 HP에 그만큼 피해를 받으면 유니크 행동으로 무너지는 것 — 방어도로 막힌 피해는 안 센다. 유니크 행동은 추첨에 안 들어가고 파쇄되지도 않는다. 유니크가 나오는 길은 국면 전환과 파쇄 둘뿐이다. 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
  ['족보','배수(mult)와 변형의 부가 능력 수치.',tabScore],
  ['주사위','여섯 면을 직접 고친다. 면 구성이 곧 성능이다.',tabDice],
  ['유물','효과 수치는 hook.amount 하나로 정해진다.',tabRelic],
+ ['국면','보스의 국면 전환. HP가 임계 아래로 떨어지는 순간 진입 행동(유니크)이 현재 예고를 밀어내고 강제로 나온다.',tabPhase],
  ['막·테마','어느 테마에 어느 적이 나오는지. 배율은 [수치] 탭에.',tabTheme],
  ['만남','이벤트 선택지의 대가와 보상.',tabEvent],
  ['수치','지도·보상·경제·전역 배율. 게임 전체의 손잡이.',tabConst],
@@ -312,7 +314,7 @@ function tabMoves(v){
       const efBox=document.createElement('div');
       (m.effects||[]).forEach((x,k)=>{
         const row=document.createElement('div'); row.className='efrow';
-        row.appendChild(select(`${base}.effects.${k}.op`, e.name+' '+m.name+' 효과'+(k+1), ENEMY_OPS));
+        row.appendChild(select(`${base}.effects.${k}.op`, e.name+' '+m.name+' 효과'+(k+1), ENEMY_OPS, {after:redraw}));
         row.appendChild(miniBtn('×','이 효과 지우기',()=>{ removeP(`${base}.effects.${k}`); mark(`${base}.effects`, e.name+' '+m.name+' 효과 삭제'); redraw(); }));
         efBox.appendChild(row);
       });
@@ -407,7 +409,7 @@ function tabScore(v){
       const vb=`scoring:categories.${ci}.variants.${vi}`;
       const ab=document.createElement('div');
       (vr.ability||[]).forEach((a,k)=>{ const r=document.createElement('div'); r.className='efrow';
-        r.appendChild(select(`${vb}.ability.${k}.op`, vr.name+' 능력'+(k+1), ABILITY_OPS));
+        r.appendChild(select(`${vb}.ability.${k}.op`, vr.name+' 능력'+(k+1), ABILITY_OPS, {after:redraw}));
         r.appendChild(miniBtn('×','이 능력 지우기',()=>{ removeP(`${vb}.ability.${k}`); mark(`${vb}.ability`, vr.name+' 능력 삭제'); redraw(); }));
         ab.appendChild(r); });
       ab.appendChild(miniBtn('+ 능력','능력 추가',()=>{ (vr.ability=vr.ability||[]).push({op:'strength',amount:1});
@@ -465,6 +467,65 @@ function tabRelic(v){
     DB.relics.push({ id:freshId(ids,'relic'), name:'새 유물', icon:'✨', tier:'normal',
       desc:'효과 설명', hook:{ type:'flatDamage', amount:1 } });
     mark('relics','유물 추가'); redraw(); });
+}
+function tabPhase(v){
+  const tb=table(v,['적','격','국면','유지 구간','HP 임계','진입 행동 (유니크)','이 국면의 행동','']);
+  DB.enemies.forEach((e,i)=>{
+    const uo=Object.entries(uniqueOf(e));
+    const phases=e.phases||[];
+    if(phases.length){
+      phases.forEach((ph,k)=>{
+        const tr=document.createElement('tr'); tr.className='t-'+e.tier;
+        tr.dataset.k=(e.id+' '+e.name).toLowerCase();
+        cell(tr, k===0? e.name:'', 1);
+        cell(tr, k===0? ({normal:'일반',elite:'정예',boss:'보스'}[e.tier]):'', 1);
+        cell(tr, '국면 '+(k+1), 1);
+        const hi = k===0 ? 100 : Math.round(phases[k-1].untilHpRatio*100);
+        cell(tr, `HP ${hi}% → ${Math.round(ph.untilHpRatio*100)}%`, 1);
+        cell(tr, k===phases.length-1 ? '0 (마지막)' : field(`enemies:${i}.phases.${k}.untilHpRatio`, `${e.name} 국면${k+1} HP 임계`),
+             k===phases.length-1);
+        // 진입 행동은 첫 국면엔 없다 (전투 시작이 곧 1국면)
+        if(k===0) cell(tr, '— 시작 국면 —', 1);
+        else if(!uo.length) cell(tr, '유니크 행동을 먼저 만드세요', 1);
+        else cell(tr, select(`enemies:${i}.phases.${k}.enter`, `${e.name} 국면${k+1} 진입 행동`,
+          [['','— 없음 —'], ...uo.map(([id,m])=>[id,m.name])],
+          {removable:true, removePath:`enemies:${i}.phases.${k}.enter`,
+           onCreate:(val)=>{ ph.enter=val; }}));
+        cell(tr, Object.entries(ph.pattern.weights||{}).filter(([,w])=>w>0)
+          .map(([id,w])=>`${(e.moves[id]||{}).name||id} ${w}`).join(' · ')||'—', 1);
+        const box=document.createElement('div');
+        if(k>0) box.appendChild(miniBtn('국면 삭제','이 국면을 없앤다',()=>{
+          if(!confirm(`${e.name}의 국면 ${k+1}을 지울까요?`)) return;
+          e.phases.splice(k,1);
+          if(e.phases.length===1){ e.pattern=e.phases[0].pattern; delete e.phases; }
+          else e.phases[e.phases.length-1].untilHpRatio=0;
+          mark(`enemies:${i}.phases`, `${e.name} 국면 삭제`); redraw(); }));
+        cell(tr, box);
+        tb.appendChild(tr);
+      });
+    } else {
+      const tr=document.createElement('tr'); tr.className='t-'+e.tier;
+      tr.dataset.k=(e.id+' '+e.name).toLowerCase();
+      cell(tr,e.name,1); cell(tr,({normal:'일반',elite:'정예',boss:'보스'}[e.tier]),1);
+      cell(tr,'—',1); cell(tr,'국면 없음 (하나로 끝까지)',1); cell(tr,'—',1); cell(tr,'—',1);
+      cell(tr, Object.entries((e.pattern||{}).weights||{}).filter(([,w])=>w>0)
+        .map(([id,w])=>`${(e.moves[id]||{}).name||id} ${w}`).join(' · ')||'—', 1);
+      cell(tr,'',1);
+      tb.appendChild(tr);
+    }
+    const add=document.createElement('tr'); add.dataset.k=(e.id+' '+e.name).toLowerCase();
+    const td=document.createElement('td'); td.colSpan=8; td.style.padding='4px 6px';
+    td.appendChild(miniBtn('+ 국면 추가', `${e.name}에 국면을 하나 더`, ()=>{
+      const clone=(o)=>JSON.parse(JSON.stringify(o));
+      if(!e.phases){ e.phases=[{untilHpRatio:0.5, pattern:e.pattern}, {untilHpRatio:0, pattern:clone(e.pattern)}]; delete e.pattern; }
+      else {
+        const last=e.phases[e.phases.length-1];
+        last.untilHpRatio = Number((1/(e.phases.length+1)).toFixed(2));
+        e.phases.push({untilHpRatio:0, pattern:clone(last.pattern)});
+      }
+      mark(`enemies:${i}.phases`, `${e.name} 국면 추가`); redraw(); }));
+    add.appendChild(td); tb.appendChild(add);
+  });
 }
 function tabTheme(v){
   const tb=table(v,['막','테마','일반 적','정예','보스','이벤트','HP 배율','공격 배율']);
@@ -585,7 +646,7 @@ function validateDB(){
     }
     for(const id of Object.keys(e.uniqueMoves||{})){
       const reached=broken.has(id) || (e.phases||[]).some(p=>p.enter===id) || e.defaultMove===id || called.has(id);
-      if(!reached) bad.push(`${e.name}/${e.uniqueMoves[id].name}: 유니크인데 부르는 곳이 없음 (파쇄·국면 전환·기본 행동 중 하나로 연결하세요)`);
+      if(!reached) bad.push(`${e.name}/${e.uniqueMoves[id].name}: 유니크인데 부르는 곳이 없음 (국면 전환이나 파쇄로 연결하세요)`);
     }
   }
   for(const id of DB.act1.player.startDice) if(!DB.dice.some(d=>d.id===id)) bad.push(`시작 주사위 "${id}" 가 없음`);
