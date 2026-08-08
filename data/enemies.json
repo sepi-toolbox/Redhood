@@ -872,6 +872,11 @@
           {
             "op": "damage",
             "amount": 10
+          },
+          {
+            "op": "status",
+            "kind": "bleed",
+            "amount": 2
           }
         ],
         "cooldown": 1,
@@ -903,7 +908,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 7,
+            "amount": 5,
             "hits": 3
           },
           {
@@ -913,7 +918,11 @@
           }
         ],
         "minTurn": 3,
-        "cooldown": 0
+        "cooldown": 0,
+        "break": {
+          "damage": 1,
+          "move": "unique1"
+        }
       },
       "surge": {
         "name": "상처 찢기",
