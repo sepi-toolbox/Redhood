@@ -99,16 +99,19 @@ function hasRelic(relics, type) { return relics.some(r => r.hook.type === type);
    3. 무작위로 걸 때는 빈 칸을 먼저 채우고, 다 찼으면 아무 칸이나 덮는다.        */
 const stDef = (kind) => (DB.statusById && DB.statusById[kind]) || null;
 export const stRule = (d, rule) => !!(d && d.st && stDef(d.st.kind) && stDef(d.st.kind).rule === rule);
-// 수치는 건 쪽이 정한 값이 우선이고, 안 적었으면 statuses.json 의 기본값을 쓴다
+// 수치는 statuses.json 값으로 고정이다.
+// 적 행동이 덮어쓸 수 있는 건 부패(fuse)의 폭발 피해 하나뿐 — 나머지는 규칙 상수다.
 const stAmount = (d) => {
-  if (d.st && d.st.power > 0) return d.st.power;
-  const x = stDef(d.st.kind); return x ? x.amount : 0;
+  const x = stDef(d.st.kind); if (!x) return 0;
+  if (x.rule === 'fuse' && d.st.power > 0) return d.st.power;
+  return x.amount;
 };
 
 // power: 이 상태이상의 세기 (0이면 기본값) · turns: 지속/심지 턴 (0이면 기본값)
 export function applyStatus(battle, kind, count = 1, power = 0, turns = 0) {
   if (!stDef(kind)) return 0;
   const def = stDef(kind);
+  if (def.rule !== 'fuse') power = 0;        // 세기를 정할 수 있는 건 부패뿐
   const life = turns > 0 ? turns : (def.turns || 0);
   let put = 0;
   for (let k = 0; k < count; k++) {
