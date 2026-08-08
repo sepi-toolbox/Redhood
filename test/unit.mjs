@@ -707,6 +707,35 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eq('정화 후', b.dice.filter(d => d.st).length, 0);
   }
 
+  // 적 행동이 세기와 지속까지 정한다
+  { const b = mk();
+    b.enemies[0].nextMove = { id: 't', name: '시험', effects: [{ op: 'status', kind: 'rot', amount: 1, power: 33, turns: 3 }] };
+    b.await = 'enemy'; eng.enemyPhase(b);
+    const d = b.dice.find(x => x.st && x.st.kind === 'rot');
+    eq('건 쪽이 정한 세기가 들어간다', d.st.power, 33);
+    eq('심지도 지정한 값 (첫 턴 시작에서 1 탐)', d.st.fuse, 2);
+    const hp = b.player.hp;
+    b.await = 'enemy'; eng.enemyPhase(b);
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('기본값 10이 아니라 33으로 터진다', hp - b.player.hp >= 33, true);
+  }
+  // 세기를 안 적으면 statuses.json 기본값을 쓴다
+  { const b = mk(); eng.initialRoll(b);
+    b.dice.forEach(d => d.face = 3);
+    eng.applyStatus(b, 'bleed', 1);
+    const i = b.dice.findIndex(d => d.st);
+    b.dice[i].face = 3;
+    const r = eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
+    eq('기본 배수 1이 적용', r.bonusHits.includes('🩸-3'), true);
+  }
+  // 세기를 적으면 그 값이 배수가 된다
+  { const b = mk(); eng.initialRoll(b);
+    b.dice.forEach(d => d.face = 3);
+    eng.applyStatus(b, 'bleed', 1, 2);
+    const r = eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
+    eq('세기 2면 눈금 ×2', r.bonusHits.includes('🩸-6'), true);
+  }
+
   // 데이터 무결성
   eq('상태이상 13종', DB.statuses.list.length, 13);
   eq('규칙이 전부 구현된 것만 쓴다',

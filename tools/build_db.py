@@ -12,7 +12,7 @@ events, acts, act1 = D('events'), D('acts'), D('act1')
 statuses = D('statuses')
 
 EN = {e['id']: e for e in enemies}
-VERSION = 'v1.17'
+VERSION = 'v1.18'
 TODAY = '2026-08-08'
 
 FONT = 'Arial'
@@ -62,13 +62,19 @@ OPNAME = {'rest':'휴식','selfDamage':'자해','poison':'독','bleed':'출혈',
           'weaken':'약화','vulnerable':'취약','bleed':'출혈','regen':'재생','focus':'집중',
           'strength':'힘','loseHp':'HP 감소','gainRelic':'유물 획득','drain':'흡혈',
           'markReroll':'리롤 표식','curse':'저주'}
-ST_NAME = {}
+ST_NAME = {}; ST_AMT = {}; ST_TURN = {}
 def eff_text(effs):
     if not effs: return '—'
     out = []
     for e in effs:
         if e.get('op') == 'status':
-            out.append(f"{ST_NAME.get(e.get('kind'), e.get('kind'))} {e.get('amount', 1)}칸")
+            pw = e.get('power') or ST_AMT.get(e.get('kind'), 0)
+            tn = e.get('turns') or ST_TURN.get(e.get('kind'), 0)
+            t = f"{ST_NAME.get(e.get('kind'), e.get('kind'))}"
+            if pw: t += f" 세기{pw}"
+            t += f" {e.get('amount', 1)}칸"
+            if tn: t += f" ({tn}턴)"
+            out.append(t)
             continue
         n = OPNAME.get(e.get('op'), e.get('op'))
         a = e.get('amount')
@@ -79,6 +85,8 @@ def eff_text(effs):
     return ' · '.join(out)
 
 ST_NAME.update({x['id']: x['name'] for x in statuses['list']})
+ST_AMT.update({x['id']: x.get('amount', 0) for x in statuses['list']})
+ST_TURN.update({x['id']: x.get('turns', 0) for x in statuses['list']})
 
 ACT_OF = {}
 for a in acts['acts']:
@@ -243,7 +251,7 @@ for e in ENEMIES:
         rows.append([e['id'], e['name'], '__enlight', e['enlightenedMove']['name'],
                      eff_text(e['enlightenedMove'].get('effects')), '3번째 행동마다', '', '', '', '', '계몽 17~19단계', '', e['tier']])
 sheet('적행동', '적 행동 전량',
-      '막 → 테마 → 난이도 순. 발동 조건 다섯 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 락 턴은 "이 턴이 되면 더 안 씀", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정".',
+      '상태이상 부여는 [종류 세기 N칸] 으로 읽는다 — 세기를 안 적으면 상태이상 시트의 기본값을 쓴다. 막 → 테마 → 난이도 순. 발동 조건 다섯 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 락 턴은 "이 턴이 되면 더 안 씀", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정".',
       ['적 id','적 이름','행동 id','행동명','효과','가중치','해금 턴','락 턴','쿨다운','파쇄','비고','연계'], rows, [16,16,16,20,30,18,8,8,8,18,14,22])
 
 # ---------- 7-2. 상태이상 ----------

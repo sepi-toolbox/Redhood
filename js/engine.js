@@ -99,17 +99,25 @@ function hasRelic(relics, type) { return relics.some(r => r.hook.type === type);
    3. 무작위로 걸 때는 빈 칸을 먼저 채우고, 다 찼으면 아무 칸이나 덮는다.        */
 const stDef = (kind) => (DB.statusById && DB.statusById[kind]) || null;
 export const stRule = (d, rule) => !!(d && d.st && stDef(d.st.kind) && stDef(d.st.kind).rule === rule);
-const stAmount = (d) => { const x = stDef(d.st.kind); return x ? x.amount : 0; };
+// 수치는 건 쪽이 정한 값이 우선이고, 안 적었으면 statuses.json 의 기본값을 쓴다
+const stAmount = (d) => {
+  if (d.st && d.st.power > 0) return d.st.power;
+  const x = stDef(d.st.kind); return x ? x.amount : 0;
+};
 
-export function applyStatus(battle, kind, count = 1) {
+// power: 이 상태이상의 세기 (0이면 기본값) · turns: 지속/심지 턴 (0이면 기본값)
+export function applyStatus(battle, kind, count = 1, power = 0, turns = 0) {
   if (!stDef(kind)) return 0;
   const def = stDef(kind);
+  const life = turns > 0 ? turns : (def.turns || 0);
   let put = 0;
   for (let k = 0; k < count; k++) {
     const empty = battle.dice.map((d, i) => (d.st ? -1 : i)).filter(i => i >= 0);
     const pool = empty.length ? empty : battle.dice.map((_, i) => i);
     const i = pool[Math.floor(rng.next() * pool.length)];
-    battle.dice[i].st = { kind, left: def.turns || 0, fuse: def.rule === 'fuse' ? (def.turns || 1) : 0, opened: false };
+    battle.dice[i].st = { kind, power: power > 0 ? power : 0,
+      left: def.rule === 'fuse' ? 0 : life,
+      fuse: def.rule === 'fuse' ? (life || 1) : 0, opened: false };
     put++;
   }
   return put;
@@ -524,7 +532,7 @@ function applyStatusCost(battle, bd) {
   });
   for (const j of grow) {
     const t = battle.dice[j];
-    if (t && !stRule(t, 'spread')) t.st = { kind: 'devour', left: 0, fuse: 0, opened: false };
+    if (t && !stRule(t, 'spread')) t.st = { kind: 'devour', power: 0, left: 0, fuse: 0, opened: false };
   }
   if (battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;
   if (coin > 0) { battle.coinsLost += coin; battle.lastResult.bonusHits.push(`🪙-${coin}`); }
@@ -629,7 +637,8 @@ export function enemyPhase(battle) {
           battle.pendingConfuse += ef.amount;
           break;
         case 'status':                                     // v1.17 주사위에 상태이상을 건다
-          applyStatus(battle, ef.kind, Math.max(1, ef.amount || 1));
+          // amount = 몇 칸에 거는가 · power = 세기(0이면 기본) · turns = 지속/심지(0이면 기본)
+          applyStatus(battle, ef.kind, Math.max(1, ef.amount || 1), ef.power || 0, ef.turns || 0);
           break;
         case 'empower':                                    // 💪 강화 — 전투 내 공격력 누적
           e.power = (e.power || 0) + ef.amount;
@@ -810,7 +819,8 @@ export function intentOf(enemy) {
     else if (ef.op === 'confuse' || ef.op === 'poison' || ef.op === 'bleed') parts.push('🌀');
     else if (ef.op === 'status') {
       const st = DB.statusById[ef.kind];
-      parts.push(`🎲${st ? st.name : '?'}${(ef.amount || 1) > 1 ? '×' + ef.amount : ''}`);
+      const pw = ef.power || (st ? st.amount : 0);
+      parts.push(`🎲${st ? st.name : '?'}${pw > 0 ? pw : ''}${(ef.amount || 1) > 1 ? '×' + ef.amount : ''}`);
     }
     else if (ef.op === 'empower') parts.push('💪');
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);

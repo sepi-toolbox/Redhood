@@ -66,7 +66,10 @@ function validate() {
     for (const [mid, mv] of Object.entries(all)) {
       for (const ef of mv.effects) {
         if (!ENEMY_OPS.has(ef.op)) throw new Error(`enemies.json: ${e.id}.${mid} 미지원 효과 "${ef.op}"`);
-        if (ef.op === 'status' && !DB.statusById[ef.kind]) throw new Error(`enemies.json: ${e.id}.${mid} 없는 상태이상 "${ef.kind}"`);
+        if (ef.op === 'status') {
+          if (!DB.statusById[ef.kind]) throw new Error(`enemies.json: ${e.id}.${mid} 없는 상태이상 "${ef.kind}"`);
+          if (ef.power < 0 || ef.turns < 0) throw new Error(`enemies.json: ${e.id}.${mid} 상태이상 수치/지속이 음수입니다`);
+        }
       }
       if (mv.break) {
         if (!(e.uniqueMoves || {})[mv.break.move]) throw new Error(`enemies.json: ${e.id}.${mid} 파쇄 대상 "${mv.break.move}" 은(는) 유니크 행동이어야 합니다`);
