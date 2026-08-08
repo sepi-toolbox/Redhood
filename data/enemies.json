@@ -91,8 +91,9 @@
         "name": "웅크리기",
         "effects": [
           {
-            "op": "block",
-            "amount": 5
+            "op": "damage",
+            "amount": 1,
+            "hits": 5
           }
         ],
         "cooldown": 1
@@ -101,7 +102,8 @@
         "name": "명멸",
         "effects": [
           {
-            "op": "rest"
+            "op": "block",
+            "amount": 10
           }
         ],
         "hidden": true,
@@ -109,7 +111,8 @@
           "move": "flare",
           "chance": 1.0
         },
-        "cooldown": 1
+        "cooldown": 1,
+        "lockTurn": 5
       },
       "flare": {
         "name": "불꽃 폭발",
@@ -119,19 +122,32 @@
             "amount": 15
           }
         ],
-        "minTurn": 5,
-        "cooldown": 2
+        "minTurn": 5
       },
       "surge": {
-        "name": "심지를 태운다",
+        "name": "심각한 명멸",
         "effects": [
           {
-            "op": "empower",
-            "amount": 5
+            "op": "block",
+            "amount": 15
           }
         ],
-        "minTurn": 4,
-        "cooldown": 3
+        "minTurn": 5,
+        "cooldown": 1,
+        "followUp": {
+          "move": "move1",
+          "chance": 1.0
+        }
+      },
+      "move1": {
+        "name": "대폭발",
+        "effects": [
+          {
+            "op": "damage",
+            "amount": 30
+          }
+        ],
+        "minTurn": 5
       }
     },
     "pattern": {
@@ -139,8 +155,9 @@
       "weights": {
         "scorch": 1,
         "flicker": 1,
-        "flare": 0,
-        "surge": 3
+        "flare": 99,
+        "surge": 1,
+        "move1": 99
       }
     },
     "enlightenedMove": {
