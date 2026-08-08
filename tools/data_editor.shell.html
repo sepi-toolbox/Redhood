@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.23 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.24 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -110,10 +110,33 @@ function mark(p, label, def){
   if(was===undefined && def!==undefined) was=def;      // 원래 없던 항목은 기본값과 비교한다
   const same = (typeof now==='object'||typeof was==='object') ? JSON.stringify(now)===JSON.stringify(was) : String(now)===String(was);
   if(same) changed.delete(p); else changed.set(p,{before:was,after:now,label});
+  refreshCount();
+}
+function refreshCount(){
   const n=changed.size;
   document.getElementById('cnt').textContent='변경 '+n+'건';
   document.getElementById('exp').disabled=!n;
   document.getElementById('undo').disabled=!n;
+}
+/* 지운 항목의 기록을 요약에서도 치운다 (안 그러면 없어진 행동이 계속 요약에 뜬다) */
+function purgeChanged(...prefixes){
+  for(const k of [...changed.keys()])
+    if(prefixes.some(pre => k===pre || k.startsWith(pre+'.') || k.startsWith(pre+':'))) changed.delete(k);
+  refreshCount();
+}
+/* 배열에서 한 칸을 뺐을 때: 그 칸 기록은 버리고 뒤 칸 기록은 한 칸씩 당긴다 */
+function spliceChanged(arrPath, idx){
+  const pre = arrPath + (arrPath.includes(':') ? '.' : ':');
+  const moved=[];
+  for(const k of [...changed.keys()]){
+    if(!k.startsWith(pre)) continue;
+    const m = k.slice(pre.length).match(/^(\d+)(\..*)?$/); if(!m) continue;
+    const n=Number(m[1]), tail=m[2]||'', v=changed.get(k);
+    changed.delete(k);
+    if(n!==idx) moved.push([pre+(n>idx?n-1:n)+tail, v]);
+  }
+  moved.forEach(([k,v])=>changed.set(k,v));
+  refreshCount();
 }
 
 /* ---------- 입력 만들기 ---------- */
@@ -305,17 +328,22 @@ function addRow(tb, cols, label, fn){
 function freshId(taken, stem){ let n=1; while(taken.has(stem+n)) n++; return stem+n; }
 function patternsOf(e){ return (e.phases||[]).map(p=>p.pattern).concat(e.pattern?[e.pattern]:[]); }
 // 행동을 지울 때 그 행동을 가리키던 것들을 같이 치운다 (안 그러면 데이터가 깨져 로딩이 막힌다)
-function purgeMove(e, mid){
-  const cleaned=[];
-  for(const p of patternsOf(e)) if(p.weights && mid in p.weights){ delete p.weights[mid]; cleaned.push('가중치'); }
+function purgeMove(e, mid, i){
+  const cleaned=[], gone=[`enemies:${i}.moves.${mid}`, `enemies:${i}.uniqueMoves.${mid}`];
+  const pats=(e.phases||[]).map((p,k)=>[p.pattern,`enemies:${i}.phases.${k}.pattern`])
+    .concat(e.pattern?[[e.pattern,`enemies:${i}.pattern`]]:[]);
+  for(const [p,pp] of pats) if(p && p.weights && mid in p.weights){
+    delete p.weights[mid]; cleaned.push('가중치'); gone.push(`${pp}.weights.${mid}`); }
   for(const [k,m] of Object.entries({...e.moves, ...uniqueOf(e)})){
-    if(m.followUp && m.followUp.move===mid){ delete m.followUp; cleaned.push(`${m.name}의 연계`); }
-    if(m.break && m.break.move===mid){ delete m.break; cleaned.push(`${m.name}의 파쇄`); }
+    const mp=`enemies:${i}.${e.moves[k]?'moves':'uniqueMoves'}.${k}`;
+    if(m.followUp && m.followUp.move===mid){ delete m.followUp; cleaned.push(`${m.name}의 연계`); gone.push(`${mp}.followUp`); }
+    if(m.break && m.break.move===mid){ delete m.break; cleaned.push(`${m.name}의 파쇄`); gone.push(`${mp}.break`); }
   }
-  if(e.defaultMove===mid){ delete e.defaultMove; cleaned.push('기본 행동'); }
-  for(const p of (e.phases||[])) if(p.enter===mid){ delete p.enter; cleaned.push('국면 전환'); }
+  if(e.defaultMove===mid){ delete e.defaultMove; cleaned.push('기본 행동'); gone.push(`enemies:${i}.defaultMove`); }
+  (e.phases||[]).forEach((p,k)=>{ if(p.enter===mid){ delete p.enter; cleaned.push('국면 전환'); gone.push(`enemies:${i}.phases.${k}.enter`); } });
   if(e.moves[mid]) delete e.moves[mid];
   if(e.uniqueMoves && e.uniqueMoves[mid]) delete e.uniqueMoves[mid];
+  purgeChanged(...gone);
   return [...new Set(cleaned)];
 }
 function tabMoves(v){
@@ -356,7 +384,7 @@ function tabMoves(v){
             row.appendChild(l1); row.appendChild(pw);
           }
         }
-        row.appendChild(miniBtn('×','이 효과 지우기',()=>{ removeP(`${base}.effects.${k}`); mark(`${base}.effects`, e.name+' '+m.name+' 효과 삭제'); redraw(); }));
+        row.appendChild(miniBtn('×','이 효과 지우기',()=>{ removeP(`${base}.effects.${k}`); spliceChanged(`${base}.effects`, k); mark(`${base}.effects`, e.name+' '+m.name+' 효과 삭제'); redraw(); }));
         efBox.appendChild(row);
       });
       efBox.appendChild(miniBtn('+ 효과','효과 추가',()=>{
@@ -413,7 +441,7 @@ function tabMoves(v){
       noteBox.appendChild(miniBtn('행 삭제','이 행동을 지운다 (가리키던 연계·파쇄·가중치도 함께 정리)',()=>{
         if(!uniq && Object.keys(e.moves).length<=1){ alert('일반 행동이 하나뿐이라 지울 수 없어요.'); return; }
         if(!confirm(`${e.name}의 "${m.name}" 을(를) 지울까요?`)) return;
-        const cleaned=purgeMove(e, mid);
+        const cleaned=purgeMove(e, mid, i);
         mark(`enemies:${i}.${holder}`, `${e.name} 행동 삭제: ${m.name}` + (cleaned.length?` (${cleaned.join('·')} 정리)`:''));
         redraw();
       }));
@@ -455,7 +483,7 @@ function tabScore(v){
       const ab=document.createElement('div');
       (vr.ability||[]).forEach((a,k)=>{ const r=document.createElement('div'); r.className='efrow';
         r.appendChild(select(`${vb}.ability.${k}.op`, vr.name+' 능력'+(k+1), ABILITY_OPS, {after:redraw}));
-        r.appendChild(miniBtn('×','이 능력 지우기',()=>{ removeP(`${vb}.ability.${k}`); mark(`${vb}.ability`, vr.name+' 능력 삭제'); redraw(); }));
+        r.appendChild(miniBtn('×','이 능력 지우기',()=>{ removeP(`${vb}.ability.${k}`); spliceChanged(`${vb}.ability`, k); mark(`${vb}.ability`, vr.name+' 능력 삭제'); redraw(); }));
         ab.appendChild(r); });
       ab.appendChild(miniBtn('+ 능력','능력 추가',()=>{ (vr.ability=vr.ability||[]).push({op:'strength',amount:1});
         mark(`${vb}.ability`, vr.name+' 능력 추가'); redraw(); }));
@@ -481,7 +509,7 @@ function tabDice(v){
     box.appendChild(miniBtn('행 삭제','이 주사위를 지운다',()=>{
       if(DB.act1.player.startDice.includes(d.id)){ alert('시작 주사위로 쓰이고 있어 지울 수 없어요.'); return; }
       if(!confirm(`주사위 "${d.name}" 을(를) 지울까요?`)) return;
-      DB.dice.splice(i,1); mark('dice', `주사위 삭제: ${d.name}`); redraw(); }));
+      DB.dice.splice(i,1); spliceChanged('dice', i); mark('dice', `주사위 삭제: ${d.name}`); redraw(); }));
     cell(tr, box);
     tb.appendChild(tr);
   });
@@ -503,7 +531,7 @@ function tabRelic(v){
     const box=document.createElement('div'); box.style.cssText='display:flex;gap:6px';
     box.appendChild(miniBtn('행 삭제','이 유물을 지운다',()=>{
       if(!confirm(`유물 "${r.name}" 을(를) 지울까요?`)) return;
-      DB.relics.splice(i,1); mark('relics', `유물 삭제: ${r.name}`); redraw(); }));
+      DB.relics.splice(i,1); spliceChanged('relics', i); mark('relics', `유물 삭제: ${r.name}`); redraw(); }));
     cell(tr, box);
     tb.appendChild(tr);
   });
@@ -541,8 +569,9 @@ function tabPhase(v){
         const box=document.createElement('div');
         if(k>0) box.appendChild(miniBtn('국면 삭제','이 국면을 없앤다',()=>{
           if(!confirm(`${e.name}의 국면 ${k+1}을 지울까요?`)) return;
-          e.phases.splice(k,1);
-          if(e.phases.length===1){ e.pattern=e.phases[0].pattern; delete e.phases; }
+          e.phases.splice(k,1); spliceChanged(`enemies:${i}.phases`, k);
+          if(e.phases.length===1){ e.pattern=e.phases[0].pattern; delete e.phases;
+            purgeChanged(`enemies:${i}.phases`); }
           else e.phases[e.phases.length-1].untilHpRatio=0;
           mark(`enemies:${i}.phases`, `${e.name} 국면 삭제`); redraw(); }));
         cell(tr, box);

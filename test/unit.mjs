@@ -130,9 +130,11 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('순서(sequence) 패턴이 남아 있지 않음',
     DB.enemies.some(e => ((e.phases || []).map(p => p.pattern).concat(e.pattern ? [e.pattern] : []))
       .some(p => p.mode === 'sequence')), false);
-  // 효과 종류는 설계자가 자유롭게 정한다 — 여기서 검사할 것은 '장기전에만 나오는 수가 있는가'다
-  eq('최종 보스를 뺀 모두가 후반 전용 행동을 가짐',
-    DB.enemies.filter(e => !e.final).every(e => Object.values(e.moves).some(m => m.minTurn > 0)), true);
+  // 효과 종류는 설계자가 자유롭게 정한다 — 여기서 검사할 것은 '전투가 길어지면 새 수가 나오는가'다.
+  // 그 장치는 둘 중 아무거나면 된다: 해금 턴(minTurn) 또는 국면(phases).
+  eq('최종 보스를 뺀 모두가 후반용 장치를 가짐',
+    DB.enemies.filter(e => !e.final).every(e =>
+      Object.values(e.moves).some(m => m.minTurn > 0) || (e.phases || []).length > 1), true);
   eq('행동 이름에 공용 라벨 없음',
     DB.enemies.every(e => Object.values(e.moves).every(m => !/격노/.test(m.name))), true);
   // 가중치 0인데 아무도 연계로 부르지 않는 '절대 안 나오는 행동'이 없어야 한다
