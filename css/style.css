@@ -61,13 +61,26 @@ body {
 .relic-bar { font-size: 16px; letter-spacing: 2px; }
 
 /* ---------- 타이틀 ---------- */
-.title-screen { align-items: center; justify-content: center; gap: 12px; padding: 24px; }
+.title-screen { align-items: center; justify-content: center; gap: 12px; padding: 24px; position: relative; }
+/* v0.99: 로비 배경 — 전투 배경과 달리 화면 전체를 덮는다.
+   그림 아래쪽에 등불을 든 아이가 있어서 바닥을 살려야 하므로 세로 하단을 기준으로 맞춘다.
+   글자가 등불빛 위에 올라가 안 읽히는 걸 막으려고 위아래에 어두운 겹을 한 장 깐다. */
+.title-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(16,12,10,.72) 0%, rgba(16,12,10,.34) 34%, rgba(16,12,10,.30) 58%, rgba(16,12,10,.80) 88%, rgba(16,12,10,.92) 100%),
+    url('../assets/bg/bg_title.jpg');
+  background-size: 100% 100%, cover;
+  background-position: center, center bottom;
+  filter: brightness(1.18);
+}
+.title-screen > *:not(.title-bg) { position: relative; z-index: 1; }
 .title-art { font-size: 40px; }
 .logo { width: min(330px, 86%); filter: drop-shadow(0 0 26px rgba(201, 48, 47, .28)); } /* v0.28 로고 아트 */
 .title-screen h1 { font-size: 42px; letter-spacing: 6px; color: #c9302f; text-shadow: 0 0 24px rgba(201, 48, 47, .35); }
-.subtitle { color: #9c8f7a; margin-bottom: 10px; }
-.hint { font-size: 11.5px; color: #6f6353; }
-.hint.notice { margin-top: 6px; color: #5f5648; letter-spacing: .2px; } /* v0.76: 로비 AI 제작 안내 */
+.subtitle { color: #b3a48b; margin-bottom: 10px; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.hint { font-size: 11.5px; color: #8a7c68; text-shadow: 0 1px 3px rgba(0,0,0,.85); }
+.hint.notice { margin-top: 6px; color: #7b6f5d; letter-spacing: .2px; } /* v0.76: 로비 AI 제작 안내 */
 
 /* ---------- 맵: 양피지 ---------- */
 .map-scroll { flex: 1; overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; }
