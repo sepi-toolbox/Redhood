@@ -1,129 +1,127 @@
-# REDHOOD 상태이상 리소스 — 프롬프트 정리본
+# REDHOOD 상태이상 리소스 — 프롬프트 정리본 (2판)
 
-> 기준 **v1.16** · 2026-08-08. 주사위에 얹히는 상태이상 13종 + 곁들이 2종.
-> 이 문서만 열어놓고 위에서부터 복사하면 됩니다. 받으면 규격 맞추기·밝기 보정은 제가 합니다.
-
----
-
-## 0. 먼저 알아야 할 화면 크기
-
-주사위 한 칸은 **62 × 70 px** 입니다. 그 안에 눈 그림이 **46 × 46 px** 로 들어갑니다.
-상태이상 그림은 그 62 × 70 위에 통째로 얹힙니다. **엄지손톱보다 작습니다.**
-
-여기서 두 가지가 따라옵니다.
-
-**하나, 대부분은 가운데를 비워야 합니다.** 13종 중 값이 보여야 하는 게 11종입니다. 가운데를 덮어버리면 눈이 안 보여서 게임이 안 됩니다. 그래서 기본형은 **네 변만 두르는 테두리**이고, 가운데는 완전히 비웁니다. 족보 판 등급 만들 때 쓴 그 방식입니다.
-값이 안 보여야 하는 건 **혼란**과 **봉인** 둘뿐이고, 이 둘만 타일 전체를 덮는 **가림형**입니다.
-
-**둘, 받침이 어둡습니다.** 주사위 받침 `die_pad.png` 의 평균색이 **#38160F**, 가운데가 **#4F1110** 인 짙은 적갈색입니다. 어두운 색으로 그리면 받침에 먹혀서 안 보입니다. 그래서 모든 프롬프트에 **바깥 윤곽을 밝게 빼는 문구**가 들어가 있습니다. 특히 출혈(붉은색)·잠식(검정)·저주(검보라)가 위험합니다.
+> 기준 **v1.16** · 2026-08-08. **1판의 테두리형은 전부 폐기했습니다.**
+> 액자가 세 겹이 되는 문제가 있어서 방식을 갈았습니다. 이 문서만 보고 뽑으면 됩니다.
 
 ---
 
-## 1. 색을 먼저 갈라둡니다
+## 0. 무엇이 바뀌었나
 
-62px에서 13종을 구분하려면 **실루엣이 1순위, 색이 2순위**입니다. 색만으로는 절대 못 갈립니다. 그래서 아래 표는 "이 색으로 그려라"가 아니라 "이 색은 다른 데서 쓰니 피해라"에 가깝습니다.
+**주사위를 두르지 않습니다. 주사위 눈 면 위에 얹습니다.**
 
-게임이 이미 쓰고 있는 발광 세 가지가 있습니다. 여기에 겹치면 안 됩니다.
+1판은 주사위 칸 네 변을 두르는 테두리였는데, 받침(`die_pad.png`)이 이미 나무 테두리 + 안쪽 붉은 면 두 겹이라 거기에 또 두르니 액자가 세 겹이 됐습니다. 그림이 문제가 아니라 **닫힌 사각 링**이 문제였습니다.
 
-| 이미 쓰는 것 | 색 | 뜻 |
+2판은 **주사위 눈이 그려진 그 사각 면 위에서 벌어지는 일**입니다. 받침은 손대지 않습니다.
+
+---
+
+## 1. 겹 구조 — 상태이상 하나당 네 겹
+
+전부 같은 구조를 씁니다. **그림은 딱 한 장**이고 나머지 세 겹은 제가 코드로 만듭니다.
+
+| 겹 | 무엇 | 누가 만드나 |
 |---|---|---|
-| 붉은 발광 | `#FF503E` | 다시 굴릴 주사위로 찍어둔 것 |
-| 금 발광 | `#FFDB84` | 지금 고른 족보를 이루는 것 |
-| 보라 발광 | `#C68CFF` | 상태이상이 걸린 것 (공통 표시) |
+| ① 면 효과 | 주사위 눈 면 위에 얹히는 그림 | **뽑아주셔야 하는 것 (1장)** |
+| ② 물듦 | 면 전체가 그 색으로 젖는다 | 코드 (색만 지정) |
+| ③ 파티클 | 방울·불꽃·재 같은 작은 알갱이 | 코드 (모양·움직임 지정) |
+| ④ 이름표 | 주사위 아래 붉은 글씨 "출혈" | 코드 |
 
-그래서 **축복은 금색으로 그리면 안 되고**(족보 강조와 헷갈립니다) 표백된 뼈흰빛으로, **약탈도 반짝이는 금이 아니라** 때 낀 구릿빛으로 갑니다. 프롬프트에 그 문구를 넣어뒀습니다.
+**④ 이름표가 붙으면서 그림의 부담이 확 줄었습니다.** 원래는 13종을 62px 실루엣만으로 구분해야 해서 기절과 마비를 어떻게 가를지 같은 걸 고민했는데, 이제 글자가 이름을 말해줍니다. 그림은 **"뭔가 나쁜 게 걸렸다"와 색**만 담당하면 됩니다.
 
-13종 배정입니다.
+**움직임은 상태마다 다릅니다.** 피는 흘러내리고 전류는 지직거리고 재는 흩날립니다. 흘러내리는 건 그게 피라서 그런 거지 공통 규칙이 아닙니다. 각자 자기 성질대로 움직입니다. 겹 구조만 하나로 통일되어 있으면 됩니다.
 
-| # | 상태이상 | 파일명 | 형태 | 색 | 실루엣 한 줄 |
+---
+
+## 2. 13종 파라미터
+
+`grammar_test.mp4` 에서 출혈(그림 있음)과 마비(그림 없이 코드로만 흉내)를 나란히 확인할 수 있습니다.
+
+| # | 상태 | 면 위에 무엇이 | 물듦 색 | 파티클 | 움직임 |
 |---|---|---|---|---|---|
-| 1 | 출혈 | `status_die_bleed` | 테두리 | 밝은 선홍 | 위에서 흘러내린 핏줄기, 아래에 고임 |
-| 2 | 독 | `status_die_poison` | 테두리 | 독성 황록 | 부풀어 맺힌 방울, 아래에 끓는 거품 |
-| 3 | 포박 | `status_die_bind` | 테두리 | 젖은 검녹 | 늪 뿌리가 네 변을 조이고 위에 매듭 |
-| 4 | 기절 | `status_die_stun` | 테두리 | 은백 | 네 모서리에서 안으로 뻗는 균열 |
-| 5 | 저주 | `status_die_curse` | 테두리 | 검보라·재 | 위에서 아래로 뻗은 뒤틀린 뿔 |
-| 6 | 축복 | `status_die_blessing` | 테두리 | 표백된 뼈흰빛 | 위쪽의 차가운 광배 반원 |
-| 7 | 혼란 | `status_die_confuse` | **가림** | 보라 | 타일을 덮은 소용돌이 안개 |
-| 8 | 봉인 | `status_die_seal` | **가림** | 남색·적갈 | 십자로 두른 띠와 밀랍 인장 |
-| 9 | 부패 | `status_die_rot` | 테두리 | 병든 자두빛 | 위 변에 곧 터질 듯 부푼 종기 |
-| 10 | 결속 | `status_die_chain` | 테두리 | 차가운 무쇠 | 좌우로 고리가 튀어나온 쇠사슬 |
-| 11 | 마비 | `status_die_leaden` | 테두리 | 납회색 | 네 귀에 매달린 추, 아래가 처짐 |
-| 12 | 약탈 | `status_die_plunder` | 테두리 | 때 낀 구릿빛 | 위에서 뻗어 들어오는 갈고리 손 |
-| 13 | 잠식 | `status_die_devour` | 테두리 | 먹빛 + 푸른 림 | 안으로 기어드는 너덜한 검은 구멍 |
+| 1 | 출혈 | 위에서 흘러내린 피 | 진홍 | 핏방울 | 아래로 뚝뚝 |
+| 2 | 독 | 면을 덮은 점액과 거품 | 황록 | 기포 | 떠올라 터짐 |
+| 3 | 포박 | 면을 가로지르는 젖은 뿌리 | 검녹 | — | 서서히 조임 |
+| 4 | 기절 | 면에 간 균열 | 은회 | 파편 | 가끔 튐 |
+| 5 | 저주 | 면을 삼켜오는 검은 그을음 | 검보라 | 재 | 위로 흩날림 |
+| 6 | 축복 | 면 위에 뜬 창백한 광배 | 뼈흰빛 | 빛가루 | 천천히 떠오름 |
+| 7 | 혼란 | 면 전체를 덮은 소용돌이 안개 | 보라 | — | 느리게 회전 |
+| 8 | 봉인 | 면을 덮은 밀랍 인장 | 남색 | — | 아주 느린 숨 |
+| 9 | 부패 | 면에 부푼 종기 | 병든 자두 | 포자 | 부풀었다 꺼짐 |
+| 10 | 결속 | 면을 가로지르는 쇠사슬 | 청회 | — | 팽팽히 당김 |
+| 11 | 마비 | 면 위를 달리는 전류 | 창백한 청백 | 스파크 | 지직거림 |
+| 12 | 약탈 | 면을 움켜쥔 갈고리 손 | 구릿빛 | 동전 | 떨어져 나감 |
+| 13 | 잠식 | 면을 먹어들어가는 검정 | 먹빛 | 검은 조각 | 안으로 빨림 |
 
-**기절과 마비**가 둘 다 회색 계열이라 걱정될 텐데, 실루엣이 정반대입니다. 기절은 **얇은 선**(균열), 마비는 **매달린 덩어리**(추). 62px에서도 갈립니다.
-**포박과 결속**도 둘 다 감는 형태지만 재질이 다릅니다. 포박은 **젖은 식물**, 결속은 **마른 쇠**이고, 결속만 좌우로 고리가 삐져나옵니다.
+**덮는 정도가 두 가지입니다.** 7 혼란과 8 봉인만 **면을 완전히 덮습니다** — 눈금이 안 보이는 게 규칙이니까요. 나머지 11종은 **면의 절반쯤만 차지하고 눈금이 비쳐야** 합니다.
 
----
-
-## 2. 규격
-
-**전부 정사각 1:1 · 배경 제거용 단색 배경.** 출력은 클수록 좋고 최소 512입니다. 제가 받아서 256×256으로 줄여 넣습니다.
-**키아트 `keyart_stilllife` 첨부하세요.** 첨부 없이 뽑으면 화풍이 따로 놉니다.
-
-**시트로 묶지 마세요.** 유물 26개는 6개씩 묶어도 됐지만 이건 안 됩니다. 가운데가 비어 있어야 하는데 시트로 뽑으면 옆 칸 그림이 그 자리를 침범합니다. **한 장에 하나씩** 뽑아주세요.
+**색이 겹치지 않게 갈라뒀습니다.** 게임이 이미 붉은 발광을 "다시 굴릴 주사위", 금 발광을 "지금 고른 족보"로 쓰고 있어서, 축복은 금색이 아니라 표백된 뼈흰빛으로, 약탈은 반짝이는 금이 아니라 때 낀 구릿빛으로 갑니다.
 
 ---
 
-## 3. 테두리형 11종
+## 3. 규격
 
-아래 열한 개는 전부 같은 머리말을 씁니다. `<<< >>>` 안쪽만 갈아끼우면 됩니다.
+**정사각 1:1 · 배경 제거용 단색 배경.** 출력 최소 512, 클수록 좋습니다. 제가 256×256으로 줄여 넣습니다.
+**키아트 `keyart_stilllife` 첨부하세요.** 없이 뽑으면 화풍이 따로 놉니다.
+**한 장에 하나씩.** 시트로 묶지 마세요.
 
-### 공통 머리말 (테두리형)
+화면에서는 **46 × 46 px** 로 들어갑니다. 주사위 눈 면 크기 그대로입니다.
 
-```
-Stylized dark fairytale game icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter. NOT photorealistic, NOT 3D. Square 1:1 image, on one plain flat mid-grey background — solid color, no gradient, no checkerboard.
-A RING-SHAPED ornament that wraps only around the four outer edges of the square frame. The ENTIRE MIDDLE of the image — a large square area covering the central 60% — is COMPLETELY EMPTY and shows nothing but the same plain flat mid-grey background. Do NOT draw anything in the middle. Do NOT draw a die, do NOT draw dice pips, do NOT draw a cube.
-The ornament: <<<모티프>>>
-The ornament touches all four edges of the frame and its heaviest visual weight sits along the TOP edge. It must stay bright enough to read against a very dark reddish-brown surface underneath — give its outer contour a light rim so it never sinks into the background. Bold silhouette, instantly readable at 62px. No text, no letters, no numbers, no watermark.
-```
+---
 
-### 1. 출혈 — `status_die_bleed`
+## 4. 부분형 11종
 
-*방금 벤 상처. 아직 마르지 않았다. 어두운 받침에 먹히기 쉬우니 유독 밝게.*
+### 공통 머리말
 
 ```
-<<<fresh wet blood clinging to the four edges — thick bright crimson beads gathered along the top edge with three uneven streaks running down the left and right edges and stopping partway, and a shallow dark pool collected along the bottom edge with one drop about to fall. Vivid arterial red, NOT brown, NOT dried, kept bright and saturated so it separates from a dark red-brown surface. Wet glossy highlights on the upper rim.>>>
+Stylized dark fairytale game effect overlay for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter. NOT photorealistic, NOT 3D. Square 1:1 image, on one plain flat mid-grey background — solid color, no gradient, no checkerboard.
+An effect lying ON TOP of a flat square surface, as if something has happened to the face of a tile. It must NOT be a border, NOT a frame, NOT a ring, NOT a decorative edge — do NOT draw anything running around all four edges. It covers roughly HALF the square and leaves clear open gaps where the surface underneath would still show through.
+Do NOT draw a die, do NOT draw dice pips, do NOT draw a cube, do NOT draw a background scene.
+The effect: <<<모티프>>>
+Bold silhouette, instantly readable at 46px. It must stay bright enough to read against a dark reddish surface underneath, so give its outer contour a thin continuous pale rim like a sticker cut-line. No text, no letters, no numbers, no watermark.
 ```
+
+### 1. 출혈 — `status_die_bleed` ✅ 완료
+
+받으신 그림에서 위쪽만 잘라 쓰고 있습니다. 다시 뽑을 필요 없습니다.
 
 ### 2. 독 — `status_die_poison`
 
-*끓어오르는 독액. 출혈과 나란히 놓아도 안 헷갈리게 색을 확실히 띄운다.*
+*파묻힌 자. 출혈과 나란히 놓아도 안 헷갈리게 색을 확실히 띄운다.*
 
 ```
-<<<bubbling toxic slime creeping along the four edges — swollen glossy droplets of sickly yellow-green venom hanging from the top edge, thin runnels down the sides, and a band of fat boiling bubbles along the bottom edge with two small bubbles floating free. Acidic bile yellow-green, luminous and unnatural. Wet glossy highlights.>>>
+<<<a spill of bubbling toxic slime poured across the upper half of the square and sagging downward in two thick runnels, with a cluster of fat glossy bubbles swelling along its lower edge and three small bubbles floating free above it. The lower third of the square is left empty. Acidic bile yellow-green, luminous and unnatural, wet glossy highlights, one small bubble caught mid-burst.>>>
 ```
 
 ### 3. 포박 — `status_die_bind`
 
-*늪의 왕. 물에 젖은 뿌리다. 가시는 넣지 않는다 — 가시덤불 몬스터와 겹친다.*
+*늪의 왕. 젖은 뿌리다. 가시는 넣지 않는다 — 가시덤불 몬스터와 겹친다.*
 
 ```
-<<<wet swamp roots and creeping vines coiling tightly around the four edges and squeezing inward, knotted into one thick gnarled knot at the middle of the top edge, with two frayed root tips trailing off the bottom corners. Dark waterlogged green-brown, slick with pond scum, pale grey-green highlights on the upper coils. NO thorns, NO spikes, NO flowers.>>>
+<<<two thick wet swamp roots running diagonally across the square from the upper left to the lower right, crossing over each other near the middle and knotted there into one gnarled knot, their frayed tips trailing off past two opposite corners. Wide open gaps between the roots. Dark waterlogged green-brown, slick with pond scum, pale grey-green highlights along the top of each root. NO thorns, NO spikes, NO flowers, NO full circle around the edge.>>>
 ```
 
 ### 4. 기절 — `status_die_stun`
 
-*값은 나오는데 세지지 않는다 = 금이 가서 못 쓰는 주사위. 별이나 새는 넣지 않는다 — 만화적이라 화풍에 안 맞는다.*
+*트롤. 값은 나오는데 세지지 않는다 = 금이 가서 못 쓰는 면. 별이나 새는 넣지 않는다 — 만화적이라 화풍에 안 맞는다.*
 
 ```
-<<<sharp glass-like fractures splitting inward from the four corners — jagged pale white-silver crack lines that radiate toward the middle but STOP well before reaching it, leaving the center untouched, with three small chipped shards breaking off and floating just outside the top corners. Thin bright crack lines with cold blue-white edges, almost weightless. NO stars, NO birds, NO spirals, NO swirls.>>>
+<<<a hard impact crack shattering across the square — one deep jagged fracture running from the upper left corner to the lower right, with five or six thinner splits branching off it, and two small chipped shards broken loose and floating just off the surface. Most of the square is untouched between the cracks. Thin bright pale white-silver crack lines with cold blue-white edges, weightless and sharp. NO stars, NO birds, NO spirals.>>>
 ```
 
 ### 5. 저주 — `status_die_curse`
 
-*곰인형에게 줄지 거짓 성인에게 줄지는 아직 정하는 중이지만, 그림은 어느 쪽이든 맞게 뽑습니다.*
+*검은색이라 어두운 받침에 먹히기 쉽다. 보랏빛 림라이트가 필수.*
 
 ```
-<<<creeping black-violet soot bleeding inward from the four edges — a pair of twisted blackened horns curling DOWNWARD from the middle of the top edge like a crown gone wrong, ragged ash smearing along the sides, and fine grey ash flecks drifting off the bottom edge. Deep black-purple with cold violet rim light on every contour so it stays visible on a dark surface. Ashen grey accents.>>>
+<<<a creeping black-violet soot bleeding in from the lower left corner and the upper right corner of the square, spreading in ragged uneven tongues toward the middle but leaving the center partly clear, with a pair of small twisted blackened horns curling downward out of the upper mass, and fine grey ash flecks drifting off the edges of the stain. Deep black-purple with cold violet rim light on every contour so it stays visible on a dark surface.>>>
 ```
 
 ### 6. 축복 — `status_die_blessing`
 
-*진짜 축복이 아니라 축복인 척하는 것. 따뜻하면 안 되고, 금색이면 안 된다 — 족보 강조 금빛과 헷갈린다.*
+*거짓 성인. 진짜 축복이 아니라 축복인 척하는 것. 따뜻하면 안 되고 금색이면 안 된다 — 족보 강조 금빛과 헷갈린다.*
 
 ```
-<<<a cold false halo framing the four edges — a thin bleached bone-white ring, thickening into a smooth semicircular halo arc across the top edge with seven short straight rays pointing outward, and four small pale beads at the corners. Bleached bone-white and the faintest cold pale silver, deliberately drained and lifeless — NOT warm, NOT golden, NOT saturated yellow, NOT glowing orange. Sterile and a little wrong.>>>
+<<<a cold false halo hovering over the square — one thin bleached bone-white ring tilted in perspective across the upper half like a crown floating above a surface, with seven short straight rays pointing outward from it and four small pale beads scattered below. Most of the square stays open and clear. Bleached bone-white and the faintest cold pale silver, deliberately drained and lifeless — NOT warm, NOT golden, NOT saturated yellow, NOT glowing orange. Sterile and a little wrong.>>>
 ```
 
 ### 9. 부패 — `status_die_rot`
@@ -131,23 +129,23 @@ The ornament touches all four edges of the frame and its heaviest visual weight 
 *다음 턴에 터진다. 터지기 직전이라는 게 한눈에 보여야 한다.*
 
 ```
-<<<swollen diseased blisters bulging along the four edges — one large taut boil dominating the middle of the top edge, stretched to bursting with hairline splits across its skin and a dull sick light leaking out from inside the cracks, smaller lumpy pustules crowding the sides, and dark mottled bruising along the bottom edge. Bruised plum-purple and greenish rot brown, with a hot dull amber glow escaping the splits.>>>
+<<<one large taut diseased boil swelling up out of the middle-upper area of the square, stretched to bursting with hairline splits across its skin and a dull sick amber light leaking out from inside the cracks, with three smaller lumpy pustules clustered around its base and dark mottled bruising seeping outward from them. The corners of the square stay clear. Bruised plum-purple and greenish rot brown, hot dull amber glow escaping the splits.>>>
 ```
 
 ### 10. 결속 — `status_die_chain`
 
-*옆 주사위와 묶인다. 좌우로 고리가 삐져나와야 사슬이 이어질 자리가 생긴다 — 이게 이 그림의 핵심이다.*
+*옆 주사위와 묶인다. 좌우로 사슬 끝이 삐져나와야 이어질 자리가 생긴다 — 이게 이 그림의 핵심이다.*
 
 ```
-<<<a heavy cast-iron chain wrapped once around the four edges — thick oval links, and at the exact middle of the LEFT edge and the middle of the RIGHT edge one open link juts OUTWARD past the frame as if reaching to connect to something beside it. Cold blue-grey wrought iron, chipped and pitted, bright steel highlights on the top of every link. Dry hard metal, NO rust stains, NO rope, NO vines.>>>
+<<<a single heavy cast-iron chain stretched taut straight across the middle of the square from the left edge to the right edge, exactly five thick oval links, cut off flat at both edges as if continuing beyond them, with one broken open link hanging loose below the line. The top and bottom thirds of the square are completely empty. Cold blue-grey wrought iron, chipped and pitted, bright steel highlights along the top of every link. NO rust stains, NO rope, NO vines, NO frame.>>>
 ```
 
-### 11. 마비 — `status_die_leaden`
+### 11. 마비 — `status_die_numb`
 
-*무거워서 굴리기 힘들다. 기절(얇은 균열)과 정반대로 두껍고 매달린 덩어리여야 한다.*
+*감전된 것처럼. 기절(얇은 균열)과는 실루엣이 정반대라 헷갈릴 일이 없다.*
 
 ```
-<<<four heavy lead weights dragging the frame down — a squat blunt lead ingot hanging from each of the four corners on a short thick loop, the bottom edge visibly sagging and bowing downward under their weight while the top edge is thin and stretched taut. Dull dark blue-grey lead, matte and soft-edged, no shine except one dull grey highlight on each weight. NO cracks, NO chains stretching outward.>>>
+<<<a violent electric arc crawling across the square — two or three jagged lightning bolts of pale blue-white energy zigzagging from the top edge down to the bottom edge in sharp angular steps, branching into thin forks, with four or five tiny bright sparks flying off the bends. Wide empty space between the bolts. Searing pale blue-white core with an electric cyan halo, hot and unstable. NO clouds, NO storm, NO frame, NO circle.>>>
 ```
 
 ### 12. 약탈 — `status_die_plunder`
@@ -155,7 +153,7 @@ The ornament touches all four edges of the frame and its heaviest visual weight 
 *돈을 뺏어간다. 반짝이는 금이면 족보 강조와 겹친다 — 때 낀 동전이어야 한다.*
 
 ```
-<<<tarnished coins studded around the four edges — overlapping dull copper discs pressed into the left, right and bottom edges, several sliding loose and spilling off the bottom corner, and from the middle of the top edge a crooked grasping hook-clawed hand reaching INWARD and stopping short of the center. Dirty tarnished copper and dark brass, oxidised green-black in the crevices, deliberately dull — NOT bright gold, NOT shiny treasure, NOT glowing.>>>
+<<<a crooked grasping hand with hooked claws reaching in from the lower right corner and clutching across the square, its fingers curled over the surface, with four tarnished copper coins caught in its grip and two more spilling loose toward the opposite corner. The upper left of the square stays open. Dirty tarnished copper and dark brass, oxidised green-black in the crevices, the hand itself a dark leathery grey-brown. Deliberately dull — NOT bright gold, NOT shiny treasure, NOT glowing.>>>
 ```
 
 ### 13. 잠식 — `status_die_devour`
@@ -163,22 +161,22 @@ The ornament touches all four edges of the frame and its heaviest visual weight 
 *최종보스 계열. 순수한 검정은 어두운 받침에서 사라지므로 푸른 림라이트가 필수다.*
 
 ```
-<<<a spreading void eating in from the four edges — the border looks like the tile is being dissolved away, its rim torn and ragged like burnt paper, with pure lightless black creeping inward in uneven tongues, and two thin black tendrils curling in from the top edge and stopping short of the center. The torn edge of every black shape carries a cold pale blue rim light so the blackness stays clearly visible against a dark background. Absolute void black inside, cold blue-white at every torn edge.>>>
+<<<a spreading void eating a hole through the middle of the square — the surface looks burnt away into pure lightless black, its torn opening ragged like burnt paper with uneven tongues creeping outward, and two thin black tendrils curling out of the hole toward opposite corners. The corners of the square remain untouched. The torn edge of every black shape carries a cold pale blue rim light so the blackness stays clearly visible against a dark background. Absolute void black inside, cold blue-white at every torn edge.>>>
 ```
 
 ---
 
-## 4. 가림형 2종
+## 5. 전면형 2종
 
-이 둘만 타일 전체를 덮습니다. 아래를 완전히 가려야 하니 불투명하게 그립니다.
+이 둘만 눈금을 완전히 가립니다.
 
-### 공통 머리말 (가림형)
+### 공통 머리말
 
 ```
-Stylized dark fairytale game icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter. NOT photorealistic, NOT 3D. Square 1:1 image, on one plain flat mid-grey background.
-A single OPAQUE object that COMPLETELY FILLS the square frame edge to edge, like a lid laid flat over a tile — nothing shows through it, there is no empty middle and no visible background inside the shape. Do NOT draw a die, do NOT draw dice pips, do NOT draw a cube.
-The object: <<<모티프>>>
-Slightly rounded square silhouette with soft corners. Bold and instantly readable at 62px. No text, no letters, no numbers, no watermark.
+Stylized dark fairytale game effect overlay for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density. NOT photorealistic, NOT 3D. Square 1:1 image, on one plain flat mid-grey background.
+A single OPAQUE effect that COMPLETELY FILLS the square frame edge to edge and hides whatever is underneath — nothing shows through, no gaps, no empty middle. It is a surface, not a border. Do NOT draw a die, do NOT draw dice pips, do NOT draw a cube.
+The effect: <<<모티프>>>
+Slightly rounded square silhouette with soft corners. Bold and instantly readable at 46px. No text, no letters, no numbers, no watermark.
 ```
 
 ### 7. 혼란 — `status_die_confuse`
@@ -186,26 +184,24 @@ Slightly rounded square silhouette with soft corners. Bold and instantly readabl
 *안개의 어머니. 게임이 이미 보라색을 상태이상 색으로 쓰고 있으니 그대로 간다.*
 
 ```
-<<<a thick swirling fog that has settled over the tile and hidden whatever is under it — a slow violet-purple vortex spiralling clockwise from a point slightly above the center, layered in three or four flat overlapping bands of mist from deep indigo at the corners to pale lilac at the eye of the spiral, dense and completely opaque with soft torn wisps curling at the four edges. NOT transparent, NOT wispy enough to see through.>>>
+<<<a thick swirling fog that has settled over the surface and hidden whatever is under it — a slow violet-purple vortex spiralling clockwise from a point slightly above the center, layered in three or four flat overlapping bands of mist from deep indigo at the corners to pale lilac at the eye of the spiral, dense and completely opaque with soft torn wisps curling at the four edges. NOT transparent, NOT wispy enough to see through.>>>
 ```
 
 ### 8. 봉인 — `status_die_seal`
 
-*값 자체가 없다. 한 번 굴려야 열린다. 밀랍이 뜯긴 적 없는 새것처럼 보여야 한다.*
+*자각몽의 왕. 값 자체가 없다. 한 번 굴려야 열린다. 뜯긴 적 없는 새것처럼 보여야 한다.*
 
 ```
-<<<a document seal clamped over the tile — two broad dark indigo-navy cloth bands crossing over each other diagonally corner to corner and fully covering the surface beneath, pinned at their crossing point by one thick round blob of dark red wax stamped with a plain simple sunken circle impression, the wax edges squeezed out unevenly. Deep navy-indigo cloth with a dull matte weave, oxblood red wax with one soft highlight. Unbroken and intact — NOT cracked, NOT torn open.>>>
+<<<a document seal clamped over the surface — two broad dark indigo-navy cloth bands crossing over each other diagonally corner to corner and fully covering everything beneath, pinned at their crossing point by one thick round blob of dark red wax stamped with a plain simple sunken circle impression, the wax edges squeezed out unevenly. Deep navy-indigo cloth with a dull matte weave, oxblood red wax with one soft highlight. Unbroken and intact — NOT cracked, NOT torn open.>>>
 ```
 
 ---
 
-## 5. 곁들여 필요한 것 2장
+## 6. 곁들여 필요한 것 2장
 
 ### A. 결속 사슬 이음 — `chain_link`
 
-**규격만 다릅니다: 가로로 긴 2:1, 512×256.** 배경 제거용 단색 배경.
-
-결속은 주사위 두 개를 묶는 상태라 **사이를 잇는 사슬**이 따로 필요합니다. 주사위 사이 간격이 8px라 화면에서는 아주 짧게 나옵니다.
+**가로 2:1, 512×256.** 결속은 주사위 두 개를 묶는 상태라 사이를 잇는 사슬이 따로 필요합니다.
 
 ```
 Stylized dark fairytale game icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density. NOT photorealistic, NOT 3D. Wide 2:1 landscape image, on one plain flat mid-grey background — solid color, no gradient.
@@ -214,7 +210,7 @@ A short horizontal length of heavy cast-iron chain running straight across the f
 
 ### B. 공허의 부름 족보 판 — `paper_void_call`
 
-**규격: 가로 800 × 세로 212 (약 3.8:1) 가로 띠.** 기존 족보 판 18종과 **똑같은 규격**입니다. `COMBO_PLATE_PROMPTS.md` 의 규칙이 그대로 적용됩니다 — 가운데는 글자가 얹히므로 **민무늬로 비우고**, 장식은 좌우 끝과 위아래 테두리에만 둡니다.
+**가로 800 × 세로 212.** 기존 족보 판 18종과 같은 규격이고 `COMBO_PLATE_PROMPTS.md` 규칙이 그대로 적용됩니다 — 가운데는 글자가 얹히니 민무늬로 비우고 장식은 좌우 끝과 위아래 테두리에만.
 
 잠식이 주사위 5개를 다 먹으면 족보가 이것 하나만 남습니다. **게임에서 가장 나쁜 순간에 뜨는 판**이라 다른 18종보다 확실히 불길해야 합니다.
 
@@ -227,28 +223,30 @@ Ominous, silent, final. The plate fills the frame edge to edge with no margin. N
 
 ---
 
-## 6. 안 뽑아도 되는 것 (헛수고 방지)
+## 7. 안 뽑아도 되는 것
 
-**저주·축복 전용 눈 그림은 필요 없습니다.** 저주는 1/2/3만, 축복은 4/5/6만 나오는 규칙이라 **기존 주사위 눈 그림을 그대로** 씁니다. 13종 × 6면이 이미 다 있습니다.
+**물듦·파티클·이름표는 전부 코드입니다.** 핏방울, 스파크, 재, 기포 같은 알갱이는 그림이 아니라 CSS로 만듭니다. 마비를 그림 한 장 없이 통째로 흉내낸 게 `grammar_test.mp4` 에 있습니다.
 
-**봉인 상태의 "값 없음" 그림도 필요 없습니다.** `.pip-art.empty` — 눈 없이 받침만 보이는 상태가 코드에 이미 있습니다. 그 위에 봉인 가림형을 얹으면 끝입니다.
+**저주·축복 전용 눈 그림은 필요 없습니다.** 저주는 1/2/3만, 축복은 4/5/6만 나오는 규칙이라 기존 주사위 눈 그림을 그대로 씁니다.
 
-**폭발·해제 연출도 그림이 필요 없습니다.** 부패가 터지는 순간과 상태이상이 풀리는 순간은 CSS 애니메이션으로 처리합니다.
+**봉인의 "값 없음" 그림도 필요 없습니다.** `.pip-art.empty` 가 코드에 이미 있습니다.
 
-**적 행동 예고 아이콘 13종은 나중에 따로 받겠습니다.** 지금은 상태이상이 전부 소용돌이 하나(🌀)로 뭉뚱그려 예고되고 있는데, 13종이 되면 예고를 보고 대비를 못 합니다. 다만 위 13장을 받으면 제가 **각 그림의 위쪽 모티프만 잘라 임시 예고 아이콘으로 자동 생성**해 넣을 수 있습니다. 그걸로 붙여서 굴려보고, 정말 안 읽히는 것만 골라서 나중에 다시 뽑는 게 낫습니다.
+**폭발·해제 연출도 그림이 필요 없습니다.** CSS 애니메이션으로 처리합니다.
+
+**적 행동 예고 아이콘 13종은 나중에 따로.** 지금은 전부 소용돌이 하나(🌀)로 뭉뚱그려 예고되는데, 13종이 되면 예고를 보고 대비를 못 합니다. 다만 위 그림들을 받으면 제가 축소해서 임시 예고 아이콘으로 자동 생성할 수 있으니, 붙여서 굴려보고 안 읽히는 것만 나중에 다시 뽑는 게 낫습니다.
 
 ---
 
-## 7. 받은 뒤 제가 하는 일
+## 8. 받은 뒤 제가 하는 일
 
-1. 배경 단색을 키로 파내고 알파를 만듭니다 (`key_background`).
+1. 배경 단색을 키로 파내고 알파를 만듭니다.
 2. 256×256으로 줄이고 팔레트 256색으로 눌러 용량을 깎습니다.
-3. 62×70 주사위 칸 비율에 맞춰 세로로 살짝 늘려 얹습니다. 테두리형은 위아래가 잘리지 않게 안쪽으로 2px 여유를 둡니다.
-4. **실제 화면에 얹은 스크린샷을 62px 그대로와 3배 확대 두 벌로 찍어서 드립니다.** 13종을 나란히 놓고 봐야 구분이 되는지 알 수 있습니다. 안 갈리는 게 있으면 그것만 다시 뽑으면 됩니다.
-5. 밝기는 받침색 #4F1110 위에서 재서 안 읽히는 것만 감마로 올립니다. **뽑을 때 밝기는 신경 쓰지 마세요.**
+3. 눈 면(46×46) 위에 얹고, 물듦 색·파티클·이름표 세 겹을 붙입니다.
+4. **13종을 나란히 놓은 영상을 찍어서 드립니다.** 한 화면에서 봐야 구분이 되는지 알 수 있습니다.
+5. 밝기는 받침색 #4F1110 위에서 재서 안 읽히는 것만 올립니다. **뽑을 때 밝기는 신경 쓰지 마세요.**
 
-## 8. 순서
+## 9. 순서
 
 한 번에 다 안 주셔도 됩니다. 없으면 지금처럼 보라 발광만 뜨고 굴러갑니다.
 
-급한 순서는 **결속 → 포박 → 출혈 → 독 → 저주** 입니다. 1막 보스 셋(곰인형·늑대)과 첫 테마들이 이걸 쓰기 때문에 이 다섯 장만 있어도 1막이 완성됩니다. 잠식과 공허의 부름 판은 최종보스용이라 맨 뒤로 미뤄도 됩니다.
+급한 순서는 **결속 → 포박 → 독 → 저주** 입니다. 출혈이 이미 끝났으니 이 넷만 있으면 1막이 완성됩니다. 잠식과 공허의 부름 판은 최종보스용이라 맨 뒤로 미뤄도 됩니다.
