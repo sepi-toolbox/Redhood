@@ -1,2 +1,2 @@
-1786158005
-v1.02 weight zero
+1786159006
+v1.03 unified move conditions

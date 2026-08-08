@@ -91,7 +91,8 @@ rows = [
  ('층당 적 HP 증가', act1['hpScalePerFloor']),
  ('막별 HP 배율', ' / '.join(f"{k}막 ×{v}" for k, v in acts['scaling']['hp'].items())),
  ('막별 공격 배율', ' / '.join(f"{k}막 ×{v}" for k, v in acts['scaling']['atk'].items())),
- ('강화 행동 주기', f"첫 발동 {acts['surge']['firstTurn'][0]}~{acts['surge']['firstTurn'][1]}턴, 이후 {acts['surge']['interval'][0]}~{acts['surge']['interval'][1]}턴마다"),
+ ('행동 발동 조건', '가중치(뽑힐 확률·0이면 연계 전용) · 해금 턴 · 쿨다운 · 연계 — 네 가지뿐'),
+ ('강화 행동', "각 적의 'surge' 행동 — 해금 턴 4, 쿨다운 4. 4턴 이후 주기적으로 힘을 올린다"),
  ('보스 처치 회복', f"최대 HP의 {int(acts['bossHealRatio']*100)}%"),
  ('최종 보스', EN[acts['finalBoss']]['name']),
  ('', ''),
@@ -178,13 +179,13 @@ for e in enemies:
     phases = len(e.get('phases', [])) or 1
     rows.append([e['id'], e['name'], {'normal':'일반','elite':'정예','boss':'보스'}[e['tier']],
                  act, theme, hp_s, len(e['moves']), phases,
-                 e.get('surgeMove',{}).get('name','—'),
-                 eff_text(e.get('surgeMove',{}).get('effects')),
+                 (e['moves'].get('surge') or {}).get('name','—'),
+                 eff_text((e['moves'].get('surge') or {}).get('effects')),
                  (f"{late[0]} ({lateT[0]}턴부터)" if late else '—'),
                  ' / '.join(chains) if chains else '—',
                  e.get('enlightenedMove',{}).get('name','—'),
                  e['tier']])
-sheet('적', '적 44종', '강화 행동은 4~6턴마다 예고 없이 한 번씩 끼어들어 힘을 올린다. 해금 행동은 그 턴이 지나기 전에는 절대 나오지 않는다. 연계는 앞 행동을 쓰면 다음 턴에 확률로 뒤 행동이 확정된다.',
+sheet('적', '적 44종', '행동 발동 조건은 가중치·해금 턴·쿨다운·연계 네 가지다. 강화 행동은 별도 장치가 아니라 해금 턴 4 · 쿨다운 4가 붙은 평범한 행동이다.',
       ['id','이름','격','막','테마','HP','행동 수','국면','강화 행동','강화 효과','해금 행동','연계','계몽 전용 행동'],
       rows, [16,16,6,5,14,10,7,6,20,14,22,34,18])
 
@@ -211,9 +212,6 @@ for e in enemies:
                      weight_text(e, mid), m.get('minTurn') or '', m.get('cooldown') or 0, '숨김' if m.get('hidden') else '',
                      (f"{e['moves'][fu['move']]['name']} {int(fu['chance']*100)}%" if fu else ''),
                      e['tier']])
-    if e.get('surgeMove'):
-        rows.append([e['id'], e['name'], '__surge', e['surgeMove']['name'],
-                     eff_text(e['surgeMove'].get('effects')), '전용 트랙', '', '', '강화(4~6턴 주기)', '', e['tier']])
     if e.get('enlightenedMove'):
         rows.append([e['id'], e['name'], '__enlight', e['enlightenedMove']['name'],
                      eff_text(e['enlightenedMove'].get('effects')), '3번째 행동마다', '', '', '계몽 17~19단계', '', e['tier']])
