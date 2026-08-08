@@ -1,0 +1,280 @@
+# REDHOOD 게임 데이터 종합본 생성기
+# 실행: python3 tools/build_db.py  (data/*.json 을 읽어 docs/REDHOOD_game_db.xlsx 을 새로 씀)
+# 판을 올릴 때마다 다시 돌리면 표가 코드와 어긋나지 않는다.
+import json, datetime
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+
+D = lambda n: json.load(open(f'/home/claude/redhood/data/{n}.json'))
+scoring, dice, relics, enemies = D('scoring'), D('dice'), D('relics'), D('enemies')
+events, acts, act1 = D('events'), D('acts'), D('act1')
+EN = {e['id']: e for e in enemies}
+VERSION = 'v0.99'
+TODAY = '2026-08-08'
+
+FONT = 'Arial'
+HEAD_FILL = PatternFill('solid', fgColor='3A2A1C')
+SUB_FILL  = PatternFill('solid', fgColor='EDE3D2')
+TITLE_F   = Font(name=FONT, size=15, bold=True, color='3A2A1C')
+HEAD_F    = Font(name=FONT, size=10, bold=True, color='F4EAD5')
+BODY_F    = Font(name=FONT, size=10)
+NOTE_F    = Font(name=FONT, size=9, italic=True, color='7A6850')
+INPUT_F   = Font(name=FONT, size=10, color='0000FF')
+THIN = Side(style='thin', color='CFC3AE')
+BOX = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
+TIER_FILL = {'common': None,
+             'uncommon': PatternFill('solid', fgColor='E4EDF5'),
+             'rare': PatternFill('solid', fgColor='ECE4F5'),
+             'epic': PatternFill('solid', fgColor='FBF0DA'),
+             'legendary': PatternFill('solid', fgColor='FBF0DA'),
+             'normal': None, 'elite': PatternFill('solid', fgColor='E4EDF5'),
+             'boss': PatternFill('solid', fgColor='F8E2E0')}
+
+wb = openpyxl.Workbook()
+wb.remove(wb.active)
+
+def sheet(name, title, note, headers, rows, widths, freeze='A4'):
+    ws = wb.create_sheet(name)
+    ws['A1'] = title; ws['A1'].font = TITLE_F
+    ws['A2'] = note;  ws['A2'].font = NOTE_F
+    for i, hdr in enumerate(headers, 1):
+        c = ws.cell(row=3, column=i, value=hdr)
+        c.font = HEAD_F; c.fill = HEAD_FILL; c.border = BOX
+        c.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    for r, row in enumerate(rows, 4):
+        tier = row[-1] if isinstance(row[-1], str) and row[-1] in TIER_FILL else None
+        for i, v in enumerate(row[:len(headers)], 1):
+            c = ws.cell(row=r, column=i, value=v)
+            c.font = BODY_F; c.border = BOX
+            c.alignment = Alignment(vertical='top', wrap_text=isinstance(v, str) and len(str(v)) > 26)
+            if tier and TIER_FILL.get(tier): c.fill = TIER_FILL[tier]
+    for i, wd in enumerate(widths, 1):
+        ws.column_dimensions[get_column_letter(i)].width = wd
+    ws.row_dimensions[3].height = 26
+    ws.freeze_panes = freeze
+    return ws
+
+# ---------- 효과 사람말 ----------
+OPNAME = {'damage':'피해','block':'방어','empower':'힘','confuse':'혼란','heal':'회복',
+          'weaken':'약화','vulnerable':'취약','bleed':'출혈','regen':'재생','focus':'집중',
+          'strength':'힘','loseHp':'HP 감소','gainRelic':'유물 획득','drain':'흡혈',
+          'markReroll':'리롤 표식','curse':'저주'}
+def eff_text(effs):
+    if not effs: return '—'
+    out = []
+    for e in effs:
+        n = OPNAME.get(e.get('op'), e.get('op'))
+        a = e.get('amount')
+        out.append(f"{n} {a}" if a is not None else n)
+    return ' · '.join(out)
+
+ACT_OF = {}
+for a in acts['acts']:
+    for t in a['themes']:
+        for k in ('normals','elites'):
+            for e in t.get(k, []): ACT_OF.setdefault(e, (a['act'], t['name']))
+        ACT_OF.setdefault(t['boss'], (a['act'], t['name']))
+ACT_OF.setdefault(acts['finalBoss'], (4, '최후의 어둠'))
+
+# ---------- 1. 개요 ----------
+ws = wb.create_sheet('개요')
+ws['A1'] = 'REDHOOD 게임 데이터 종합본'; ws['A1'].font = Font(name=FONT, size=18, bold=True, color='8F2A20')
+rows = [
+ ('판', VERSION), ('갱신일', TODAY),
+ ('출처', 'data/*.json 에서 자동 생성 — 손으로 고치지 말고 JSON을 고친 뒤 다시 뽑을 것'),
+ ('', ''),
+ ('시작 HP', act1['player']['maxHp']),
+ ('시작 주사위', ', '.join(act1['player']['startDice'])),
+ ('턴당 리롤', scoring['rerollsPerTurn']),
+ ('한 막의 층수', act1['map']['floors']),
+ ('층당 적 HP 증가', act1['hpScalePerFloor']),
+ ('막별 HP 배율', ' / '.join(f"{k}막 ×{v}" for k, v in acts['scaling']['hp'].items())),
+ ('막별 공격 배율', ' / '.join(f"{k}막 ×{v}" for k, v in acts['scaling']['atk'].items()) + f" (전역 보정 ×{acts['scaling']['atkTrim']})"),
+ ('강화 행동 주기', f"첫 발동 {acts['surge']['firstTurn'][0]}~{acts['surge']['firstTurn'][1]}턴, 이후 {acts['surge']['interval'][0]}~{acts['surge']['interval'][1]}턴마다"),
+ ('보스 처치 회복', f"최대 HP의 {int(acts['bossHealRatio']*100)}%"),
+ ('최종 보스', EN[acts['finalBoss']]['name']),
+ ('', ''),
+ ('족보', f"{len(scoring['categories'])}종 · 변형 {sum(len(c['variants']) for c in scoring['categories'])}개"),
+ ('주사위', f"{len(dice)}종"), ('유물', f"{len(relics)}개"),
+ ('적', f"{len(enemies)}종 (일반 {sum(1 for e in enemies if e['tier']=='normal')} · 정예 {sum(1 for e in enemies if e['tier']=='elite')} · 보스 {sum(1 for e in enemies if e['tier']=='boss')})"),
+ ('무기', f"{len(events['weapons'])}종"), ('만남 이벤트', f"{len(events['events'])}개"),
+]
+for r, (k, v) in enumerate(rows, 3):
+    a = ws.cell(row=r, column=1, value=k); a.font = Font(name=FONT, size=10, bold=True)
+    b = ws.cell(row=r, column=2, value=v); b.font = BODY_F
+    b.alignment = Alignment(wrap_text=True, vertical='top')
+ws.column_dimensions['A'].width = 20; ws.column_dimensions['B'].width = 74
+r0 = len(rows) + 5
+ws.cell(row=r0, column=1, value='시트 안내').font = TITLE_F
+for i, (n, d) in enumerate([
+  ('막·테마','3막 × 테마 3종. 어느 테마에 어느 적이 나오는지'),
+  ('족보','9종 × 변형 18개. 성립 조건·피해식·부가 능력'),
+  ('주사위','13종의 면 구성과 등급'),
+  ('유물','26개. 일반 17 / 정예 9'),
+  ('적','44종. HP·등장 위치·강화 행동·연계·해금 턴'),
+  ('적행동','모든 행동 낱개. 효과 수치와 발동 조건'),
+  ('무기','6종과 시작 족보'),
+  ('만남','11개 이벤트의 선택지와 대가'),
+  ('지도·보상','노드 생성 규칙과 보상 확률'),
+  ('경제','코인·상점 가격·족보 교체 비용'),
+  ('계몽','20단계 난이도 상승'),
+], 1):
+    ws.cell(row=r0+i, column=1, value=n).font = Font(name=FONT, size=10, bold=True)
+    ws.cell(row=r0+i, column=2, value=d).font = BODY_F
+ws.freeze_panes = 'A3'
+
+# ---------- 2. 막·테마 ----------
+rows = []
+for a in acts['acts']:
+    for t in a['themes']:
+        rows.append([a['act'], t['name'], t['id'],
+                     ', '.join(EN[x]['name'] for x in t.get('normals', [])),
+                     ', '.join(EN[x]['name'] for x in t.get('elites', [])),
+                     EN[t['boss']]['name'],
+                     ', '.join(t.get('events', [])),
+                     f"bg_{t['id']}.jpg"])
+rows.append([4, '최후의 어둠', 'final', '—', '—', EN[acts['finalBoss']]['name'], '—', 'bg_final.jpg'])
+sheet('막·테마', '막 · 테마', '런마다 막당 테마 1개가 무작위로 뽑힌다. 보스는 테마 고정, 일반·정예·이벤트는 그 테마 풀 안에서 랜덤.',
+      ['막','테마','id','일반 적','정예','보스','이벤트','배경 파일'], rows, [6,14,10,42,18,16,24,16])
+
+# ---------- 3. 족보 ----------
+rows = []
+for c in scoring['categories']:
+    for v in c['variants']:
+        rows.append([c['id'], c['name'], v['id'], v['name'], v.get('tier','common'),
+                     c.get('ruleText',''), str(c.get('score','')),
+                     v.get('abilityText','') or '부가 없음',
+                     ' '.join(str(x) for x in c.get('example',[])),
+                     c.get('fx',''), v.get('tier','common')])
+sheet('족보', '족보 9종 · 변형 18개', '같은 족보라도 변형에 따라 부가 능력과 등급이 다르다. 등급은 색으로 구분(흰 커먼 / 파랑 언커먼 / 보라 레어 / 금 전설).',
+      ['족보 id','족보','변형 id','변형 이름','등급','성립 조건','피해식','부가 능력','예시','연출'],
+      rows, [12,12,16,18,9,40,14,44,12,9])
+
+# ---------- 4. 주사위 ----------
+rows = [[d['id'], d['name'], ' '.join(str(f) for f in d['faces']),
+         d.get('tier','common'), d.get('desc',''), d.get('tier','common')] for d in dice]
+sheet('주사위', '주사위 13종', '면 구성이 곧 성능이다. 상점과 전투 보상에서 얻어 5개 중 하나를 교체한다.',
+      ['id','이름','면 구성','등급','설명'], rows, [12,16,18,9,50])
+
+# ---------- 5. 유물 ----------
+rows = [[r['id'], r['name'], r.get('icon',''), '정예' if r.get('tier')=='elite' else '일반',
+         r['desc'], r.get('tier','normal')] for r in relics]
+sheet('유물', '유물 26개', '일반 17개는 어디서나, 정예 9개는 정예 처치 보상에서만. 정예는 항상 유물을 떨구고 그중 10% 확률로 정예 유물이 나온다.',
+      ['id','이름','아이콘','등급','효과'], rows, [18,16,7,8,58])
+
+# ---------- 6. 적 ----------
+rows = []
+for e in enemies:
+    act, theme = ACT_OF.get(e['id'], ('—','—'))
+    hp = e['hp']; hp_s = f"{hp[0]}" if hp[0]==hp[1] else f"{hp[0]}~{hp[1]}"
+    late = [m['name'] for m in e['moves'].values() if m.get('minTurn')]
+    lateT = [m['minTurn'] for m in e['moves'].values() if m.get('minTurn')]
+    chains = []
+    for mid, m in e['moves'].items():
+        if m.get('followUp'):
+            fu = m['followUp']
+            chains.append(f"{m['name']} → {e['moves'][fu['move']]['name']} ({int(fu['chance']*100)}%)")
+    phases = len(e.get('phases', [])) or 1
+    rows.append([e['id'], e['name'], {'normal':'일반','elite':'정예','boss':'보스'}[e['tier']],
+                 act, theme, hp_s, len(e['moves']), phases,
+                 e.get('surgeMove',{}).get('name','—'),
+                 eff_text(e.get('surgeMove',{}).get('effects')),
+                 (f"{late[0]} ({lateT[0]}턴부터)" if late else '—'),
+                 ' / '.join(chains) if chains else '—',
+                 e.get('enlightenedMove',{}).get('name','—'),
+                 e['tier']])
+sheet('적', '적 44종', '강화 행동은 4~6턴마다 예고 없이 한 번씩 끼어들어 힘을 올린다. 해금 행동은 그 턴이 지나기 전에는 절대 나오지 않는다. 연계는 앞 행동을 쓰면 다음 턴에 확률로 뒤 행동이 확정된다.',
+      ['id','이름','격','막','테마','HP','행동 수','국면','강화 행동','강화 효과','해금 행동','연계','계몽 전용 행동'],
+      rows, [16,16,6,5,14,10,7,6,20,14,22,34,18])
+
+# ---------- 7. 적 행동 ----------
+rows = []
+for e in enemies:
+    for mid, m in e['moves'].items():
+        fu = m.get('followUp')
+        rows.append([e['id'], e['name'], mid, m['name'], eff_text(m.get('effects')),
+                     m.get('minTurn') or '', '숨김' if m.get('hidden') else '',
+                     (f"{e['moves'][fu['move']]['name']} {int(fu['chance']*100)}%" if fu else ''),
+                     e['tier']])
+    if e.get('surgeMove'):
+        rows.append([e['id'], e['name'], '__surge', e['surgeMove']['name'],
+                     eff_text(e['surgeMove'].get('effects')), '', '강화(4~6턴 주기)', '', e['tier']])
+    if e.get('enlightenedMove'):
+        rows.append([e['id'], e['name'], '__enlight', e['enlightenedMove']['name'],
+                     eff_text(e['enlightenedMove'].get('effects')), '', '계몽 17~19단계', '', e['tier']])
+sheet('적행동', '적 행동 전량', '적이 낼 수 있는 모든 행동. 해금 턴이 비어 있으면 1턴부터 나온다.',
+      ['적 id','적 이름','행동 id','행동명','효과','해금 턴','비고','연계'], rows, [16,16,16,20,30,8,16,22])
+
+# ---------- 8. 무기 ----------
+NAMEOF = {v['id']: (c['name'], v['name']) for c in scoring['categories'] for v in c['variants']}
+rows = []
+for w_ in events['weapons']:
+    st = w_['start']
+    rows.append([w_['id'], w_['name'], w_.get('icon',''), w_.get('desc',''),
+                 ' · '.join(f"{NAMEOF[v][0]}={NAMEOF[v][1]}" for v in st.values() if v in NAMEOF)])
+sheet('무기', '무기 6종', '무기를 고르면 시작 족보 3개가 정해진다. 나머지 족보는 런 중에 보상으로 채운다.',
+      ['id','이름','아이콘','컨셉','시작 족보'], rows, [12,16,7,26,60])
+
+# ---------- 9. 만남 ----------
+rows = []
+for ev in events['events']:
+    for i, ch in enumerate(ev['choices']):
+        rows.append([ev['id'] if i==0 else '', ev['npc']['name'] if i==0 else '',
+                     ', '.join(ev.get('themes',[])) if i==0 else '',
+                     ch['text'], ch.get('sub',''), eff_text(ch.get('effects')), ch.get('result','')])
+sheet('만남', '만남 이벤트 11개', '테마에 맞는 이벤트만 등장한다. 계몽 15단계부터 대가가 1.5배로 가혹해진다.',
+      ['이벤트 id','NPC','등장 테마','선택지','요약','효과','결과 대사'], rows, [16,16,20,26,22,22,44])
+
+# ---------- 10. 지도·보상 ----------
+mp = act1['map']; rw = act1['rewards']
+rows = [
+ ['층수', mp['floors'], '마지막 층이 보스'],
+ ['한 층의 갈림길', f"{mp['choicesMin']}~{mp['choicesMax']}", '최대 4열까지만 사용'],
+ ['고정 층', ' / '.join(f"{k}층={v}" for k,v in mp['fixed'].items()), '보스 직전 층은 항상 휴식'],
+ ['정예 등장 층', f"{mp['eliteFloors'][0]}~{mp['eliteFloors'][-1]}층", ''],
+ ['노드 비중', ' / '.join(f"{k} {v}" for k,v in mp['nodeWeights'].items()), '적3 : 이벤트1 : 정예1.6 : 상점0.8 : 휴식0.5'],
+ ['규칙 1', '연속 휴식 강제 금지', '갈 수 있는 길이 전부 휴식이 되지 않게'],
+ ['규칙 2', '보스 직전 층은 항상 휴식', ''],
+ ['규칙 3', '갈림길 두 갈래는 항상 서로 다른 종류', '고정 층은 예외'],
+ ['', '', ''],
+ ['일반 전투 보상', f"{rw['battle']['choices']}개 중 택1", f"족보 {rw['battle']['pool']['category']}% / 주사위 {rw['battle']['pool']['dice']}%"],
+ ['일반 보상 등급', ' / '.join(f"{k} {v}%" for k,v in rw['battle']['tierWeights'].items()), ''],
+ ['정예 보상', f"{rw['elite']['choices']}개 중 택1 + 유물 확정", f"족보 {rw['elite']['pool']['category']}% / 주사위 {rw['elite']['pool']['dice']}%"],
+ ['정예 보상 등급', ' / '.join(f"{k} {v}%" for k,v in rw['elite']['tierWeights'].items()), ''],
+ ['정예 유물', '항상 1개 드랍', '10% 확률로 정예 등급 유물'],
+ ['보스 보상', '유물 + 전설 족보', ''],
+ ['휴식 회복', f"최대 HP의 {int(act1['rest']['healRatio']*100)}%", '계몽 11단계부터 절반'],
+]
+sheet('지도·보상', '지도 생성 규칙 · 보상', '지도는 매 런 새로 만들어진다. 좌표를 직접 찍지 않고 층=행, 열=최대 4칸인 표로 배치한 뒤 브라우저가 정한 위치를 읽어 잇는다.',
+      ['항목','값','비고'], rows, [22,34,44])
+
+# ---------- 11. 경제 ----------
+sh = act1['shop']; ds = act1['diceShift']
+rows = [
+ ['일반 전투 코인', f"{act1['coins']['battle'][0]}~{act1['coins']['battle'][1]}", ''],
+ ['정예 전투 코인', f"{act1['coins']['elite'][0]}~{act1['coins']['elite'][1]}", ''],
+ ['상점 주사위 진열', sh['stockDice'], ' / '.join(f"{k} {v}%" for k,v in sh['dieTierWeights'].items())],
+ ['상점 유물 진열', sh['stockRelics'], ''],
+ ['주사위 가격', ' / '.join(f"{k} {v}🪙" for k,v in sh['prices']['diceByTier'].items()), ''],
+ ['유물 가격', f"{sh['prices']['relic']}🪙", ''],
+ ['족보 교체 비용', f"변형당 {ds['perVariant']}🪙", f"처음 {ds['freeVariants']}개는 무료"],
+ ['족보 교체 상한', f"보유 족보의 {int(ds['maxRatio']*100)}%", ''],
+ ['계몽 13단계', '적이 주는 코인 -25%', ''],
+ ['계몽 16단계', '상점 가격 증가', ''],
+]
+sheet('경제', '코인 · 상점 · 교체 비용', '코인은 전투에서만 나온다. 상점은 지도에 확률로 등장한다.',
+      ['항목','값','비고'], rows, [22,34,34])
+
+# ---------- 12. 계몽 ----------
+ENL = ['엘리트가 더 자주 나타난다','모든 일반 적 공격력 +15%','모든 엘리트 공격력 +15%','보스 공격력 +15%',
+ '보스 처치 회복 50% → 15%','HP 30%를 잃은 채 시작','모든 일반 적 체력 +20%','모든 엘리트 체력 +20%',
+ '모든 보스 체력 +20%','주사위 하나가 저주 주사위로','휴식 회복량 -50%','일반의 언커먼·엘리트의 레어 확률 절반',
+ '적이 주는 코인 -25%','최대 HP -10%','이벤트의 대가가 가혹해진다','상점 가격 증가','일반 적에게 계몽 패턴',
+ '엘리트에게 계몽 패턴','보스에게 계몽 패턴','최종 보스가 두 마리']
+rows = [[i+1, t, '적 강화' if '+15%' in t or '+20%' in t else ('플레이어 약화' if 'HP' in t and '적' not in t else '규칙 변경')] for i, t in enumerate(ENL)]
+sheet('계몽', '계몽 20단계', '보스를 3막까지 깨면 1단계씩 오른다. 한 번 오른 단계는 내려가지 않는다.',
+      ['단계','효과','분류'], rows, [8,44,16])
+
+wb.save('/home/claude/redhood/docs/REDHOOD_game_db.xlsx')
+print('저장 완료 · 시트', len(wb.sheetnames), wb.sheetnames)
