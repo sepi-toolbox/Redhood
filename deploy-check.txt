@@ -1,2 +1,2 @@
-1786152950
-v0.99 bg complete
+1786155065
+v1.00 atkTrim removed
