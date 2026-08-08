@@ -121,7 +121,7 @@ export function applyStatus(battle, kind, count = 1, power = 0) {
     const i = pool[Math.floor(rng.next() * pool.length)];
     battle.dice[i].st = { kind, power: power > 0 ? power : 0,
       left: def.rule === 'fuse' ? 0 : life,
-      fuse: def.rule === 'fuse' ? (life || 1) : 0, opened: false };
+      fuse: def.rule === 'fuse' ? (life || 1) : 0, opened: false, fresh: true };
     put++;
   }
   return put;
@@ -158,6 +158,7 @@ function statusTurn(battle) {
   battle.dice.forEach((d) => {
     if (!d.st) return;
     if (stRule(d, 'fuse')) {
+      if (d.st.fresh) { d.st.fresh = false; return; }
       d.st.fuse -= 1;
       if (d.st.fuse <= 0) {                       // 터진다
         const dmg = stAmount(d);
@@ -168,6 +169,7 @@ function statusTurn(battle) {
       }
       return;
     }
+    if (d.st.fresh) { d.st.fresh = false; return; }   // 걸린 턴에는 안 깎인다 (최소 한 턴은 겪는다)
     if (d.st.left > 0) { d.st.left -= 1; if (d.st.left <= 0) d.st = null; }
   });
   if (stRule(battle.dice[0], 'spread') && battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;

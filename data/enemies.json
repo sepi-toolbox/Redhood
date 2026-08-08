@@ -14,7 +14,8 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 5
+            "amount": 3,
+            "hits": 2
           }
         ],
         "cooldown": 1
@@ -34,8 +35,9 @@
         "name": "흉내내기",
         "effects": [
           {
-            "op": "confuse",
-            "amount": 2
+            "op": "status",
+            "amount": 2,
+            "kind": "confuse"
           }
         ],
         "cooldown": 1
@@ -109,7 +111,7 @@
         "hidden": true,
         "followUp": {
           "move": "flare",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 1,
         "lockTurn": 5
@@ -140,7 +142,7 @@
         "cooldown": 1,
         "followUp": {
           "move": "move1",
-          "chance": 1.0
+          "chance": 1
         }
       },
       "move1": {
@@ -207,23 +209,25 @@
         "name": "독니",
         "effects": [
           {
-            "op": "poison",
-            "amount": 4
+            "op": "status",
+            "amount": 2,
+            "kind": "poison"
           },
           {
             "op": "damage",
-            "amount": 2
+            "amount": 5
           }
         ],
         "cooldown": 1,
-        "lockTurn": 4
+        "lockTurn": 3
       },
       "web": {
         "name": "거미줄",
         "effects": [
           {
-            "op": "confuse",
-            "amount": 2
+            "op": "status",
+            "amount": 2,
+            "kind": "bind"
           }
         ],
         "cooldown": 1
@@ -242,15 +246,16 @@
         "name": "맹독니",
         "effects": [
           {
-            "op": "poison",
-            "amount": 8
+            "op": "status",
+            "amount": 5,
+            "kind": "poison"
           },
           {
             "op": "damage",
-            "amount": 3
+            "amount": 5
           }
         ],
-        "minTurn": 4,
+        "minTurn": 3,
         "cooldown": 1
       }
     },
@@ -292,11 +297,11 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 3,
-            "hits": 2
+            "amount": 10,
+            "hits": 1
           }
         ],
-        "cooldown": 1
+        "cooldown": 2
       },
       "growl": {
         "name": "울부짖기",
@@ -306,10 +311,7 @@
             "amount": 2
           }
         ],
-        "followUp": {
-          "move": "bite",
-          "chance": 0.5
-        }
+        "cooldown": 2
       },
       "maul": {
         "name": "상처 보듬기",
@@ -319,14 +321,14 @@
           }
         ],
         "minTurn": 1,
-        "cooldown": 2
+        "cooldown": 0
       },
       "surge": {
         "name": "허기",
         "effects": [
           {
-            "op": "damage",
-            "amount": 5
+            "op": "block",
+            "amount": 10
           },
           {
             "op": "empower",
@@ -340,8 +342,8 @@
     "pattern": {
       "mode": "weighted",
       "weights": {
-        "bite": 1,
-        "growl": 1,
+        "bite": 2,
+        "growl": 2,
         "maul": 1,
         "surge": 3
       },
@@ -400,8 +402,9 @@
             "amount": 11
           },
           {
-            "op": "confuse",
-            "amount": 2
+            "op": "status",
+            "amount": 2,
+            "kind": "bind"
           }
         ],
         "minTurn": 3,
@@ -472,7 +475,7 @@
         ],
         "followUp": {
           "move": "crush",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 3
       },
@@ -567,7 +570,7 @@
         ],
         "followUp": {
           "move": "torrent",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -814,7 +817,7 @@
         ],
         "followUp": {
           "move": "sweep",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 3
       },
@@ -874,7 +877,7 @@
         "effects": [
           {
             "op": "block",
-            "amount": 6
+            "amount": 20
           },
           {
             "op": "empower",
@@ -883,7 +886,7 @@
         ],
         "followUp": {
           "move": "frenzy",
-          "chance": 0.6
+          "chance": 1
         },
         "cooldown": 3
       },
@@ -892,31 +895,34 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 5,
+            "hits": 3
+          },
+          {
+            "op": "status",
+            "amount": 5,
+            "kind": "bleed"
           }
         ],
-        "minTurn": 6,
-        "cooldown": 3
+        "minTurn": 3,
+        "cooldown": 0,
+        "lockTurn": 0,
+        "break": {
+          "damage": 1,
+          "move": "unique1"
+        }
       },
       "surge": {
-        "name": "무리를 부른다",
+        "name": "상처 찢기",
         "effects": [
           {
-            "op": "empower",
-            "amount": 6
+            "op": "status",
+            "amount": 5,
+            "kind": "bleed"
           }
         ],
         "minTurn": 4,
-        "cooldown": 3
-      }
-    },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "bite": 2,
-        "howl": 1,
-        "frenzy": 1,
-        "surge": 3
+        "cooldown": 1
       }
     },
     "enlightenedMove": {
@@ -931,7 +937,57 @@
           "amount": 2
         }
       ]
-    }
+    },
+    "uniqueMoves": {
+      "unique1": {
+        "name": "상처 보듬기",
+        "effects": [
+          {
+            "op": "rest"
+          }
+        ]
+      },
+      "unique2": {
+        "name": "궁지에 몰린 야수",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 10
+          }
+        ],
+        "followUp": {
+          "move": "bite",
+          "chance": 1
+        }
+      }
+    },
+    "phases": [
+      {
+        "untilHpRatio": 0.5,
+        "pattern": {
+          "mode": "weighted",
+          "weights": {
+            "bite": 2,
+            "howl": 1,
+            "frenzy": 0,
+            "surge": 3
+          }
+        }
+      },
+      {
+        "untilHpRatio": 0,
+        "pattern": {
+          "mode": "weighted",
+          "weights": {
+            "bite": 2,
+            "howl": 1,
+            "frenzy": 0,
+            "surge": 3
+          }
+        },
+        "enter": "unique2"
+      }
+    ]
   },
   {
     "id": "old_pike",
@@ -964,7 +1020,7 @@
         "hidden": true,
         "followUp": {
           "move": "thrash",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -1041,7 +1097,7 @@
         "hidden": true,
         "followUp": {
           "move": "pounce",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -1102,87 +1158,59 @@
     ],
     "moves": {
       "bite": {
-        "name": "물어뜯기",
+        "name": "경계",
         "effects": [
-          {
-            "op": "damage",
-            "amount": 11
-          }
-        ],
-        "cooldown": 2
-      },
-      "stalk": {
-        "name": "어둠 속 발소리",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 8
-          },
           {
             "op": "empower",
-            "amount": 2
+            "amount": 5
           }
         ],
-        "hidden": true,
+        "cooldown": 0,
+        "break": {
+          "damage": 20,
+          "move": "unique1"
+        },
         "followUp": {
           "move": "pounce",
-          "chance": 1.0
-        },
-        "cooldown": 2
+          "chance": 1
+        }
       },
       "pounce": {
         "name": "덮치기",
         "effects": [
           {
             "op": "damage",
-            "amount": 18
+            "amount": 15
           }
         ],
-        "minTurn": 6,
-        "cooldown": 2
+        "minTurn": 0,
+        "cooldown": 0
       },
-      "howl": {
-        "name": "핏빛 울부짖음",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
-          },
-          {
-            "op": "status",
-            "amount": 2,
-            "kind": "bleed"
-          }
-        ]
-      },
-      "rend": {
-        "name": "갈기갈기",
+      "move1": {
+        "name": "핏빛 발톱",
         "effects": [
           {
             "op": "damage",
-            "amount": 14
-          }
-        ]
-      },
-      "lick": {
-        "name": "상처 핥기",
-        "effects": [
+            "amount": 5
+          },
           {
-            "op": "heal",
-            "amount": 10
-          }
-        ]
-      },
-      "surge": {
-        "name": "털이 곤두선다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 7
+            "op": "status",
+            "amount": 5,
+            "kind": "bleed"
           }
         ],
-        "minTurn": 4,
-        "cooldown": 3
+        "cooldown": 1
+      },
+      "move2": {
+        "name": "광란",
+        "effects": [
+          {
+            "op": "damage",
+            "amount": 5,
+            "hits": 3
+          }
+        ],
+        "cooldown": 1
       }
     },
     "phases": [
@@ -1192,26 +1220,25 @@
           "mode": "weighted",
           "weights": {
             "bite": 1,
-            "stalk": 1,
             "pounce": 0,
-            "surge": 1.5
+            "move1": 0,
+            "move2": 0
           }
         }
       },
       {
-        "untilHpRatio": 0.0,
+        "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
-            "rend": 3,
-            "bite": 2,
-            "howl": 2,
-            "lick": 1,
-            "pounce": 1,
-            "surge": 1.5
+            "bite": 0,
+            "pounce": 0,
+            "move1": 1,
+            "move2": 1
           },
           "noRepeat": 2
-        }
+        },
+        "enter": "unique2"
       }
     ],
     "enlightenedMove": {
@@ -1226,6 +1253,31 @@
           "amount": 2
         }
       ]
+    },
+    "uniqueMoves": {
+      "unique1": {
+        "name": "물러서기",
+        "effects": [
+          {
+            "op": "block",
+            "amount": 10
+          }
+        ],
+        "followUp": {
+          "move": "bite",
+          "chance": 1
+        }
+      },
+      "unique2": {
+        "name": "피의 향연",
+        "effects": [
+          {
+            "op": "status",
+            "kind": "bleed",
+            "amount": 5
+          }
+        ]
+      }
     }
   },
   {
@@ -1259,7 +1311,7 @@
         ],
         "followUp": {
           "move": "drown",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -1309,7 +1361,7 @@
         }
       },
       {
-        "untilHpRatio": 0.0,
+        "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
@@ -1372,7 +1424,7 @@
         "hidden": true,
         "followUp": {
           "move": "rip",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -1426,7 +1478,7 @@
         }
       },
       {
-        "untilHpRatio": 0.0,
+        "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
@@ -1483,7 +1535,7 @@
         ],
         "followUp": {
           "move": "spit",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -1646,7 +1698,7 @@
         "hidden": true,
         "followUp": {
           "move": "wail",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -1805,7 +1857,7 @@
         ],
         "followUp": {
           "move": "bone_throw",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -1886,7 +1938,7 @@
         "hidden": true,
         "followUp": {
           "move": "erupt",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -1971,7 +2023,7 @@
         ],
         "followUp": {
           "move": "quake",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -2059,7 +2111,7 @@
         ],
         "followUp": {
           "move": "cleave",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -2135,7 +2187,7 @@
         ],
         "followUp": {
           "move": "inter",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -2227,7 +2279,7 @@
         "hidden": true,
         "followUp": {
           "move": "death_roll",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -2277,7 +2329,7 @@
         }
       },
       {
-        "untilHpRatio": 0.0,
+        "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
@@ -2339,7 +2391,7 @@
         ],
         "followUp": {
           "move": "smother",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -2394,7 +2446,7 @@
         }
       },
       {
-        "untilHpRatio": 0.0,
+        "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
@@ -2455,7 +2507,7 @@
         ],
         "followUp": {
           "move": "grave_call",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -2510,7 +2562,7 @@
         }
       },
       {
-        "untilHpRatio": 0.0,
+        "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
@@ -2635,7 +2687,7 @@
         ],
         "followUp": {
           "move": "beam",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -2817,7 +2869,7 @@
         "cooldown": 2,
         "followUp": {
           "move": "pulse",
-          "chance": 1.0
+          "chance": 1
         }
       },
       "pulse": {
@@ -2979,7 +3031,7 @@
         ],
         "followUp": {
           "move": "crack",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -3074,7 +3126,7 @@
         ],
         "followUp": {
           "move": "collapse",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 3
       },
@@ -3173,7 +3225,7 @@
         ],
         "followUp": {
           "move": "smash",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 3
       },
@@ -3260,7 +3312,7 @@
         "hidden": true,
         "followUp": {
           "move": "peal",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -3345,7 +3397,7 @@
         "hidden": true,
         "followUp": {
           "move": "nightmare",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -3400,7 +3452,7 @@
         }
       },
       {
-        "untilHpRatio": 0.0,
+        "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
@@ -3457,7 +3509,7 @@
         ],
         "followUp": {
           "move": "crush",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -3512,7 +3564,7 @@
         }
       },
       {
-        "untilHpRatio": 0.0,
+        "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
@@ -3575,7 +3627,7 @@
         "cooldown": 2,
         "followUp": {
           "move": "judgment",
-          "chance": 1.0
+          "chance": 1
         }
       },
       "absolve": {
@@ -3632,7 +3684,7 @@
         }
       },
       {
-        "untilHpRatio": 0.0,
+        "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
@@ -3704,7 +3756,7 @@
         ],
         "followUp": {
           "move": "unmake",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 3
       },
@@ -3769,7 +3821,7 @@
         ],
         "followUp": {
           "move": "strike",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
@@ -3946,7 +3998,7 @@
         ],
         "followUp": {
           "move": "flareup",
-          "chance": 1.0
+          "chance": 1
         },
         "cooldown": 2
       },
