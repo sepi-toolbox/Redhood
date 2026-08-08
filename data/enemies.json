@@ -627,7 +627,7 @@
         "mist_veil": 1,
         "torrent": 99,
         "surge": 0,
-        "move1": 1
+        "move1": 0
       }
     },
     "enlightenedMove": {
@@ -1063,50 +1063,48 @@
     ],
     "moves": {
       "snap": {
-        "name": "덥석",
+        "name": "물기",
         "effects": [
           {
             "op": "damage",
             "amount": 11
           }
         ],
-        "cooldown": 2
+        "cooldown": 1
       },
       "dive": {
         "name": "잠수",
         "effects": [
           {
-            "op": "block",
-            "amount": 8
+            "op": "rest",
+            "amount": 10
           }
         ],
         "hidden": true,
-        "followUp": {
-          "move": "thrash",
-          "chance": 1
+        "cooldown": 1,
+        "break": {
+          "damage": 10,
+          "move": "unique1"
         },
-        "cooldown": 2
+        "followUp": {
+          "move": "snap",
+          "chance": 1
+        }
       },
       "thrash": {
         "name": "요동",
         "effects": [
           {
-            "op": "damage",
-            "amount": 14
+            "op": "status",
+            "amount": 1,
+            "kind": "stun"
+          },
+          {
+            "op": "empower",
+            "amount": 2
           }
         ],
         "minTurn": 6,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "지느러미를 곧추세운다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 6
-          }
-        ],
-        "minTurn": 4,
         "cooldown": 3
       }
     },
@@ -1115,8 +1113,7 @@
       "weights": {
         "snap": 1,
         "dive": 1,
-        "thrash": 0,
-        "surge": 3
+        "thrash": 1
       }
     },
     "enlightenedMove": {
@@ -1127,6 +1124,17 @@
           "amount": 20
         }
       ]
+    },
+    "uniqueMoves": {
+      "unique1": {
+        "name": "삼키기",
+        "effects": [
+          {
+            "op": "damage",
+            "amount": 20
+          }
+        ]
+      }
     }
   },
   {
@@ -1353,17 +1361,7 @@
     ],
     "moves": {
       "grasp": {
-        "name": "바위 손아귀",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 10
-          }
-        ],
-        "cooldown": 2
-      },
-      "curse": {
-        "name": "다리의 저주",
+        "name": "지진",
         "effects": [
           {
             "op": "status",
@@ -1371,69 +1369,219 @@
             "kind": "stun"
           }
         ],
-        "followUp": {
-          "move": "drown",
-          "chance": 1
-        },
-        "cooldown": 2
+        "cooldown": 3,
+        "minTurn": 1
       },
       "drown": {
-        "name": "내려찍기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 16
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "mend": {
-        "name": "이끼 회복",
-        "effects": [
-          {
-            "op": "heal",
-            "amount": 12
-          }
-        ]
-      },
-      "surge": {
-        "name": "바위를 움켜쥔다",
+        "name": "힘 모으기",
         "effects": [
           {
             "op": "empower",
-            "amount": 7
+            "amount": 5
           }
         ],
-        "minTurn": 4,
+        "minTurn": 1,
+        "cooldown": 1,
+        "break": {
+          "damage": 20,
+          "move": "unique1"
+        },
+        "followUp": {
+          "move": "move1",
+          "chance": 0.5
+        }
+      },
+      "surge": {
+        "name": "기둥 뿌리",
+        "effects": [
+          {
+            "op": "damage",
+            "amount": 5
+          }
+        ],
+        "minTurn": 0,
+        "cooldown": 1
+      },
+      "move1": {
+        "name": "압도적인 힘",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "break": {
+          "damage": 10,
+          "move": "unique1"
+        },
+        "followUp": {
+          "move": "move2",
+          "chance": 1
+        }
+      },
+      "move2": {
+        "name": "바위 던지기",
+        "effects": [
+          {
+            "op": "damage",
+            "amount": 20
+          }
+        ]
+      },
+      "move3": {
+        "name": "지진",
+        "effects": [
+          {
+            "op": "status",
+            "amount": 2,
+            "kind": "stun"
+          }
+        ],
         "cooldown": 3
+      },
+      "move4": {
+        "name": "힘 모으기",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "break": {
+          "damage": 25,
+          "move": "unique1"
+        },
+        "followUp": {
+          "move": "move5",
+          "chance": 0.5
+        },
+        "cooldown": 1
+      },
+      "move5": {
+        "name": "압도적인 힘",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "followUp": {
+          "move": "move2",
+          "chance": 1
+        },
+        "break": {
+          "damage": 15,
+          "move": "unique1"
+        }
+      },
+      "move6": {
+        "name": "지진",
+        "effects": [
+          {
+            "op": "status",
+            "amount": 3,
+            "kind": "stun"
+          }
+        ],
+        "cooldown": 3
+      },
+      "move7": {
+        "name": "힘 모으기",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "cooldown": 1,
+        "break": {
+          "damage": 30,
+          "move": "unique1"
+        },
+        "followUp": {
+          "move": "move8",
+          "chance": 0.5
+        }
+      },
+      "move8": {
+        "name": "압도적인 힘",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "followUp": {
+          "move": "move2",
+          "chance": 1
+        },
+        "break": {
+          "damage": 20,
+          "move": "unique1"
+        }
       }
     },
     "phases": [
       {
-        "untilHpRatio": 0.5,
+        "untilHpRatio": 0.6,
         "pattern": {
           "mode": "weighted",
           "weights": {
             "grasp": 1,
-            "curse": 1,
-            "drown": 0,
-            "surge": 1.5
+            "drown": 1,
+            "surge": 1,
+            "move1": 0,
+            "move2": 0,
+            "move3": 0,
+            "move4": 0,
+            "move5": 0,
+            "move6": 0,
+            "move7": 0,
+            "move8": 0
           }
         }
+      },
+      {
+        "untilHpRatio": 0.3,
+        "pattern": {
+          "mode": "weighted",
+          "weights": {
+            "grasp": 0,
+            "drown": 0,
+            "surge": 1,
+            "move1": 0,
+            "move2": 0,
+            "move3": 1,
+            "move4": 1,
+            "move5": 0,
+            "move6": 0,
+            "move7": 0,
+            "move8": 0
+          },
+          "noRepeat": 2
+        },
+        "enter": "unique2"
       },
       {
         "untilHpRatio": 0,
         "pattern": {
           "mode": "weighted",
           "weights": {
-            "grasp": 2,
-            "drown": 3,
-            "mend": 2,
-            "surge": 1.5
+            "grasp": 0,
+            "drown": 0,
+            "surge": 1,
+            "move1": 0,
+            "move2": 0,
+            "move3": 0,
+            "move4": 0,
+            "move5": 0,
+            "move6": 1,
+            "move7": 1,
+            "move8": 0
           },
           "noRepeat": 2
-        }
+        },
+        "enter": "unique3"
       }
     ],
     "enlightenedMove": {
@@ -1448,6 +1596,43 @@
           "amount": 1
         }
       ]
+    },
+    "uniqueMoves": {
+      "unique1": {
+        "name": "땅 흔들기",
+        "effects": [
+          {
+            "op": "status",
+            "kind": "stun",
+            "amount": 1
+          }
+        ]
+      },
+      "unique2": {
+        "name": "전투의 희열",
+        "effects": [
+          {
+            "op": "rest",
+            "amount": 5
+          }
+        ],
+        "followUp": {
+          "move": "move4",
+          "chance": 1
+        }
+      },
+      "unique3": {
+        "name": "전투의 열광",
+        "effects": [
+          {
+            "op": "rest"
+          }
+        ],
+        "followUp": {
+          "move": "move7",
+          "chance": 1
+        }
+      }
     }
   },
   {
