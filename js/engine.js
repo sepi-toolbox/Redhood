@@ -737,7 +737,7 @@ function chooseMove(enemy, turn = 1) {
   //   "moves.stalk.followUp": { "move": "pounce", "chance": 0.7 }  (배열로 여러 후보도 가능)
   //   확정된 연계는 minTurn·강화 행동보다 우선한다 — 말 그대로 무조건 이어진다.
   const prev = enemy.nextMove;
-  if (prev && prev.followUp && !prev.chained) {
+  if (prev && prev.followUp && (prev.chainDepth || 0) < 8) {
     const list = Array.isArray(prev.followUp) ? prev.followUp : [prev.followUp];
     for (const fu of list) {
       const target = moveDef(def, fu.move);
@@ -746,7 +746,7 @@ function chooseMove(enemy, turn = 1) {
       if (onCooldown(enemy, fu.move, turn)) continue;   // 대기 중인 기술은 연계로도 못 당긴다
       if (rng.next() >= (fu.chance != null ? fu.chance : 1)) continue;
       stampCooldown(enemy, def, fu.move, turn);
-      setNextMove(enemy, def, fu.move, { chained: true });
+      setNextMove(enemy, def, fu.move, { chained: true, chainDepth: (prev.chainDepth || 0) + 1 });
       return;
     }
   }
