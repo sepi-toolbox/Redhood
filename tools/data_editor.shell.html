@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.18 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.19 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -164,6 +164,7 @@ function cell(tr, node, ro){ const td=document.createElement('td'); if(ro) td.cl
 const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['status','상태이상 부여'],['confuse','혼란(구)'],['heal','회복'],['rest','휴식'],['poison','독(🌀)'],['bleed','출혈(🌀)'],['selfDamage','자해(❓)']];
 const ST_OPS=(DB.statuses.list||[]).map(s=>[s.id,s.name]);
 const DB_statusById={}; (DB.statuses.list||[]).forEach(s=>DB_statusById[s.id]=s); DB.statusById2=DB_statusById;
+const NO_POWER=new Set(['onUseFaceDamage','onUseFaceCoin','noReroll','zeroValue','hideFace','needReroll','linked','spread']);
 const ST_RULES=[['onUseFaceDamage','쓰면 눈금만큼 피해'],['onUseFaceCoin','쓰면 눈금만큼 코인'],['noReroll','다시 못 굴림'],
   ['zeroValue','눈금 0 계산'],['faceLow','수치 이하만 나옴'],['faceHigh','수치 이상만 나옴'],['hideFace','눈 가림'],
   ['needReroll','한 번 굴리기 전 값 없음'],['fuse','턴 지나면 폭발'],['linked','같이 굴러감'],
@@ -197,7 +198,7 @@ const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.i
 const TABS=[
  ['개요','바뀐 값은 초록으로 표시된다. 다 고쳤으면 오른쪽 위 [내보내기]를 눌러 바뀐 JSON을 받아 나에게 주면 반영해서 배포한다.',ovw],
  ['적','HP와 기본 행동. 기본 행동은 쓸 수 있는 수가 하나도 없을 때 제약을 전부 무시하고 시동하는 예외 처리 장치다 — 유니크 행동과는 별개이며 아무 행동이나 지정할 수 있다. 개별 행동은 [적행동] 탭에서 고친다.',tabEnemy],
- ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. [상태이상 부여]는 종류·세기·지속을 효과 칸에서 정하고, [수치] 칸은 몇 칸에 거는지다 — 세기와 지속을 0으로 두면 상태이상 탭의 기본값을 쓴다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 락 턴은 "이 턴이 되면 더 안 씀"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 파쇄는 그 행동이 예고된 동안 HP에 그만큼 피해를 받으면 유니크 행동으로 무너지는 것 — 방어도로 막힌 피해는 안 센다. 유니크 행동은 추첨에 안 들어가고 파쇄되지도 않는다. 유니크가 나오는 길은 국면 전환과 파쇄 둘뿐이다. 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
+ ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. [상태이상 부여]는 종류·지속을 효과 칸에서 정하고, [수치] 칸은 몇 칸에 거는지다. 세기 칸은 세기를 쓰는 넷(저주·축복·부패·마비)에만 나오고, 0으로 두면 상태이상 탭의 기본값을 쓴다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 락 턴은 "이 턴이 되면 더 안 씀"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 파쇄는 그 행동이 예고된 동안 HP에 그만큼 피해를 받으면 유니크 행동으로 무너지는 것 — 방어도로 막힌 피해는 안 센다. 유니크 행동은 추첨에 안 들어가고 파쇄되지도 않는다. 유니크가 나오는 길은 국면 전환과 파쇄 둘뿐이다. 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
  ['족보','배수(mult)와 변형의 부가 능력 수치.',tabScore],
  ['주사위','여섯 면을 직접 고친다. 면 구성이 곧 성능이다.',tabDice],
  ['유물','효과 수치는 hook.amount 하나로 정해진다.',tabRelic],
@@ -336,15 +337,19 @@ function tabMoves(v){
         if(x.op==='status'){
           row.appendChild(select(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 상태이상 종류', ST_OPS, {def:'bleed'}));
           const st=DB.statusById2[x.kind];
-          const pw=field(`${base}.effects.${k}.power`, e.name+' '+m.name+' 상태이상 세기', {num:true, def:0});
-          pw.style.maxWidth='52px';
-          pw.title='세기 — 0이면 상태이상 탭의 기본값('+(st?st.amount:'?')+')을 쓴다';
+          // 세기를 안 쓰는 규칙에는 아예 칸을 안 만든다 — 넣어봐야 무시되니 헷갈리기만 한다
+          if(st && !NO_POWER.has(st.rule)){
+            const pw=field(`${base}.effects.${k}.power`, e.name+' '+m.name+' 상태이상 세기', {num:true, def:0});
+            pw.style.maxWidth='52px';
+            pw.title='세기 — 0이면 상태이상 탭의 기본값('+st.amount+')을 쓴다';
+            const l1=document.createElement('span'); l1.className='sub'; l1.textContent='세기';
+            row.appendChild(l1); row.appendChild(pw);
+          }
           const tn=field(`${base}.effects.${k}.turns`, e.name+' '+m.name+' 상태이상 지속', {num:true, def:0});
           tn.style.maxWidth='52px';
           tn.title='지속/심지 턴 — 0이면 기본값('+(st?(st.turns||'영구'):'?')+')';
-          const l1=document.createElement('span'); l1.className='sub'; l1.textContent='세기';
           const l2=document.createElement('span'); l2.className='sub'; l2.textContent='지속';
-          row.appendChild(l1); row.appendChild(pw); row.appendChild(l2); row.appendChild(tn);
+          row.appendChild(l2); row.appendChild(tn);
         }
         row.appendChild(miniBtn('×','이 효과 지우기',()=>{ removeP(`${base}.effects.${k}`); mark(`${base}.effects`, e.name+' '+m.name+' 효과 삭제'); redraw(); }));
         efBox.appendChild(row);
@@ -605,8 +610,8 @@ function tabStatus(v){
     tb.appendChild(tr);
   });
   const p=document.createElement('p'); p.className='note';
-  p.innerHTML='<b>규칙별 수치가 뜻하는 것</b> — 출혈·독·약탈은 눈금에 곱하는 배수, 저주·축복은 나올 수 있는 눈의 경계, '
-    +'부패는 터질 때 피해(지속 턴이 심지 길이), 마비는 리롤을 몇 칸 먹는지. 나머지는 수치를 안 쓴다.';
+  p.innerHTML='<b>수치를 쓰는 건 넷뿐이다</b> — 저주·축복은 나올 수 있는 눈의 경계, 부패는 터질 때 피해(지속 턴이 심지 길이), 마비는 리롤을 몇 칸 먹는지. '
+    +'<b>출혈·독·약탈은 눈금 그대로</b>라 수치가 없고, 포박·기절·혼란·봉인·결속·잠식도 안 쓴다. 그런 종류는 적 행동에서 세기 칸이 아예 안 나온다.';
   v.appendChild(p);
   const q=document.createElement('p'); q.className='note';
   q.textContent='공허의 부름: '+DB.statuses.voidCall.name+' — '+DB.statuses.voidCall.text;
@@ -690,7 +695,11 @@ function validateDB(){
     for(const [mid,m] of Object.entries(all)){
       for(const ef of (m.effects||[])){
         if(!OPS.has(ef.op)) bad.push(`${e.name}/${m.name}: 모르는 효과 "${ef.op}"`);
-        if(ef.op==='status' && !STK.has(ef.kind)) bad.push(`${e.name}/${m.name}: 없는 상태이상 "${ef.kind||'(빈칸)'}"`);
+        if(ef.op==='status'){
+          if(!STK.has(ef.kind)) bad.push(`${e.name}/${m.name}: 없는 상태이상 "${ef.kind||'(빈칸)'}"`);
+          else if(ef.power>0 && NO_POWER.has(DB.statusById2[ef.kind].rule))
+            bad.push(`${e.name}/${m.name}: "${DB.statusById2[ef.kind].name}" 은(는) 세기를 쓰지 않는다`);
+        }
       }
       if(m.break){
         if(!(e.uniqueMoves||{})[m.break.move]) bad.push(`${e.name}/${m.name}: 파쇄 대상이 유니크 행동이 아님`);

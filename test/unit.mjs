@@ -719,21 +719,23 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     b.await = 'enemy'; eng.enemyPhase(b);
     eq('기본값 10이 아니라 33으로 터진다', hp - b.player.hp >= 33, true);
   }
-  // 세기를 안 적으면 statuses.json 기본값을 쓴다
+  // 출혈·독·약탈은 눈금 그대로다 — 세기라는 손잡이가 없다
   { const b = mk(); eng.initialRoll(b);
     b.dice.forEach(d => d.face = 3);
     eng.applyStatus(b, 'bleed', 1);
-    const i = b.dice.findIndex(d => d.st);
-    b.dice[i].face = 3;
     const r = eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
-    eq('기본 배수 1이 적용', r.bonusHits.includes('🩸-3'), true);
+    eq('눈금 그대로', r.bonusHits.includes('🩸-3'), true);
   }
-  // 세기를 적으면 그 값이 배수가 된다
   { const b = mk(); eng.initialRoll(b);
     b.dice.forEach(d => d.face = 3);
-    eng.applyStatus(b, 'bleed', 1, 2);
+    eng.applyStatus(b, 'bleed', 1, 5);            // 세기를 억지로 넣어도
     const r = eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
-    eq('세기 2면 눈금 ×2', r.bonusHits.includes('🩸-6'), true);
+    eq('세기를 넣어도 눈금 그대로', r.bonusHits.includes('🩸-3'), true);
+  }
+  // 세기를 쓰는 규칙에만 검증기가 통과시킨다
+  { const NO = ['bleed','poison','plunder','bind','stun','confuse','seal','chain','devour'];
+    eq('세기를 안 쓰는 아홉 종은 기본값이 0',
+      NO.every(k => (DB.statusById[k].amount || 0) === 0 || DB.statusById[k].rule === 'spread'), true);
   }
 
   // 데이터 무결성

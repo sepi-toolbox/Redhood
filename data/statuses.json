@@ -6,68 +6,120 @@
   },
   "list": [
     {
-      "id": "bleed", "name": "출혈", "color": "#ff5a4a",
-      "rule": "onUseFaceDamage", "amount": 1, "turns": 0,
-      "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다"
+      "id": "bleed",
+      "name": "출혈",
+      "color": "#ff5a4a",
+      "rule": "onUseFaceDamage",
+      "amount": 0,
+      "turns": 0,
+      "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다 (세기 없음)"
     },
     {
-      "id": "poison", "name": "독", "color": "#b8e04a",
-      "rule": "onUseFaceDamage", "amount": 1, "turns": 0,
-      "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다"
+      "id": "poison",
+      "name": "독",
+      "color": "#b8e04a",
+      "rule": "onUseFaceDamage",
+      "amount": 0,
+      "turns": 0,
+      "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다 (세기 없음)"
     },
     {
-      "id": "bind", "name": "포박", "color": "#7fbf8a",
-      "rule": "noReroll", "amount": 0, "turns": 0,
+      "id": "bind",
+      "name": "포박",
+      "color": "#7fbf8a",
+      "rule": "noReroll",
+      "amount": 0,
+      "turns": 0,
       "text": "이 주사위는 다시 굴릴 수 없다"
     },
     {
-      "id": "stun", "name": "기절", "color": "#dfe6ee",
-      "rule": "zeroValue", "amount": 0, "turns": 0,
+      "id": "stun",
+      "name": "기절",
+      "color": "#dfe6ee",
+      "rule": "zeroValue",
+      "amount": 0,
+      "turns": 0,
       "text": "족보에는 들어가지만 눈금이 0으로 계산된다"
     },
     {
-      "id": "curse", "name": "저주", "color": "#c78cff",
-      "rule": "faceLow", "amount": 3, "turns": 0,
+      "id": "curse",
+      "name": "저주",
+      "color": "#c78cff",
+      "rule": "faceLow",
+      "amount": 3,
+      "turns": 0,
       "text": "이 주사위는 수치 이하의 눈만 나온다"
     },
     {
-      "id": "blessing", "name": "축복", "color": "#f3ecdd",
-      "rule": "faceHigh", "amount": 4, "turns": 0,
+      "id": "blessing",
+      "name": "축복",
+      "color": "#f3ecdd",
+      "rule": "faceHigh",
+      "amount": 4,
+      "turns": 0,
       "text": "이 주사위는 수치 이상의 눈만 나온다"
     },
     {
-      "id": "confuse", "name": "혼란", "color": "#c68cff",
-      "rule": "hideFace", "amount": 0, "turns": 0,
+      "id": "confuse",
+      "name": "혼란",
+      "color": "#c68cff",
+      "rule": "hideFace",
+      "amount": 0,
+      "turns": 0,
       "text": "눈이 보이지 않는다 (족보에는 그대로 들어간다)"
     },
     {
-      "id": "seal", "name": "봉인", "color": "#8fa8e0",
-      "rule": "needReroll", "amount": 0, "turns": 0,
+      "id": "seal",
+      "name": "봉인",
+      "color": "#8fa8e0",
+      "rule": "needReroll",
+      "amount": 0,
+      "turns": 0,
       "text": "한 번 다시 굴리기 전에는 값이 없다 — 족보에도 안 들어간다"
     },
     {
-      "id": "rot", "name": "부패", "color": "#d98cc0",
-      "rule": "fuse", "amount": 10, "turns": 2,
+      "id": "rot",
+      "name": "부패",
+      "color": "#d98cc0",
+      "rule": "fuse",
+      "amount": 10,
+      "turns": 2,
       "text": "턴이 다 차면 터져 수치만큼 피해. 그 전에 족보에 쓰면 해제된다"
     },
     {
-      "id": "chain", "name": "결속", "color": "#a8c2d8",
-      "rule": "linked", "amount": 0, "turns": 0,
+      "id": "chain",
+      "name": "결속",
+      "color": "#a8c2d8",
+      "rule": "linked",
+      "amount": 0,
+      "turns": 0,
       "text": "결속된 주사위끼리 항상 같이 굴러간다"
     },
     {
-      "id": "numb", "name": "마비", "color": "#8fd4ff",
-      "rule": "rerollCost", "amount": 2, "turns": 0,
+      "id": "numb",
+      "name": "마비",
+      "color": "#8fd4ff",
+      "rule": "rerollCost",
+      "amount": 2,
+      "turns": 0,
       "text": "이 주사위를 다시 굴리면 리롤을 수치만큼 쓴다"
     },
     {
-      "id": "plunder", "name": "약탈", "color": "#d9a05a",
-      "rule": "onUseFaceCoin", "amount": 1, "turns": 0,
-      "text": "이 주사위를 족보에 쓰면 눈금만큼 코인을 뺏긴다"
+      "id": "plunder",
+      "name": "약탈",
+      "color": "#d9a05a",
+      "rule": "onUseFaceCoin",
+      "amount": 0,
+      "turns": 0,
+      "text": "이 주사위를 족보에 쓰면 눈금만큼 코인을 뺏긴다 (세기 없음)"
     },
     {
-      "id": "devour", "name": "잠식", "color": "#9fd8f0",
-      "rule": "spread", "amount": 1, "turns": 0,
+      "id": "devour",
+      "name": "잠식",
+      "color": "#9fd8f0",
+      "rule": "spread",
+      "amount": 0,
+      "turns": 0,
       "text": "쓰지 않으면 양옆으로 번진다. 다 잠식되면 공허의 부름만 남는다"
     }
   ],

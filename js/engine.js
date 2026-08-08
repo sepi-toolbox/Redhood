@@ -520,8 +520,9 @@ function applyStatusCost(battle, bd) {
   battle.dice.forEach((d, i) => {
     if (!d.st) return;
     if (used.has(i)) {
-      if (stRule(d, 'onUseFaceDamage')) hurt += d.face * (stAmount(d) || 1);
-      if (stRule(d, 'onUseFaceCoin'))   coin += d.face * (stAmount(d) || 1);
+      // 눈금 그대로다. 세기라는 손잡이를 두지 않는다 — 적이 조절하는 건 몇 칸에 거는가뿐.
+      if (stRule(d, 'onUseFaceDamage')) hurt += d.face;
+      if (stRule(d, 'onUseFaceCoin'))   coin += d.face;
       if (stRule(d, 'fuse')) d.st = null;                 // 부패는 쓰면 해제된다
     }
   });
@@ -819,7 +820,7 @@ export function intentOf(enemy) {
     else if (ef.op === 'confuse' || ef.op === 'poison' || ef.op === 'bleed') parts.push('🌀');
     else if (ef.op === 'status') {
       const st = DB.statusById[ef.kind];
-      const pw = ef.power || (st ? st.amount : 0);
+      const pw = ef.power || (st ? st.amount : 0);       // 세기를 안 쓰는 규칙이면 0이라 안 붙는다
       parts.push(`🎲${st ? st.name : '?'}${pw > 0 ? pw : ''}${(ef.amount || 1) > 1 ? '×' + ef.amount : ''}`);
     }
     else if (ef.op === 'empower') parts.push('💪');

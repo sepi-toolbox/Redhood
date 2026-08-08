@@ -69,6 +69,9 @@ function validate() {
         if (ef.op === 'status') {
           if (!DB.statusById[ef.kind]) throw new Error(`enemies.json: ${e.id}.${mid} 없는 상태이상 "${ef.kind}"`);
           if (ef.power < 0 || ef.turns < 0) throw new Error(`enemies.json: ${e.id}.${mid} 상태이상 수치/지속이 음수입니다`);
+          const NO_POWER = new Set(['onUseFaceDamage', 'onUseFaceCoin', 'noReroll', 'zeroValue', 'hideFace', 'needReroll', 'linked', 'spread']);
+          if (ef.power > 0 && NO_POWER.has(DB.statusById[ef.kind].rule))
+            throw new Error(`enemies.json: ${e.id}.${mid} "${ef.kind}" 은(는) 세기를 쓰지 않습니다`);
         }
       }
       if (mv.break) {
