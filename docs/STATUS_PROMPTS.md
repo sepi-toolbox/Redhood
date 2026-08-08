@@ -21,7 +21,7 @@
 
 | 겹 | 무엇 | 누가 만드나 |
 |---|---|---|
-| ① 면 효과 | 주사위 눈 면 위에 얹히는 그림 | **뽑아주셔야 하는 것 (1장)** |
+| ① 면 효과 | 주사위 눈 면 위에 얹히는 그림 | **뽑아주셔야 하는 것 (13장)** |
 | ② 물듦 | 면 전체가 그 색으로 젖는다 | 코드 (색만 지정) |
 | ③ 파티클 | 방울·불꽃·재 같은 작은 알갱이 | 코드 (모양·움직임 지정) |
 | ④ 이름표 | 주사위 아래 붉은 글씨 "출혈" | 코드 |
@@ -80,9 +80,13 @@ The effect: <<<모티프>>>
 Bold silhouette, instantly readable at 46px. It must stay bright enough to read against a dark reddish surface underneath, so give its outer contour a thin continuous pale rim like a sticker cut-line. No text, no letters, no numbers, no watermark.
 ```
 
-### 1. 출혈 — `status_die_bleed` ✅ 완료
+### 1. 출혈 — `status_die_bleed`
 
-받으신 그림에서 위쪽만 잘라 쓰고 있습니다. 다시 뽑을 필요 없습니다.
+*늑대. **처음 주신 액자 그림은 폐기했습니다** — 네 변을 두르는 형태라 이 규격에 안 맞습니다. 아래 프롬프트로 다시 뽑아주세요. 어두운 받침에 먹히기 쉬우니 유독 밝게.*
+
+```
+<<<fresh wet blood spilled across the top of the square — a thick uneven smear clinging to the upper edge with a lumpy irregular lower rim, and four blood runnels of DIFFERENT lengths hanging down from it, each swelling into a heavy round bead at its tip, the longest reaching about two thirds of the way down and the shortest barely a quarter. The bottom third of the square is left completely empty. Vivid arterial crimson, NOT brown, NOT dried, kept bright and saturated so it separates from a dark red-brown surface, with one glossy white highlight running down the left side of each runnel.>>>
+```
 
 ### 2. 독 — `status_die_poison`
 
@@ -225,7 +229,9 @@ Ominous, silent, final. The plate fills the frame edge to edge with no margin. N
 
 ## 7. 안 뽑아도 되는 것
 
-**물듦·파티클·이름표는 전부 코드입니다.** 핏방울, 스파크, 재, 기포 같은 알갱이는 그림이 아니라 CSS로 만듭니다. 마비를 그림 한 장 없이 통째로 흉내낸 게 `grammar_test.mp4` 에 있습니다.
+**물듦·파티클·이름표는 전부 코드입니다.** 핏방울, 스파크, 재, 기포 같은 알갱이는 그림이 아니라 CSS로 만듭니다.
+
+**임시 그림이 이미 13종 다 들어가 있습니다.** `allstates.mp4` 가 그것으로, 코드로만 그린 대역입니다. 진짜 그림이 오는 대로 ① 자리만 갈아끼우면 되고, 안 온 것은 대역이 계속 버팁니다. **그러니 순서·개수 신경 쓰지 말고 되는 대로 주세요.** 하나 오면 하나만 바뀝니다.
 
 **저주·축복 전용 눈 그림은 필요 없습니다.** 저주는 1/2/3만, 축복은 4/5/6만 나오는 규칙이라 기존 주사위 눈 그림을 그대로 씁니다.
 
@@ -247,6 +253,8 @@ Ominous, silent, final. The plate fills the frame edge to edge with no margin. N
 
 ## 9. 순서
 
-한 번에 다 안 주셔도 됩니다. 없으면 지금처럼 보라 발광만 뜨고 굴러갑니다.
+한 번에 다 안 주셔도 됩니다. 안 온 것은 코드 대역이 그대로 버팁니다.
 
-급한 순서는 **결속 → 포박 → 독 → 저주** 입니다. 출혈이 이미 끝났으니 이 넷만 있으면 1막이 완성됩니다. 잠식과 공허의 부름 판은 최종보스용이라 맨 뒤로 미뤄도 됩니다.
+급한 순서는 **출혈 → 저주 → 기절 → 포박** 입니다. 1막 보스 셋(늑대 출혈 · 곰인형 저주 · 트롤 기절)과 2막 늪의 왕이 이걸 씁니다. 이 넷이면 1막이 완성됩니다. 잠식과 공허의 부름 판은 최종보스용이라 맨 뒤로 미뤄도 됩니다.
+
+**뽑을 때 밝기는 신경 쓰지 마세요.** 받침색 #4F1110 위에서 제가 재서 맞춥니다.
