@@ -438,6 +438,7 @@ export function enemyPhase(battle) {
     //   강화(power)와 약화(weak)가 '한 대마다' 적용되고 방어도 한 대씩 갉히기 때문에,
     //   한 방이 약해도 강화가 쌓이면 급격히 세지고 얇은 방어로는 다 못 막는다.
     for (const ef of e.nextMove.effects) {
+      if (e.hp <= 0) break;                                // 자해로 쓰러졌으면 남은 효과는 없던 일이 된다
       switch (ef.op) {
         case 'damage': {                                   // ⚔️ 공격 — hits 만큼 한 대씩 따로 때린다
           if (battle.dodgeActive) break;
@@ -470,6 +471,9 @@ export function enemyPhase(battle) {
           break;
         case 'rest':                                       // 💤 휴식 — 아무것도 하지 않고 턴을 넘긴다
           break;                                           //   (숨 고르는 틈을 의도적으로 만들 때 쓴다)
+        case 'selfDamage':                                 // ❓ 자해 — 제 HP를 깎는다 (방어도 무시, 죽을 수도 있다)
+          e.hp -= ef.amount;                                //   예고로는 무슨 행동인지 알 수 없다
+          break;
       }
     }
     if (e.escalation) e.power += e.escalation; // 최종 보스: 매 턴 점진적으로 강해진다
@@ -621,6 +625,8 @@ export function intentOf(enemy) {
   if (enemy.stunned) return '💫';
   if (mv.hidden) return '❓';
   const parts = [];
+  // 자해처럼 예고로 읽어낼 수 없는 효과가 섞이면 통째로 '?' 로 가린다
+  if (mv.effects.some(ef => ef.op === 'selfDamage')) return '❓';
   for (const ef of mv.effects) {
     if (ef.op !== 'damage') continue;
     const per = hitDamage(enemy, ef), n = hitCount(ef);

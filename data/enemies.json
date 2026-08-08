@@ -103,7 +103,7 @@
         "effects": [
           {
             "op": "block",
-            "amount": 10
+            "amount": 15
           }
         ],
         "hidden": true,
@@ -133,7 +133,7 @@
         "effects": [
           {
             "op": "block",
-            "amount": 15
+            "amount": 20
           }
         ],
         "minTurn": 5,
@@ -186,7 +186,8 @@
         "name": "잿더미",
         "effects": [
           {
-            "op": "rest"
+            "op": "selfDamage",
+            "amount": 15
           }
         ]
       }

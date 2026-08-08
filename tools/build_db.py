@@ -56,7 +56,7 @@ def sheet(name, title, note, headers, rows, widths, freeze='A4'):
     return ws
 
 # ---------- 효과 사람말 ----------
-OPNAME = {'rest':'휴식','damage':'피해','block':'방어','empower':'힘','confuse':'혼란','heal':'회복',
+OPNAME = {'rest':'휴식','selfDamage':'자해','damage':'피해','block':'방어','empower':'힘','confuse':'혼란','heal':'회복',
           'weaken':'약화','vulnerable':'취약','bleed':'출혈','regen':'재생','focus':'집중',
           'strength':'힘','loseHp':'HP 감소','gainRelic':'유물 획득','drain':'흡혈',
           'markReroll':'리롤 표식','curse':'저주'}

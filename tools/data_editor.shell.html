@@ -161,12 +161,12 @@ function cell(tr, node, ro){ const td=document.createElement('td'); if(ro) td.cl
   if(node instanceof Node) td.appendChild(node); else td.innerHTML = node==null?'':node; tr.appendChild(td); return td; }
 
 /* ---------- 공통 도우미 ---------- */
-const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['confuse','혼란'],['heal','회복'],['rest','휴식']];
+const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['confuse','혼란'],['heal','회복'],['rest','휴식'],['selfDamage','자해(❓)']];
 const NO_AMOUNT=new Set(['rest']);   // 수치가 없는 효과
 const ABILITY_OPS=[['strength','힘'],['focus','집중'],['regen','재생'],['block','방어'],['heal','회복'],
   ['weakEnemy','적 약화'],['bleed','출혈'],['vulnerable','취약'],['stun','기절'],['dodge','회피'],
   ['rerollNext','다음 턴 리롤'],['buffNext','다음 족보 강화'],['cleanse','정화'],['selfDamage','자해']];
-const OPN={rest:'휴식',damage:'피해',block:'방어',empower:'힘',confuse:'혼란',heal:'회복',weaken:'약화',
+const OPN={rest:'휴식',selfDamage:'자해',damage:'피해',block:'방어',empower:'힘',confuse:'혼란',heal:'회복',weaken:'약화',
   vulnerable:'취약',bleed:'출혈',regen:'재생',focus:'집중',strength:'힘',weakEnemy:'적 약화',
   loseHp:'HP 감소',gainRelic:'유물 획득',drain:'흡혈'};
 const EN = {}; DB.enemies.forEach((e,i)=>EN[e.id]={e,i});

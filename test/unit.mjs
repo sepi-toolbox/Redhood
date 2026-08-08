@@ -471,6 +471,33 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
 }
 
+// v1.13: 자해 — 적이 스스로 HP를 깎는다. 예고에는 정체가 드러나지 않는다(❓)
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = Math.random;
+  const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+  DB.enemyById.__self = { id: '__self', name: '자해', tier: 'normal', art: '🧪', hp: [40, 40],
+    moves: { burn: { name: '타들어감', effects: [{ op: 'selfDamage', amount: 15 }] } },
+    pattern: { mode: 'weighted', weights: { burn: 1 } } };
+  {
+    const b = mk('__self'); const e = b.enemies[0];
+    eq('자해 예고는 정체 불명(❓)', eng.intentOf(e), '❓');
+    const hp0 = b.player.hp;
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('자기 HP가 깎임', e.hp, 25);
+    eq('플레이어는 멀쩡함', b.player.hp, hp0);
+    e.block = 99; b.await = 'enemy'; eng.enemyPhase(b);
+    eq('자기 방어도는 자해를 못 막음', e.hp, 10);
+  }
+  {   // 자해로 죽으면 그 자리에서 전투가 끝난다
+    const b = mk('__self'); const e = b.enemies[0]; e.hp = 10;
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('자해로 쓰러지면 승리 처리', [e.hp <= 0, b.over, b.result], [true, true, 'victory']);
+  }
+}
+
 // v0.85: 지도 생성 규칙 — 휴식 강제 연속 금지 / 보스 앞 휴식 / 갈림길 구성 상이
 {
   const run_ = await import('../js/run.js');
