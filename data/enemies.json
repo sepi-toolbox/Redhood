@@ -54,7 +54,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -99,7 +99,7 @@
             "amount": 5
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "flicker": {
         "name": "명멸",
@@ -114,7 +114,7 @@
           "move": "flare",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "flare": {
         "name": "불꽃 폭발",
@@ -125,7 +125,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "심지를 태운다",
@@ -136,7 +136,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -180,7 +180,7 @@
             "amount": 5
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "web": {
         "name": "거미줄",
@@ -194,7 +194,7 @@
           "move": "ambush",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "ambush": {
         "name": "기습",
@@ -205,7 +205,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "다리를 곧추세운다",
@@ -216,7 +216,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -297,7 +297,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -342,7 +342,7 @@
             "amount": 5
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "coil": {
         "name": "가시 세우기",
@@ -360,7 +360,7 @@
           "move": "lash",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "lash": {
         "name": "덩굴 채찍",
@@ -371,7 +371,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "가시를 세운다",
@@ -382,7 +382,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -426,7 +426,7 @@
             "amount": 8
           }
         ],
-        "cooldown": 4
+        "cooldown": 3
       },
       "root": {
         "name": "뿌리내림",
@@ -440,7 +440,7 @@
           "move": "crush",
           "chance": 1.0
         },
-        "cooldown": 4
+        "cooldown": 3
       },
       "crush": {
         "name": "짓뭉개기",
@@ -451,7 +451,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 4
+        "cooldown": 3
       },
       "mend": {
         "name": "수액 빨아올리기",
@@ -461,7 +461,7 @@
             "amount": 7
           }
         ],
-        "cooldown": 4
+        "cooldown": 3
       },
       "surge": {
         "name": "옹이가 굵어진다",
@@ -472,7 +472,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -517,7 +517,7 @@
             "amount": 5
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "mist_veil": {
         "name": "물안개",
@@ -535,7 +535,7 @@
           "move": "torrent",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "torrent": {
         "name": "급류",
@@ -546,7 +546,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "물살이 거세진다",
@@ -557,7 +557,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -638,7 +638,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -716,7 +716,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -758,7 +758,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 2
+        "cooldown": 1
       },
       "dust": {
         "name": "먼지구름",
@@ -768,7 +768,7 @@
             "amount": 1
           }
         ],
-        "cooldown": 4
+        "cooldown": 3
       },
       "stand": {
         "name": "버티기",
@@ -782,7 +782,7 @@
           "move": "sweep",
           "chance": 1.0
         },
-        "cooldown": 4
+        "cooldown": 3
       },
       "surge": {
         "name": "빗자루가 뻣뻣해진다",
@@ -793,7 +793,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -833,7 +833,7 @@
             "amount": 10
           }
         ],
-        "cooldown": 2
+        "cooldown": 1
       },
       "howl": {
         "name": "울부짖음",
@@ -851,7 +851,7 @@
           "move": "frenzy",
           "chance": 0.6
         },
-        "cooldown": 4
+        "cooldown": 3
       },
       "frenzy": {
         "name": "광란",
@@ -862,7 +862,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 4
+        "cooldown": 3
       },
       "surge": {
         "name": "무리를 부른다",
@@ -873,7 +873,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -917,7 +917,7 @@
             "amount": 11
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "dive": {
         "name": "잠수",
@@ -932,7 +932,7 @@
           "move": "thrash",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "thrash": {
         "name": "요동",
@@ -943,7 +943,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "지느러미를 곧추세운다",
@@ -954,7 +954,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -994,7 +994,7 @@
             "amount": 10
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "lurk": {
         "name": "도사림",
@@ -1009,7 +1009,7 @@
           "move": "pounce",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "pounce": {
         "name": "덮침",
@@ -1020,7 +1020,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "어둠을 삼킨다",
@@ -1031,7 +1031,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -1075,7 +1075,7 @@
             "amount": 11
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "stalk": {
         "name": "어둠 속 발소리",
@@ -1094,7 +1094,7 @@
           "move": "pounce",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "pounce": {
         "name": "덮치기",
@@ -1105,7 +1105,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "howl": {
         "name": "핏빛 울부짖음",
@@ -1147,7 +1147,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "phases": [
@@ -1211,7 +1211,7 @@
             "amount": 10
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "curse": {
         "name": "다리의 저주",
@@ -1225,7 +1225,7 @@
           "move": "drown",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "drown": {
         "name": "내려찍기",
@@ -1236,7 +1236,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "mend": {
         "name": "이끼 회복",
@@ -1256,7 +1256,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "phases": [
@@ -1318,7 +1318,7 @@
             "amount": 11
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "button_eye": {
         "name": "단추 눈",
@@ -1337,7 +1337,7 @@
           "move": "rip",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "rip": {
         "name": "솔기 뜯기",
@@ -1348,7 +1348,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "stuff": {
         "name": "솜 채우기",
@@ -1372,7 +1372,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "phases": [
@@ -1434,7 +1434,7 @@
             "amount": 6
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "bloat": {
         "name": "부풀기",
@@ -1448,7 +1448,7 @@
           "move": "spit",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "spit": {
         "name": "독침 뱉기",
@@ -1459,7 +1459,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "목이 부푼다",
@@ -1470,7 +1470,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -1551,7 +1551,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -1596,7 +1596,7 @@
             "amount": 5
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "fade": {
         "name": "스러지기",
@@ -1611,7 +1611,7 @@
           "move": "wail",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "wail": {
         "name": "곡소리",
@@ -1626,7 +1626,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "안개가 짙어진다",
@@ -1637,7 +1637,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -1715,7 +1715,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -1756,7 +1756,7 @@
             "amount": 7
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "guard": {
         "name": "방패 들기",
@@ -1770,7 +1770,7 @@
           "move": "bone_throw",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "bone_throw": {
         "name": "뼈 던지기",
@@ -1781,7 +1781,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "뼈를 맞춘다",
@@ -1792,7 +1792,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -1836,7 +1836,7 @@
             "amount": 5
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "burrow": {
         "name": "파고들기",
@@ -1851,7 +1851,7 @@
           "move": "erupt",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "erupt": {
         "name": "분출",
@@ -1862,7 +1862,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "마디가 굵어진다",
@@ -1873,7 +1873,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -1917,7 +1917,7 @@
             "amount": 11
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "harden": {
         "name": "굳히기",
@@ -1931,7 +1931,7 @@
           "move": "quake",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "quake": {
         "name": "진동",
@@ -1946,7 +1946,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "진흙을 더 끌어모은다",
@@ -1957,7 +1957,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -2001,7 +2001,7 @@
             "amount": 12
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "charge_up": {
         "name": "고삐 당기기",
@@ -2019,7 +2019,7 @@
           "move": "cleave",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "cleave": {
         "name": "참격",
@@ -2030,7 +2030,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "창을 고쳐 쥔다",
@@ -2041,7 +2041,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -2081,7 +2081,7 @@
             "amount": 11
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "toll": {
         "name": "조종(弔鐘)",
@@ -2095,7 +2095,7 @@
           "move": "inter",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "inter": {
         "name": "매장",
@@ -2106,7 +2106,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "삽자루를 고쳐 쥔다",
@@ -2117,7 +2117,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -2161,7 +2161,7 @@
             "amount": 12
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "submerge": {
         "name": "잠수",
@@ -2176,7 +2176,7 @@
           "move": "death_roll",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "death_roll": {
         "name": "죽음의 회전",
@@ -2187,7 +2187,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "regrow": {
         "name": "재생",
@@ -2207,7 +2207,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "phases": [
@@ -2273,7 +2273,7 @@
             "amount": 1
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "veil": {
         "name": "장막",
@@ -2287,7 +2287,7 @@
           "move": "smother",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "smother": {
         "name": "질식",
@@ -2298,7 +2298,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "lullaby": {
         "name": "자장가",
@@ -2322,7 +2322,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "phases": [
@@ -2384,7 +2384,7 @@
             "amount": 12
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "rise": {
         "name": "일어서기",
@@ -2402,7 +2402,7 @@
           "move": "grave_call",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "grave_call": {
         "name": "무덤의 부름",
@@ -2413,7 +2413,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "rot": {
         "name": "부패",
@@ -2437,7 +2437,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "phases": [
@@ -2536,7 +2536,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -2581,7 +2581,7 @@
           "move": "beam",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "beam": {
         "name": "시선 광선",
@@ -2592,7 +2592,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "blink": {
         "name": "깜빡임",
@@ -2603,7 +2603,7 @@
           }
         ],
         "hidden": true,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "동공이 벌어진다",
@@ -2614,7 +2614,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -2695,7 +2695,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -2748,7 +2748,7 @@
           "move": "pulse",
           "chance": 0.5
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "lash": {
         "name": "촉수질",
@@ -2758,7 +2758,7 @@
             "amount": 8
           }
         ],
-        "cooldown": 3,
+        "cooldown": 2,
         "followUp": {
           "move": "pulse",
           "chance": 1.0
@@ -2773,7 +2773,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "속삭임이 커진다",
@@ -2784,7 +2784,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -2862,7 +2862,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -2911,7 +2911,7 @@
             "amount": 1
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "harden": {
         "name": "굳히기",
@@ -2925,7 +2925,7 @@
           "move": "crack",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "crack": {
         "name": "균열",
@@ -2936,7 +2936,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "금이 갈라진다",
@@ -2947,7 +2947,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -2991,7 +2991,7 @@
             "amount": 2
           }
         ],
-        "cooldown": 4
+        "cooldown": 3
       },
       "grip": {
         "name": "모래 손",
@@ -3001,7 +3001,7 @@
             "amount": 13
           }
         ],
-        "cooldown": 4
+        "cooldown": 3
       },
       "hourglass": {
         "name": "시간의 모래",
@@ -3015,7 +3015,7 @@
           "move": "collapse",
           "chance": 1.0
         },
-        "cooldown": 4
+        "cooldown": 3
       },
       "collapse": {
         "name": "붕괴",
@@ -3026,7 +3026,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 4
+        "cooldown": 3
       },
       "surge": {
         "name": "모래를 끌어모은다",
@@ -3037,7 +3037,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -3082,7 +3082,7 @@
             "amount": 12
           }
         ],
-        "cooldown": 4
+        "cooldown": 3
       },
       "coil": {
         "name": "휘감기",
@@ -3096,7 +3096,7 @@
             "amount": 1
           }
         ],
-        "cooldown": 4
+        "cooldown": 3
       },
       "rise": {
         "name": "솟아오르기",
@@ -3114,7 +3114,7 @@
           "move": "smash",
           "chance": 1.0
         },
-        "cooldown": 4
+        "cooldown": 3
       },
       "smash": {
         "name": "내려찍기",
@@ -3125,7 +3125,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 4
+        "cooldown": 3
       },
       "surge": {
         "name": "촉수가 굵어진다",
@@ -3136,7 +3136,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -3181,7 +3181,7 @@
             "amount": 1
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "silence": {
         "name": "침묵",
@@ -3196,7 +3196,7 @@
           "move": "peal",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "peal": {
         "name": "큰 종소리",
@@ -3207,7 +3207,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "줄을 힘껏 당긴다",
@@ -3218,7 +3218,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -3262,7 +3262,7 @@
             "amount": 13
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "rewrite": {
         "name": "꿈 고쳐쓰기",
@@ -3281,7 +3281,7 @@
           "move": "nightmare",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "nightmare": {
         "name": "악몽",
@@ -3292,7 +3292,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "wake_false": {
         "name": "거짓 기상",
@@ -3316,7 +3316,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "phases": [
@@ -3378,7 +3378,7 @@
             "amount": 13
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "abyss_call": {
         "name": "심연의 부름",
@@ -3392,7 +3392,7 @@
           "move": "crush",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "swallow_light": {
         "name": "빛 삼키기",
@@ -3416,7 +3416,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "아가리가 더 벌어진다",
@@ -3427,7 +3427,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "phases": [
@@ -3493,7 +3493,7 @@
             "amount": 3
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "smite": {
         "name": "단죄",
@@ -3503,7 +3503,7 @@
             "amount": 14
           }
         ],
-        "cooldown": 3,
+        "cooldown": 2,
         "followUp": {
           "move": "judgment",
           "chance": 1.0
@@ -3535,7 +3535,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "후광이 짙어진다",
@@ -3546,7 +3546,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "phases": [
@@ -3609,7 +3609,7 @@
           }
         ],
         "hidden": true,
-        "cooldown": 4
+        "cooldown": 3
       },
       "whisper": {
         "name": "귓가의 속삭임",
@@ -3623,7 +3623,7 @@
             "amount": 1
           }
         ],
-        "cooldown": 4
+        "cooldown": 3
       },
       "reach": {
         "name": "닿는다",
@@ -3637,7 +3637,7 @@
           "move": "unmake",
           "chance": 1.0
         },
-        "cooldown": 4
+        "cooldown": 3
       },
       "unmake": {
         "name": "지운다",
@@ -3652,7 +3652,7 @@
           }
         ],
         "minTurn": 6,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -3702,7 +3702,7 @@
           "move": "strike",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "strike": {
         "name": "지팡이 내리치기",
@@ -3713,7 +3713,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "blessing": {
         "name": "거꾸로 된 축복",
@@ -3727,7 +3727,7 @@
             "amount": 6
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "설교가 빨라진다",
@@ -3738,7 +3738,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -3820,7 +3820,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
@@ -3861,7 +3861,7 @@
             "amount": 5
           }
         ],
-        "cooldown": 3
+        "cooldown": 2
       },
       "waver": {
         "name": "일렁임",
@@ -3879,7 +3879,7 @@
           "move": "flareup",
           "chance": 1.0
         },
-        "cooldown": 3
+        "cooldown": 2
       },
       "flareup": {
         "name": "확 타오르기",
@@ -3890,7 +3890,7 @@
           }
         ],
         "minTurn": 5,
-        "cooldown": 3
+        "cooldown": 2
       },
       "surge": {
         "name": "심지가 길어진다",
@@ -3901,7 +3901,7 @@
           }
         ],
         "minTurn": 4,
-        "cooldown": 4
+        "cooldown": 3
       }
     },
     "pattern": {
