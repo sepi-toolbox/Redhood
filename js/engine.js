@@ -404,15 +404,21 @@ export function enemyPhase(battle) {
       switch (ef.op) {
         case 'damage': {                                   // ⚔️ 공격 (막·계몽 스케일 + 강화 - 약화)
           if (battle.dodgeActive) break;
-          let dmg = Math.max(0, Math.round(ef.amount * (e.atkScale || 1)) + (e.power || 0) - e.debuffs.weak);
-          const absorbed = Math.min(battle.player.block, dmg);
-          battle.player.block -= absorbed;
-          dmg -= absorbed;
-          if (dmg > 0) {
-            battle.player.hp -= dmg;
-            if (battle.player.hp <= 0) {
-              battle.player.hp = 0; battle.over = true; battle.result = 'defeat';
-              return;
+          // v1.06 연타: hits 만큼 '한 대씩' 따로 때린다.
+          //   강화(power)와 약화(weak)가 타수마다 적용되므로, 한 방이 약해도 강화가 쌓이면 급격히 세진다.
+          //   방어도 한 대씩 갉히기 때문에 얇은 방어로는 다 못 막는다.
+          const hits = Math.max(1, Math.floor(ef.hits || 1));
+          for (let h = 0; h < hits; h++) {
+            let dmg = hitDamage(e, ef);
+            const absorbed = Math.min(battle.player.block, dmg);
+            battle.player.block -= absorbed;
+            dmg -= absorbed;
+            if (dmg > 0) {
+              battle.player.hp -= dmg;
+              if (battle.player.hp <= 0) {
+                battle.player.hp = 0; battle.over = true; battle.result = 'defeat';
+                return;
+              }
             }
           }
           break;
@@ -531,6 +537,14 @@ function chooseMove(enemy, turn = 1) {
   enemy.nextMove = { id: moveId, ...def.moves[moveId] };
 }
 
+// 한 대의 피해 — 기본 수치에 막·계몽 배율을 곱한 뒤 강화를 더하고 약화를 뺀다.
+// 연타는 이 값을 타수만큼 반복한다 (강화가 타수마다 붙는 게 연타의 핵심).
+export function hitDamage(enemy, ef) {
+  const weak = enemy.debuffs ? enemy.debuffs.weak : 0;
+  return Math.max(0, Math.round(ef.amount * (enemy.atkScale || 1)) + (enemy.power || 0) - weak);
+}
+export const hitCount = (ef) => Math.max(1, Math.floor(ef.hits || 1));
+
 // 의도 표기 (v0.11): ⚔️공격 / 🛡방어 / 🌀혼란 / 💪강화 / 💚치료 / ❓의문 — 혼합은 병기
 export function intentOf(enemy) {
   const mv = enemy.nextMove;
@@ -538,9 +552,11 @@ export function intentOf(enemy) {
   if (enemy.stunned) return '💫';
   if (mv.hidden) return '❓';
   const parts = [];
-  const dmg = mv.effects.filter(e => e.op === 'damage')
-    .reduce((s, e) => s + Math.max(0, Math.round(e.amount * (enemy.atkScale || 1)) + (enemy.power || 0) - (enemy.debuffs ? enemy.debuffs.weak : 0)), 0);
-  if (dmg > 0) parts.push(`⚔️${dmg}`);
+  for (const ef of mv.effects) {
+    if (ef.op !== 'damage') continue;
+    const per = hitDamage(enemy, ef), n = hitCount(ef);
+    if (per * n > 0) parts.push(n > 1 ? `⚔️${per}×${n}` : `⚔️${per}`);
+  }
   for (const ef of mv.effects) {
     if (ef.op === 'block') parts.push(`🛡${ef.amount}`);
     else if (ef.op === 'confuse') parts.push('🌀');

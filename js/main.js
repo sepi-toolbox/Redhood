@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.05'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.06'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -959,10 +959,12 @@ function enemyEffectText(e, ef) {
     case 'damage': {
       const base = Math.round(ef.amount * (e.atkScale || 1));
       const final = Math.max(0, base + (e.power || 0) - weak);
+      const n = Math.max(1, Math.floor(ef.hits || 1));
       const parts = [];
       if (e.power > 0) parts.push(`+강화 ${e.power}`);
       if (weak > 0) parts.push(`-약화 ${weak}`);
-      return `${ico('intent_attack')} 피해 ${final}` + (parts.length ? ` (기본 ${base} ${parts.join(' ')})` : '');
+      const head = n > 1 ? `피해 ${final} × ${n}타 = ${final * n}` : `피해 ${final}`;
+      return `${ico('intent_attack')} ${head}` + (parts.length ? ` (한 대당 기본 ${base} ${parts.join(' ')})` : '');
     }
     case 'block': return `${ico('intent_defend')} 방어 ${ef.amount} 획득`;
     case 'confuse': return `${ico('intent_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
