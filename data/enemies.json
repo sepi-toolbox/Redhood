@@ -872,11 +872,6 @@
           {
             "op": "damage",
             "amount": 10
-          },
-          {
-            "op": "status",
-            "kind": "bleed",
-            "amount": 2
           }
         ],
         "cooldown": 1,

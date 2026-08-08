@@ -713,8 +713,9 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     b.await = 'enemy'; eng.enemyPhase(b);
     const d = b.dice.find(x => x.st && x.st.kind === 'rot');
     eq('적이 정한 폭발 피해가 들어간다', d.st.power, 33);
-    eq('심지는 상태이상 탭 값(2)에서 하나 탄 상태', d.st.fuse, DB.statusById.rot.turns - 1);
+    eq('걸린 턴에는 심지가 안 탄다', d.st.fuse, DB.statusById.rot.turns);
     const hp = b.player.hp;
+    b.await = 'enemy'; eng.enemyPhase(b);
     b.await = 'enemy'; eng.enemyPhase(b);
     eq('기본값 10이 아니라 33으로 터진다', hp - b.player.hp >= 33, true);
   }
@@ -723,6 +724,15 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.applyStatus(b, 'rot', 1, 50);
     const d = b.dice.find(x => x.st);
     eq('심지는 언제나 탭 값', d.st.fuse, DB.statusById.rot.turns);
+  }
+  // 지속 1턴 — 걸린 턴은 겪고, 그 다음 턴 시작에 풀린다
+  { const b = mk();
+    b.enemies[0].nextMove = { id: 't', name: '시험', effects: [{ op: 'status', kind: 'bleed', amount: 1 }] };
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('걸린 직후 내 턴에는 살아 있다', b.dice.filter(d => d.st && d.st.kind === 'bleed').length, 1);
+    b.enemies[0].nextMove = { id: 'r', name: '쉼', effects: [{ op: 'rest' }] };
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('한 턴 겪고 나면 풀린다', b.dice.filter(d => d.st && d.st.kind === 'bleed').length, 0);
   }
   // 출혈·독·약탈은 눈금 그대로다 — 세기라는 손잡이가 없다
   { const b = mk(); eng.initialRoll(b);

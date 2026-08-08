@@ -11,8 +11,8 @@
       "color": "#ff5a4a",
       "rule": "onUseFaceDamage",
       "amount": 0,
-      "turns": 0,
-      "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다 (세기 없음)"
+      "turns": 1,
+      "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다"
     },
     {
       "id": "poison",
