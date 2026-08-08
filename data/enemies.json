@@ -14,7 +14,8 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 5
+            "amount": 3,
+            "hits": 2
           }
         ],
         "cooldown": 1
@@ -34,7 +35,8 @@
         "name": "흉내내기",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           }
         ],
@@ -207,22 +209,24 @@
         "name": "독니",
         "effects": [
           {
-            "op": "poison",
-            "amount": 4
+            "op": "status",
+            "kind": "poison",
+            "amount": 2
           },
           {
             "op": "damage",
-            "amount": 2
+            "amount": 5
           }
         ],
         "cooldown": 1,
-        "lockTurn": 4
+        "lockTurn": 3
       },
       "web": {
         "name": "거미줄",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "bind",
             "amount": 2
           }
         ],
@@ -242,15 +246,16 @@
         "name": "맹독니",
         "effects": [
           {
-            "op": "poison",
-            "amount": 8
+            "op": "status",
+            "kind": "poison",
+            "amount": 5
           },
           {
             "op": "damage",
-            "amount": 3
+            "amount": 5
           }
         ],
-        "minTurn": 4,
+        "minTurn": 3,
         "cooldown": 1
       }
     },
@@ -292,11 +297,15 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 3,
-            "hits": 2
+            "amount": 10
+          },
+          {
+            "op": "status",
+            "kind": "bleed",
+            "amount": 1
           }
         ],
-        "cooldown": 1
+        "cooldown": 2
       },
       "growl": {
         "name": "울부짖기",
@@ -306,10 +315,7 @@
             "amount": 2
           }
         ],
-        "followUp": {
-          "move": "bite",
-          "chance": 0.5
-        }
+        "cooldown": 2
       },
       "maul": {
         "name": "상처 보듬기",
@@ -319,14 +325,14 @@
           }
         ],
         "minTurn": 1,
-        "cooldown": 2
+        "cooldown": 0
       },
       "surge": {
         "name": "허기",
         "effects": [
           {
-            "op": "damage",
-            "amount": 5
+            "op": "block",
+            "amount": 10
           },
           {
             "op": "empower",
@@ -340,8 +346,8 @@
     "pattern": {
       "mode": "weighted",
       "weights": {
-        "bite": 1,
-        "growl": 1,
+        "bite": 2,
+        "growl": 2,
         "maul": 1,
         "surge": 3
       },
@@ -400,7 +406,8 @@
             "amount": 11
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "bind",
             "amount": 2
           }
         ],
@@ -865,16 +872,25 @@
           {
             "op": "damage",
             "amount": 10
+          },
+          {
+            "op": "status",
+            "kind": "bleed",
+            "amount": 2
           }
         ],
-        "cooldown": 1
+        "cooldown": 1,
+        "followUp": {
+          "move": "surge",
+          "chance": 1
+        }
       },
       "howl": {
         "name": "울부짖음",
         "effects": [
           {
             "op": "block",
-            "amount": 6
+            "amount": 20
           },
           {
             "op": "empower",
@@ -883,7 +899,7 @@
         ],
         "followUp": {
           "move": "frenzy",
-          "chance": 0.6
+          "chance": 1
         },
         "cooldown": 3
       },
@@ -892,22 +908,29 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 7,
+            "hits": 3
+          },
+          {
+            "op": "status",
+            "kind": "bleed",
+            "amount": 5
           }
         ],
-        "minTurn": 6,
-        "cooldown": 3
+        "minTurn": 3,
+        "cooldown": 0
       },
       "surge": {
-        "name": "무리를 부른다",
+        "name": "상처 찢기",
         "effects": [
           {
-            "op": "empower",
-            "amount": 6
+            "op": "status",
+            "kind": "bleed",
+            "amount": 5
           }
         ],
         "minTurn": 4,
-        "cooldown": 3
+        "cooldown": 1
       }
     },
     "pattern": {
@@ -915,7 +938,7 @@
       "weights": {
         "bite": 2,
         "howl": 1,
-        "frenzy": 1,
+        "frenzy": 0,
         "surge": 3
       }
     },
@@ -931,7 +954,57 @@
           "amount": 2
         }
       ]
-    }
+    },
+    "uniqueMoves": {
+      "unique1": {
+        "name": "상처 보듬기",
+        "effects": [
+          {
+            "op": "rest"
+          }
+        ]
+      },
+      "unique2": {
+        "name": "궁지에 몰린 야수",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 10
+          }
+        ],
+        "followUp": {
+          "move": "bite",
+          "chance": 1
+        }
+      }
+    },
+    "phases": [
+      {
+        "untilHpRatio": 0.5,
+        "pattern": {
+          "mode": "weighted",
+          "weights": {
+            "bite": 2,
+            "howl": 1,
+            "frenzy": 0,
+            "surge": 3
+          }
+        }
+      },
+      {
+        "untilHpRatio": 0.0,
+        "enter": "unique2",
+        "pattern": {
+          "mode": "weighted",
+          "weights": {
+            "bite": 3,
+            "howl": 1,
+            "frenzy": 0,
+            "surge": 3
+          }
+        }
+      }
+    ]
   },
   {
     "id": "old_pike",
