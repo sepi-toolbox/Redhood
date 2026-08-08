@@ -554,7 +554,7 @@
             "amount": 5
           }
         ],
-        "cooldown": 2
+        "cooldown": 1
       },
       "mist_veil": {
         "name": "물안개",
@@ -564,37 +564,60 @@
             "amount": 6
           },
           {
-            "op": "confuse",
-            "amount": 1
+            "op": "status",
+            "kind": "confuse",
+            "amount": 2
           }
         ],
         "followUp": {
           "move": "torrent",
           "chance": 1
         },
-        "cooldown": 2
+        "cooldown": 1
       },
       "torrent": {
         "name": "급류",
         "effects": [
           {
-            "op": "damage",
+            "op": "rest",
             "amount": 9
           }
         ],
-        "minTurn": 5,
-        "cooldown": 2
+        "minTurn": 3,
+        "cooldown": 1,
+        "followUp": {
+          "move": "surge",
+          "chance": 1
+        }
       },
       "surge": {
-        "name": "물살이 거세진다",
+        "name": "가까워진 급류",
         "effects": [
           {
-            "op": "empower",
+            "op": "rest",
             "amount": 5
           }
         ],
-        "minTurn": 4,
-        "cooldown": 3
+        "minTurn": 0,
+        "cooldown": 1,
+        "followUp": {
+          "move": "move1",
+          "chance": 1
+        }
+      },
+      "move1": {
+        "name": "물벼락",
+        "effects": [
+          {
+            "op": "damage",
+            "amount": 20
+          },
+          {
+            "op": "status",
+            "kind": "confuse",
+            "amount": 5
+          }
+        ]
       }
     },
     "pattern": {
@@ -602,8 +625,9 @@
       "weights": {
         "splash": 1,
         "mist_veil": 1,
-        "torrent": 0,
-        "surge": 3
+        "torrent": 99,
+        "surge": 0,
+        "move1": 1
       }
     },
     "enlightenedMove": {
@@ -641,50 +665,79 @@
             "op": "heal",
             "amount": 4
           }
-        ]
+        ],
+        "followUp": {
+          "move": "swell",
+          "chance": 0.5
+        },
+        "break": {
+          "damage": 20,
+          "move": "unique1"
+        }
       },
       "cling": {
         "name": "들러붙기",
         "effects": [
           {
-            "op": "damage",
+            "op": "rest",
             "amount": 5
           }
         ],
-        "minTurn": 5,
+        "minTurn": 0,
         "followUp": {
-          "move": "swell",
-          "chance": 0.5
-        }
+          "move": "suck",
+          "chance": 1
+        },
+        "cooldown": 1
       },
       "swell": {
-        "name": "부풀기",
+        "name": "대량의 피 빨기",
         "effects": [
           {
-            "op": "empower",
-            "amount": 2
-          }
-        ]
-      },
-      "surge": {
-        "name": "몸을 부풀린다",
-        "effects": [
+            "op": "damage",
+            "amount": 6
+          },
           {
-            "op": "empower",
-            "amount": 5
+            "op": "heal",
+            "amount": 6
           }
         ],
-        "minTurn": 4,
-        "cooldown": 3
+        "followUp": {
+          "move": "surge",
+          "chance": 1
+        }
+      },
+      "surge": {
+        "name": "심각한 피 빨기",
+        "effects": [
+          {
+            "op": "damage",
+            "amount": 8
+          },
+          {
+            "op": "heal",
+            "amount": 8
+          }
+        ],
+        "minTurn": 0,
+        "cooldown": 0,
+        "followUp": {
+          "move": "cling",
+          "chance": 0.5
+        },
+        "break": {
+          "damage": 5,
+          "move": "unique1"
+        }
       }
     },
     "pattern": {
       "mode": "weighted",
       "weights": {
-        "suck": 3,
+        "suck": 0,
         "cling": 2,
-        "swell": 1,
-        "surge": 3
+        "swell": 0,
+        "surge": 0
       },
       "noRepeat": 2
     },
@@ -700,6 +753,16 @@
           "amount": 8
         }
       ]
+    },
+    "uniqueMoves": {
+      "unique1": {
+        "name": "숨고르기",
+        "effects": [
+          {
+            "op": "rest"
+          }
+        ]
+      }
     }
   },
   {
