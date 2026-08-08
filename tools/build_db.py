@@ -194,17 +194,18 @@ for e in enemies:
     for mid, m in e['moves'].items():
         fu = m.get('followUp')
         rows.append([e['id'], e['name'], mid, m['name'], eff_text(m.get('effects')),
-                     m.get('minTurn') or '', '숨김' if m.get('hidden') else '',
+                     m.get('minTurn') or '', m.get('cooldown') or 0, '숨김' if m.get('hidden') else '',
                      (f"{e['moves'][fu['move']]['name']} {int(fu['chance']*100)}%" if fu else ''),
                      e['tier']])
     if e.get('surgeMove'):
         rows.append([e['id'], e['name'], '__surge', e['surgeMove']['name'],
-                     eff_text(e['surgeMove'].get('effects')), '', '강화(4~6턴 주기)', '', e['tier']])
+                     eff_text(e['surgeMove'].get('effects')), '', '', '강화(4~6턴 주기)', '', e['tier']])
     if e.get('enlightenedMove'):
         rows.append([e['id'], e['name'], '__enlight', e['enlightenedMove']['name'],
-                     eff_text(e['enlightenedMove'].get('effects')), '', '계몽 17~19단계', '', e['tier']])
-sheet('적행동', '적 행동 전량', '적이 낼 수 있는 모든 행동. 해금 턴이 비어 있으면 1턴부터 나온다.',
-      ['적 id','적 이름','행동 id','행동명','효과','해금 턴','비고','연계'], rows, [16,16,16,20,30,8,16,22])
+                     eff_text(e['enlightenedMove'].get('effects')), '', '', '계몽 17~19단계', '', e['tier']])
+sheet('적행동', '적 행동 전량',
+      '발동 조건은 셋이다 — 해금 턴은 "이 턴부터 나올 수 있다", 쿨다운은 "쓰고 나서 몇 턴 쉰다", 연계는 "앞 행동을 쓰면 확률로 확정된다". 쿨다운 0은 제한 없음.',
+      ['적 id','적 이름','행동 id','행동명','효과','해금 턴','쿨다운','비고','연계'], rows, [16,16,16,20,30,8,8,16,22])
 
 # ---------- 8. 무기 ----------
 NAMEOF = {v['id']: (c['name'], v['name']) for c in scoring['categories'] for v in c['variants']}

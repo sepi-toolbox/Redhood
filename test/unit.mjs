@@ -195,6 +195,57 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('연계가 무한히 이어지지 않음', doubleChain, 0);
 }
 
+// v1.01: 쿨다운 — 한 번 쓴 행동은 지정한 턴 수만큼 다시 안 나온다
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = Math.random;
+  // 임시 적: 세 행동 중 hammer 에만 쿨다운 3을 건다
+  const CD = 3;
+  DB.enemyById.__cdtest = {
+    id: '__cdtest', name: '시험체', tier: 'normal', art: '🧪', hp: [9e6, 9e6],
+    moves: {
+      jab: { name: '잽', effects: [{ op: 'damage', amount: 1 }] },
+      poke: { name: '찌르기', effects: [{ op: 'damage', amount: 1 }] },
+      hammer: { name: '망치', effects: [{ op: 'damage', amount: 1 }], cooldown: CD },
+    },
+    pattern: { mode: 'weighted', weights: { jab: 1, poke: 1, hammer: 8 } },
+  };
+  const mk = () => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } }, ['__cdtest'], 'battle');
+  let minGap = 99, uses = 0, tooSoon = 0;
+  for (let n = 0; n < 200; n++) {
+    const b = mk(); const e = b.enemies[0];
+    let last = -99;
+    for (let t = 1; t <= 20; t++) {
+      if (e.nextMove.id === 'hammer') {
+        uses++;
+        const gap = t - last;
+        if (last > -99) { minGap = Math.min(minGap, gap); if (gap < CD) tooSoon++; }
+        last = t;
+      }
+      b.await = 'enemy'; eng.enemyPhase(b);
+    }
+  }
+  eq('쿨다운 행동이 실제로 쓰이긴 함', uses > 400, true);
+  eq('쿨다운보다 빨리 재사용된 적 없음', tooSoon, 0);
+  eq('실제 최소 간격이 쿨다운 이상', minGap >= CD, true);
+  // 쿨다운 0(미지정)인 행동은 제한이 없어야 한다
+  DB.enemyById.__cdtest2 = { ...DB.enemyById.__cdtest, id: '__cdtest2',
+    moves: { ...DB.enemyById.__cdtest.moves, hammer: { name: '망치', effects: [{ op: 'damage', amount: 1 }] } } };
+  let back2back = 0;
+  for (let n = 0; n < 120; n++) {
+    const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+      dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } }, ['__cdtest2'], 'battle');
+    const e = b.enemies[0]; let last = -99;
+    for (let t = 1; t <= 16; t++) {
+      if (e.nextMove.id === 'hammer') { if (t - last === 2) back2back++; last = t; }
+      b.await = 'enemy'; eng.enemyPhase(b);
+    }
+  }
+  eq('쿨다운 없는 행동은 간격 제한 없음', back2back > 0, true);
+}
+
 // v0.85: 지도 생성 규칙 — 휴식 강제 연속 금지 / 보스 앞 휴식 / 갈림길 구성 상이
 {
   const run_ = await import('../js/run.js');

@@ -1,2 +1,2 @@
-1786155065
-v1.00 atkTrim removed
+1786157752
+v1.01 move cooldown

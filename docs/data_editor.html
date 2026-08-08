@@ -82,8 +82,10 @@ function writeP(p,v){ const [f,rest]=p.split(':'); const ks=rest.split('.'); con
 
 /* ---------- 변경 추적 ---------- */
 const changed = new Map();           // path -> {before, after, label}
-function mark(p, label){
-  const now=readP(p), was=origP(p);
+function mark(p, label, def){
+  const now=readP(p);
+  let was=origP(p);
+  if(was===undefined && def!==undefined) was=def;      // 원래 없던 항목은 기본값과 비교한다
   if(String(now)===String(was)) changed.delete(p); else changed.set(p,{before:was,after:now,label});
   const n=changed.size;
   document.getElementById('cnt').textContent='변경 '+n+'건';
@@ -93,8 +95,9 @@ function mark(p, label){
 
 /* ---------- 입력 만들기 ---------- */
 function field(path, label, opt={}){
-  const v = readP(path);
-  const num = opt.num !== false && typeof v === 'number';
+  let v = readP(path);
+  if (v === undefined && opt.def !== undefined) v = opt.def;      // 아직 없는 항목 (예: 쿨다운)
+  const num = opt.num === true || (opt.num !== false && typeof v === 'number');
   const i = document.createElement('input');
   i.className = 'f' + (num?' num':'');
   i.value = v == null ? '' : v;
@@ -103,7 +106,7 @@ function field(path, label, opt={}){
   i.addEventListener('input', () => {
     let val = i.value;
     if (num){ const f = parseFloat(val); if (Number.isNaN(f)) return; val = f; }
-    writeP(path, val); mark(path, label);
+    writeP(path, val); mark(path, label, opt.def);
     i.classList.toggle('changed', changed.has(path));
     refreshDerived();
   });
@@ -128,7 +131,7 @@ const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.i
 const TABS=[
  ['개요','바뀐 값은 초록으로 표시된다. 다 고쳤으면 오른쪽 위 [내보내기]를 눌러 바뀐 JSON을 받아 나에게 주면 반영해서 배포한다.',ovw],
  ['적','HP와 강화 행동. 개별 행동 수치는 [적행동] 탭에서 고친다.',tabEnemy],
- ['적행동','일반 행동 147개. 해금 턴이 비어 있으면 1턴부터 나온다. 강화 행동은 [적] 탭에서 고친다.',tabMoves],
+ ['적행동','일반 행동 147개. 해금 턴은 "이 턴부터 나올 수 있다", 쿨다운은 "쓰고 나서 몇 턴 쉰다". 쿨다운 0은 제한 없음. 강화 행동은 [적] 탭에서 고친다.',tabMoves],
  ['족보','배수(mult)와 변형의 부가 능력 수치.',tabScore],
  ['주사위','여섯 면을 직접 고친다. 면 구성이 곧 성능이다.',tabDice],
  ['유물','효과 수치는 hook.amount 하나로 정해진다.',tabRelic],
@@ -194,7 +197,7 @@ function tabEnemy(v){
   });
 }
 function tabMoves(v){
-  const tb=table(v,['적','행동명','효과','수치','해금 턴','연계 확률','비고']);
+  const tb=table(v,['적','행동명','효과','수치','해금 턴','쿨다운','연계 확률','비고']);
   DB.enemies.forEach((e,i)=>{
     Object.entries(e.moves).forEach(([mid,m])=>{
       const tr=document.createElement('tr'); tr.className='t-'+e.tier;
@@ -206,6 +209,7 @@ function tabMoves(v){
       (m.effects||[]).forEach((x,k)=>{ if(x.amount!=null) wrap.appendChild(field(`enemies:${i}.moves.${mid}.effects.${k}.amount`, e.name+' '+m.name+' '+(OPN[x.op]||x.op))); });
       cell(tr, wrap.children.length?wrap:'—', !wrap.children.length);
       cell(tr, m.minTurn!=null? field(`enemies:${i}.moves.${mid}.minTurn`,e.name+' '+m.name+' 해금 턴') : '—', m.minTurn==null);
+      cell(tr, field(`enemies:${i}.moves.${mid}.cooldown`, e.name+' '+m.name+' 쿨다운', {num:true, def:0}));
       cell(tr, m.followUp? field(`enemies:${i}.moves.${mid}.followUp.chance`,e.name+' '+m.name+' 연계 확률') : '—', !m.followUp);
       cell(tr, (m.hidden?'숨김 ':'')+(m.followUp? '→ '+e.moves[m.followUp.move].name : ''),1);
       tb.appendChild(tr);
