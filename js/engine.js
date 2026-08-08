@@ -460,12 +460,6 @@ function currentPattern(enemy) {
   return def.phases[idx].pattern;
 }
 
-// v0.74 트랙 A: 몬스터는 4~6턴마다 한 번 자기 결에 맞는 '힘을 끌어올리는 행동'을 한다.
-// 첫 발동 턴도 4~6 사이로 흔들어 매번 같은 턴에 오지 않게 한다. 예고에 그대로 보인다.
-function rollSurgeTurn(from, range) {
-  const [lo, hi] = range;
-  return from + lo + Math.floor(rng.next() * (hi - lo + 1));
-}
 // v1.01: 행동별 재사용 대기.
 //   "moves.bristle.cooldown": 4  → 한 번 쓰면 4턴이 지나야 다시 나온다.
 //   값이 없거나 0이면 제한 없음. 해금 턴(minTurn)과 나란히 쓰는 발동 조건이다.
@@ -495,15 +489,6 @@ function chooseMove(enemy, turn = 1) {
       return;
     }
   }
-  const sc = DB.acts.surge;
-  if (sc && def.surgeMove && !enemy.final) {
-    if (enemy.nextSurgeTurn == null) enemy.nextSurgeTurn = rollSurgeTurn(0, sc.firstTurn);
-    if (turn >= enemy.nextSurgeTurn) {
-      enemy.nextSurgeTurn = rollSurgeTurn(turn, sc.interval);
-      enemy.nextMove = { id: '__surge', surging: true, ...def.surgeMove };
-      return;
-    }
-  }
   const st = enemy.patternState;
   st.count = (st.count || 0) + 1;
   // 계몽 패턴: 3번째 행동마다 강력한 계몽 기술 사용
@@ -513,14 +498,14 @@ function chooseMove(enemy, turn = 1) {
   }
   const pat = currentPattern(enemy);
   let moveId;
-  // v0.74 트랙 B: minTurn이 붙은 기술은 그 턴 전에는 아예 나오지 않는다 (긴 싸움에서만 보는 수)
+  // v1.03: 행동 선택은 가중치 추첨 하나로 통일됐다. 발동 조건은 네 가지뿐이다.
+  //   가중치  — 뽑힐 상대 확률. 0이면 추첨에서 빠지고 연계로만 나온다.
+  //   minTurn — 이 턴이 되기 전에는 아예 나오지 않는다 (후반 전용 기술).
+  //   cooldown— 한 번 쓰면 이 턴 수만큼 쉰다. 주기적인 리듬은 이걸로 만든다.
+  //   followUp— 앞 행동 다음에 확률로 확정된다. 순서를 강제할 때 쓴다.
+  //   (예전의 sequence 모드와 강화 전용 트랙은 이 넷의 조합으로 그대로 표현된다)
   const unlocked = (id) => !(def.moves[id] && def.moves[id].minTurn > turn) && !onCooldown(enemy, id, turn);
-  if (pat.mode === 'sequence') {
-    const order = pat.order.filter(unlocked);
-    const use = order.length ? order : pat.order;
-    moveId = use[st.index % use.length];
-    st.index += 1;
-  } else {
+  {
     // v1.01: 가중치 0 = 추첨에 안 들어간다. 연계(followUp)로만 나오는 기술을 이렇게 표현한다.
     //   준비 동작 → 큰 공격 처럼 '반드시 앞선 행동이 있어야 하는' 기술에 쓴다.
     const entries = Object.entries(pat.weights).filter(([id, w]) => {

@@ -44,6 +44,17 @@
           "move": "dive",
           "chance": 0.5
         }
+      },
+      "surge": {
+        "name": "깃털을 곤두세운다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -51,7 +62,8 @@
       "weights": {
         "peck": 3,
         "dive": 2,
-        "caw": 2
+        "caw": 2,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -65,15 +77,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "깃털을 곤두세운다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -95,7 +98,8 @@
             "op": "damage",
             "amount": 5
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "flicker": {
         "name": "명멸",
@@ -108,8 +112,9 @@
         "hidden": true,
         "followUp": {
           "move": "flare",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "flare": {
         "name": "불꽃 폭발",
@@ -119,17 +124,29 @@
             "amount": 10
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "심지를 태운다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "scorch",
-        "flicker",
-        "flare"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "scorch": 1,
+        "flicker": 1,
+        "flare": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "도깨비 화염",
@@ -141,15 +158,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "심지를 태운다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -171,7 +179,8 @@
             "op": "damage",
             "amount": 5
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "web": {
         "name": "거미줄",
@@ -183,8 +192,9 @@
         ],
         "followUp": {
           "move": "ambush",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "ambush": {
         "name": "기습",
@@ -194,17 +204,29 @@
             "amount": 10
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "다리를 곧추세운다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "bite",
-        "web",
-        "ambush"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "bite": 1,
+        "web": 1,
+        "ambush": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "맹독 송곳니",
@@ -216,15 +238,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "다리를 곧추세운다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -274,6 +287,17 @@
           }
         ],
         "minTurn": 5
+      },
+      "surge": {
+        "name": "송곳니를 드러낸다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -281,7 +305,8 @@
       "weights": {
         "bite": 3,
         "growl": 1,
-        "maul": 1
+        "maul": 1,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -294,15 +319,6 @@
         },
         {
           "op": "heal",
-          "amount": 5
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "송곳니를 드러낸다",
-      "effects": [
-        {
-          "op": "empower",
           "amount": 5
         }
       ]
@@ -325,7 +341,8 @@
             "op": "damage",
             "amount": 5
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "coil": {
         "name": "가시 세우기",
@@ -341,8 +358,9 @@
         ],
         "followUp": {
           "move": "lash",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "lash": {
         "name": "덩굴 채찍",
@@ -352,17 +370,29 @@
             "amount": 11
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "가시를 세운다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "scratch",
-        "coil",
-        "lash"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "scratch": 1,
+        "coil": 1,
+        "lash": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "가시 폭발",
@@ -374,15 +404,6 @@
         {
           "op": "block",
           "amount": 6
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "가시를 세운다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -404,7 +425,8 @@
             "op": "damage",
             "amount": 8
           }
-        ]
+        ],
+        "cooldown": 4
       },
       "root": {
         "name": "뿌리내림",
@@ -416,8 +438,9 @@
         ],
         "followUp": {
           "move": "crush",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 4
       },
       "crush": {
         "name": "짓뭉개기",
@@ -427,7 +450,8 @@
             "amount": 14
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 4
       },
       "mend": {
         "name": "수액 빨아올리기",
@@ -436,18 +460,30 @@
             "op": "heal",
             "amount": 7
           }
-        ]
+        ],
+        "cooldown": 4
+      },
+      "surge": {
+        "name": "옹이가 굵어진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "slam",
-        "root",
-        "crush",
-        "mend"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "slam": 1,
+        "root": 1,
+        "crush": 0,
+        "mend": 1,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "숲의 분노",
@@ -459,15 +495,6 @@
         {
           "op": "block",
           "amount": 8
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "옹이가 굵어진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -489,7 +516,8 @@
             "op": "damage",
             "amount": 5
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "mist_veil": {
         "name": "물안개",
@@ -504,11 +532,12 @@
           }
         ],
         "followUp": {
-          "move": "surge",
-          "chance": 0.5
-        }
+          "move": "torrent",
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
-      "surge": {
+      "torrent": {
         "name": "급류",
         "effects": [
           {
@@ -516,17 +545,29 @@
             "amount": 9
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "물살이 거세진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "splash",
-        "mist_veil",
-        "surge"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "splash": 1,
+        "mist_veil": 1,
+        "torrent": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "소용돌이",
@@ -538,15 +579,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "물살이 거세진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -596,6 +628,17 @@
             "amount": 2
           }
         ]
+      },
+      "surge": {
+        "name": "몸을 부풀린다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -603,7 +646,8 @@
       "weights": {
         "suck": 3,
         "cling": 2,
-        "swell": 1
+        "swell": 1,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -617,15 +661,6 @@
         {
           "op": "heal",
           "amount": 8
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "몸을 부풀린다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -671,6 +706,17 @@
           "move": "swarm",
           "chance": 0.5
         }
+      },
+      "surge": {
+        "name": "무리가 불어난다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -678,7 +724,8 @@
       "weights": {
         "gnaw": 3,
         "swarm": 2,
-        "squeak": 1
+        "squeak": 1,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -688,15 +735,6 @@
         {
           "op": "damage",
           "amount": 9
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "무리가 불어난다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -719,7 +757,8 @@
             "amount": 5
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 2
       },
       "dust": {
         "name": "먼지구름",
@@ -728,7 +767,8 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "cooldown": 4
       },
       "stand": {
         "name": "버티기",
@@ -740,19 +780,30 @@
         ],
         "followUp": {
           "move": "sweep",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 4
+      },
+      "surge": {
+        "name": "빗자루가 뻣뻣해진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "sweep",
-        "dust",
-        "sweep",
-        "stand"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "sweep": 2,
+        "dust": 1,
+        "stand": 1,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "후려치기",
@@ -760,15 +811,6 @@
         {
           "op": "damage",
           "amount": 11
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "빗자루가 뻣뻣해진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -790,7 +832,8 @@
             "op": "damage",
             "amount": 10
           }
-        ]
+        ],
+        "cooldown": 2
       },
       "howl": {
         "name": "울부짖음",
@@ -807,7 +850,8 @@
         "followUp": {
           "move": "frenzy",
           "chance": 0.6
-        }
+        },
+        "cooldown": 4
       },
       "frenzy": {
         "name": "광란",
@@ -817,18 +861,29 @@
             "amount": 15
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 4
+      },
+      "surge": {
+        "name": "무리를 부른다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 6
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "bite",
-        "howl",
-        "bite",
-        "frenzy"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "bite": 2,
+        "howl": 1,
+        "frenzy": 1,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "무리의 기억",
@@ -840,15 +895,6 @@
         {
           "op": "empower",
           "amount": 2
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "무리를 부른다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 6
         }
       ]
     }
@@ -870,7 +916,8 @@
             "op": "damage",
             "amount": 11
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "dive": {
         "name": "잠수",
@@ -883,8 +930,9 @@
         "hidden": true,
         "followUp": {
           "move": "thrash",
-          "chance": 0.6
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "thrash": {
         "name": "요동",
@@ -894,17 +942,29 @@
             "amount": 14
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "지느러미를 곧추세운다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 6
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "snap",
-        "dive",
-        "thrash"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "snap": 1,
+        "dive": 1,
+        "thrash": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "통째로 삼키기",
@@ -912,15 +972,6 @@
         {
           "op": "damage",
           "amount": 20
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "지느러미를 곧추세운다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 6
         }
       ]
     }
@@ -942,7 +993,8 @@
             "op": "damage",
             "amount": 10
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "lurk": {
         "name": "도사림",
@@ -955,8 +1007,9 @@
         "hidden": true,
         "followUp": {
           "move": "pounce",
-          "chance": 0.6
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "pounce": {
         "name": "덮침",
@@ -966,17 +1019,29 @@
             "amount": 15
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "어둠을 삼킨다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 6
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "scratch",
-        "lurk",
-        "pounce"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "scratch": 1,
+        "lurk": 1,
+        "pounce": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "끌고 내려가기",
@@ -988,15 +1053,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "어둠을 삼킨다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 6
         }
       ]
     }
@@ -1018,7 +1074,8 @@
             "op": "damage",
             "amount": 11
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "stalk": {
         "name": "어둠 속 발소리",
@@ -1035,8 +1092,9 @@
         "hidden": true,
         "followUp": {
           "move": "pounce",
-          "chance": 0.7
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "pounce": {
         "name": "덮치기",
@@ -1046,7 +1104,8 @@
             "amount": 18
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
       },
       "howl": {
         "name": "핏빛 울부짖음",
@@ -1078,19 +1137,30 @@
             "amount": 10
           }
         ]
+      },
+      "surge": {
+        "name": "털이 곤두선다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 7
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "phases": [
       {
         "untilHpRatio": 0.5,
         "pattern": {
-          "mode": "sequence",
-          "order": [
-            "bite",
-            "stalk",
-            "pounce"
-          ],
-          "loop": true
+          "mode": "weighted",
+          "weights": {
+            "bite": 1,
+            "stalk": 1,
+            "pounce": 0,
+            "surge": 1.5
+          }
         }
       },
       {
@@ -1102,7 +1172,8 @@
             "bite": 2,
             "howl": 2,
             "lick": 1,
-            "pounce": 1
+            "pounce": 1,
+            "surge": 1.5
           },
           "noRepeat": 2
         }
@@ -1118,15 +1189,6 @@
         {
           "op": "empower",
           "amount": 2
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "털이 곤두선다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
         }
       ]
     }
@@ -1148,7 +1210,8 @@
             "op": "damage",
             "amount": 10
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "curse": {
         "name": "다리의 저주",
@@ -1160,8 +1223,9 @@
         ],
         "followUp": {
           "move": "drown",
-          "chance": 0.7
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "drown": {
         "name": "내려찍기",
@@ -1171,7 +1235,8 @@
             "amount": 16
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
       },
       "mend": {
         "name": "이끼 회복",
@@ -1181,19 +1246,30 @@
             "amount": 12
           }
         ]
+      },
+      "surge": {
+        "name": "바위를 움켜쥔다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 7
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "phases": [
       {
         "untilHpRatio": 0.5,
         "pattern": {
-          "mode": "sequence",
-          "order": [
-            "grasp",
-            "curse",
-            "drown"
-          ],
-          "loop": true
+          "mode": "weighted",
+          "weights": {
+            "grasp": 1,
+            "curse": 1,
+            "drown": 0,
+            "surge": 1.5
+          }
         }
       },
       {
@@ -1203,7 +1279,8 @@
           "weights": {
             "grasp": 2,
             "drown": 3,
-            "mend": 2
+            "mend": 2,
+            "surge": 1.5
           },
           "noRepeat": 2
         }
@@ -1219,15 +1296,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "바위를 움켜쥔다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
         }
       ]
     }
@@ -1249,7 +1317,8 @@
             "op": "damage",
             "amount": 11
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "button_eye": {
         "name": "단추 눈",
@@ -1266,8 +1335,9 @@
         "hidden": true,
         "followUp": {
           "move": "rip",
-          "chance": 0.7
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "rip": {
         "name": "솔기 뜯기",
@@ -1277,7 +1347,8 @@
             "amount": 17
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
       },
       "stuff": {
         "name": "솜 채우기",
@@ -1291,19 +1362,30 @@
             "amount": 8
           }
         ]
+      },
+      "surge": {
+        "name": "솜이 팽팽해진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 7
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "phases": [
       {
         "untilHpRatio": 0.5,
         "pattern": {
-          "mode": "sequence",
-          "order": [
-            "hug",
-            "button_eye",
-            "rip"
-          ],
-          "loop": true
+          "mode": "weighted",
+          "weights": {
+            "hug": 1,
+            "button_eye": 1,
+            "rip": 0,
+            "surge": 1.5
+          }
         }
       },
       {
@@ -1313,7 +1395,8 @@
           "weights": {
             "hug": 2,
             "rip": 3,
-            "stuff": 2
+            "stuff": 2,
+            "surge": 1.5
           },
           "noRepeat": 2
         }
@@ -1329,15 +1412,6 @@
         {
           "op": "empower",
           "amount": 2
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "솜이 팽팽해진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
         }
       ]
     }
@@ -1359,7 +1433,8 @@
             "op": "damage",
             "amount": 6
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "bloat": {
         "name": "부풀기",
@@ -1371,8 +1446,9 @@
         ],
         "followUp": {
           "move": "spit",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "spit": {
         "name": "독침 뱉기",
@@ -1382,17 +1458,29 @@
             "amount": 8
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "목이 부푼다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "tongue",
-        "bloat",
-        "spit"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "tongue": 1,
+        "bloat": 1,
+        "spit": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "삼키기",
@@ -1403,15 +1491,6 @@
         },
         {
           "op": "heal",
-          "amount": 5
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "목이 부푼다",
-      "effects": [
-        {
-          "op": "empower",
           "amount": 5
         }
       ]
@@ -1462,6 +1541,17 @@
             "amount": 5
           }
         ]
+      },
+      "surge": {
+        "name": "날갯소리가 높아진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -1469,7 +1559,8 @@
       "weights": {
         "drain": 3,
         "buzz": 2,
-        "scatter": 1
+        "scatter": 1,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -1483,15 +1574,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "날갯소리가 높아진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -1513,7 +1595,8 @@
             "op": "damage",
             "amount": 5
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "fade": {
         "name": "스러지기",
@@ -1526,8 +1609,9 @@
         "hidden": true,
         "followUp": {
           "move": "wail",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "wail": {
         "name": "곡소리",
@@ -1541,17 +1625,29 @@
             "amount": 1
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "안개가 짙어진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "chill",
-        "fade",
-        "wail"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "chill": 1,
+        "fade": 1,
+        "wail": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "공포",
@@ -1563,15 +1659,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "안개가 짙어진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -1618,6 +1705,17 @@
           }
         ],
         "minTurn": 5
+      },
+      "surge": {
+        "name": "뿔이 자란다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -1625,7 +1723,8 @@
       "weights": {
         "gore": 3,
         "stare": 1,
-        "trample": 1
+        "trample": 1,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -1635,15 +1734,6 @@
         {
           "op": "damage",
           "amount": 14
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "뿔이 자란다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -1665,7 +1755,8 @@
             "op": "damage",
             "amount": 7
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "guard": {
         "name": "방패 들기",
@@ -1677,8 +1768,9 @@
         ],
         "followUp": {
           "move": "bone_throw",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "bone_throw": {
         "name": "뼈 던지기",
@@ -1688,17 +1780,29 @@
             "amount": 10
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "뼈를 맞춘다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "slash",
-        "guard",
-        "bone_throw"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "slash": 1,
+        "guard": 1,
+        "bone_throw": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "뼈 무너뜨리기",
@@ -1710,15 +1814,6 @@
         {
           "op": "block",
           "amount": 6
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "뼈를 맞춘다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -1740,7 +1835,8 @@
             "op": "damage",
             "amount": 5
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "burrow": {
         "name": "파고들기",
@@ -1753,8 +1849,9 @@
         "hidden": true,
         "followUp": {
           "move": "erupt",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "erupt": {
         "name": "분출",
@@ -1764,17 +1861,29 @@
             "amount": 11
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "마디가 굵어진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "bite",
-        "burrow",
-        "erupt"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "bite": 1,
+        "burrow": 1,
+        "erupt": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "흙째 삼키기",
@@ -1786,15 +1895,6 @@
         {
           "op": "heal",
           "amount": 6
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "마디가 굵어진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -1816,7 +1916,8 @@
             "op": "damage",
             "amount": 11
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "harden": {
         "name": "굳히기",
@@ -1828,8 +1929,9 @@
         ],
         "followUp": {
           "move": "quake",
-          "chance": 0.6
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "quake": {
         "name": "진동",
@@ -1843,17 +1945,29 @@
             "amount": 1
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "진흙을 더 끌어모은다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 6
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "slam",
-        "harden",
-        "quake"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "slam": 1,
+        "harden": 1,
+        "quake": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "파묻기",
@@ -1865,15 +1979,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "진흙을 더 끌어모은다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 6
         }
       ]
     }
@@ -1895,7 +2000,8 @@
             "op": "damage",
             "amount": 12
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "charge_up": {
         "name": "고삐 당기기",
@@ -1911,8 +2017,9 @@
         ],
         "followUp": {
           "move": "cleave",
-          "chance": 0.6
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "cleave": {
         "name": "참격",
@@ -1922,17 +2029,29 @@
             "amount": 16
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "창을 고쳐 쥔다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 6
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "lance",
-        "charge_up",
-        "cleave"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "lance": 1,
+        "charge_up": 1,
+        "cleave": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "목 없는 돌격",
@@ -1940,15 +2059,6 @@
         {
           "op": "damage",
           "amount": 22
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "창을 고쳐 쥔다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 6
         }
       ]
     }
@@ -1970,7 +2080,8 @@
             "op": "damage",
             "amount": 11
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "toll": {
         "name": "조종(弔鐘)",
@@ -1982,8 +2093,9 @@
         ],
         "followUp": {
           "move": "inter",
-          "chance": 0.6
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "inter": {
         "name": "매장",
@@ -1993,17 +2105,29 @@
             "amount": 15
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "삽자루를 고쳐 쥔다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 6
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "shovel",
-        "toll",
-        "inter"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "shovel": 1,
+        "toll": 1,
+        "inter": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "마지막 의식",
@@ -2015,15 +2139,6 @@
         {
           "op": "empower",
           "amount": 3
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "삽자루를 고쳐 쥔다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 6
         }
       ]
     }
@@ -2045,7 +2160,8 @@
             "op": "damage",
             "amount": 12
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "submerge": {
         "name": "잠수",
@@ -2058,8 +2174,9 @@
         "hidden": true,
         "followUp": {
           "move": "death_roll",
-          "chance": 0.7
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "death_roll": {
         "name": "죽음의 회전",
@@ -2069,7 +2186,8 @@
             "amount": 18
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
       },
       "regrow": {
         "name": "재생",
@@ -2079,19 +2197,30 @@
             "amount": 14
           }
         ]
+      },
+      "surge": {
+        "name": "늪이 끓어오른다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 7
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "phases": [
       {
         "untilHpRatio": 0.5,
         "pattern": {
-          "mode": "sequence",
-          "order": [
-            "chomp",
-            "submerge",
-            "death_roll"
-          ],
-          "loop": true
+          "mode": "weighted",
+          "weights": {
+            "chomp": 1,
+            "submerge": 1,
+            "death_roll": 0,
+            "surge": 1.5
+          }
         }
       },
       {
@@ -2101,7 +2230,8 @@
           "weights": {
             "chomp": 2,
             "death_roll": 3,
-            "regrow": 2
+            "regrow": 2,
+            "surge": 1.5
           },
           "noRepeat": 2
         }
@@ -2117,15 +2247,6 @@
         {
           "op": "heal",
           "amount": 8
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "늪이 끓어오른다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
         }
       ]
     }
@@ -2151,7 +2272,8 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "veil": {
         "name": "장막",
@@ -2163,8 +2285,9 @@
         ],
         "followUp": {
           "move": "smother",
-          "chance": 0.7
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "smother": {
         "name": "질식",
@@ -2174,7 +2297,8 @@
             "amount": 17
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
       },
       "lullaby": {
         "name": "자장가",
@@ -2188,19 +2312,30 @@
             "amount": 2
           }
         ]
+      },
+      "surge": {
+        "name": "숨을 깊이 들이쉰다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 7
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "phases": [
       {
         "untilHpRatio": 0.5,
         "pattern": {
-          "mode": "sequence",
-          "order": [
-            "caress",
-            "veil",
-            "smother"
-          ],
-          "loop": true
+          "mode": "weighted",
+          "weights": {
+            "caress": 1,
+            "veil": 1,
+            "smother": 0,
+            "surge": 1.5
+          }
         }
       },
       {
@@ -2210,7 +2345,8 @@
           "weights": {
             "caress": 2,
             "smother": 3,
-            "lullaby": 2
+            "lullaby": 2,
+            "surge": 1.5
           },
           "noRepeat": 2
         }
@@ -2226,15 +2362,6 @@
         {
           "op": "confuse",
           "amount": 2
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "숨을 깊이 들이쉰다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
         }
       ]
     }
@@ -2256,7 +2383,8 @@
             "op": "damage",
             "amount": 12
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "rise": {
         "name": "일어서기",
@@ -2272,8 +2400,9 @@
         ],
         "followUp": {
           "move": "grave_call",
-          "chance": 0.7
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "grave_call": {
         "name": "무덤의 부름",
@@ -2283,7 +2412,8 @@
             "amount": 16
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
       },
       "rot": {
         "name": "부패",
@@ -2297,19 +2427,30 @@
             "amount": 10
           }
         ]
+      },
+      "surge": {
+        "name": "흙을 밀어낸다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 7
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "phases": [
       {
         "untilHpRatio": 0.5,
         "pattern": {
-          "mode": "sequence",
-          "order": [
-            "claw",
-            "rise",
-            "grave_call"
-          ],
-          "loop": true
+          "mode": "weighted",
+          "weights": {
+            "claw": 1,
+            "rise": 1,
+            "grave_call": 0,
+            "surge": 1.5
+          }
         }
       },
       {
@@ -2319,7 +2460,8 @@
           "weights": {
             "claw": 2,
             "grave_call": 3,
-            "rot": 2
+            "rot": 2,
+            "surge": 1.5
           },
           "noRepeat": 2
         }
@@ -2335,15 +2477,6 @@
         {
           "op": "empower",
           "amount": 3
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "흙을 밀어낸다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
         }
       ]
     }
@@ -2393,6 +2526,17 @@
           }
         ],
         "minTurn": 5
+      },
+      "surge": {
+        "name": "귀를 세운다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -2400,7 +2544,8 @@
       "weights": {
         "nibble": 3,
         "hop": 2,
-        "shriek": 2
+        "shriek": 2,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -2410,15 +2555,6 @@
         {
           "op": "damage",
           "amount": 13
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "귀를 세운다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -2443,8 +2579,9 @@
         ],
         "followUp": {
           "move": "beam",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "beam": {
         "name": "시선 광선",
@@ -2454,7 +2591,8 @@
             "amount": 10
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
       },
       "blink": {
         "name": "깜빡임",
@@ -2464,17 +2602,29 @@
             "amount": 8
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "동공이 벌어진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "gaze",
-        "beam",
-        "blink"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "gaze": 1,
+        "beam": 0,
+        "blink": 1,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "광기의 응시",
@@ -2486,15 +2636,6 @@
         {
           "op": "confuse",
           "amount": 2
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "동공이 벌어진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -2544,6 +2685,17 @@
             "amount": 5
           }
         ]
+      },
+      "surge": {
+        "name": "비늘가루를 모은다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -2551,7 +2703,8 @@
       "weights": {
         "wing": 3,
         "dust": 2,
-        "cocoon": 1
+        "cocoon": 1,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -2565,15 +2718,6 @@
         {
           "op": "heal",
           "amount": 8
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "비늘가루를 모은다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -2603,7 +2747,8 @@
         "followUp": {
           "move": "pulse",
           "chance": 0.5
-        }
+        },
+        "cooldown": 3
       },
       "lash": {
         "name": "촉수질",
@@ -2612,7 +2757,12 @@
             "op": "damage",
             "amount": 8
           }
-        ]
+        ],
+        "cooldown": 3,
+        "followUp": {
+          "move": "pulse",
+          "chance": 1.0
+        }
       },
       "pulse": {
         "name": "맥동",
@@ -2622,17 +2772,29 @@
             "amount": 11
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "속삭임이 커진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "whisper",
-        "lash",
-        "pulse"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "whisper": 1,
+        "lash": 1,
+        "pulse": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "광란의 합창",
@@ -2644,15 +2806,6 @@
         {
           "op": "empower",
           "amount": 3
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "속삭임이 커진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -2699,6 +2852,17 @@
           }
         ],
         "minTurn": 5
+      },
+      "surge": {
+        "name": "기도를 삼킨다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -2706,7 +2870,8 @@
       "weights": {
         "dagger": 3,
         "pray": 2,
-        "sacrifice": 1
+        "sacrifice": 1,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -2720,15 +2885,6 @@
         {
           "op": "heal",
           "amount": 10
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "기도를 삼킨다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -2754,7 +2910,8 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "harden": {
         "name": "굳히기",
@@ -2766,8 +2923,9 @@
         ],
         "followUp": {
           "move": "crack",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "crack": {
         "name": "균열",
@@ -2777,17 +2935,29 @@
             "amount": 12
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "금이 갈라진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "scream",
-        "harden",
-        "crack"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "scream": 1,
+        "harden": 1,
+        "crack": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "공명",
@@ -2799,15 +2969,6 @@
         {
           "op": "confuse",
           "amount": 2
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "금이 갈라진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -2829,7 +2990,8 @@
             "op": "confuse",
             "amount": 2
           }
-        ]
+        ],
+        "cooldown": 4
       },
       "grip": {
         "name": "모래 손",
@@ -2838,7 +3000,8 @@
             "op": "damage",
             "amount": 13
           }
-        ]
+        ],
+        "cooldown": 4
       },
       "hourglass": {
         "name": "시간의 모래",
@@ -2850,8 +3013,9 @@
         ],
         "followUp": {
           "move": "collapse",
-          "chance": 0.6
-        }
+          "chance": 1.0
+        },
+        "cooldown": 4
       },
       "collapse": {
         "name": "붕괴",
@@ -2861,18 +3025,30 @@
             "amount": 17
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 4
+      },
+      "surge": {
+        "name": "모래를 끌어모은다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 6
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "sand",
-        "grip",
-        "hourglass",
-        "collapse"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "sand": 1,
+        "grip": 1,
+        "hourglass": 1,
+        "collapse": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "영원한 잠",
@@ -2884,15 +3060,6 @@
         {
           "op": "confuse",
           "amount": 2
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "모래를 끌어모은다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 6
         }
       ]
     }
@@ -2914,7 +3081,8 @@
             "op": "damage",
             "amount": 12
           }
-        ]
+        ],
+        "cooldown": 4
       },
       "coil": {
         "name": "휘감기",
@@ -2927,7 +3095,8 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "cooldown": 4
       },
       "rise": {
         "name": "솟아오르기",
@@ -2943,8 +3112,9 @@
         ],
         "followUp": {
           "move": "smash",
-          "chance": 0.6
-        }
+          "chance": 1.0
+        },
+        "cooldown": 4
       },
       "smash": {
         "name": "내려찍기",
@@ -2954,18 +3124,30 @@
             "amount": 18
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 4
+      },
+      "surge": {
+        "name": "촉수가 굵어진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 6
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "slap",
-        "coil",
-        "rise",
-        "smash"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "slap": 1,
+        "coil": 1,
+        "rise": 1,
+        "smash": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "심연의 손아귀",
@@ -2973,15 +3155,6 @@
         {
           "op": "damage",
           "amount": 22
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "촉수가 굵어진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 6
         }
       ]
     }
@@ -3007,7 +3180,8 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "silence": {
         "name": "침묵",
@@ -3020,8 +3194,9 @@
         "hidden": true,
         "followUp": {
           "move": "peal",
-          "chance": 0.6
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "peal": {
         "name": "큰 종소리",
@@ -3031,17 +3206,29 @@
             "amount": 17
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "줄을 힘껏 당긴다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 6
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "toll",
-        "silence",
-        "peal"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "toll": 1,
+        "silence": 1,
+        "peal": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "진혼곡",
@@ -3053,15 +3240,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "줄을 힘껏 당긴다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 6
         }
       ]
     }
@@ -3083,7 +3261,8 @@
             "op": "damage",
             "amount": 13
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "rewrite": {
         "name": "꿈 고쳐쓰기",
@@ -3100,8 +3279,9 @@
         "hidden": true,
         "followUp": {
           "move": "nightmare",
-          "chance": 0.7
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "nightmare": {
         "name": "악몽",
@@ -3111,7 +3291,8 @@
             "amount": 19
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
       },
       "wake_false": {
         "name": "거짓 기상",
@@ -3125,19 +3306,30 @@
             "amount": 12
           }
         ]
+      },
+      "surge": {
+        "name": "꿈을 고쳐 쓴다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 7
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "phases": [
       {
         "untilHpRatio": 0.5,
         "pattern": {
-          "mode": "sequence",
-          "order": [
-            "dream_blade",
-            "rewrite",
-            "nightmare"
-          ],
-          "loop": true
+          "mode": "weighted",
+          "weights": {
+            "dream_blade": 1,
+            "rewrite": 1,
+            "nightmare": 0,
+            "surge": 1.5
+          }
         }
       },
       {
@@ -3147,7 +3339,8 @@
           "weights": {
             "dream_blade": 2,
             "nightmare": 3,
-            "wake_false": 2
+            "wake_false": 2,
+            "surge": 1.5
           },
           "noRepeat": 2
         }
@@ -3163,15 +3356,6 @@
         {
           "op": "confuse",
           "amount": 2
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "꿈을 고쳐 쓴다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
         }
       ]
     }
@@ -3193,7 +3377,8 @@
             "op": "damage",
             "amount": 13
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "abyss_call": {
         "name": "심연의 부름",
@@ -3204,9 +3389,10 @@
           }
         ],
         "followUp": {
-          "move": "swallow_light",
-          "chance": 0.7
-        }
+          "move": "crush",
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "swallow_light": {
         "name": "빛 삼키기",
@@ -3229,20 +3415,32 @@
             "amount": 21
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "아가리가 더 벌어진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 7
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "phases": [
       {
         "untilHpRatio": 0.5,
         "pattern": {
-          "mode": "sequence",
-          "order": [
-            "gnash",
-            "abyss_call",
-            "crush"
-          ],
-          "loop": true
+          "mode": "weighted",
+          "weights": {
+            "gnash": 1,
+            "abyss_call": 1,
+            "crush": 0,
+            "surge": 1.5
+          }
         }
       },
       {
@@ -3252,7 +3450,8 @@
           "weights": {
             "gnash": 2,
             "crush": 3,
-            "swallow_light": 2
+            "swallow_light": 2,
+            "surge": 1.5
           },
           "noRepeat": 2
         }
@@ -3268,15 +3467,6 @@
         {
           "op": "empower",
           "amount": 4
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "아가리가 더 벌어진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
         }
       ]
     }
@@ -3302,7 +3492,8 @@
             "op": "empower",
             "amount": 3
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "smite": {
         "name": "단죄",
@@ -3311,7 +3502,12 @@
             "op": "damage",
             "amount": 14
           }
-        ]
+        ],
+        "cooldown": 3,
+        "followUp": {
+          "move": "judgment",
+          "chance": 1.0
+        }
       },
       "absolve": {
         "name": "거짓 사면",
@@ -3338,20 +3534,32 @@
             "amount": 20
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "후광이 짙어진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 7
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "phases": [
       {
         "untilHpRatio": 0.5,
         "pattern": {
-          "mode": "sequence",
-          "order": [
-            "hymn",
-            "smite",
-            "judgment"
-          ],
-          "loop": true
+          "mode": "weighted",
+          "weights": {
+            "hymn": 1,
+            "smite": 1,
+            "judgment": 0,
+            "surge": 1.5
+          }
         }
       },
       {
@@ -3361,7 +3569,8 @@
           "weights": {
             "smite": 2,
             "judgment": 3,
-            "absolve": 2
+            "absolve": 2,
+            "surge": 1.5
           },
           "noRepeat": 2
         }
@@ -3377,15 +3586,6 @@
         {
           "op": "heal",
           "amount": 12
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "후광이 짙어진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
         }
       ]
     }
@@ -3408,7 +3608,8 @@
             "amount": 2
           }
         ],
-        "hidden": true
+        "hidden": true,
+        "cooldown": 4
       },
       "whisper": {
         "name": "귓가의 속삭임",
@@ -3421,7 +3622,8 @@
             "op": "confuse",
             "amount": 1
           }
-        ]
+        ],
+        "cooldown": 4
       },
       "reach": {
         "name": "닿는다",
@@ -3433,8 +3635,9 @@
         ],
         "followUp": {
           "move": "unmake",
-          "chance": 0.7
-        }
+          "chance": 1.0
+        },
+        "cooldown": 4
       },
       "unmake": {
         "name": "지운다",
@@ -3448,18 +3651,18 @@
             "amount": 1
           }
         ],
-        "minTurn": 6
+        "minTurn": 6,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "watch",
-        "whisper",
-        "reach",
-        "unmake"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "watch": 1,
+        "whisper": 1,
+        "reach": 1,
+        "unmake": 0
+      }
     },
     "enlightenedMove": {
       "name": "눈뜬다",
@@ -3475,16 +3678,7 @@
       ]
     },
     "final": true,
-    "escalation": 2,
-    "surgeMove": {
-      "name": "형태가 뒤틀린다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 7
-        }
-      ]
-    }
+    "escalation": 2
   },
   {
     "id": "hollow_priest",
@@ -3506,8 +3700,9 @@
         ],
         "followUp": {
           "move": "strike",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "strike": {
         "name": "지팡이 내리치기",
@@ -3517,7 +3712,8 @@
             "amount": 8
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
       },
       "blessing": {
         "name": "거꾸로 된 축복",
@@ -3530,17 +3726,29 @@
             "op": "block",
             "amount": 6
           }
-        ]
+        ],
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "설교가 빨라진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "sermon",
-        "strike",
-        "blessing"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "sermon": 1,
+        "strike": 0,
+        "blessing": 1,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "공허의 손길",
@@ -3552,15 +3760,6 @@
         {
           "op": "confuse",
           "amount": 1
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "설교가 빨라진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -3611,6 +3810,17 @@
           }
         ],
         "hidden": true
+      },
+      "surge": {
+        "name": "음이 높아진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
@@ -3618,7 +3828,8 @@
       "weights": {
         "hymn": 3,
         "crescendo": 2,
-        "rest_note": 1
+        "rest_note": 1,
+        "surge": 3
       },
       "noRepeat": 2
     },
@@ -3628,15 +3839,6 @@
         {
           "op": "damage",
           "amount": 13
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "음이 높아진다",
-      "effects": [
-        {
-          "op": "empower",
-          "amount": 5
         }
       ]
     }
@@ -3658,7 +3860,8 @@
             "op": "damage",
             "amount": 5
           }
-        ]
+        ],
+        "cooldown": 3
       },
       "waver": {
         "name": "일렁임",
@@ -3674,8 +3877,9 @@
         ],
         "followUp": {
           "move": "flareup",
-          "chance": 0.5
-        }
+          "chance": 1.0
+        },
+        "cooldown": 3
       },
       "flareup": {
         "name": "확 타오르기",
@@ -3685,17 +3889,29 @@
             "amount": 11
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "cooldown": 3
+      },
+      "surge": {
+        "name": "심지가 길어진다",
+        "effects": [
+          {
+            "op": "empower",
+            "amount": 5
+          }
+        ],
+        "minTurn": 4,
+        "cooldown": 4
       }
     },
     "pattern": {
-      "mode": "sequence",
-      "order": [
-        "singe",
-        "waver",
-        "flareup"
-      ],
-      "loop": true
+      "mode": "weighted",
+      "weights": {
+        "singe": 1,
+        "waver": 1,
+        "flareup": 0,
+        "surge": 3
+      }
     },
     "enlightenedMove": {
       "name": "불바다",
@@ -3706,15 +3922,6 @@
         },
         {
           "op": "heal",
-          "amount": 5
-        }
-      ]
-    },
-    "surgeMove": {
-      "name": "심지가 길어진다",
-      "effects": [
-        {
-          "op": "empower",
           "amount": 5
         }
       ]

@@ -259,6 +259,7 @@ span.enemy-art {
 .enemy-zone.multi span.enemy-art { height: 186px; line-height: 186px; font-size: 124px; margin-bottom: -62px; }
 .enemy-zone.multi .enemy-name { font-size: 11.5px; }
 /* v0.74: 힘을 끌어올리는 턴은 예고가 붉게 달아오른다 */
+/* v1.03: 강화 행동은 이제 평범한 행동 하나지만, 예고에서만큼은 눈에 띄어야 한다 */
 .enemy .intent.surging { color: #ff8a6b; text-shadow: 0 0 8px rgba(224, 92, 75, .7); }
 /* v0.75: 연계로 확정된 다음 수 — 피할 수 없다는 걸 색으로 알린다 */
 .enemy .intent.chained { color: #e8b64b; text-shadow: 0 0 8px rgba(232, 182, 75, .6); }
