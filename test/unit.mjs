@@ -246,6 +246,43 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('쿨다운 없는 행동은 간격 제한 없음', back2back > 0, true);
 }
 
+// v1.02: 가중치 0 = 추첨 제외 (연계로만 등장) · 쿨다운+연계+가중치0 이 '정해진 순서'를 그대로 재현하는가
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = Math.random;
+  const D = (n) => [{ op: 'damage', amount: n }];
+  const mkdef = (id, moves, weights) => { DB.enemyById[id] = { id, name: id, tier: 'normal', art: '🧪',
+    hp: [9e6, 9e6], moves, pattern: { mode: 'weighted', weights } }; };
+  const play = (id, T) => {
+    const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+    const e = b.enemies[0]; const out = [];
+    for (let t = 1; t <= T; t++) { out.push(e.nextMove.id); b.await = 'enemy'; eng.enemyPhase(b); }
+    return out;
+  };
+  // 가중치 0 인 기술은 연계가 없으면 절대 안 나온다
+  mkdef('__w0', { A: { name: 'A', effects: D(1) }, Z: { name: 'Z', effects: D(1) } }, { A: 1, Z: 0 });
+  let zLeak = 0;
+  for (let n = 0; n < 300; n++) zLeak += play('__w0', 12).filter(x => x === 'Z').length;
+  eq('가중치 0은 추첨에서 절대 안 뽑힘', zLeak, 0);
+
+  // 쿨다운 3 + 연계 100% + 가중치 0 → A→B→C 가 매번 정확히 순환
+  mkdef('__rot', {
+    A: { name: 'A', effects: D(1), cooldown: 3 },
+    B: { name: 'B', effects: D(1), cooldown: 3, followUp: { move: 'C', chance: 1 } },
+    C: { name: 'C', effects: D(1), cooldown: 3 },
+  }, { A: 1, B: 1, C: 0 });
+  let cycleBad = 0, orderBad = 0;
+  for (let n = 0; n < 400; n++) {
+    const s = play('__rot', 12);
+    for (let i = 0; i + 3 <= 12; i += 3) if (new Set(s.slice(i, i + 3)).size !== 3) cycleBad++;
+    for (let i = 0; i < 12; i++) if (s[i] === 'C' && s[i - 1] !== 'B') orderBad++;
+  }
+  eq('세 행동이 3턴마다 한 번씩 (주기 유지)', cycleBad, 0);
+  eq('큰 공격 앞에는 항상 준비 행동', orderBad, 0);
+}
+
 // v0.85: 지도 생성 규칙 — 휴식 강제 연속 금지 / 보스 앞 휴식 / 갈림길 구성 상이
 {
   const run_ = await import('../js/run.js');
