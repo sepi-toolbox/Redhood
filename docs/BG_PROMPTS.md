@@ -1,7 +1,6 @@
 # REDHOOD 배경 프롬프트 — 12종 (복사용)
 
-> ✅ 완료 9종: `bg_map` `bg_forest` `bg_stream` `bg_cabin` `bg_swamp` `bg_mist` `bg_grave` `bg_dream` `bg_hill`
-> ⬜ 남은 3종: `bg_church` `bg_final` `bg_title`
+> ✅ **12/12 전량 완료** (2026-08-08, v0.99). 아래는 재생성용 기록입니다.
 >
 > **밝기는 받아서 제가 맞춥니다.** 화면에 보이는 띠(세로 22~82%)의 평균 밝기를 재서 숲(17)을 기준으로 잡습니다.
 > 안개 낀 숲이 107로 들어와서 감마 2.85로 35까지 내렸고, 꿈속·무덤가는 45에서 28로 내렸습니다.
@@ -78,7 +77,7 @@ Stylized dark fairytale background for a mobile dice game, gothic caricature sty
 Stylized dark fairytale background for a mobile dice game, gothic caricature style: chunky angular shapes, thick dark outlines, flat gouache color planes, minimal detail, NOT photorealistic, NOT 3D. Muted palette: near-black brown, deep blood red, antique gold, aged cream. Vertical mobile game background, portrait 2:3. Distant scenery only, no creatures, no characters, no text, no watermark. Keep it dim and low-contrast so a painted monster standing in front of it stays the brightest thing on screen. Dark vignette at the top, the middle band kept simple and uncluttered, and the lower half fades smoothly into near-black so game UI can sit on it. The scene: a bare black hill under a slowly spiraling night sky, one thin ancient monolith on the summit, a faint red glow behind the clouds.
 ```
 
-### 사람 없는 교회 — `bg_church` ⬜
+### 사람 없는 교회 — `bg_church` ✅
 *스테인드글라스가 화려해지기 쉬움 — 창은 위쪽 작게*
 
 ```
@@ -90,7 +89,7 @@ Stylized dark fairytale background for a mobile dice game, gothic caricature sty
 
 ## 최종전
 
-### 최후의 어둠 — `bg_final` ⬜
+### 최후의 어둠 — `bg_final` ✅
 *유일하게 형체가 있어도 되는 배경 — 단, 아주 흐릿하게*
 
 ```
@@ -100,7 +99,7 @@ Stylized dark fairytale background for a mobile dice game, gothic caricature sty
 
 ---
 
-## 타이틀 배경 — `bg_title`
+## 타이틀 배경 — `bg_title` ✅
 
 *유일하게 인물이 들어가는 배경입니다. 로고가 위 1/3에 얹히므로 그 영역은 비워야 합니다.*
 

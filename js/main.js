@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v0.98'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v0.99'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -106,6 +106,7 @@ function showTitle() {
   app.innerHTML = '';
   app.append(h(`
     <div class="screen title-screen">
+      <div class="title-bg"></div>
       <img class="logo" src="assets/ui/logo.png" alt="REDHOOD" draggable="false">
       <p class="subtitle">빨간망토의 모험 — 주사위판</p>
       ${hasSave() ? `<button class="btn primary" id="continue-btn">이어하기</button>` : ''}
@@ -141,7 +142,8 @@ if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
 // (CSS 변수로 넘기면 브라우저가 URL을 stylesheet 기준으로 풀어버려서, 인라인 배경으로 직접 지정한다)
 function bgLayer() {
   const themeId = run && run.act <= 3 ? themeOf(run).id : null;
-  const bgId = BG_ART.has(themeId) ? themeId : 'forest';   // 전용 배경이 없으면 숲으로 임시 대체
+  // 최종전은 4막이라 테마가 없다 — 전용 배경(최후의 어둠)을 쓴다
+  const bgId = run && run.act >= 4 ? 'final' : (BG_ART.has(themeId) ? themeId : 'forest');
   return `<div class="bg-layer" style="background-image: linear-gradient(rgba(16,12,10,.08), rgba(16,12,10,.24) 60%, #0f0c0b 98%), url('assets/bg/bg_${bgId}.jpg')"></div>`;
 }
 
@@ -158,7 +160,7 @@ const ENEMY_ART = new Set(['stray_dog', 'wolf', 'crow', 'will_o_wisp', 'forest_s
   'grave_worm', 'mud_golem', 'headless_knight', 'grave_keeper', 'nightmare_hare', 'floating_eye', 'dream_moth',
   'whisper_polyp', 'faceless_cultist', 'screaming_stone', 'hollow_priest', 'choir_ghost', 'candle_swarm', 'sandman',
   'hill_tentacle', 'bell_ringer', 'lucid_king', 'the_maw', 'false_saint', 'nameless_dread']);
-const BG_ART = new Set(['forest', 'stream', 'cabin', 'swamp', 'mist', 'grave', 'dream', 'hill']); // 전투 테마 배경 보유 목록
+const BG_ART = new Set(['forest', 'stream', 'cabin', 'swamp', 'mist', 'grave', 'dream', 'hill', 'church']); // 전투 테마 배경 보유 목록
 const NPC_ART = { '잿빛 방물장수': 'peddler', '부러진 이정표': 'signpost', '낯익은 환영': 'redhood',
   '숯쟁이 난쟁이': 'dwarf', '이끼 낀 제단': 'altar', '가라앉은 상자': 'stream_chest',
   '늪 위의 불빛': 'swamp_light', '안개 속 목소리': 'voice_in_mist',
