@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.22 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.23 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -333,9 +333,19 @@ function tabMoves(v){
       const efBox=document.createElement('div');
       (m.effects||[]).forEach((x,k)=>{
         const row=document.createElement('div'); row.className='efrow';
-        row.appendChild(select(`${base}.effects.${k}.op`, e.name+' '+m.name+' 효과'+(k+1), ENEMY_OPS, {after:redraw}));
+        row.appendChild(select(`${base}.effects.${k}.op`, e.name+' '+m.name+' 효과'+(k+1), ENEMY_OPS, {after:(v)=>{
+          // 상태이상으로 바꾸면 종류를 채워 넣는다 — 비워두면 데이터가 반쪽이 된다
+          if(v==='status' && !x.kind){ writeP(`${base}.effects.${k}.kind`, ST_OPS[0][0]); mark(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 상태이상 종류'); }
+          if(v!=='status'){ if(x.kind!==undefined) removeP(`${base}.effects.${k}.kind`); if(x.power!==undefined) removeP(`${base}.effects.${k}.power`); }
+          redraw();
+        }}));
         if(x.op==='status'){
-          row.appendChild(select(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 상태이상 종류', ST_OPS, {def:'bleed'}));
+          row.appendChild(select(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 상태이상 종류', ST_OPS, {def:ST_OPS[0][0], after:(v)=>{
+            // 폭발 칸을 쓰지 않는 종류로 바꿨으면 남아 있던 값을 지운다
+            const nst=DB.statusById2[v];
+            if(nst && NO_POWER.has(nst.rule) && x.power!==undefined) removeP(`${base}.effects.${k}.power`);
+            redraw();
+          }}));
           const st=DB.statusById2[x.kind];
           // 세기를 안 쓰는 규칙에는 아예 칸을 안 만든다 — 넣어봐야 무시되니 헷갈리기만 한다
           if(st && !NO_POWER.has(st.rule)){
@@ -350,7 +360,7 @@ function tabMoves(v){
         efBox.appendChild(row);
       });
       efBox.appendChild(miniBtn('+ 효과','효과 추가',()=>{
-        (m.effects=m.effects||[]).push({op:'damage',amount:1});
+        (m.effects=m.effects||[]).push({op:'damage',amount:1});   // 종류는 [상태이상 부여]로 바꾸는 순간 채워진다
         mark(`${base}.effects`, e.name+' '+m.name+' 효과 추가'); redraw(); }));
       cell(tr, efBox);
       const wrap=document.createElement('div'), hitBox=document.createElement('div');
