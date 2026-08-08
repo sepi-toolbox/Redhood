@@ -207,7 +207,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   // 임시 적: 세 행동 중 hammer 에만 쿨다운 3을 건다
-  const CD = 3;
+  const CD = 3;   // v1.04: '세 턴을 쉰다' → 최소 간격은 4턴
   DB.enemyById.__cdtest = {
     id: '__cdtest', name: '시험체', tier: 'normal', art: '🧪', hp: [9e6, 9e6],
     moves: {
@@ -227,7 +227,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
       if (e.nextMove.id === 'hammer') {
         uses++;
         const gap = t - last;
-        if (last > -99) { minGap = Math.min(minGap, gap); if (gap < CD) tooSoon++; }
+        if (last > -99) { minGap = Math.min(minGap, gap); if (gap < CD + 1) tooSoon++; }
         last = t;
       }
       b.await = 'enemy'; eng.enemyPhase(b);
@@ -235,7 +235,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
   eq('쿨다운 행동이 실제로 쓰이긴 함', uses > 400, true);
   eq('쿨다운보다 빨리 재사용된 적 없음', tooSoon, 0);
-  eq('실제 최소 간격이 쿨다운 이상', minGap >= CD, true);
+  eq('실제 최소 간격이 쿨다운+1', minGap >= CD + 1, true);
   // 쿨다운 0(미지정)인 행동은 제한이 없어야 한다
   DB.enemyById.__cdtest2 = { ...DB.enemyById.__cdtest, id: '__cdtest2',
     moves: { ...DB.enemyById.__cdtest.moves, hammer: { name: '망치', effects: [{ op: 'damage', amount: 1 }] } } };
@@ -275,9 +275,9 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
   // 쿨다운 3 + 연계 100% + 가중치 0 → A→B→C 가 매번 정확히 순환
   mkdef('__rot', {
-    A: { name: 'A', effects: D(1), cooldown: 3 },
-    B: { name: 'B', effects: D(1), cooldown: 3, followUp: { move: 'C', chance: 1 } },
-    C: { name: 'C', effects: D(1), cooldown: 3 },
+    A: { name: 'A', effects: D(1), cooldown: 2 },
+    B: { name: 'B', effects: D(1), cooldown: 2, followUp: { move: 'C', chance: 1 } },
+    C: { name: 'C', effects: D(1), cooldown: 2 },
   }, { A: 1, B: 1, C: 0 });
   let cycleBad = 0, orderBad = 0;
   for (let n = 0; n < 400; n++) {

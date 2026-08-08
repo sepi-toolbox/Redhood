@@ -460,10 +460,11 @@ function currentPattern(enemy) {
   return def.phases[idx].pattern;
 }
 
-// v1.01: 행동별 재사용 대기.
-//   "moves.bristle.cooldown": 4  → 한 번 쓰면 4턴이 지나야 다시 나온다.
-//   값이 없거나 0이면 제한 없음. 해금 턴(minTurn)과 나란히 쓰는 발동 조건이다.
-function onCooldown(enemy, id, turn) { return (enemy.cooldown[id] || 0) > turn; }
+// v1.04: 행동별 재사용 대기 — 값은 '몇 턴 쉬는가'다.
+//   "moves.bristle.cooldown": 3  → 쓰고 나서 세 턴을 쉬고, 네 턴째에 다시 나올 수 있다.
+//   0이거나 없으면 제한 없음. 세 행동을 번갈아 돌리려면 각자 2를 준다.
+//   (v1.03까지는 '몇 턴 뒤에 다시'라 1이 아무 턴도 막지 못했다 — 직관과 어긋나 바꿨다)
+function onCooldown(enemy, id, turn) { return (enemy.cooldown[id] || 0) >= turn; }
 function stampCooldown(enemy, def, id, turn) {
   const cd = def.moves[id] && def.moves[id].cooldown;
   if (cd > 0) enemy.cooldown[id] = turn + cd;

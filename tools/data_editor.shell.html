@@ -169,7 +169,7 @@ const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.i
 const TABS=[
  ['개요','바뀐 값은 초록으로 표시된다. 다 고쳤으면 오른쪽 위 [내보내기]를 눌러 바뀐 JSON을 받아 나에게 주면 반영해서 배포한다.',ovw],
  ['적','HP와 강화 행동. 개별 행동 수치는 [적행동] 탭에서 고친다.',tabEnemy],
- ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
+ ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정". 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
  ['족보','배수(mult)와 변형의 부가 능력 수치.',tabScore],
  ['주사위','여섯 면을 직접 고친다. 면 구성이 곧 성능이다.',tabDice],
  ['유물','효과 수치는 hook.amount 하나로 정해진다.',tabRelic],
@@ -290,7 +290,7 @@ function tabMoves(v){
       cell(tr, wrap.children.length?wrap:'—', !wrap.children.length);
       cell(tr, weightCell(e, i, mid, m), false);
       cell(tr, m.minTurn!=null? field(`enemies:${i}.moves.${mid}.minTurn`,e.name+' '+m.name+' 해금 턴') : '—', m.minTurn==null);
-      cell(tr, field(`enemies:${i}.moves.${mid}.cooldown`, e.name+' '+m.name+' 쿨다운', {num:true, def:0}));
+      cell(tr, field(`enemies:${i}.moves.${mid}.cooldown`, e.name+' '+m.name+' 쿨다운(쉬는 턴)', {num:true, def:0}));
       const opts=[['','— 없음 —'], ...Object.entries(e.moves).filter(([k])=>k!==mid).map(([k,mm])=>[k,mm.name])];
       const fuBox=document.createElement('div');
       if(m.followUp){
