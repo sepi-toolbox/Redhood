@@ -12,19 +12,18 @@ h1{font-size:15px;color:#e8b64b;margin:2px 0 3px}
 .holder{position:relative}
 .die{width:62px;height:70px;border-radius:13px;position:relative;
   background:transparent url(__PAD__) center/contain no-repeat}
-.die img{width:46px;height:46px;object-fit:contain;position:absolute;left:8px;top:12px;
+.pip{width:46px;height:46px;object-fit:contain;position:absolute;left:8px;top:12px;
   filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))}
-.tint,.tint2,.fx,.arc,.mist,.sealbar,.wax,.rim{position:absolute;pointer-events:none}
-.tint,.tint2{left:8px;right:8px;top:12px;bottom:12px;border-radius:6px}
-.tint{mix-blend-mode:multiply;animation:tp 2.4s ease-in-out infinite}
-.tint2{animation:tp 2.4s ease-in-out infinite}
-@keyframes tp{0%,100%{opacity:.74}50%{opacity:1}}
-.fx,.arc{left:8px;right:8px;top:12px;bottom:12px;z-index:2}
-.fx svg,.arc svg{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7));overflow:visible}
+.tint,.tint2{position:absolute;left:8px;right:8px;top:12px;bottom:12px;border-radius:6px;pointer-events:none}
+.tint{mix-blend-mode:multiply;z-index:2;animation:tp 2.4s ease-in-out infinite}
+.tint2{z-index:4;animation:tp 2.4s ease-in-out infinite}
+@keyframes tp{0%,100%{opacity:.76}50%{opacity:1}}
+.ov{position:absolute;left:8px;top:12px;width:46px;height:46px;object-fit:contain;z-index:3;
+  pointer-events:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.75))}
 .nm{position:absolute;bottom:0;left:-9px;right:-9px;text-align:center;font-size:10px;font-weight:700;
-  letter-spacing:-.3px;text-shadow:0 1px 2px #000,0 0 5px rgba(0,0,0,.95);z-index:5;
+  letter-spacing:-.3px;text-shadow:0 1px 2px #000,0 0 5px rgba(0,0,0,.95);z-index:6;
   animation:tp 2.4s ease-in-out infinite}
-.pt{position:absolute;opacity:0;pointer-events:none;z-index:4}
+.pt{position:absolute;opacity:0;pointer-events:none;z-index:5}
 .drop{width:5px;height:7px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;box-shadow:0 0 4px rgba(255,60,50,.85)}
 .bub{width:5px;height:5px;border-radius:50%;box-shadow:0 0 4px rgba(180,230,60,.8)}
 .shard{width:3px;height:3px;border-radius:1px;box-shadow:0 0 4px rgba(220,240,255,.9)}
@@ -44,41 +43,31 @@ h1{font-size:15px;color:#e8b64b;margin:2px 0 3px}
  62%{opacity:.5;transform:scale(1.1)}100%{opacity:0;transform:scale(.4)}}
 @keyframes suck{0%{opacity:0;transform:translate(-9px,-9px) scale(1.2)}18%{opacity:1}
  82%{opacity:.8;transform:translate(0,0) scale(.35)}100%{opacity:0;transform:translate(2px,2px) scale(.1)}}
-/* 도형 움직임 */
-@keyframes ooze{0%,100%{transform:scaleY(.93)}50%{transform:scaleY(1.07)}}
-@keyframes boil{0%,100%{transform:scaleY(.95) translateY(1px)}50%{transform:scaleY(1.05) translateY(-1px)}}
-@keyframes squeeze{0%,100%{transform:scale(1)}50%{transform:scale(.94)}}
-@keyframes creep{0%,100%{transform:scale(.96);opacity:.86}50%{transform:scale(1.04);opacity:1}}
+/* ── 그림 움직임 : 상태마다 다르다 ── */
+@keyframes ooze{0%,100%{transform:scaleY(.94)}50%{transform:scaleY(1.08)}}
+@keyframes boil{0%,100%{transform:scaleY(.95)}50%{transform:scaleY(1.07)}}
+@keyframes squeeze{0%,100%{transform:scale(1)}50%{transform:scale(.93)}}
+@keyframes jitter{0%,88%,100%{transform:translate(0,0);filter:drop-shadow(0 1px 2px rgba(0,0,0,.75))}
+ 90%{transform:translate(.8px,-.6px);filter:drop-shadow(0 0 5px rgba(220,240,255,.95))}
+ 93%{transform:translate(-.7px,.5px)}96%{transform:translate(.4px,0)}}
+@keyframes creep{0%,100%{transform:scaleY(.93);opacity:.85}50%{transform:scaleY(1.07);opacity:1}}
 @keyframes hover{0%,100%{transform:translateY(1.2px)}50%{transform:translateY(-1.6px)}}
-@keyframes bulge{0%,100%{transform:scale(.92)}55%{transform:scale(1.1)}}
-@keyframes taut{0%,100%{transform:scaleX(1)}50%{transform:scaleX(1.04)}}
-@keyframes grab{0%,100%{transform:translate(1.5px,1.5px) rotate(1.5deg)}50%{transform:translate(-1px,-1px) rotate(-1.5deg)}}
-/* 혼란 · 봉인 · 잠식 */
-.mist{left:8px;right:8px;top:12px;bottom:12px;border-radius:6px;overflow:hidden;z-index:2}
-.mist::before{content:"";position:absolute;left:-45%;top:-45%;width:190%;height:190%;
-  background:conic-gradient(from 0deg at 50% 50%,#1a0d33,#5b2f9e,#c9a4ff,#6a37b0,#2a1350,#8a5fd6,#1a0d33);
-  filter:blur(1.4px) saturate(1.15);animation:spin 5.5s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.t-confuse .tint,.t-confuse .tint2{background:none;box-shadow:none}
-.t-seal .tint{background:#1a2350;mix-blend-mode:normal;opacity:1;animation:breathe 4s ease-in-out infinite}
-@keyframes breathe{0%,100%{opacity:.94}50%{opacity:1}}
-.sealbar{left:6px;right:6px;top:29px;height:9px;background:linear-gradient(#2c3a72,#161f45);z-index:2;
-  box-shadow:0 1px 2px rgba(0,0,0,.6)}
-.b1{transform:rotate(41deg)} .b2{transform:rotate(-41deg)}
-.wax{left:24px;top:29px;width:14px;height:14px;border-radius:50%;z-index:3;
-  background:radial-gradient(circle at 36% 30%,#a3352c,#5c1310);box-shadow:0 1px 3px rgba(0,0,0,.7),inset 0 0 4px rgba(0,0,0,.5)}
-.t-devour .tint{mix-blend-mode:normal;animation:voidPulse 2.4s ease-in-out infinite;
-  background:radial-gradient(circle at 50% 50%,#000 0%,#000 30%,rgba(2,6,12,.82) 44%,rgba(6,14,24,.4) 58%,rgba(8,16,28,0) 72%)}
-@keyframes voidPulse{0%,100%{transform:scale(.97)}50%{transform:scale(1.02)}}
-.t-devour .tint2{box-shadow:none}
-.t-devour .rim{left:15px;right:15px;top:19px;bottom:19px;border-radius:50%;z-index:3;
-  box-shadow:0 0 7px 2px rgba(150,220,250,.9),0 0 16px 5px rgba(60,140,190,.45);animation:voidPulse 2.4s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(.99);filter:drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(.94)}
+ 50%{transform:scale(1.01);filter:drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(1.08)}}
+@keyframes bulge{0%,100%{transform:scale(.94)}55%{transform:scale(1.09)}}
+@keyframes taut{0%,100%{transform:scaleX(1)}50%{transform:scaleX(1.05)}}
+@keyframes zap{0%,100%{opacity:.25}4%{opacity:1}10%{opacity:.3}16%{opacity:1}22%{opacity:.2}
+ 46%{opacity:.9}52%{opacity:.25}70%{opacity:1}76%{opacity:.3}}
+@keyframes grab{0%,100%{transform:translate(1px,1.5px) rotate(1.6deg)}50%{transform:translate(-.8px,-1px) rotate(-1.6deg)}}
+@keyframes rise{0%,100%{transform:translateY(1.4px) scaleY(.94)}50%{transform:translateY(-1.4px) scaleY(1.07)}}
+.t-confuse .ov{animation-timing-function:linear!important;animation-duration:6s!important}
 /*__CSS__*/
 </style></head><body><div class="wrap">
-<h1>상태이상 13종 — 그림 파일 0장</h1>
-<p class="s">출혈까지 코드로 다시 그렸다. 물듦 + 도형 + 파티클 + 이름표 네 겹, 전부 CSS와 SVG다.</p>
+<h1>상태이상 13종 — 받은 그림 + 움직임</h1>
+<p class="s">혼란·봉인만 눈을 덮는다. 나머지 열하나는 얕게 얹히고 각자 다르게 움직인다.</p>
 <div class="stage"><div class="grid">
 <!--__DIES__-->
 </div></div>
-<p class="n">움직임이 전부 다르다 — 피는 떨어지고, 독은 떠오르고, 뿌리는 조이고, 전류는 튀고, 재는 흩날리고, 잠식은 빨아들인다</p>
+<p class="n">피는 흘러내리고 · 독은 끓고 · 뿌리는 조이고 · 균열은 튀고 · 그을음은 피어오르고 · 전류는 지직거리고 · 잠식은 밀려올라온다</p>
 </div></body></html>
