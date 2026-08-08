@@ -7,7 +7,7 @@
 
 | 순서 | 항목 | 수량 | 파일 위치 | 왜 이 순서인가 |
 |---|---|---|---|---|
-| 1 | 배경 | 8장 | `assets/bg/bg_*.jpg` | 화면의 절반을 차지한다. 지금 2·3막이 전부 1막 숲을 돌려쓰고 있어 체감이 가장 크다 |
+| 1 | 배경 | **3장** (5장 완료) | `assets/bg/bg_*.jpg` | 화면의 절반을 차지한다. 지금 2·3막이 전부 1막 숲을 돌려쓰고 있어 체감이 가장 크다 |
 | 2 | 보물상자 | 3장 | `assets/ui/chest_*.png` | 전투가 끝날 때마다 매번 보인다. 코드는 이미 들어가 있고 플래그만 켜면 된다 |
 | 3 | 보스 낙서 | 9개 | `assets/icons/doodle_boss_*.png` | 지도에서 이번 판이 어느 구역인지 알려준다 |
 | 4 | 유물 | 26개 | `assets/relics/*.png` | 수가 많지만 48px로 작게 나온다. 시트로 묶어 뽑으면 빠르다 |
@@ -35,7 +35,9 @@
 
 ---
 
-# 1. 배경 8장
+# 1. 배경 3장 — 사람 없는 교회 · 최후의 어둠 · 타이틀
+
+> ✅ 늪·안개숲·무덤가·꿈속·언덕은 v0.98에 적용 완료. 아래 완료분은 재생성용 기록입니다.
 
 **규격**: 세로 2:3 (게임에서 768×1152). 풀블리드라 배경 제거가 필요 없습니다.
 
@@ -43,13 +45,13 @@
 
 배경의 역할은 뒤로 물러나는 것입니다. 게임이 위에 어두운 겹을 한 장 더 얹지만, 배경 자체가 밝거나 복잡하면 몬스터가 묻힙니다.
 
-### 가라앉는 늪지 — `bg_swamp`  ·  2막 · 늪의 왕
+### ✅ 가라앉는 늪지 — `bg_swamp`  ·  2막 · 늪의 왕
 
 ```
 Stylized dark fairytale background for a mobile dice game, gothic caricature style: chunky angular shapes, thick dark outlines, flat gouache color planes, minimal detail, NOT photorealistic, NOT 3D. Muted palette: near-black brown, deep blood red, antique gold, aged cream. Vertical mobile game background, portrait 2:3. Distant scenery only, no creatures, no characters, no text, no watermark. Keep it dim and low-contrast so a painted monster standing in front of it stays the brightest thing on screen. Dark vignette at the top, the middle band kept simple and uncluttered, and the lower half fades smoothly into near-black so game UI can sit on it. The scene: a sinking bog with bare dead trees leaning at odd angles, faint green will-o-wisp lights hovering low over still black water, half-submerged roots.
 ```
 
-### 안개 낀 숲 — `bg_mist`  ·  2막 · 안개의 어머니
+### ✅ 안개 낀 숲 — `bg_mist`  ·  2막 · 안개의 어머니
 
 *안개가 밝아 몬스터를 잡아먹기 쉽다. 전체 밝기를 한 단계 낮춰 뽑을 것.*
 
@@ -57,13 +59,13 @@ Stylized dark fairytale background for a mobile dice game, gothic caricature sty
 Stylized dark fairytale background for a mobile dice game, gothic caricature style: chunky angular shapes, thick dark outlines, flat gouache color planes, minimal detail, NOT photorealistic, NOT 3D. Muted palette: near-black brown, deep blood red, antique gold, aged cream. Vertical mobile game background, portrait 2:3. Distant scenery only, no creatures, no characters, no text, no watermark. Keep it dim and low-contrast so a painted monster standing in front of it stays the brightest thing on screen. Dark vignette at the top, the middle band kept simple and uncluttered, and the lower half fades smoothly into near-black so game UI can sit on it. The scene: a forest drowned in thick pale fog, bare black silhouette trees fading layer by layer into white, the ground lost in mist.
 ```
 
-### 이름 없는 무덤가 — `bg_grave`  ·  2막 · 파묻힌 자
+### ✅ 이름 없는 무덤가 — `bg_grave`  ·  2막 · 파묻힌 자
 
 ```
 Stylized dark fairytale background for a mobile dice game, gothic caricature style: chunky angular shapes, thick dark outlines, flat gouache color planes, minimal detail, NOT photorealistic, NOT 3D. Muted palette: near-black brown, deep blood red, antique gold, aged cream. Vertical mobile game background, portrait 2:3. Distant scenery only, no creatures, no characters, no text, no watermark. Keep it dim and low-contrast so a painted monster standing in front of it stays the brightest thing on screen. Dark vignette at the top, the middle band kept simple and uncluttered, and the lower half fades smoothly into near-black so game UI can sit on it. The scene: a nameless overgrown graveyard at dusk, leaning weathered gravestones, dry grass, a bare dead branch across the upper corner.
 ```
 
-### 꿈속 — `bg_dream`  ·  3막 · 자각몽의 왕
+### ✅ 꿈속 — `bg_dream`  ·  3막 · 자각몽의 왕
 
 *떠다니는 오브젝트는 3개 이하로.*
 
@@ -71,7 +73,7 @@ Stylized dark fairytale background for a mobile dice game, gothic caricature sty
 Stylized dark fairytale background for a mobile dice game, gothic caricature style: chunky angular shapes, thick dark outlines, flat gouache color planes, minimal detail, NOT photorealistic, NOT 3D. Muted palette: near-black brown, deep blood red, antique gold, aged cream. Vertical mobile game background, portrait 2:3. Distant scenery only, no creatures, no characters, no text, no watermark. Keep it dim and low-contrast so a painted monster standing in front of it stays the brightest thing on screen. Dark vignette at the top, the middle band kept simple and uncluttered, and the lower half fades smoothly into near-black so game UI can sit on it. The scene: a melting dreamlike forest where the trees bend the wrong way, a few floating doors and clock faces drifting between them, the colors slightly wrong and washed out.
 ```
 
-### 비명 지르는 언덕 — `bg_hill`  ·  3막 · 벌어진 아가리
+### ✅ 비명 지르는 언덕 — `bg_hill`  ·  3막 · 벌어진 아가리
 
 ```
 Stylized dark fairytale background for a mobile dice game, gothic caricature style: chunky angular shapes, thick dark outlines, flat gouache color planes, minimal detail, NOT photorealistic, NOT 3D. Muted palette: near-black brown, deep blood red, antique gold, aged cream. Vertical mobile game background, portrait 2:3. Distant scenery only, no creatures, no characters, no text, no watermark. Keep it dim and low-contrast so a painted monster standing in front of it stays the brightest thing on screen. Dark vignette at the top, the middle band kept simple and uncluttered, and the lower half fades smoothly into near-black so game UI can sit on it. The scene: a bare black hill under a slowly spiraling night sky, one thin ancient monolith on the summit, a faint red glow behind the clouds.
