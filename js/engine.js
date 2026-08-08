@@ -27,7 +27,9 @@ export function createBattle(run, encounterIds) {
   const battle = {
     over: false, result: null, turn: 1,
     await: null,                          // null | 'enemy' (플레이어 확정 후 적 페이즈 대기)
-    player: { hp: run.hp, maxHp: run.maxHp, block: 0 },
+    player: { hp: run.hp, maxHp: run.maxHp, block: 0, dot: 0, dotKind: 'poison' },
+    // v1.14 독·출혈: 완전히 같은 장치이고 이름과 연출만 다르다. 한 판에 섞어 쓰지 않는다.
+    //   내 행동이 끝나면 쌓인 수치만큼 피해를 받고 누적이 1 줄어든다. 방어도로 막힌다.
     diceDefs: run.dice.map(id => DB.diceById[id]),
     dice: run.dice.map(() => ({ face: 0, held: false })),
     rolled: false,                        // 이번 턴 첫 굴림 여부
@@ -398,8 +400,26 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
     battle.over = true; battle.result = 'victory';
     return battle.lastResult;
   }
+  tickDot(battle);
+  if (battle.over) return battle.lastResult;
   battle.await = 'enemy';
   return battle.lastResult;
+}
+
+// 독·출혈 — 내 행동이 끝난 직후 쌓인 만큼 아프고 누적이 1 줄어든다. 방어도가 먼저 막는다.
+export function tickDot(battle) {
+  const p = battle.player;
+  if (!(p.dot > 0)) return 0;
+  let dmg = p.dot;
+  const absorbed = Math.min(p.block, dmg);
+  p.block -= absorbed; dmg -= absorbed;
+  if (dmg > 0) {
+    p.hp -= dmg;
+    if (p.hp <= 0) { p.hp = 0; battle.over = true; battle.result = 'defeat'; }
+  }
+  p.dot -= 1;
+  if (battle.lastResult) battle.lastResult.dotHit = { amount: absorbed + dmg, kind: p.dotKind };
+  return absorbed + dmg;
 }
 
 // v0.71: 상태이상 지속시간 — 턴이 끝날 때 스택 1 감소.
@@ -471,6 +491,11 @@ export function enemyPhase(battle) {
           break;
         case 'rest':                                       // 💤 휴식 — 아무것도 하지 않고 턴을 넘긴다
           break;                                           //   (숨 고르는 틈을 의도적으로 만들 때 쓴다)
+        case 'poison':                                     // 🌀 독 — 지속 피해를 건다 (아래 bleed 와 같은 장치)
+        case 'bleed':                                      // 🌀 출혈 — 이름과 연출만 다르다
+          battle.player.dot += ef.amount;
+          battle.player.dotKind = ef.op;
+          break;
         case 'selfDamage':                                 // ❓ 자해 — 제 HP를 깎는다 (방어도 무시, 죽을 수도 있다)
           e.hp -= ef.amount;                                //   예고로는 무슨 행동인지 알 수 없다
           break;
@@ -634,7 +659,7 @@ export function intentOf(enemy) {
   }
   for (const ef of mv.effects) {
     if (ef.op === 'block') parts.push(`🛡${ef.amount}`);
-    else if (ef.op === 'confuse') parts.push('🌀');
+    else if (ef.op === 'confuse' || ef.op === 'poison' || ef.op === 'bleed') parts.push('🌀');
     else if (ef.op === 'empower') parts.push('💪');
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
   }
