@@ -586,7 +586,8 @@ function chooseMove(enemy, turn = 1) {
     });
     // v1.08 기본 행동(defaultMove) — 예외 처리용 안전망이다.
     //   쓸 수 있는 수가 하나도 남지 않았을 때(전부 쿨다운·락·해금에 걸렸을 때) 강제로 시동한다.
-    //   해금 턴·락 턴·쿨다운·가중치를 전부 무시한다. 유니크 행동도 지정할 수 있다.
+    //   해금 턴·락 턴·쿨다운·가중치를 전부 무시한다. 일반이든 유니크든 아무 행동이나 지정할 수 있지만,
+    //   유니크 행동 체계(국면 전환·파쇄)와는 아무 관계가 없다 — 순수한 예외 처리 장치다.
     //   데이터를 어떻게 짜든 적이 아무것도 못 하고 멈추는 상황을 없애는 게 목적이다.
     if (entries.length === 0 && def.defaultMove && moveDef(def, def.defaultMove)) {
       setNextMove(enemy, def, def.defaultMove, { forced: true });
