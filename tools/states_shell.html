@@ -53,15 +53,23 @@ h1{font-size:15px;color:#e8b64b;margin:2px 0 3px}
 @keyframes creep{0%,100%{transform:scaleY(.93);opacity:.85}50%{transform:scaleY(1.07);opacity:1}}
 @keyframes hover{0%,100%{transform:translateY(1.2px)}50%{transform:translateY(-1.6px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes breathe{0%,100%{transform:scale(.99);filter:drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(.94)}
- 50%{transform:scale(1.01);filter:drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(1.08)}}
+/* 혼란 — 사각 윤곽은 고정, 안쪽 안개만 돈다 */
+.swirlbox{position:absolute;left:8px;top:12px;width:46px;height:46px;border-radius:7px;
+  overflow:hidden;z-index:3;pointer-events:none}
+.swirl{position:absolute;left:50%;top:50%;width:150%;height:150%;
+  transform-origin:center;animation:spin 7s linear infinite;
+  margin-left:-75%;margin-top:-75%;opacity:.62;filter:blur(.4px)}
+@keyframes mist{0%,100%{filter:drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(.94) saturate(.95)}
+ 50%{filter:drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(1.1) saturate(1.12)}}
+@keyframes wax{0%,100%{filter:drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(.9)}
+ 50%{filter:drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(1.06)}}
 @keyframes bulge{0%,100%{transform:scale(.94)}55%{transform:scale(1.09)}}
 @keyframes taut{0%,100%{transform:scaleX(1)}50%{transform:scaleX(1.05)}}
 @keyframes zap{0%,100%{opacity:.25}4%{opacity:1}10%{opacity:.3}16%{opacity:1}22%{opacity:.2}
  46%{opacity:.9}52%{opacity:.25}70%{opacity:1}76%{opacity:.3}}
 @keyframes grab{0%,100%{transform:translate(1px,1.5px) rotate(1.6deg)}50%{transform:translate(-.8px,-1px) rotate(-1.6deg)}}
 @keyframes rise{0%,100%{transform:translateY(1.4px) scaleY(.94)}50%{transform:translateY(-1.4px) scaleY(1.07)}}
-.t-confuse .ov{animation-timing-function:linear!important;animation-duration:6s!important}
+.t-confuse .ov,.t-seal .ov{transform:none!important}
 /*__CSS__*/
 </style></head><body><div class="wrap">
 <h1>상태이상 13종 — 받은 그림 + 움직임</h1>

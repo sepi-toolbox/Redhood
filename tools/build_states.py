@@ -26,8 +26,8 @@ S = [
   "inset 0 -8px 13px -3px rgba(150,70,220,.65)",("#b489e0","ash","rise",4),"creep","bottom center"),
  ("blessing","축복","#f3ecdd","radial-gradient(ellipse at 50% 12%,rgba(240,236,225,.4) 0%,rgba(190,188,182,.28) 55%,rgba(120,120,118,.2) 100%)",
   "inset 0 8px 13px -4px rgba(255,253,245,.85)",("#fffdf2","mote","rise",3),"hover","top center"),
- ("confuse","혼란","#c68cff","","",(None,None,None,0),"spin","center"),
- ("seal","봉인","#8fa8e0","","",(None,None,None,0),"breathe","center"),
+ ("confuse","혼란","#c68cff","","",(None,None,None,0),"mist","center"),
+ ("seal","봉인","#8fa8e0","","",(None,None,None,0),"wax","center"),
  ("rot","부패","#d98cc0","radial-gradient(ellipse at 50% 112%,rgba(120,30,86,.6) 0%,rgba(78,26,60,.42) 52%,rgba(44,20,34,.2) 100%)",
   "inset 0 -8px 11px -4px rgba(230,120,190,.6)",("#e7a3cf","spore","swell",3),"bulge","bottom center"),
  ("chain","결속","#a8c2d8","radial-gradient(ellipse at 50% 50%,rgba(40,54,68,.26) 0%,rgba(30,42,56,.46) 60%,rgba(18,26,36,.6) 100%)",
@@ -52,8 +52,14 @@ for i,(sid,name,col,tint,rim,(pc,psh,pan,pn),mot,org) in enumerate(S):
         x,y = POS[j]
         css.append(f".t-{sid} .p{j}{{left:{x}px;top:{y}px;background:{pc};animation:{pan} 2.4s ease-in-out infinite {j*0.7:.2f}s}}")
         parts += f'<span class="pt {psh} p{j}"></span>'
+    # 혼란만 두 겹 — 안쪽 안개는 돌지만 바깥 사각 윤곽은 고정이다
+    if sid == "confuse":
+        layer = (f'<span class="swirlbox"><img class="swirl" src="{art}"></span>'
+                 f'<img class="ov" src="{art}">')
+    else:
+        layer = f'<img class="ov" src="{art}">'
     dies.append(f'<div class="holder"><div class="die t-{sid}"><img class="pip" src="{PIPS[i%6]}">'
-                f'<span class="tint"></span><img class="ov" src="{art}"><span class="tint2"></span>'
+                f'<span class="tint"></span>{layer}<span class="tint2"></span>'
                 f'{parts}<span class="nm">{name}</span></div></div>')
 
 TPL = open(R+'tools/states_shell.html', encoding='utf-8').read()
