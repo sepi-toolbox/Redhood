@@ -429,6 +429,8 @@ export function enemyPhase(battle) {
         case 'heal':                                       // 💚 치료
           e.hp = Math.min(e.maxHpInit, e.hp + ef.amount);
           break;
+        case 'rest':                                       // 💤 휴식 — 아무것도 하지 않고 턴을 넘긴다
+          break;                                           //   (숨 고르는 틈을 의도적으로 만들 때 쓴다)
       }
     }
     if (e.escalation) e.power += e.escalation; // 최종 보스: 매 턴 점진적으로 강해진다

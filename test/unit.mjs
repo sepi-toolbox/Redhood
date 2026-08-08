@@ -289,6 +289,26 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('큰 공격 앞에는 항상 준비 행동', orderBad, 0);
 }
 
+// v1.05: 휴식 효과 — 턴만 넘기고 아무 일도 일어나지 않는다
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = Math.random;
+  DB.enemyById.__rest = { id: '__rest', name: '쉬는 적', tier: 'normal', art: '🧪', hp: [200, 200],
+    moves: { nap: { name: '숨 고르기', effects: [{ op: 'rest' }] } },
+    pattern: { mode: 'weighted', weights: { nap: 1 } } };
+  const b = eng.createBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__rest'], 'battle');
+  const e = b.enemies[0];
+  const hp0 = b.player.hp, ehp0 = e.hp;
+  for (let t = 0; t < 8; t++) { b.await = 'enemy'; eng.enemyPhase(b); }
+  eq('휴식은 플레이어 HP를 안 깎음', b.player.hp, hp0);
+  eq('휴식은 적 방어·힘을 안 올림', [e.block, e.power], [0, 0]);
+  eq('휴식은 적 HP를 안 바꿈', e.hp, ehp0);
+  eq('휴식 중에도 전투는 계속됨', b.over, false);
+  eq('휴식의 의도 표시는 💤', eng.intentOf(e), '💤');
+}
+
 // v0.85: 지도 생성 규칙 — 휴식 강제 연속 금지 / 보스 앞 휴식 / 갈림길 구성 상이
 {
   const run_ = await import('../js/run.js');

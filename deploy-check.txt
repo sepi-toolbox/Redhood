@@ -1,2 +1,2 @@
-1786160918
-v1.04 cooldown semantics
+1786161619
+v1.05 crow tuning + rest effect

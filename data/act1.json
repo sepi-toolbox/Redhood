@@ -1,7 +1,7 @@
 {
   "_version": 4,
   "player": {
-    "maxHp": 70,
+    "maxHp": 60,
     "startDice": [
       "normal",
       "normal",
