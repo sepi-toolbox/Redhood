@@ -309,6 +309,53 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('휴식의 의도 표시는 💤', eng.intentOf(e), '💤');
 }
 
+// v1.06: 연타 — 한 대는 약하지만 강화가 타수마다 붙는다
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = Math.random;
+  const mkEnemy = (id, ef) => { DB.enemyById[id] = { id, name: id, tier: 'normal', art: '🧪', hp: [9e6, 9e6],
+    moves: { hit: { name: '난타', effects: [ef] } }, pattern: { mode: 'weighted', weights: { hit: 1 } } }; };
+  const run = (id, turns, power) => {
+    const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+    b.enemies[0].power = power;
+    const hp0 = b.player.hp;
+    for (let t = 0; t < turns; t++) { b.await = 'enemy'; eng.enemyPhase(b); b.enemies[0].power = power; }
+    return hp0 - b.player.hp;
+  };
+  mkEnemy('__once', { op: 'damage', amount: 12 });            // 한 방 12
+  mkEnemy('__multi', { op: 'damage', amount: 4, hits: 3 });   // 4를 세 번
+  eq('강화 0이면 총합이 같다', [run('__once', 1, 0), run('__multi', 1, 0)], [12, 12]);
+  // 강화 6: 한 방은 12+6=18, 연타는 (4+6)×3=30
+  eq('강화가 타수마다 붙는다', [run('__once', 1, 6), run('__multi', 1, 6)], [18, 30]);
+  // 약화도 타수마다 빠진다
+  {
+    const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__multi'], 'battle');
+    b.enemies[0].debuffs.weak = 2; const hp0 = b.player.hp;
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('약화도 타수마다 빠진다', hp0 - b.player.hp, (4 - 2) * 3);
+  }
+  // 방어는 한 대씩 갉힌다 — 방어 5는 첫 대를 막고 남은 두 대가 들어온다
+  {
+    const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__multi'], 'battle');
+    b.player.block = 5; const hp0 = b.player.hp;
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('방어를 타수로 갉는다', hp0 - b.player.hp, 12 - 5);
+  }
+  // 의도 표시에 타수가 보인다
+  {
+    const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__multi'], 'battle');
+    eq('의도에 타수 표기', eng.intentOf(b.enemies[0]), '⚔️4×3');
+    b.enemies[0].power = 6;
+    eq('강화가 반영된 한 대 피해로 표기', eng.intentOf(b.enemies[0]), '⚔️10×3');
+  }
+  eq('hits 없으면 1타로 동작', eng.hitCount({ op: 'damage', amount: 3 }), 1);
+}
+
 // v0.85: 지도 생성 규칙 — 휴식 강제 연속 금지 / 보스 앞 휴식 / 갈림길 구성 상이
 {
   const run_ = await import('../js/run.js');

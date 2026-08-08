@@ -66,7 +66,10 @@ def eff_text(effs):
     for e in effs:
         n = OPNAME.get(e.get('op'), e.get('op'))
         a = e.get('amount')
-        out.append(n if (a is None or e.get('op') == 'rest') else f"{n} {a}")
+        h = e.get('hits')
+        txt = n if (a is None or e.get('op') == 'rest') else f"{n} {a}"
+        if h and h > 1: txt += f" ×{h}타"
+        out.append(txt)
     return ' · '.join(out)
 
 ACT_OF = {}

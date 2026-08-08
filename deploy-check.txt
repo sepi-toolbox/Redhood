@@ -1,2 +1,2 @@
-1786161619
-v1.05 crow tuning + rest effect
+1786162525
+v1.06 multihit + rest
