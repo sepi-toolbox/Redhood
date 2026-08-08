@@ -1383,7 +1383,7 @@
         "minTurn": 1,
         "cooldown": 1,
         "break": {
-          "damage": 20,
+          "damage": 30,
           "move": "unique1"
         },
         "followUp": {
@@ -1411,7 +1411,7 @@
           }
         ],
         "break": {
-          "damage": 10,
+          "damage": 20,
           "move": "unique1"
         },
         "followUp": {
@@ -1448,7 +1448,7 @@
           }
         ],
         "break": {
-          "damage": 25,
+          "damage": 35,
           "move": "unique1"
         },
         "followUp": {
@@ -1470,7 +1470,7 @@
           "chance": 1
         },
         "break": {
-          "damage": 15,
+          "damage": 25,
           "move": "unique1"
         }
       },
@@ -1495,7 +1495,7 @@
         ],
         "cooldown": 1,
         "break": {
-          "damage": 30,
+          "damage": 40,
           "move": "unique1"
         },
         "followUp": {
@@ -1516,7 +1516,7 @@
           "chance": 1
         },
         "break": {
-          "damage": 20,
+          "damage": 30,
           "move": "unique1"
         }
       }

@@ -832,9 +832,6 @@ export function intentOf(enemy) {
     else if (ef.op === 'empower') parts.push('💪');
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
   }
-  const br = mv.break;
-  if (br && br.damage > 0 && !mv.phaseShift && !mv.broken) {
-    parts.push(`🔨${Math.max(0, br.damage - (enemy.breakTaken || 0))}`);
-  }
+  // 파쇄 기준치(🔨N)는 예고에 내보내지 않는다 — 적을 길게 눌러 여는 치트 창에서만 보인다
   return parts.join(' ') || '💤';
 }
