@@ -204,14 +204,19 @@
     ],
     "moves": {
       "bite": {
-        "name": "물기",
+        "name": "독니",
         "effects": [
           {
+            "op": "poison",
+            "amount": 3
+          },
+          {
             "op": "damage",
-            "amount": 5
+            "amount": 2
           }
         ],
-        "cooldown": 2
+        "cooldown": 1,
+        "lockTurn": 5
       },
       "web": {
         "name": "거미줄",
@@ -221,33 +226,32 @@
             "amount": 2
           }
         ],
-        "followUp": {
-          "move": "ambush",
-          "chance": 1.0
-        },
-        "cooldown": 2
+        "cooldown": 1
       },
       "ambush": {
-        "name": "기습",
+        "name": "웅크리기",
         "effects": [
           {
-            "op": "damage",
+            "op": "block",
             "amount": 10
           }
         ],
-        "minTurn": 5,
         "cooldown": 2
       },
       "surge": {
-        "name": "다리를 곧추세운다",
+        "name": "맹독니",
         "effects": [
           {
-            "op": "empower",
-            "amount": 5
+            "op": "poison",
+            "amount": 6
+          },
+          {
+            "op": "damage",
+            "amount": 2
           }
         ],
-        "minTurn": 4,
-        "cooldown": 3
+        "minTurn": 5,
+        "cooldown": 1
       }
     },
     "pattern": {
@@ -255,7 +259,7 @@
       "weights": {
         "bite": 1,
         "web": 1,
-        "ambush": 0,
+        "ambush": 1,
         "surge": 3
       }
     },
@@ -288,53 +292,55 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 7
-          }
-        ]
-      },
-      "growl": {
-        "name": "으르렁",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
+            "amount": 3,
+            "hits": 2
           }
         ],
-        "followUp": {
-          "move": "maul",
-          "chance": 0.5
-        }
+        "cooldown": 1
       },
-      "maul": {
-        "name": "사냥",
+      "growl": {
+        "name": "울부짖기",
         "effects": [
-          {
-            "op": "damage",
-            "amount": 11
-          },
           {
             "op": "empower",
             "amount": 2
           }
         ],
-        "minTurn": 5
+        "followUp": {
+          "move": "bite",
+          "chance": 0.5
+        }
+      },
+      "maul": {
+        "name": "상처 보듬기",
+        "effects": [
+          {
+            "op": "rest"
+          }
+        ],
+        "minTurn": 1,
+        "cooldown": 2
       },
       "surge": {
-        "name": "송곳니를 드러낸다",
+        "name": "허기",
         "effects": [
+          {
+            "op": "damage",
+            "amount": 5
+          },
           {
             "op": "empower",
             "amount": 5
           }
         ],
-        "minTurn": 4,
-        "cooldown": 3
+        "minTurn": 6,
+        "cooldown": 5
       }
     },
     "pattern": {
       "mode": "weighted",
       "weights": {
-        "bite": 3,
+        "bite": 1,
         "growl": 1,
         "maul": 1,
         "surge": 3
@@ -366,31 +372,24 @@
     ],
     "moves": {
       "scratch": {
-        "name": "할퀴기",
+        "name": "가시 뿜기",
         "effects": [
           {
             "op": "damage",
-            "amount": 5
+            "amount": 1,
+            "hits": 5
           }
         ],
         "cooldown": 2
       },
       "coil": {
-        "name": "가시 세우기",
+        "name": "줄기 방패",
         "effects": [
           {
             "op": "block",
-            "amount": 8
-          },
-          {
-            "op": "confuse",
-            "amount": 1
+            "amount": 6
           }
         ],
-        "followUp": {
-          "move": "lash",
-          "chance": 1.0
-        },
         "cooldown": 2
       },
       "lash": {
@@ -399,21 +398,25 @@
           {
             "op": "damage",
             "amount": 11
+          },
+          {
+            "op": "confuse",
+            "amount": 2
           }
         ],
-        "minTurn": 5,
-        "cooldown": 2
+        "minTurn": 3,
+        "cooldown": 3
       },
       "surge": {
-        "name": "가시를 세운다",
+        "name": "급성장",
         "effects": [
           {
             "op": "empower",
             "amount": 5
           }
         ],
-        "minTurn": 4,
-        "cooldown": 3
+        "minTurn": 6,
+        "cooldown": 6
       }
     },
     "pattern": {
@@ -421,7 +424,7 @@
       "weights": {
         "scratch": 1,
         "coil": 1,
-        "lash": 0,
+        "lash": 99,
         "surge": 3
       }
     },

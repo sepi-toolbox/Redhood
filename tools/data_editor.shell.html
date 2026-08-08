@@ -621,7 +621,7 @@ const dlg=document.getElementById('dlg');
 document.getElementById('close').onclick=()=>dlg.close();
 // 게임의 data.js 가 로딩 때 하는 검사를 여기서 미리 돌린다 — 깨진 데이터를 넘기지 않으려고
 function validateDB(){
-  const bad=[]; const OPS=new Set(['damage','block','confuse','empower','heal','rest']);
+  const bad=[]; const OPS=new Set(ENEMY_OPS.map(([id])=>id));   // 드롭다운 목록에서 직접 뽑는다 — 따로 적어두면 또 어긋난다
   for(const e of DB.enemies){
     const all={...e.moves, ...(e.uniqueMoves||{})};
     if(!Object.keys(e.moves).length) bad.push(`${e.name}: 일반 행동이 하나도 없음`);
