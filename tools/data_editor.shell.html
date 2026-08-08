@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v0.99 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.16 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -174,6 +174,17 @@ const ACT={}; DB.acts.acts.forEach(a=>a.themes.forEach(t=>{
   (t.normals||[]).concat(t.elites||[]).forEach(x=>ACT[x]=ACT[x]||[a.act,t.name]);
   ACT[t.boss]=ACT[t.boss]||[a.act,t.name];}));
 ACT[DB.acts.finalBoss]=[4,'최후의 어둠'];
+/* 표 순서: 막 → 테마 → 난이도(일반·정예·보스). 지도에 나오는 차례 그대로 훑을 수 있게. */
+const ORD={}; let _ord=0;
+DB.acts.acts.forEach(a=>a.themes.forEach(t=>{
+  (t.normals||[]).forEach(x=>{ if(!(x in ORD)) ORD[x]=_ord++; });
+  (t.elites ||[]).forEach(x=>{ if(!(x in ORD)) ORD[x]=_ord++; });
+  if(t.boss && !(t.boss in ORD)) ORD[t.boss]=_ord++;
+}));
+if(DB.acts.finalBoss && !(DB.acts.finalBoss in ORD)) ORD[DB.acts.finalBoss]=_ord++;
+/* [적, 원래 인덱스] — 인덱스는 JSON 경로에 그대로 쓰이므로 절대 다시 매기지 않는다 */
+const ENEMIES = DB.enemies.map((e,i)=>[e,i])
+  .sort((A,B)=>((ORD[A[0].id]??9999)-(ORD[B[0].id]??9999)) || (A[1]-B[1]));
 const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.id]=[c.name,v.name]));
 
 /* ---------- 탭 ---------- */
@@ -228,7 +239,7 @@ function rangeF(p,label){ const w=document.createElement('div'); w.style.display
 
 function tabEnemy(v){
   const tb=table(v,['id','이름','격','막','테마','HP 최소','HP 최대','기본 행동','행동 수','연계']);
-  DB.enemies.forEach((e,i)=>{
+  ENEMIES.forEach(([e,i])=>{
     const tr=document.createElement('tr'); tr.className='t-'+e.tier;
     tr.dataset.k=(e.id+' '+e.name).toLowerCase();
     cell(tr,e.id,1); cell(tr,e.name,1);
@@ -301,7 +312,7 @@ function purgeMove(e, mid){
 }
 function tabMoves(v){
   const tb=table(v,['적','행동명','효과','수치','타수','가중치','해금 턴','락 턴','쿨다운','파쇄 피해','파쇄 후','연계 확률','비고']);
-  DB.enemies.forEach((e,i)=>{
+  ENEMIES.forEach(([e,i])=>{
     const list=[...Object.entries(e.moves).map(([k,m])=>[k,m,false]),
                 ...Object.entries(uniqueOf(e)).map(([k,m])=>[k,m,true])];
     list.forEach(([mid,m,uniq])=>{
@@ -470,7 +481,7 @@ function tabRelic(v){
 }
 function tabPhase(v){
   const tb=table(v,['적','격','국면','유지 구간','HP 임계','진입 행동 (유니크)','이 국면의 행동','']);
-  DB.enemies.forEach((e,i)=>{
+  ENEMIES.forEach(([e,i])=>{
     const uo=Object.entries(uniqueOf(e));
     const phases=e.phases||[];
     if(phases.length){

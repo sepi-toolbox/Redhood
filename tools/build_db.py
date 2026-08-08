@@ -10,7 +10,7 @@ D = lambda n: json.load(open(f'/home/claude/redhood/data/{n}.json'))
 scoring, dice, relics, enemies = D('scoring'), D('dice'), D('relics'), D('enemies')
 events, acts, act1 = D('events'), D('acts'), D('act1')
 EN = {e['id']: e for e in enemies}
-VERSION = 'v0.99'
+VERSION = 'v1.16'
 TODAY = '2026-08-08'
 
 FONT = 'Arial'
@@ -80,6 +80,16 @@ for a in acts['acts']:
         ACT_OF.setdefault(t['boss'], (a['act'], t['name']))
 ACT_OF.setdefault(acts['finalBoss'], (4, '최후의 어둠'))
 
+# 표 순서: 막 → 테마 → 난이도(일반·정예·보스). 지도에 나오는 차례 그대로 훑을 수 있게.
+ORD = {}
+for a in acts['acts']:
+    for t in a['themes']:
+        for k in ('normals', 'elites'):
+            for e in t.get(k, []): ORD.setdefault(e, len(ORD))
+        ORD.setdefault(t['boss'], len(ORD))
+ORD.setdefault(acts['finalBoss'], len(ORD))
+ENEMIES = sorted(enemies, key=lambda e: ORD.get(e['id'], 9999))
+
 # ---------- 1. 개요 ----------
 ws = wb.create_sheet('개요')
 ws['A1'] = 'REDHOOD 게임 데이터 종합본'; ws['A1'].font = Font(name=FONT, size=18, bold=True, color='8F2A20')
@@ -94,8 +104,9 @@ rows = [
  ('층당 적 HP 증가', act1['hpScalePerFloor']),
  ('막별 HP 배율', ' / '.join(f"{k}막 ×{v}" for k, v in acts['scaling']['hp'].items())),
  ('막별 공격 배율', ' / '.join(f"{k}막 ×{v}" for k, v in acts['scaling']['atk'].items())),
- ('행동 발동 조건', '가중치(뽑힐 확률·0이면 연계 전용) · 해금 턴 · 쿨다운 · 연계 — 네 가지뿐'),
- ('강화 행동', "각 적의 'surge' 행동 — 해금 턴 4, 쿨다운 3. 4턴 이후 5턴 안팎마다 힘을 올린다"),
+ ('행동 발동 조건', '가중치(뽑힐 확률·0이면 연계 전용) · 해금 턴 · 락 턴 · 쿨다운 · 연계 — 다섯 가지뿐'),
+ ('강화 행동', "별도 장치가 아니다. 각 적의 'surge' 는 해금 턴·쿨다운이 붙은 평범한 행동일 뿐"),
+ ('표 정렬', '적·적행동 시트는 막 → 테마 → 난이도(일반·정예·보스) 순'),
  ('보스 처치 회복', f"최대 HP의 {int(acts['bossHealRatio']*100)}%"),
  ('최종 보스', EN[acts['finalBoss']]['name']),
  ('', ''),
@@ -169,7 +180,7 @@ sheet('유물', '유물 26개', '일반 17개는 어디서나, 정예 9개는 �
 
 # ---------- 6. 적 ----------
 rows = []
-for e in enemies:
+for e in ENEMIES:
     act, theme = ACT_OF.get(e['id'], ('—','—'))
     hp = e['hp']; hp_s = f"{hp[0]}" if hp[0]==hp[1] else f"{hp[0]}~{hp[1]}"
     late = [m['name'] for m in e['moves'].values() if m.get('minTurn')]
@@ -188,7 +199,7 @@ for e in enemies:
                  ' / '.join(chains) if chains else '—',
                  e.get('enlightenedMove',{}).get('name','—'),
                  e['tier']])
-sheet('적', '적 44종', '행동 발동 조건은 가중치·해금 턴·쿨다운·연계 네 가지다. 강화 행동은 별도 장치가 아니라 해금 턴 4 · 쿨다운 4가 붙은 평범한 행동이다.',
+sheet('적', '적 44종', '막 → 테마 → 난이도 순으로 늘어놓았다. 행동 발동 조건은 가중치·해금 턴·락 턴·쿨다운·연계 다섯 가지다.',
       ['id','이름','격','막','테마','HP','행동 수','국면','기본 행동','유니크 행동','해금 행동','연계','계몽 전용 행동'],
       rows, [16,16,6,5,14,10,7,6,16,20,22,34,18])
 
@@ -208,7 +219,7 @@ def weight_text(e, mid):
     return ' / '.join(out) if out else '—'
 
 rows = []
-for e in enemies:
+for e in ENEMIES:
     for mid, m in e['moves'].items():
         fu = m.get('followUp')
         br = m.get('break')
@@ -224,7 +235,7 @@ for e in enemies:
         rows.append([e['id'], e['name'], '__enlight', e['enlightenedMove']['name'],
                      eff_text(e['enlightenedMove'].get('effects')), '3번째 행동마다', '', '', '', '', '계몽 17~19단계', '', e['tier']])
 sheet('적행동', '적 행동 전량',
-      '발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정".',
+      '막 → 테마 → 난이도 순. 발동 조건 다섯 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 락 턴은 "이 턴이 되면 더 안 씀", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정".',
       ['적 id','적 이름','행동 id','행동명','효과','가중치','해금 턴','락 턴','쿨다운','파쇄','비고','연계'], rows, [16,16,16,20,30,18,8,8,8,18,14,22])
 
 # ---------- 8. 무기 ----------
