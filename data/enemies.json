@@ -2465,8 +2465,7 @@
           {
             "op": "status",
             "amount": 2,
-            "kind": "poison",
-            "power": 2
+            "kind": "poison"
           },
           {
             "op": "heal",
