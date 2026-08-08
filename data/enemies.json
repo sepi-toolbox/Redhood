@@ -122,7 +122,11 @@
             "amount": 15
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "break": {
+          "damage": 1,
+          "move": "ashes"
+        }
       },
       "surge": {
         "name": "심각한 명멸",
@@ -147,7 +151,11 @@
             "amount": 30
           }
         ],
-        "minTurn": 5
+        "minTurn": 5,
+        "break": {
+          "damage": 1,
+          "move": "ashes"
+        }
       }
     },
     "pattern": {
@@ -155,9 +163,9 @@
       "weights": {
         "scorch": 1,
         "flicker": 1,
-        "flare": 99,
+        "flare": 0,
         "surge": 1,
-        "move1": 99
+        "move1": 0
       }
     },
     "enlightenedMove": {
@@ -172,6 +180,16 @@
           "amount": 1
         }
       ]
+    },
+    "uniqueMoves": {
+      "ashes": {
+        "name": "잿더미",
+        "effects": [
+          {
+            "op": "rest"
+          }
+        ]
+      }
     }
   },
   {
