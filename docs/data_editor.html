@@ -83,7 +83,9 @@ function at(root, path){ return path.split('.').reduce((o,k)=> o==null?o:o[k], r
 function readP(p){ const [f,rest]=p.split(':'); return rest? at(DB[f],rest) : DB[f]; }
 function origP(p){ const [f,rest]=p.split(':'); return rest? at(ORIG[f],rest) : ORIG[f]; }
 function writeP(p,v){ const [f,rest]=p.split(':'); const ks=rest.split('.'); const last=ks.pop();
-  const o=ks.reduce((a,k)=>a[k], DB[f]); o[last]=v; }
+  let o=DB[f];
+  for(const k of ks){ if(o[k]===undefined||o[k]===null) o[k] = /^\d+$/.test(k) ? [] : {}; o=o[k]; }
+  o[last]=v; }
 function parentOf(p){ const [f,rest]=p.split(':'); const ks=rest.split('.'); const last=ks.pop();
   return [ks.reduce((a,k)=>a[k], DB[f]), last]; }
 function removeP(p){ const [o,last]=parentOf(p);
@@ -95,7 +97,11 @@ const changed = new Map();           // path -> {before, after, label}
 function shown(v){
   if(v===undefined||v===null) return '없음';
   if(Array.isArray(v)) return v.length+'개';
-  if(typeof v==='object') return Object.entries(v).map(([k,x])=>k+' '+x).join(' ');
+  if(typeof v==='object'){
+    const ks=Object.keys(v);
+    if(ks.every(k=>typeof v[k]!=='object')) return ks.map(k=>k+' '+v[k]).join(' ');
+    return ks.length+'개 ('+ks.join(', ')+')';
+  }
   return String(v);
 }
 function mark(p, label, def){
@@ -123,8 +129,11 @@ function field(path, label, opt={}){
   i.addEventListener('input', () => {
     let val = i.value;
     if (num){ const f = parseFloat(val); if (Number.isNaN(f)) return; val = f; }
+    const fresh = (readP(path) === undefined) && !!opt.onCreate;
+    if (fresh) opt.onCreate(val);
     writeP(path, val); mark(path, label, opt.def);
     i.classList.toggle('changed', changed.has(path));
+    if (fresh) { redraw(); return; }      // 짝이 되는 칸(예: 파쇄 후 행동)을 바로 보여주려면 한 번 다시 그린다
     refreshDerived();
   });
   if (changed.has(path)) i.classList.add('changed');
@@ -267,6 +276,27 @@ function weightCell(e, i, mid, m){
   return w;
 }
 const uniqueOf = (e) => e.uniqueMoves || {};
+function addRow(tb, cols, label, fn){
+  const tr=document.createElement('tr'); const td=document.createElement('td');
+  td.colSpan=cols; td.style.padding='4px 6px'; td.appendChild(miniBtn('+ '+label, label, fn));
+  tr.appendChild(td); tb.appendChild(tr);
+}
+function freshId(taken, stem){ let n=1; while(taken.has(stem+n)) n++; return stem+n; }
+function patternsOf(e){ return (e.phases||[]).map(p=>p.pattern).concat(e.pattern?[e.pattern]:[]); }
+// 행동을 지울 때 그 행동을 가리키던 것들을 같이 치운다 (안 그러면 데이터가 깨져 로딩이 막힌다)
+function purgeMove(e, mid){
+  const cleaned=[];
+  for(const p of patternsOf(e)) if(p.weights && mid in p.weights){ delete p.weights[mid]; cleaned.push('가중치'); }
+  for(const [k,m] of Object.entries({...e.moves, ...uniqueOf(e)})){
+    if(m.followUp && m.followUp.move===mid){ delete m.followUp; cleaned.push(`${m.name}의 연계`); }
+    if(m.break && m.break.move===mid){ delete m.break; cleaned.push(`${m.name}의 파쇄`); }
+  }
+  if(e.defaultMove===mid){ delete e.defaultMove; cleaned.push('기본 행동'); }
+  for(const p of (e.phases||[])) if(p.enter===mid){ delete p.enter; cleaned.push('국면 전환'); }
+  if(e.moves[mid]) delete e.moves[mid];
+  if(e.uniqueMoves && e.uniqueMoves[mid]) delete e.uniqueMoves[mid];
+  return [...new Set(cleaned)];
+}
 function tabMoves(v){
   const tb=table(v,['적','행동명','효과','수치','타수','가중치','해금 턴','락 턴','쿨다운','파쇄 피해','파쇄 후','연계 확률','비고']);
   DB.enemies.forEach((e,i)=>{
@@ -330,9 +360,38 @@ function tabMoves(v){
           {onCreate:(v)=>{ m.followUp={move:v, chance:0.5}; mark(`${base}.followUp.move`, e.name+' '+m.name+' 연계 추가'); }}));
       }
       cell(tr, fuBox);
-      cell(tr, (m.hidden?'숨김 ':'')+(uniq?'유니크':''),1);
+      const noteBox=document.createElement('div');
+      const tag=document.createElement('span'); tag.className='sub';
+      tag.textContent=(m.hidden?'숨김 ':'')+(uniq?'유니크':''); noteBox.appendChild(tag);
+      noteBox.appendChild(miniBtn('행 삭제','이 행동을 지운다 (가리키던 연계·파쇄·가중치도 함께 정리)',()=>{
+        if(!uniq && Object.keys(e.moves).length<=1){ alert('일반 행동이 하나뿐이라 지울 수 없어요.'); return; }
+        if(!confirm(`${e.name}의 "${m.name}" 을(를) 지울까요?`)) return;
+        const cleaned=purgeMove(e, mid);
+        mark(`enemies:${i}.${holder}`, `${e.name} 행동 삭제: ${m.name}` + (cleaned.length?` (${cleaned.join('·')} 정리)`:''));
+        redraw();
+      }));
+      cell(tr, noteBox);
       tb.appendChild(tr);
     });
+    // 적마다 마지막에 추가 줄
+    const add=document.createElement('tr'); add.dataset.k=(e.id+' '+e.name).toLowerCase();
+    const td=document.createElement('td'); td.colSpan=13; td.style.padding='4px 6px';
+    const box=document.createElement('div'); box.style.cssText='display:flex;gap:6px;align-items:center';
+    const lab=document.createElement('span'); lab.className='sub'; lab.textContent=e.name+' 에 추가 →'; box.appendChild(lab);
+    box.appendChild(miniBtn('+ 일반 행동','추첨에 들어가는 보통 행동을 새로 만든다',()=>{
+      const taken=new Set([...Object.keys(e.moves), ...Object.keys(uniqueOf(e))]);
+      const id=freshId(taken,'move');
+      e.moves[id]={ name:'새 행동', effects:[{op:'damage',amount:5}] };
+      for(const p of patternsOf(e)) if(p.weights) p.weights[id]=1;
+      mark(`enemies:${i}.moves`, `${e.name} 일반 행동 추가`); redraw();
+    }));
+    box.appendChild(miniBtn('+ 유니크 행동','추첨되지 않고 국면 전환·파쇄로만 나오는 행동을 만든다',()=>{
+      const taken=new Set([...Object.keys(e.moves), ...Object.keys(uniqueOf(e))]);
+      const id=freshId(taken,'unique');
+      (e.uniqueMoves=e.uniqueMoves||{})[id]={ name:'새 유니크 행동', effects:[{op:'rest'}] };
+      mark(`enemies:${i}.uniqueMoves`, `${e.name} 유니크 행동 추가`); redraw();
+    }));
+    td.appendChild(box); add.appendChild(td); tb.appendChild(add);
   });
 }
 function tabScore(v){
@@ -364,18 +423,28 @@ function tabScore(v){
   });
 }
 function tabDice(v){
-  const tb=table(v,['id','이름','등급','1','2','3','4','5','6','설명']);
+  const tb=table(v,['id','이름','등급','1','2','3','4','5','6','설명','']);
   DB.dice.forEach((d,i)=>{
     const tr=document.createElement('tr'); tr.className='t-'+(d.tier||'common');
     tr.dataset.k=(d.id+' '+d.name).toLowerCase();
     cell(tr,d.id,1); cell(tr, field(`dice:${i}.name`,d.id+' 이름')); cell(tr,d.tier||'common',1);
     d.faces.forEach((f,k)=> cell(tr, field(`dice:${i}.faces.${k}`, d.name+' '+(k+1)+'번 면')));
-    cell(tr,d.desc||'',1);
+    cell(tr, field(`dice:${i}.desc`, d.id+' 설명'));
+    const box=document.createElement('div');
+    box.appendChild(miniBtn('행 삭제','이 주사위를 지운다',()=>{
+      if(DB.act1.player.startDice.includes(d.id)){ alert('시작 주사위로 쓰이고 있어 지울 수 없어요.'); return; }
+      if(!confirm(`주사위 "${d.name}" 을(를) 지울까요?`)) return;
+      DB.dice.splice(i,1); mark('dice', `주사위 삭제: ${d.name}`); redraw(); }));
+    cell(tr, box);
     tb.appendChild(tr);
   });
+  addRow(tb, 11, '주사위 추가', ()=>{
+    const ids=new Set(DB.dice.map(x=>x.id));
+    DB.dice.push({ id:freshId(ids,'die'), name:'새 주사위', faces:[1,2,3,4,5,6], tier:'common', desc:'설명' });
+    mark('dice','주사위 추가'); redraw(); });
 }
 function tabRelic(v){
-  const tb=table(v,['id','이름','등급','효과 유형','수치','설명']);
+  const tb=table(v,['id','이름','등급','효과 유형','수치','설명','']);
   DB.relics.forEach((r,i)=>{
     const tr=document.createElement('tr'); tr.className='t-'+(r.tier==='elite'?'elite':'common');
     tr.dataset.k=(r.id+' '+r.name).toLowerCase();
@@ -384,8 +453,18 @@ function tabRelic(v){
     cell(tr,(r.hook&&r.hook.type)||'—',1);
     cell(tr, r.hook&&r.hook.amount!=null? field(`relics:${i}.hook.amount`,r.name+' 수치') : '—', !(r.hook&&r.hook.amount!=null));
     cell(tr, field(`relics:${i}.desc`,r.name+' 설명'));
+    const box=document.createElement('div'); box.style.cssText='display:flex;gap:6px';
+    box.appendChild(miniBtn('행 삭제','이 유물을 지운다',()=>{
+      if(!confirm(`유물 "${r.name}" 을(를) 지울까요?`)) return;
+      DB.relics.splice(i,1); mark('relics', `유물 삭제: ${r.name}`); redraw(); }));
+    cell(tr, box);
     tb.appendChild(tr);
   });
+  addRow(tb, 7, '유물 추가', ()=>{
+    const ids=new Set(DB.relics.map(x=>x.id));
+    DB.relics.push({ id:freshId(ids,'relic'), name:'새 유물', icon:'✨', tier:'normal',
+      desc:'효과 설명', hook:{ type:'flatDamage', amount:1 } });
+    mark('relics','유물 추가'); redraw(); });
 }
 function tabTheme(v){
   const tb=table(v,['막','테마','일반 적','정예','보스','이벤트','HP 배율','공격 배율']);
@@ -479,8 +558,50 @@ document.getElementById('undo').onclick=()=>{
 };
 const dlg=document.getElementById('dlg');
 document.getElementById('close').onclick=()=>dlg.close();
+// 게임의 data.js 가 로딩 때 하는 검사를 여기서 미리 돌린다 — 깨진 데이터를 넘기지 않으려고
+function validateDB(){
+  const bad=[]; const OPS=new Set(['damage','block','confuse','empower','heal','rest']);
+  for(const e of DB.enemies){
+    const all={...e.moves, ...(e.uniqueMoves||{})};
+    if(!Object.keys(e.moves).length) bad.push(`${e.name}: 일반 행동이 하나도 없음`);
+    for(const [mid,m] of Object.entries(all)){
+      for(const ef of (m.effects||[])) if(!OPS.has(ef.op)) bad.push(`${e.name}/${m.name}: 모르는 효과 "${ef.op}"`);
+      if(m.break){
+        if(!(e.uniqueMoves||{})[m.break.move]) bad.push(`${e.name}/${m.name}: 파쇄 대상이 유니크 행동이 아님`);
+        if(!(m.break.damage>0)) bad.push(`${e.name}/${m.name}: 파쇄 피해가 0`);
+      }
+      if(m.followUp && !all[m.followUp.move]) bad.push(`${e.name}/${m.name}: 연계 대상이 없음`);
+    }
+    if(e.defaultMove && !all[e.defaultMove]) bad.push(`${e.name}: 기본 행동 "${e.defaultMove}" 없음`);
+    for(const p of (e.phases||[])) if(p.enter && !(e.uniqueMoves||{})[p.enter]) bad.push(`${e.name}: 국면 전환 대상이 유니크가 아님`);
+    const pats=(e.phases||[]).map(x=>x.pattern).concat(e.pattern?[e.pattern]:[]);
+    for(const p of pats) for(const id of Object.keys(p.weights||{}))
+      if(!e.moves[id]) bad.push(`${e.name}: 가중치의 "${id}" 가 일반 행동이 아님`);
+    const called=new Set(Object.values(all).filter(m=>m.followUp).map(m=>m.followUp.move));
+    const broken=new Set(Object.values(all).filter(m=>m.break).map(m=>m.break.move));
+    for(const id of Object.keys(e.moves)){
+      const w=pats.some(p=>(p.weights||{})[id]>0);
+      if(!w && !called.has(id) && e.defaultMove!==id) bad.push(`${e.name}/${e.moves[id].name}: 절대 등장할 수 없음 (가중치 0인데 부르는 곳 없음)`);
+    }
+    for(const id of Object.keys(e.uniqueMoves||{})){
+      const reached=broken.has(id) || (e.phases||[]).some(p=>p.enter===id) || e.defaultMove===id || called.has(id);
+      if(!reached) bad.push(`${e.name}/${e.uniqueMoves[id].name}: 유니크인데 부르는 곳이 없음 (파쇄·국면 전환·기본 행동 중 하나로 연결하세요)`);
+    }
+  }
+  for(const id of DB.act1.player.startDice) if(!DB.dice.some(d=>d.id===id)) bad.push(`시작 주사위 "${id}" 가 없음`);
+  return bad;
+}
+
 document.getElementById('exp').onclick=()=>{
   const b=document.getElementById('dlgb'); b.innerHTML='';
+  const problems=validateDB();
+  if(problems.length){
+    const w=document.createElement('div');
+    w.style.cssText='border-left:3px solid #c9302f;background:#2a1a17;padding:10px 12px;border-radius:6px;margin-bottom:12px';
+    w.innerHTML='<b style="color:#ff8a6b">⚠ 이대로는 게임이 안 뜹니다 — '+problems.length+'건</b>'
+      + problems.map(x=>`<div class="sub" style="margin-top:4px">· ${x}</div>`).join('');
+    b.appendChild(w);
+  }
   const touched=[...new Set([...changed.keys()].map(p=>p.split(':')[0]))];
 
   const h=document.createElement('div');
