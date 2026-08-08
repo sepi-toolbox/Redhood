@@ -75,6 +75,7 @@ function spawnEnemy(id, idx, scale) {
     debuffs: { weak: 0, bleed: 0, vulnerable: 0 }, // v0.19: 약화(공격-N)/출혈(행동마다 피해, -1씩 감소)/취약(받는 피해+N)
     patternState: { index: 0, recent: [], count: 0 }, phaseIndex: 0, nextMove: null,
     cooldown: {},                         // v1.01: 행동 id → 다시 쓸 수 있게 되는 턴. moves.*.cooldown 이 없으면 0(제한 없음)
+    breakTaken: 0,                        // v1.08: 지금 예고된 행동을 건 뒤 HP로 받은 피해 누적 (파쇄 판정용)
   };
 }
 
@@ -307,7 +308,40 @@ function dealToEnemy(battle, t, amount) {
   const dealt = total - absorbed;
   t.hp -= dealt;
   battle.lastHits.push({ uid: t.uid, amount: dealt, absorbed, killed: t.hp <= 0 });
+  if (t.hp > 0 && dealt > 0) interrupt(t, dealt);
 }
+
+// HP에 실제로 들어간 피해만 받아서 국면 전환과 파쇄를 판정한다 (방어도로 막힌 몫은 넘어오지 않는다)
+function interrupt(enemy, dealt) {
+  const def = DB.enemyById[enemy.defId];
+  // (1) 국면 전환이 최우선 — 예고가 무엇이든 밀어낸다
+  if (def.phases) {
+    const idx = phaseIndexFor(def, enemy);
+    if (idx !== enemy.phaseIndex) {
+      const prev = enemy.phaseIndex;
+      enemy.phaseIndex = idx;
+      enemy.patternState = { index: 0, recent: [] };
+      const enter = def.phases[idx].enter;
+      if (enter && idx > prev && moveDef(def, enter)) {
+        setNextMove(enemy, def, enter, { phaseShift: true });
+        return;
+      }
+    }
+  }
+  // (2) 파쇄 — 유니크 행동은 무너지지 않는다
+  const mv = enemy.nextMove;
+  if (!mv || mv.phaseShift || mv.broken) return;
+  if (isUnique(def, mv.id)) return;
+  const br = mv.break;
+  if (!br || !(br.damage > 0)) return;
+  enemy.breakTaken = (enemy.breakTaken || 0) + dealt;
+  if (enemy.breakTaken >= br.damage && moveDef(def, br.move)) {
+    setNextMove(enemy, def, br.move, { broken: true });
+  }
+}
+
+// 시험용 — 족보를 거치지 않고 적에게 직접 피해를 넣는다 (파쇄·국면 전환 검증)
+export function __test_deal(battle, enemy, amount) { battle.lastHits = battle.lastHits || []; dealToEnemy(battle, enemy, amount); }
 
 // ---------- 족보 확정 (플레이어 페이즈) — 사용할 변형을 지정 ----------
 export function confirmCategory(battle, catId, variantId, targetUid = null) {
@@ -454,15 +488,41 @@ export function enemyPhase(battle) {
   startTurn(battle);
 }
 
+// ---------- 유니크 행동 (v1.08) ----------
+// 일반 행동(moves)은 가중치 추첨으로 나온다. 유니크 행동(uniqueMoves)은 절대 추첨되지 않고
+// 조건이 맞을 때만 '현재 예고된 행동을 밀어내고' 나온다. 두 가지 경로가 있다.
+//   · 국면 전환 — phases[i].enter 에 적힌 유니크 행동. HP가 그 국면에 들어서는 순간 강제로 나온다.
+//   · 파쇄     — moves.X.break = { damage, move } . X가 예고된 동안 적의 HP에 그만큼 피해가 누적되면
+//                예고가 break.move(유니크)로 바뀐다. 방어도로 막힌 피해는 세지 않는다.
+// 유니크 행동은 파쇄되지 않는다.
+const moveDef = (def, id) => (def.moves && def.moves[id]) || (def.uniqueMoves && def.uniqueMoves[id]) || null;
+// v1.08 등장 구간: 해금 턴(minTurn) 이상이고 락 턴(lockTurn) 미만일 때만 쓸 수 있다.
+//   minTurn 2, lockTurn 5 → 2·3·4턴에만 나온다. 둘 다 0이면 제한 없음.
+function usableAt(def, id, turn) {
+  const m = moveDef(def, id);
+  if (!m) return false;
+  if (m.minTurn > 0 && turn < m.minTurn) return false;
+  if (m.lockTurn > 0 && turn >= m.lockTurn) return false;
+  return true;
+}
+const isUnique = (def, id) => !(def.moves && def.moves[id]) && !!(def.uniqueMoves && def.uniqueMoves[id]);
+function setNextMove(enemy, def, id, extra = {}) {
+  const m = moveDef(def, id);
+  if (!m) return;
+  enemy.breakTaken = 0;                 // 예고가 바뀌면 파쇄 누적도 처음부터
+  enemy.nextMove = { id, ...m, ...extra };
+}
+function phaseIndexFor(def, enemy) {
+  const ratio = enemy.hp / enemy.maxHpInit;
+  for (let i = 0; i < def.phases.length; i++) if (ratio > def.phases[i].untilHpRatio) return i;
+  return def.phases.length - 1;
+}
+
 // ---------- 적 행동 선택 ----------
 function currentPattern(enemy) {
   const def = DB.enemyById[enemy.defId];
   if (!def.phases) return def.pattern;
-  const ratio = enemy.hp / enemy.maxHpInit;
-  let idx = def.phases.length - 1;
-  for (let i = 0; i < def.phases.length; i++) {
-    if (ratio > def.phases[i].untilHpRatio) { idx = i; break; }
-  }
+  const idx = phaseIndexFor(def, enemy);
   if (idx !== enemy.phaseIndex) { enemy.phaseIndex = idx; enemy.patternState = { index: 0, recent: [] }; }
   return def.phases[idx].pattern;
 }
@@ -487,13 +547,13 @@ function chooseMove(enemy, turn = 1) {
   if (prev && prev.followUp && !prev.chained) {
     const list = Array.isArray(prev.followUp) ? prev.followUp : [prev.followUp];
     for (const fu of list) {
-      const target = def.moves[fu.move];
+      const target = moveDef(def, fu.move);
       if (!target) continue;
-      if (target.minTurn > turn) continue;   // 후반 전용 기술은 연계로도 앞당겨지지 않는다
+      if (!usableAt(def, fu.move, turn)) continue;   // 등장 구간 밖이면 연계로도 못 당긴다
       if (onCooldown(enemy, fu.move, turn)) continue;   // 대기 중인 기술은 연계로도 못 당긴다
       if (rng.next() >= (fu.chance != null ? fu.chance : 1)) continue;
       stampCooldown(enemy, def, fu.move, turn);
-      enemy.nextMove = { id: fu.move, chained: true, ...def.moves[fu.move] };
+      setNextMove(enemy, def, fu.move, { chained: true });
       return;
     }
   }
@@ -501,6 +561,7 @@ function chooseMove(enemy, turn = 1) {
   st.count = (st.count || 0) + 1;
   // 계몽 패턴: 3번째 행동마다 강력한 계몽 기술 사용
   if (enemy.enlightened && def.enlightenedMove && st.count % 3 === 0) {
+    enemy.breakTaken = 0;
     enemy.nextMove = { id: '__enlightened', ...def.enlightenedMove };
     return;
   }
@@ -512,7 +573,7 @@ function chooseMove(enemy, turn = 1) {
   //   cooldown— 한 번 쓰면 이 턴 수만큼 쉰다. 주기적인 리듬은 이걸로 만든다.
   //   followUp— 앞 행동 다음에 확률로 확정된다. 순서를 강제할 때 쓴다.
   //   (예전의 sequence 모드와 강화 전용 트랙은 이 넷의 조합으로 그대로 표현된다)
-  const unlocked = (id) => !(def.moves[id] && def.moves[id].minTurn > turn) && !onCooldown(enemy, id, turn);
+  const unlocked = (id) => usableAt(def, id, turn) && !onCooldown(enemy, id, turn);
   {
     // v1.01: 가중치 0 = 추첨에 안 들어간다. 연계(followUp)로만 나오는 기술을 이렇게 표현한다.
     //   준비 동작 → 큰 공격 처럼 '반드시 앞선 행동이 있어야 하는' 기술에 쓴다.
@@ -523,7 +584,15 @@ function chooseMove(enemy, turn = 1) {
       const recent = st.recent.slice(-(pat.noRepeat - 1));
       return !(recent.length === pat.noRepeat - 1 && recent.every(r => r === id));
     });
-    if (entries.length === 0) entries.push(...Object.entries(pat.weights).filter(([id, w]) => w > 0 && unlocked(id)));
+    // v1.08 기본 행동(defaultMove) — 예외 처리용 안전망이다.
+    //   쓸 수 있는 수가 하나도 남지 않았을 때(전부 쿨다운·락·해금에 걸렸을 때) 강제로 시동한다.
+    //   해금 턴·락 턴·쿨다운·가중치를 전부 무시한다. 유니크 행동도 지정할 수 있다.
+    //   데이터를 어떻게 짜든 적이 아무것도 못 하고 멈추는 상황을 없애는 게 목적이다.
+    if (entries.length === 0 && def.defaultMove && moveDef(def, def.defaultMove)) {
+      setNextMove(enemy, def, def.defaultMove, { forced: true });
+      return;
+    }
+    if (entries.length === 0) entries.push(...Object.entries(pat.weights).filter(([id, w]) => w > 0 && usableAt(def, id, turn)));
     if (entries.length === 0) entries.push(...Object.entries(pat.weights).filter(([, w]) => w > 0));
     if (entries.length === 0) entries.push(...Object.entries(pat.weights));
     const total = entries.reduce((s, [, w]) => s + w, 0);
@@ -533,7 +602,7 @@ function chooseMove(enemy, turn = 1) {
     st.recent.push(moveId);
   }
   stampCooldown(enemy, def, moveId, turn);
-  enemy.nextMove = { id: moveId, ...def.moves[moveId] };
+  setNextMove(enemy, def, moveId);
 }
 
 // 한 대의 피해 — 기본 수치에 막·계몽 배율을 곱한 뒤 강화를 더하고 약화를 뺀다.
@@ -561,6 +630,10 @@ export function intentOf(enemy) {
     else if (ef.op === 'confuse') parts.push('🌀');
     else if (ef.op === 'empower') parts.push('💪');
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
+  }
+  const br = mv.break;
+  if (br && br.damage > 0 && !mv.phaseShift && !mv.broken) {
+    parts.push(`🔨${Math.max(0, br.damage - (enemy.breakTaken || 0))}`);
   }
   return parts.join(' ') || '💤';
 }
