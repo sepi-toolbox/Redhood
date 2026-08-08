@@ -182,15 +182,15 @@ for e in enemies:
     phases = len(e.get('phases', [])) or 1
     rows.append([e['id'], e['name'], {'normal':'일반','elite':'정예','boss':'보스'}[e['tier']],
                  act, theme, hp_s, len(e['moves']), phases,
-                 (e['moves'].get('surge') or {}).get('name','—'),
-                 eff_text((e['moves'].get('surge') or {}).get('effects')),
+                 (e.get('defaultMove') or '—'),
+                 ', '.join((e.get('uniqueMoves') or {}).keys()) or '—',
                  (f"{late[0]} ({lateT[0]}턴부터)" if late else '—'),
                  ' / '.join(chains) if chains else '—',
                  e.get('enlightenedMove',{}).get('name','—'),
                  e['tier']])
 sheet('적', '적 44종', '행동 발동 조건은 가중치·해금 턴·쿨다운·연계 네 가지다. 강화 행동은 별도 장치가 아니라 해금 턴 4 · 쿨다운 4가 붙은 평범한 행동이다.',
-      ['id','이름','격','막','테마','HP','행동 수','국면','강화 행동','강화 효과','해금 행동','연계','계몽 전용 행동'],
-      rows, [16,16,6,5,14,10,7,6,20,14,22,34,18])
+      ['id','이름','격','막','테마','HP','행동 수','국면','기본 행동','유니크 행동','해금 행동','연계','계몽 전용 행동'],
+      rows, [16,16,6,5,14,10,7,6,16,20,22,34,18])
 
 # ---------- 7. 적 행동 ----------
 def weight_text(e, mid):
@@ -211,16 +211,21 @@ rows = []
 for e in enemies:
     for mid, m in e['moves'].items():
         fu = m.get('followUp')
+        br = m.get('break')
         rows.append([e['id'], e['name'], mid, m['name'], eff_text(m.get('effects')),
-                     weight_text(e, mid), m.get('minTurn') or '', m.get('cooldown') or 0, '숨김' if m.get('hidden') else '',
+                     weight_text(e, mid), m.get('minTurn') or '', m.get('lockTurn') or '', m.get('cooldown') or 0,
+                     (f"{br['damage']} → {br['move']}" if br else ''), '숨김' if m.get('hidden') else '',
                      (f"{e['moves'][fu['move']]['name']} {int(fu['chance']*100)}%" if fu else ''),
                      e['tier']])
+    for mid, m in (e.get('uniqueMoves') or {}).items():
+        rows.append([e['id'], e['name'], mid, m['name'], eff_text(m.get('effects')),
+                     '유니크(추첨 안 함)', '', '', '', '파쇄 안 됨', '', '', e['tier']])
     if e.get('enlightenedMove'):
         rows.append([e['id'], e['name'], '__enlight', e['enlightenedMove']['name'],
-                     eff_text(e['enlightenedMove'].get('effects')), '3번째 행동마다', '', '', '계몽 17~19단계', '', e['tier']])
+                     eff_text(e['enlightenedMove'].get('effects')), '3번째 행동마다', '', '', '', '', '계몽 17~19단계', '', e['tier']])
 sheet('적행동', '적 행동 전량',
       '발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정".',
-      ['적 id','적 이름','행동 id','행동명','효과','가중치','해금 턴','쿨다운','비고','연계'], rows, [16,16,16,20,30,18,8,8,16,22])
+      ['적 id','적 이름','행동 id','행동명','효과','가중치','해금 턴','락 턴','쿨다운','파쇄','비고','연계'], rows, [16,16,16,20,30,18,8,8,8,18,14,22])
 
 # ---------- 8. 무기 ----------
 NAMEOF = {v['id']: (c['name'], v['name']) for c in scoring['categories'] for v in c['variants']}

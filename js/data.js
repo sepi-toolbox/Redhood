@@ -55,12 +55,26 @@ function validate() {
       }
     }
   }
-  // 적 행동 6유형 검증 (v0.11)
-  const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal']);
+  // 적 행동 효과 검증 (v1.08: 휴식 추가, 유니크 행동·기본 행동·파쇄 대상까지 함께 본다)
+  const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal', 'rest']);
   for (const e of DB.enemies) {
-    for (const [mid, mv] of Object.entries(e.moves)) {
+    const all = { ...e.moves, ...(e.uniqueMoves || {}) };
+    for (const [mid, mv] of Object.entries(all)) {
       for (const ef of mv.effects) {
-        if (!ENEMY_OPS.has(ef.op)) throw new Error(`enemies.json: ${e.id}.${mid} 미지원 행동 "${ef.op}"`);
+        if (!ENEMY_OPS.has(ef.op)) throw new Error(`enemies.json: ${e.id}.${mid} 미지원 효과 "${ef.op}"`);
+      }
+      if (mv.break) {
+        if (!(e.uniqueMoves || {})[mv.break.move]) throw new Error(`enemies.json: ${e.id}.${mid} 파쇄 대상 "${mv.break.move}" 은(는) 유니크 행동이어야 합니다`);
+        if (!(mv.break.damage > 0)) throw new Error(`enemies.json: ${e.id}.${mid} 파쇄 피해가 0 이하입니다`);
+      }
+    }
+    if (e.defaultMove && !all[e.defaultMove]) throw new Error(`enemies.json: ${e.id} 기본 행동 "${e.defaultMove}" 이(가) 없습니다`);
+    for (const p of (e.phases || [])) {
+      if (p.enter && !(e.uniqueMoves || {})[p.enter]) throw new Error(`enemies.json: ${e.id} 국면 전환 행동 "${p.enter}" 은(는) 유니크 행동이어야 합니다`);
+    }
+    for (const p of ((e.phases || []).map(x => x.pattern).concat(e.pattern ? [e.pattern] : []))) {
+      for (const id of Object.keys(p.weights || {})) {
+        if (!e.moves[id]) throw new Error(`enemies.json: ${e.id} 가중치의 "${id}" 는 일반 행동이 아닙니다 (유니크는 추첨에 못 들어갑니다)`);
       }
     }
   }

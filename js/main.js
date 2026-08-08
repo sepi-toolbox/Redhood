@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.07'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.08'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -775,7 +775,7 @@ function renderBattle(opts = {}) {
           <button class="enemy t-${e.tier} ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
             ${/* v0.52: 정보(의도·이름·체력바)는 머리 위, 그림은 크게 아래 */ ''}
             <span class="target-pin">▼</span>
-            <span class="intent ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.chained ? 'chained' : ''}">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
+            <span class="intent ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.chained ? 'chained' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
               // 적 방어도 LoL식: HP 구간 끝에 회백색 실드 세그먼트
@@ -1020,8 +1020,15 @@ function showEnemyInfo(uid) {
         <h3>${e.art} ${esc(e.name)} <small class="cat-tag">${ENEMY_TIER_KO[e.tier] || e.tier}${e.final ? ' · 무한' : ''}</small></h3>
         <p class="modal-text">${e.final ? '체력 ∞' : `HP ${e.hp}/${e.maxHpInit}`}</p>
         ${status ? `<p class="info-ability">걸린 효과</p><ul class="deck-list">${status}</ul>` : ''}
-        <p class="info-ability">🔍 예고 행동: <b>${esc(mv.name)}</b>${mv.hidden ? ' <small class="cat-tag">(❓ 의문 — 치트로 공개)</small>' : ''}</p>
+        <p class="info-ability">🔍 예고 행동: <b>${esc(mv.name)}</b>${mv.hidden ? ' <small class="cat-tag">(❓ 의문 — 치트로 공개)</small>' : ''}${mv.phaseShift ? ' <small class="cat-tag">(국면 전환)</small>' : ''}${mv.broken ? ' <small class="cat-tag">(파쇄됨)</small>' : ''}</p>
         <ul class="deck-list">${effects || '<li class="modal-text">아무것도 하지 않는다</li>'}</ul>
+        ${(() => {
+          const br = mv.break;
+          if (!br || !(br.damage > 0) || mv.phaseShift || mv.broken) return '';
+          const left = Math.max(0, br.damage - (e.breakTaken || 0));
+          const alt = (DB.enemyById[e.defId].uniqueMoves || {})[br.move];
+          return `<p class="modal-text">🔨 파쇄 — 앞으로 <b>${left}</b> 피해를 더 주면 이 행동이 무너지고 <b>${esc(alt ? alt.name : br.move)}</b>(으)로 바뀐다. 방어도로 막힌 피해는 세지 않는다.</p>`;
+        })()}
         ${e.escalation ? `<p class="modal-text">⚠ 매 턴 공격력 +${e.escalation} 누적 — 점점 강해진다</p>` : ''}
         ${e.enlightened ? `<p class="modal-text">🔮 계몽 상태 — 3번째 행동마다 강화 기술 사용</p>` : ''}
         <p class="hint">⚠ 치트 보기 — 숨겨진 정보(❓)까지 공개된다</p>

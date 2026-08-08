@@ -169,8 +169,8 @@ const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.i
 /* ---------- 탭 ---------- */
 const TABS=[
  ['개요','바뀐 값은 초록으로 표시된다. 다 고쳤으면 오른쪽 위 [내보내기]를 눌러 바뀐 JSON을 받아 나에게 주면 반영해서 배포한다.',ovw],
- ['적','HP와 강화 행동. 개별 행동 수치는 [적행동] 탭에서 고친다.',tabEnemy],
- ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정". 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
+ ['적','HP와 기본 행동. 기본 행동은 모든 수가 쿨다운·락에 걸렸을 때 강제로 쓰는 안전망이다. 개별 행동은 [적행동] 탭에서 고친다.',tabEnemy],
+ ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 락 턴은 "이 턴이 되면 더 안 씀"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 파쇄는 그 행동이 예고된 동안 HP에 그만큼 피해를 받으면 유니크 행동으로 무너지는 것 — 방어도로 막힌 피해는 안 센다. 유니크 행동은 추첨에 안 들어가고 파쇄되지도 않는다. 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
  ['족보','배수(mult)와 변형의 부가 능력 수치.',tabScore],
  ['주사위','여섯 면을 직접 고친다. 면 구성이 곧 성능이다.',tabDice],
  ['유물','효과 수치는 hook.amount 하나로 정해진다.',tabRelic],
@@ -216,7 +216,7 @@ function rangeF(p,label){ const w=document.createElement('div'); w.style.display
   w.appendChild(field(p+'.1',label+' 최대')); return w; }
 
 function tabEnemy(v){
-  const tb=table(v,['id','이름','격','막','테마','HP 최소','HP 최대','강화 행동','강화 수치','행동 수','연계']);
+  const tb=table(v,['id','이름','격','막','테마','HP 최소','HP 최대','기본 행동','행동 수','연계']);
   DB.enemies.forEach((e,i)=>{
     const tr=document.createElement('tr'); tr.className='t-'+e.tier;
     tr.dataset.k=(e.id+' '+e.name).toLowerCase();
@@ -225,10 +225,12 @@ function tabEnemy(v){
     const a=ACT[e.id]||['—','—']; cell(tr,a[0],1); cell(tr,a[1],1);
     cell(tr, field(`enemies:${i}.hp.0`,e.name+' HP 최소'));
     cell(tr, field(`enemies:${i}.hp.1`,e.name+' HP 최대'));
-    cell(tr, e.surgeMove? field(`enemies:${i}.surgeMove.name`,e.name+' 강화명') : '—', !e.surgeMove);
-    cell(tr, e.surgeMove&&e.surgeMove.effects&&e.surgeMove.effects.length
-      ? field(`enemies:${i}.surgeMove.effects.0.amount`,e.name+' 강화 수치') : '—', !e.surgeMove);
-    cell(tr, Object.keys(e.moves).length, 1);
+    const all=[...Object.entries(e.moves), ...Object.entries(e.uniqueMoves||{})];
+    cell(tr, select(`enemies:${i}.defaultMove`, e.name+' 기본 행동',
+      [['','— 없음 —'], ...all.map(([k,mm])=>[k,mm.name])],
+      {removable:true, removePath:`enemies:${i}.defaultMove`,
+       onCreate:(val)=>{ e.defaultMove=val; }}));
+    cell(tr, Object.keys(e.moves).length + (e.uniqueMoves? ' + 유니크 '+Object.keys(e.uniqueMoves).length : ''), 1);
     const ch=Object.entries(e.moves).filter(([,m])=>m.followUp)
       .map(([,m])=>m.name+' → '+e.moves[m.followUp.move].name+' '+Math.round(m.followUp.chance*100)+'%');
     cell(tr, ch.join('<br>')||'—', 1);
@@ -264,15 +266,19 @@ function weightCell(e, i, mid, m){
   });
   return w;
 }
+const uniqueOf = (e) => e.uniqueMoves || {};
 function tabMoves(v){
-  const tb=table(v,['적','행동명','효과','수치','타수','가중치','해금 턴','쿨다운','연계 확률','비고']);
+  const tb=table(v,['적','행동명','효과','수치','타수','가중치','해금 턴','락 턴','쿨다운','파쇄 피해','파쇄 후','연계 확률','비고']);
   DB.enemies.forEach((e,i)=>{
-    Object.entries(e.moves).forEach(([mid,m])=>{
+    const list=[...Object.entries(e.moves).map(([k,m])=>[k,m,false]),
+                ...Object.entries(uniqueOf(e)).map(([k,m])=>[k,m,true])];
+    list.forEach(([mid,m,uniq])=>{
+      const holder = uniq ? 'uniqueMoves' : 'moves';
+      const base=`enemies:${i}.${holder}.${mid}`;
       const tr=document.createElement('tr'); tr.className='t-'+e.tier;
-      tr.dataset.k=(e.id+' '+e.name+' '+mid+' '+m.name).toLowerCase();
-      cell(tr,e.name,1);
-      cell(tr, field(`enemies:${i}.moves.${mid}.name`,e.name+' '+mid+' 이름'));
-      const base=`enemies:${i}.moves.${mid}`;
+      tr.dataset.k=(e.id+' '+e.name+' '+mid+' '+m.name+(uniq?' 유니크':'')).toLowerCase();
+      cell(tr, e.name + (uniq ? ' <span class="sub">· 유니크</span>' : ''), 1);
+      cell(tr, field(`${base}.name`, e.name+' '+mid+' 이름'));
       const efBox=document.createElement('div');
       (m.effects||[]).forEach((x,k)=>{
         const row=document.createElement('div'); row.className='efrow';
@@ -296,9 +302,20 @@ function tabMoves(v){
       });
       cell(tr, wrap.children.length?wrap:'—', !wrap.children.length);
       cell(tr, hitBox.children.length?hitBox:'—', !hitBox.children.length);
-      cell(tr, weightCell(e, i, mid, m), false);
-      cell(tr, field(`${base}.minTurn`, e.name+' '+m.name+' 해금 턴', {num:true, def:0}));
-      cell(tr, field(`enemies:${i}.moves.${mid}.cooldown`, e.name+' '+m.name+' 쿨다운(쉬는 턴)', {num:true, def:0}));
+      cell(tr, uniq ? '추첨 안 함' : weightCell(e, i, mid, m), uniq);
+      cell(tr, uniq ? '—' : field(`${base}.minTurn`, e.name+' '+m.name+' 해금 턴', {num:true, def:0}), uniq);
+      cell(tr, uniq ? '—' : field(`${base}.lockTurn`, e.name+' '+m.name+' 락 턴', {num:true, def:0}), uniq);
+      cell(tr, uniq ? '—' : field(`${base}.cooldown`, e.name+' '+m.name+' 쿨다운(쉬는 턴)', {num:true, def:0}), uniq);
+      const uo=Object.entries(uniqueOf(e));
+      if (uniq || !uo.length) { cell(tr, uniq ? '파쇄 안 됨' : '유니크 없음', 1); cell(tr,'—',1); }
+      else {
+        cell(tr, field(`${base}.break.damage`, e.name+' '+m.name+' 파쇄 피해', {num:true, def:0,
+          onCreate:(val)=>{ m.break={damage:Number(val)||10, move:uo[0][0]}; }}));
+        cell(tr, select(`${base}.break.move`, e.name+' '+m.name+' 파쇄 후 행동',
+          [['','— 없음 —'], ...uo.map(([k,mm])=>[k,mm.name])],
+          {removable:true, removePath:`${base}.break`,
+           onCreate:(val)=>{ m.break={damage:(m.break&&m.break.damage)||10, move:val}; }}));
+      }
       const opts=[['','— 없음 —'], ...Object.entries(e.moves).filter(([k])=>k!==mid).map(([k,mm])=>[k,mm.name])];
       const fuBox=document.createElement('div');
       if(m.followUp){
@@ -313,7 +330,7 @@ function tabMoves(v){
           {onCreate:(v)=>{ m.followUp={move:v, chance:0.5}; mark(`${base}.followUp.move`, e.name+' '+m.name+' 연계 추가'); }}));
       }
       cell(tr, fuBox);
-      cell(tr, (m.hidden?'숨김':''),1);
+      cell(tr, (m.hidden?'숨김 ':'')+(uniq?'유니크':''),1);
       tb.appendChild(tr);
     });
   });

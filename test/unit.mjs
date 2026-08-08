@@ -366,6 +366,111 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('hits 없으면 1타로 동작', eng.hitCount({ op: 'damage', amount: 3 }), 1);
 }
 
+// v1.08: 락 턴 · 유니크 행동 · 국면 전환 · 파쇄
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = Math.random;
+  const D = (n) => [{ op: 'damage', amount: n }];
+  const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+
+  // --- 락 턴: minTurn 2, lockTurn 5 → 2·3·4턴에만 나온다
+  DB.enemyById.__lock = { id: '__lock', name: '락', tier: 'normal', art: '🧪', hp: [9e6, 9e6],
+    moves: { base: { name: '평타', effects: D(1) }, win: { name: '구간기', effects: D(1), minTurn: 2, lockTurn: 5 } },
+    pattern: { mode: 'weighted', weights: { base: 1, win: 20 } } };
+  const seen = new Set();
+  for (let n = 0; n < 400; n++) {
+    const b = mk('__lock');
+    for (let t = 1; t <= 9; t++) { if (b.enemies[0].nextMove.id === 'win') seen.add(t); b.await = 'enemy'; eng.enemyPhase(b); }
+  }
+  eq('락 턴 구간에서만 등장 (2·3·4턴)', [...seen].sort((a, b2) => a - b2), [2, 3, 4]);
+
+  // --- 파쇄: 예고된 행동에 HP 피해가 쌓이면 유니크 행동으로 교체된다
+  DB.enemyById.__brk = { id: '__brk', name: '파쇄', tier: 'normal', art: '🧪', hp: [500, 500],
+    moves: { charge: { name: '충전', effects: D(30), break: { damage: 20, move: 'stagger' } } },
+    uniqueMoves: { stagger: { name: '휘청임', effects: [{ op: 'rest' }] } },
+    pattern: { mode: 'weighted', weights: { charge: 1 } } };
+  {
+    const b = mk('__brk'); const e = b.enemies[0];
+    eq('처음 예고는 일반 행동', e.nextMove.id, 'charge');
+    eng.__test_deal(b, e, 19);
+    eq('기준에 못 미치면 안 무너짐', [e.nextMove.id, !!e.nextMove.broken], ['charge', false]);
+    eng.__test_deal(b, e, 1);
+    eq('누적이 기준에 닿으면 파쇄', [e.nextMove.id, !!e.nextMove.broken], ['stagger', true]);
+  }
+  {   // 방어도로 막힌 피해는 세지 않는다
+    const b = mk('__brk'); const e = b.enemies[0];
+    e.block = 100; eng.__test_deal(b, e, 60);
+    eq('방어도로 막은 피해는 파쇄에 안 셈', [e.nextMove.id, e.breakTaken], ['charge', 0]);
+  }
+  {   // 유니크 행동은 파쇄되지 않는다
+    const b = mk('__brk'); const e = b.enemies[0];
+    eng.__test_deal(b, e, 20);
+    eq('파쇄 후 유니크 행동 예고', e.nextMove.id, 'stagger');
+    eng.__test_deal(b, e, 200);
+    eq('유니크 행동은 다시 안 무너짐', e.nextMove.id, 'stagger');
+  }
+
+  // --- 국면 전환: HP가 임계를 지나면 예고가 강제 교체된다
+  DB.enemyById.__ph = { id: '__ph', name: '국면', tier: 'boss', art: '🧪', hp: [100, 100],
+    moves: { a: { name: 'A', effects: D(1) }, b: { name: 'B', effects: D(1) } },
+    uniqueMoves: { awaken: { name: '각성', effects: [{ op: 'empower', amount: 9 }] } },
+    phases: [ { untilHpRatio: 0.5, pattern: { mode: 'weighted', weights: { a: 1 } } },
+              { untilHpRatio: 0.0, pattern: { mode: 'weighted', weights: { b: 1 } }, enter: 'awaken' } ] };
+  {
+    const b = mk('__ph'); const e = b.enemies[0];
+    eq('1국면 예고', e.nextMove.id, 'a');
+    eng.__test_deal(b, e, 40);                    // HP 60% — 아직 1국면
+    eq('임계 전에는 전환 없음', e.nextMove.id, 'a');
+    eng.__test_deal(b, e, 15);                    // HP 45% — 2국면 진입
+    eq('임계를 지나면 예고가 강제 교체', [e.nextMove.id, !!e.nextMove.phaseShift], ['awaken', true]);
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('전환 행동이 실제로 발동', e.power, 9);
+    eq('이후에는 2국면 행동', e.nextMove.id, 'b');
+    eng.__test_deal(b, e, 20);
+    eq('전환은 한 번만', e.nextMove.id, 'b');
+  }
+  // --- 기본 행동: 모두 잠겼을 때 강제로 쓰는 수
+  DB.enemyById.__dflt = { id: '__dflt', name: '기본', tier: 'normal', art: '🧪', hp: [9e6, 9e6],
+    moves: { only: { name: '한 방', effects: D(1), cooldown: 9 } },
+    uniqueMoves: { idle: { name: '숨 고르기', effects: [{ op: 'rest' }] } },
+    defaultMove: 'idle',
+    pattern: { mode: 'weighted', weights: { only: 1 } } };
+  {
+    const b = mk('__dflt'); const e = b.enemies[0]; const seq = [];
+    for (let t = 1; t <= 6; t++) { seq.push(e.nextMove.id); b.await = 'enemy'; eng.enemyPhase(b); }
+    eq('첫 턴은 정상 행동, 이후 쿨다운이라 기본 행동', seq, ['only', 'idle', 'idle', 'idle', 'idle', 'idle']);
+    eq('기본 행동은 강제 표시가 붙음', !!e.nextMove.forced, true);
+  }
+  // 기본 행동은 자신의 해금·락·쿨다운까지 전부 무시하고 시동한다
+  DB.enemyById.__dflt2 = { id: '__dflt2', name: '기본2', tier: 'normal', art: '🧪', hp: [9e6, 9e6],
+    moves: { only: { name: '한 방', effects: D(1), cooldown: 9 },
+             fallback: { name: '되받기', effects: D(1), minTurn: 90, lockTurn: 2, cooldown: 9 } },
+    defaultMove: 'fallback',
+    pattern: { mode: 'weighted', weights: { only: 1, fallback: 0 } } };
+  {
+    const b = mk('__dflt2'); const e = b.enemies[0]; const seq = [];
+    for (let t = 1; t <= 6; t++) { seq.push(e.nextMove.id); b.await = 'enemy'; eng.enemyPhase(b); }
+    eq('기본 행동은 해금·락·쿨다운을 전부 무시', seq, ['only', 'fallback', 'fallback', 'fallback', 'fallback', 'fallback']);
+  }
+  // 기본 행동이 없으면 제한을 풀어서라도 뭔가는 낸다 (전투가 멈추지 않는다)
+  DB.enemyById.__nodflt = { ...DB.enemyById.__dflt, id: '__nodflt', defaultMove: undefined };
+  {
+    const b = mk('__nodflt'); const e = b.enemies[0]; let blank = 0;
+    for (let t = 1; t <= 6; t++) { if (!e.nextMove || !e.nextMove.id) blank++; b.await = 'enemy'; eng.enemyPhase(b); }
+    eq('기본 행동이 없어도 예고가 비지 않음', blank, 0);
+  }
+
+  // 유니크 행동은 추첨에 절대 안 들어간다
+  {
+    let leak = 0;
+    for (let n = 0; n < 200; n++) { const b = mk('__ph');
+      for (let t = 1; t <= 6; t++) { if (b.enemies[0].nextMove.id === 'awaken') leak++; b.await = 'enemy'; eng.enemyPhase(b); } }
+    eq('유니크 행동은 추첨으로 안 나옴', leak, 0);
+  }
+}
+
 // v0.85: 지도 생성 규칙 — 휴식 강제 연속 금지 / 보스 앞 휴식 / 갈림길 구성 상이
 {
   const run_ = await import('../js/run.js');
