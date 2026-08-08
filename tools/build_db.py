@@ -12,7 +12,7 @@ events, acts, act1 = D('events'), D('acts'), D('act1')
 statuses = D('statuses')
 
 EN = {e['id']: e for e in enemies}
-VERSION = 'v1.19'
+VERSION = 'v1.20'
 TODAY = '2026-08-08'
 
 FONT = 'Arial'
@@ -63,7 +63,7 @@ OPNAME = {'rest':'휴식','selfDamage':'자해','poison':'독','bleed':'출혈',
           'strength':'힘','loseHp':'HP 감소','gainRelic':'유물 획득','drain':'흡혈',
           'markReroll':'리롤 표식','curse':'저주'}
 ST_NAME = {}; ST_AMT = {}; ST_TURN = {}
-NO_POWER = {'onUseFaceDamage','onUseFaceCoin','noReroll','zeroValue','hideFace','needReroll','linked','spread'}
+NO_POWER = {'onUseFaceDamage','onUseFaceCoin','noReroll','zeroValue','hideFace','needReroll','linked','spread','faceLow','faceHigh','rerollCost'}
 ST_RULE = {}
 def eff_text(effs):
     if not effs: return '—'
@@ -254,7 +254,7 @@ for e in ENEMIES:
         rows.append([e['id'], e['name'], '__enlight', e['enlightenedMove']['name'],
                      eff_text(e['enlightenedMove'].get('effects')), '3번째 행동마다', '', '', '', '', '계몽 17~19단계', '', e['tier']])
 sheet('적행동', '적 행동 전량',
-      '상태이상 부여는 [종류 N칸] 으로 읽는다 — 세기는 저주·축복·부패·마비 넷만 쓰고 나머지는 눈금이나 규칙 그대로다. 막 → 테마 → 난이도 순. 발동 조건 다섯 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 락 턴은 "이 턴이 되면 더 안 씀", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정".',
+      '상태이상 부여는 [종류 N칸] 으로 읽는다 — 적 행동에서 세기를 정하는 건 부패뿐이고 나머지는 상태이상 시트의 값으로 고정이다. 막 → 테마 → 난이도 순. 발동 조건 다섯 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 락 턴은 "이 턴이 되면 더 안 씀", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 연계는 "앞 행동 다음에 확률로 확정".',
       ['적 id','적 이름','행동 id','행동명','효과','가중치','해금 턴','락 턴','쿨다운','파쇄','비고','연계'], rows, [16,16,16,20,30,18,8,8,8,18,14,22])
 
 # ---------- 7-2. 상태이상 ----------
@@ -262,12 +262,13 @@ RULE_TEXT = {'onUseFaceDamage':'쓰면 눈금만큼 피해','onUseFaceCoin':'쓰
  'zeroValue':'눈금 0으로 계산','faceLow':'수치 이하만 나옴','faceHigh':'수치 이상만 나옴','hideFace':'눈 가림',
  'needReroll':'한 번 굴리기 전 값 없음','fuse':'턴 지나면 폭발','linked':'같이 굴러감',
  'rerollCost':'리롤 더 소모','spread':'양옆으로 번짐'}
+NO_VALUE = {'onUseFaceDamage','onUseFaceCoin','noReroll','zeroValue','hideFace','needReroll','linked','spread'}
 rows = [[s['id'], s['name'], RULE_TEXT.get(s['rule'], s['rule']),
-         ('—' if s['rule'] in NO_POWER else s.get('amount', 0)),
+         ('—' if s['rule'] in NO_VALUE else s.get('amount', 0)),
          (s.get('turns') or '영구'), s.get('color',''), s.get('text','')] for s in statuses['list']]
 sheet('상태이상', f"주사위 상태이상 {len(statuses['list'])}종",
       '주사위 한 칸에 하나씩 붙는다. 새로 걸면 빈 칸을 먼저 채우고, 다 차면 아무 칸이나 덮는다. '
-      '지속 턴이 영구면 정화하거나 조건을 만족해야 풀린다.',
+      '지속 턴이 영구면 정화하거나 조건을 만족해야 풀린다. 적 행동에서 수치를 덮어쓸 수 있는 건 부패뿐이다.',
       ['id','이름','규칙','수치','지속 턴','색','설명'], rows, [12,10,24,7,8,10,52])
 
 # ---------- 8. 무기 ----------

@@ -732,10 +732,21 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const r = eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
     eq('세기를 넣어도 눈금 그대로', r.bonusHits.includes('🩸-3'), true);
   }
-  // 세기를 쓰는 규칙에만 검증기가 통과시킨다
+  // 적 행동에서 세기를 정할 수 있는 건 부패 하나뿐
   { const NO = ['bleed','poison','plunder','bind','stun','confuse','seal','chain','devour'];
-    eq('세기를 안 쓰는 아홉 종은 기본값이 0',
-      NO.every(k => (DB.statusById[k].amount || 0) === 0 || DB.statusById[k].rule === 'spread'), true);
+    eq('세기를 안 쓰는 아홉 종은 기본값이 0', NO.every(k => (DB.statusById[k].amount || 0) === 0), true);
+    eq('부패만 규칙이 fuse', DB.statuses.list.filter(x => x.rule === 'fuse').map(x => x.id), ['rot']);
+  }
+  // 저주·축복·마비는 상태이상 탭 값으로 고정 — 적 행동이 뭘 넣든 안 바뀐다
+  { const b = mk();
+    eng.rng.next = Math.random;
+    eng.applyStatus(b, 'curse', 1, 1);          // 세기 1을 억지로 넣어도
+    const i = b.dice.findIndex(d => d.st);
+    const seen = [];
+    for (let k = 0; k < 60; k++) { b.rolled = false; eng.initialRoll(b); seen.push(b.dice[i].face); }
+    eq('저주는 탭 값(3) 이하로 고정', seen.every(v => v <= DB.statusById.curse.amount), true);
+    eq('세기 1이 먹혔다면 전부 1이었을 것', seen.some(v => v > 1), true);
+    eng.rng.next = () => 0.5;
   }
 
   // 데이터 무결성
