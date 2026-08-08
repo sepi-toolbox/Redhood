@@ -182,7 +182,7 @@
     }
   ],
   "finalBoss": "nameless_dread",
-  "bossHealRatio": 0.5,
+  "bossHealRatio": 0.3,
   "scaling": {
     "hp": {
       "1": 1.0,

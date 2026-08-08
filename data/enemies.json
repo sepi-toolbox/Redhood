@@ -16,33 +16,30 @@
             "op": "damage",
             "amount": 5
           }
-        ]
+        ],
+        "cooldown": 1
       },
       "dive": {
         "name": "급강하",
         "effects": [
           {
             "op": "damage",
-            "amount": 8
+            "amount": 15
           }
         ],
-        "minTurn": 5
+        "cooldown": 1
       },
       "caw": {
         "name": "어지러운 날갯짓",
         "effects": [
           {
-            "op": "damage",
-            "amount": 4
-          },
-          {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "followUp": {
           "move": "dive",
-          "chance": 0.5
+          "chance": 1.0
         }
       },
       "surge": {
@@ -53,17 +50,17 @@
             "amount": 5
           }
         ],
-        "minTurn": 4,
-        "cooldown": 3
+        "minTurn": 5,
+        "cooldown": 5
       }
     },
     "pattern": {
       "mode": "weighted",
       "weights": {
-        "peck": 3,
-        "dive": 2,
-        "caw": 2,
-        "surge": 3
+        "peck": 1,
+        "dive": 0,
+        "caw": 1,
+        "surge": 99
       },
       "noRepeat": 2
     },
