@@ -1149,8 +1149,9 @@
             "amount": 3
           },
           {
-            "op": "confuse",
-            "amount": 1
+            "op": "status",
+            "amount": 2,
+            "kind": "bleed"
           }
         ]
       },
@@ -1251,8 +1252,9 @@
         "name": "다리의 저주",
         "effects": [
           {
-            "op": "confuse",
-            "amount": 2
+            "op": "status",
+            "amount": 1,
+            "kind": "stun"
           }
         ],
         "followUp": {
@@ -1358,8 +1360,9 @@
         "name": "단추 눈",
         "effects": [
           {
-            "op": "confuse",
-            "amount": 1
+            "op": "status",
+            "amount": 1,
+            "kind": "curse"
           },
           {
             "op": "empower",
@@ -2203,6 +2206,11 @@
           {
             "op": "block",
             "amount": 12
+          },
+          {
+            "op": "status",
+            "kind": "bind",
+            "amount": 1
           }
         ],
         "hidden": true,
@@ -2303,8 +2311,9 @@
             "amount": 11
           },
           {
-            "op": "confuse",
-            "amount": 1
+            "op": "status",
+            "amount": 2,
+            "kind": "confuse"
           }
         ],
         "cooldown": 2
@@ -2338,8 +2347,9 @@
         "name": "자장가",
         "effects": [
           {
-            "op": "confuse",
-            "amount": 2
+            "op": "status",
+            "amount": 2,
+            "kind": "confuse"
           },
           {
             "op": "empower",
@@ -2453,8 +2463,9 @@
         "name": "부패",
         "effects": [
           {
-            "op": "confuse",
-            "amount": 1
+            "op": "status",
+            "amount": 2,
+            "kind": "poison"
           },
           {
             "op": "heal",
@@ -3332,8 +3343,9 @@
         "name": "거짓 기상",
         "effects": [
           {
-            "op": "confuse",
-            "amount": 2
+            "op": "status",
+            "amount": 1,
+            "kind": "seal"
           },
           {
             "op": "heal",
@@ -3432,8 +3444,9 @@
         "name": "빛 삼키기",
         "effects": [
           {
-            "op": "confuse",
-            "amount": 2
+            "op": "status",
+            "amount": 1,
+            "kind": "devour"
           },
           {
             "op": "block",
@@ -3519,8 +3532,9 @@
         "name": "거짓 찬송",
         "effects": [
           {
-            "op": "confuse",
-            "amount": 1
+            "op": "status",
+            "amount": 1,
+            "kind": "blessing"
           },
           {
             "op": "empower",

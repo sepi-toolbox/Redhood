@@ -31,7 +31,7 @@ export function createBattle(run, encounterIds) {
     // v1.14 독·출혈: 완전히 같은 장치이고 이름과 연출만 다르다. 한 판에 섞어 쓰지 않는다.
     //   내 행동이 끝나면 쌓인 수치만큼 피해를 받고 누적이 1 줄어든다. 방어도로 막힌다.
     diceDefs: run.dice.map(id => DB.diceById[id]),
-    dice: run.dice.map(() => ({ face: 0, held: false })),
+    dice: run.dice.map(() => ({ face: 0, held: false, st: null })),  // st: 이 칸에 걸린 상태이상
     rolled: false,                        // 이번 턴 첫 굴림 여부
     relics: run.relics.map(id => DB.relicById[id]),
     categories: Object.fromEntries(Object.entries(run.categories).map(([k, v]) => [k, [...v]])),
@@ -45,6 +45,8 @@ export function createBattle(run, encounterIds) {
     buffs: { strength: 0, focus: 0, regen: 0 }, // v0.19: 전투 내 지속 버프 (스택)
     enemies: encounterIds.map((id, i) => spawnEnemy(id, i, scale)),
     lastResult: null,
+    coinsLost: 0,                         // v1.17 약탈 — 전투가 끝나면 run에서 깎는다
+    voidLocked: false,                    // v1.17 잠식이 다섯 칸을 다 먹은 상태
     lastHits: [],                         // [{uid, amount}] — 연출용
   };
   for (const e of battle.enemies) chooseMove(e, 1);
@@ -90,6 +92,75 @@ function sumRelic(relics, type, field = 'amount') {
 function hasRelic(relics, type) { return relics.some(r => r.hook.type === type); }
 
 // ---------- 턴 ----------
+/* ==================== 주사위 상태이상 (v1.17) ====================
+   규칙 셋뿐이다.
+   1. 상태이상은 주사위 한 칸에 하나씩 붙는다.
+   2. 새로 걸면 그 칸의 이전 것을 덮어쓴다.
+   3. 무작위로 걸 때는 빈 칸을 먼저 채우고, 다 찼으면 아무 칸이나 덮는다.        */
+const stDef = (kind) => (DB.statusById && DB.statusById[kind]) || null;
+export const stRule = (d, rule) => !!(d && d.st && stDef(d.st.kind) && stDef(d.st.kind).rule === rule);
+const stAmount = (d) => { const x = stDef(d.st.kind); return x ? x.amount : 0; };
+
+export function applyStatus(battle, kind, count = 1) {
+  if (!stDef(kind)) return 0;
+  const def = stDef(kind);
+  let put = 0;
+  for (let k = 0; k < count; k++) {
+    const empty = battle.dice.map((d, i) => (d.st ? -1 : i)).filter(i => i >= 0);
+    const pool = empty.length ? empty : battle.dice.map((_, i) => i);
+    const i = pool[Math.floor(rng.next() * pool.length)];
+    battle.dice[i].st = { kind, left: def.turns || 0, fuse: def.rule === 'fuse' ? (def.turns || 1) : 0, opened: false };
+    put++;
+  }
+  return put;
+}
+
+export function clearStatuses(battle, kind = null) {
+  let n = 0;
+  for (const d of battle.dice) if (d.st && (!kind || d.st.kind === kind)) { d.st = null; n++; }
+  battle.voidLocked = false;
+  return n;
+}
+
+// 봉인은 한 번 다시 굴리기 전에는 값이 없다 — 족보 계산에서 아예 빠진다
+export const faceOf = (d) => (stRule(d, 'needReroll') && !d.st.opened) ? 0 : d.face;
+export const facesOf = (battle) => battle.dice.map(faceOf);
+// 기절은 족보에는 들어가되 합산에서만 0으로 친다
+const zeroedOf = (battle) => {
+  const s = new Set();
+  battle.dice.forEach((d, i) => { if (stRule(d, 'zeroValue')) s.add(i); });
+  return s;
+};
+// 저주·축복은 나올 수 있는 눈을 자른다
+function allowedFaces(die, d) {
+  const all = die.faces;
+  if (stRule(d, 'faceLow'))  { const f = all.filter(v => v <= stAmount(d)); return f.length ? f : all; }
+  if (stRule(d, 'faceHigh')) { const f = all.filter(v => v >= stAmount(d)); return f.length ? f : all; }
+  return all;
+}
+const rollWith = (die, d) => { const f = allowedFaces(die, d); return f[Math.floor(rng.next() * f.length)]; };
+
+// 턴이 시작될 때: 부패 심지가 타고, 지속 턴이 줄고, 잠식이 다 찼는지 본다
+function statusTurn(battle) {
+  battle.stEvents = [];
+  battle.dice.forEach((d) => {
+    if (!d.st) return;
+    if (stRule(d, 'fuse')) {
+      d.st.fuse -= 1;
+      if (d.st.fuse <= 0) {                       // 터진다
+        const dmg = stAmount(d);
+        d.st = null;
+        battle.stEvents.push({ kind: 'rot', amount: dmg });
+        battle.player.hp -= dmg;
+        if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; }
+      }
+      return;
+    }
+    if (d.st.left > 0) { d.st.left -= 1; if (d.st.left <= 0) d.st = null; }
+  });
+  if (stRule(battle.dice[0], 'spread') && battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;
+}
+
 function startTurn(battle, first = false) {
   // v0.71: 상태이상은 매 턴 1스택씩 빠진다. 단 "이번 턴에 새로 붙은 것"은 깎지 않는다.
   //        (집중 1을 얻으면 다음 턴에 리롤을 한 번 받고 그 턴 끝에 사라진다 — 효과를 못 보는 일이 없다)
@@ -115,6 +186,7 @@ function startTurn(battle, first = false) {
   battle.nextTurnRerolls = 0;
   battle.rolled = false;
   for (const d of battle.dice) { d.held = false; d.face = 0; d.confused = false; }
+  statusTurn(battle);
   if (hasRelic(battle.relics, 'confuseImmune')) battle.pendingConfuse = 0; // 수지 양초: 혼란 면역
   // 혼란(🌀): 무작위 주사위 N개가 뒤틀림 — 이번 턴 다시 굴릴 수 없다
   if (battle.pendingConfuse > 0) {
@@ -131,18 +203,27 @@ function startTurn(battle, first = false) {
 
 export function initialRoll(battle) {
   if (battle.over || battle.rolled || battle.await) return false;
-  battle.dice.forEach((d, i) => { d.face = rollFace(battle.diceDefs[i], rng.next); d.held = true; });
+  battle.dice.forEach((d, i) => { d.face = rollWith(battle.diceDefs[i], d); d.held = true; });
   battle.rolled = true;
   return true;
 }
 
 // 조작 규칙(v0.6): 기본은 전부 유지, 탭한 주사위(held=false)만 다시 굴린다
+export function rerollCost(battle) {
+  // 마비가 하나라도 끼면 그 수치만큼 리롤을 먹는다 (여럿이면 가장 비싼 것 하나)
+  let c = 1;
+  battle.dice.forEach(d => { if (!d.held && stRule(d, 'rerollCost')) c = Math.max(c, stAmount(d)); });
+  return c;
+}
+
 export function reroll(battle) {
-  if (battle.over || !battle.rolled || battle.await || battle.rollsLeft <= 0) return false;
+  if (battle.over || !battle.rolled || battle.await) return false;
   if (battle.dice.every(d => d.held)) return false; // 다시 굴릴 주사위 미선택
-  battle.rollsLeft -= 1;
+  const cost = rerollCost(battle);
+  if (battle.rollsLeft < cost) return false;
+  battle.rollsLeft -= cost;
   battle.dice.forEach((d, i) => {
-    if (!d.held) d.face = rollFace(battle.diceDefs[i], rng.next);
+    if (!d.held) { d.face = rollWith(battle.diceDefs[i], d); if (d.st) d.st.opened = true; }
     d.held = true; // 선택 초기화
   });
   return true;
@@ -150,8 +231,14 @@ export function reroll(battle) {
 
 export function toggleHold(battle, i) {
   if (battle.over || !battle.rolled || battle.await) return;
-  if (battle.dice[i].confused) return; // 혼란 주사위는 다시 굴릴 수 없음
-  battle.dice[i].held = !battle.dice[i].held;
+  const d = battle.dice[i];
+  if (d.confused || stRule(d, 'noReroll')) return;   // 포박 — 다시 굴릴 수 없다
+  const next = !d.held;
+  d.held = next;
+  // 결속 — 묶인 것들은 항상 같이 움직인다
+  if (stRule(d, 'linked')) {
+    battle.dice.forEach(o => { if (o !== d && stRule(o, 'linked')) o.held = next; });
+  }
 }
 
 export function aliveEnemies(battle) { return battle.enemies.filter(e => e.hp > 0); }
@@ -175,15 +262,25 @@ function situationalFlat(battle) {
 
 // ---------- 미리보기 ----------
 // v0.9: 족보당 변형을 여러 개 보유(누적) — 같은 족보의 변형은 목록에서 이웃하게 정렬됨
+const VOID_CAT = { id: 'void_call', name: '공허', kind: 'void', target: 'oneEnemy', fx: 'slash', variants: [] };
+
 export function previewAll(battle) {
-  const faces = battle.dice.map(d => d.face);
+  const faces = facesOf(battle);
+  const zero = zeroedOf(battle);
   const situ = situationalFlat(battle);
   const out = [];
+  // 잠식이 다섯 칸을 다 먹으면 족보가 이것 하나만 남는다
+  if (battle.voidLocked) {
+    const self = faces.reduce((a, b) => a + b, 0) * (DB.statuses.voidCall.selfDamageMult || 1);
+    return [{ cat: VOID_CAT, variant: { id: 'void_call', name: DB.statuses.voidCall.name, ability: [], abilityText: DB.statuses.voidCall.text },
+              seal: 0, locked: !battle.rolled, voidCall: true, selfDamage: self,
+              bd: { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 } }];
+  }
   for (const cat of DB.scoring.categories) {
     const ownedList = battle.categories[cat.id];
     if (!ownedList || ownedList.length === 0) continue;
     const bd0 = battle.rolled
-      ? computeDamage(cat, faces, battle.diceDefs, battle.relics)
+      ? computeDamage(cat, faces, battle.diceDefs, battle.relics, zero)
       : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 };
     const total = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ + battle.buffs.strength : bd0.total;
     const seal = battle.sealed[cat.id] || 0;
@@ -257,6 +354,7 @@ function applyAbility(battle, variant, bd, targets) {
         // v0.11: 해제 = 혼란(🌀) 제거 (현재 뒤틀린 주사위 + 예약된 혼란)
         let n = 0;
         for (const d of battle.dice) if (d.confused) { d.confused = false; n++; }
+        n += clearStatuses(battle);
         n += battle.pendingConfuse;
         battle.pendingConfuse = 0;
         battle.sealed = {};
@@ -363,8 +461,8 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
     targets = [t || alive[0]];
   }
 
-  const faces = battle.dice.map(d => d.face);
-  const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics);
+  const faces = facesOf(battle);
+  const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics, zeroedOf(battle));
   if (bd.total === 0) return null; // 성립 불가 족보는 확정 불가 (0점 버리기 폐지)
   if (bd.total > 0) {
     const situ = situationalFlat(battle); // 독사과 등 조건부 가산 + 힘 버프
@@ -383,6 +481,7 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
 
   applyAbility(battle, variant, bd, targets);
   applyDiceEffects(battle, bd);
+  applyStatusCost(battle, bd);
   if (battle.over && battle.result === 'defeat') return battle.lastResult; // 저주 주사위 등으로 자멸
 
   // 늑대 가죽: 처치한 적 수만큼 회복
@@ -402,6 +501,52 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   }
   tickDot(battle);
   if (battle.over) return battle.lastResult;
+  battle.await = 'enemy';
+  return battle.lastResult;
+}
+
+// 족보에 쓴 주사위가 물리는 대가 — 출혈·독은 피해, 약탈은 코인, 부패는 해제, 잠식은 번짐
+function applyStatusCost(battle, bd) {
+  const used = new Set(bd.contributing || []);
+  let hurt = 0, coin = 0;
+  battle.dice.forEach((d, i) => {
+    if (!d.st) return;
+    if (used.has(i)) {
+      if (stRule(d, 'onUseFaceDamage')) hurt += d.face * (stAmount(d) || 1);
+      if (stRule(d, 'onUseFaceCoin'))   coin += d.face * (stAmount(d) || 1);
+      if (stRule(d, 'fuse')) d.st = null;                 // 부패는 쓰면 해제된다
+    }
+  });
+  // 잠식 — 쓰지 않은 것만 양옆으로 번진다
+  const grow = [];
+  battle.dice.forEach((d, i) => {
+    if (stRule(d, 'spread') && !used.has(i)) { grow.push(i - 1); grow.push(i + 1); }
+  });
+  for (const j of grow) {
+    const t = battle.dice[j];
+    if (t && !stRule(t, 'spread')) t.st = { kind: 'devour', left: 0, fuse: 0, opened: false };
+  }
+  if (battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;
+  if (coin > 0) { battle.coinsLost += coin; battle.lastResult.bonusHits.push(`🪙-${coin}`); }
+  if (hurt > 0) {
+    const absorbed = Math.min(battle.player.block, hurt);
+    battle.player.block -= absorbed; const raw = hurt - absorbed;
+    if (raw > 0) battle.player.hp -= raw;
+    battle.lastResult.bonusHits.push(`🩸-${hurt}`);
+    if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; }
+  }
+}
+
+// 공허의 부름 — 잠식을 전부 걷어내는 대신 눈의 총합만큼 내가 아프다
+export function confirmVoidCall(battle) {
+  if (battle.over || !battle.rolled || battle.await || !battle.voidLocked) return null;
+  const self = facesOf(battle).reduce((a, b) => a + b, 0) * (DB.statuses.voidCall.selfDamageMult || 1);
+  clearStatuses(battle, 'devour');
+  battle.voidLocked = false;
+  battle.lastResult = { catName: DB.statuses.voidCall.name, total: 0, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0,
+                        bonusHits: [`🩸-${self}`], aoe: false, fx: 'slash' };
+  battle.player.hp -= self;
+  if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; return battle.lastResult; }
   battle.await = 'enemy';
   return battle.lastResult;
 }
@@ -480,8 +625,11 @@ export function enemyPhase(battle) {
         case 'block':                                      // 🛡 방어
           e.block += ef.amount;
           break;
-        case 'confuse':                                    // 🌀 혼란 — 다음 턴 주사위 잠금
+        case 'confuse':                                    // 🌀 (구) 혼란 — 다음 턴 주사위 잠금
           battle.pendingConfuse += ef.amount;
+          break;
+        case 'status':                                     // v1.17 주사위에 상태이상을 건다
+          applyStatus(battle, ef.kind, Math.max(1, ef.amount || 1));
           break;
         case 'empower':                                    // 💪 강화 — 전투 내 공격력 누적
           e.power = (e.power || 0) + ef.amount;
@@ -660,6 +808,10 @@ export function intentOf(enemy) {
   for (const ef of mv.effects) {
     if (ef.op === 'block') parts.push(`🛡${ef.amount}`);
     else if (ef.op === 'confuse' || ef.op === 'poison' || ef.op === 'bleed') parts.push('🌀');
+    else if (ef.op === 'status') {
+      const st = DB.statusById[ef.kind];
+      parts.push(`🎲${st ? st.name : '?'}${(ef.amount || 1) > 1 ? '×' + ef.amount : ''}`);
+    }
     else if (ef.op === 'empower') parts.push('💪');
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
   }

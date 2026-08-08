@@ -1,9 +1,9 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
-import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
+import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.16'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.17'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -804,19 +804,23 @@ function renderBattle(opts = {}) {
           const blank = !battle.rolled;
           const marked = battle.rolled && !d.held; // 다시 굴릴 주사위
           const skinned = DIE_SKINS.has(def.id); // 전용 스킨 보유 시 테두리 구분 불필요
-          return `<button class="die art ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''}"
-            data-idx="${i}" title="${esc(def.name)}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
-            ${blank
+          const st = d.st ? DB.statusById[d.st.kind] : null;
+          const hidden = st && st.rule === 'hideFace';
+          const sealedOff = st && st.rule === 'needReroll' && !d.st.opened;
+          return `<button class="die art ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''} ${st ? 'st t-' + st.id : ''}"
+            data-idx="${i}" title="${esc(def.name)}${st ? ' · ' + st.name + ' — ' + st.text : ''}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
+            ${blank || hidden || sealedOff
               ? '<span class="pip-art empty"></span>'
               : `<img class="pip-art" src="${dieFaceSrc(def.id, d.face)}" alt="${d.face}" draggable="false">`}
-            <small>${marked ? '다시' : d.confused ? `${ico('status_confuse')}혼란` : ''}</small>
+            ${st ? `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>${st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''}` : ''}
+            <small>${st ? esc(st.name) : marked ? '다시' : ''}</small>
           </button>`;
         }).join('')}
       </div>
       <div class="roll-bar">
         ${!battle.rolled
           ? `<button class="btn primary roll-btn" id="roll-btn">🎲 굴림</button>`
-          : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft <= 0 || battle.await || battle.dice.every(d => d.held) ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})</button>`}
+          : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft < rerollCost(battle) || battle.await || battle.dice.every(d => d.held) ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})${rerollCost(battle) > 1 ? ` <span class="cost">-${rerollCost(battle)}</span>` : ''}</button>`}
       </div>
       <div class="hint-line">${hintHtml()}</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
@@ -934,7 +938,7 @@ function updateDiceMarks() {
     if (sm) sm.textContent = marked ? '다시' : '';
   });
   const rb = document.getElementById('reroll-btn');
-  if (rb) rb.disabled = battle.rollsLeft <= 0 || battle.await || battle.dice.every(d => d.held);
+  if (rb) rb.disabled = battle.rollsLeft < rerollCost(battle) || battle.await || battle.dice.every(d => d.held);
 }
 
 // v0.28: 재렌더 없는 제자리 갱신 — 족보 선택 강조
@@ -1142,7 +1146,7 @@ function updateAfterRoll() {
   // 1) 굴림 버튼 → 리롤 버튼 (첫 굴림에서 한 번만 교체)
   const bar = app.querySelector('.roll-bar');
   if (bar) {
-    const disabled = battle.rollsLeft <= 0 || battle.await || battle.dice.every(d => d.held);
+    const disabled = battle.rollsLeft < rerollCost(battle) || battle.await || battle.dice.every(d => d.held);
     let rb = document.getElementById('reroll-btn');
     if (!rb) {
       bar.innerHTML = `<button class="btn primary roll-btn" id="reroll-btn">🎲 리롤 (${battle.rollsLeft})</button>`;
@@ -1184,7 +1188,7 @@ function tryConfirm(catId, variantId, uid) {
   if (busy) return;
   busy = true;
   selectedCat = null;
-  const res = confirmCategory(battle, catId, variantId, uid);
+  const res = (variantId === 'void_call') ? confirmVoidCall(battle) : confirmCategory(battle, catId, variantId, uid);
   if (!res) { busy = false; renderBattle(); return; }
   syncTarget(); // 표적이 죽었으면 다음 적으로
   renderBattle();
@@ -1389,6 +1393,10 @@ function finishBattle() {
   setTimeout(() => {
     busy = false;
     run.hp = battle.player.hp;
+    if (battle.coinsLost > 0) {                    // v1.17 약탈로 뺏긴 코인
+      run.coins = Math.max(0, run.coins - battle.coinsLost);
+      battle.coinsLost = 0;
+    }
     if (battle.result === 'defeat') {
       clearSave();
       if (currentNodeType === 'final') { showFinalEnd(battle.turn); return; }

@@ -1038,3 +1038,102 @@ span.enemy-art {
 .enemy-buffs .ico, .buff-chip .ico, .shield-num .ico { width: 13px; height: 13px; vertical-align: -2px; }
 .die small .ico { width: 11px; height: 11px; vertical-align: -2px; }
 .deck-list .ico { width: 16px; height: 16px; vertical-align: -3px; }
+
+/* ==================== v1.17 주사위 상태이상 ====================
+   네 겹으로 얹는다 — 물듦(아래) · 그림 · 안쪽 발광 · 이름표.
+   그림은 눈을 가리지 않게 그려져 있고, 움직임만 상태마다 다르다. */
+.die.art.st .st-tint,
+.die.art.st .st-rim { position: absolute; left: 8px; right: 8px; top: 12px; bottom: 12px;
+  border-radius: 6px; pointer-events: none; animation: stPulse 2.4s ease-in-out infinite; }
+.die.art.st .st-tint { mix-blend-mode: multiply; z-index: 2; }
+.die.art.st .st-rim { z-index: 4; }
+.die.art.st .st-art { position: absolute; left: 8px; top: 12px; width: 46px; height: 46px;
+  object-fit: contain; z-index: 3; pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .75)); animation: 2.4s ease-in-out infinite; }
+.die.art.st small { color: #e8dcc8; z-index: 6; }
+@keyframes stPulse { 0%, 100% { opacity: .76 } 50% { opacity: 1 } }
+
+/* 상태이상이 걸린 주사위는 다시굴림을 붉은 발광 대신 점선으로 표시한다 (색이 겹치지 않게) */
+.die.art.st.mark-reroll { filter: brightness(.86) saturate(.8); box-shadow: none; }
+.die.art.st.mark-reroll::before { content: ''; position: absolute; inset: 3px; border-radius: 11px;
+  border: 2px dashed rgba(255, 140, 122, .95); pointer-events: none; z-index: 7; }
+
+/* 상태별 물듦 · 발광 · 그림 움직임 */
+.t-bleed    .st-tint { background: radial-gradient(ellipse at 50% -15%, rgba(176,20,18,.72) 0%, rgba(120,14,12,.42) 55%, rgba(70,8,8,.16) 100%) }
+.t-bleed    .st-rim  { box-shadow: inset 0 8px 10px -5px rgba(255,45,36,.7) }
+.t-bleed    .st-art  { animation-name: stOoze; transform-origin: top center }
+.t-bleed    small    { color: #ff5a4a }
+.t-poison   .st-tint { background: radial-gradient(ellipse at 50% 118%, rgba(96,150,20,.7) 0%, rgba(66,110,16,.42) 55%, rgba(34,58,10,.16) 100%) }
+.t-poison   .st-rim  { box-shadow: inset 0 -9px 11px -5px rgba(180,230,60,.7) }
+.t-poison   .st-art  { animation-name: stBoil; transform-origin: bottom center }
+.t-poison   small    { color: #b8e04a }
+.t-bind     .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(24,52,30,.24) 0%, rgba(28,58,32,.5) 62%, rgba(14,32,18,.7) 100%) }
+.t-bind     .st-rim  { box-shadow: inset 0 0 11px 3px rgba(20,44,24,.8) }
+.t-bind     .st-art  { animation-name: stSqueeze }
+.t-bind     small    { color: #7fbf8a }
+.t-stun     .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(120,130,145,.3) 0%, rgba(78,86,100,.44) 60%, rgba(46,52,62,.56) 100%) }
+.t-stun     .st-rim  { box-shadow: inset 0 0 10px 2px rgba(215,232,255,.5) }
+.t-stun     .st-art  { animation-name: stJitter }
+.t-stun     small    { color: #dfe6ee }
+.t-curse    .st-tint { background: radial-gradient(ellipse at 45% 118%, rgba(46,14,72,.86) 0%, rgba(34,10,54,.5) 52%, rgba(18,6,28,.2) 100%) }
+.t-curse    .st-rim  { box-shadow: inset 0 -8px 13px -3px rgba(150,70,220,.65) }
+.t-curse    .st-art  { animation-name: stCreep; transform-origin: bottom center }
+.t-curse    small    { color: #c78cff }
+.t-blessing .st-tint { background: radial-gradient(ellipse at 50% 12%, rgba(240,236,225,.4) 0%, rgba(190,188,182,.28) 55%, rgba(120,120,118,.2) 100%) }
+.t-blessing .st-rim  { box-shadow: inset 0 8px 13px -4px rgba(255,253,245,.85) }
+.t-blessing .st-art  { animation-name: stHover }
+.t-blessing small    { color: #f3ecdd }
+.t-confuse  .st-tint, .t-confuse .st-rim { background: none; box-shadow: none }
+.t-confuse  .st-art  { animation-name: stMist }
+.t-confuse  small    { color: #c68cff }
+.t-seal     .st-tint, .t-seal .st-rim { background: none; box-shadow: none }
+.t-seal     .st-art  { animation-name: stWax }
+.t-seal     small    { color: #8fa8e0 }
+.t-rot      .st-tint { background: radial-gradient(ellipse at 50% 112%, rgba(120,30,86,.6) 0%, rgba(78,26,60,.42) 52%, rgba(44,20,34,.2) 100%) }
+.t-rot      .st-rim  { box-shadow: inset 0 -8px 11px -4px rgba(230,120,190,.6) }
+.t-rot      .st-art  { animation-name: stBulge; transform-origin: bottom center }
+.t-rot      small    { color: #d98cc0 }
+.t-chain    .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(40,54,68,.26) 0%, rgba(30,42,56,.46) 60%, rgba(18,26,36,.6) 100%) }
+.t-chain    .st-rim  { box-shadow: inset 0 0 10px 2px rgba(170,205,235,.45) }
+.t-chain    .st-art  { animation-name: stTaut }
+.t-chain    small    { color: #a8c2d8 }
+.t-numb     .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(60,120,190,.5) 0%, rgba(30,70,130,.4) 60%, rgba(14,34,70,.26) 100%) }
+.t-numb     .st-rim  { box-shadow: inset 0 0 9px 1px rgba(150,220,255,.7) }
+.t-numb     .st-art  { animation-name: stZap }
+.t-numb     small    { color: #8fd4ff }
+.t-plunder  .st-tint { background: radial-gradient(ellipse at 55% 112%, rgba(120,74,26,.64) 0%, rgba(84,54,22,.44) 52%, rgba(46,32,16,.2) 100%) }
+.t-plunder  .st-rim  { box-shadow: inset 0 -8px 10px -4px rgba(215,150,70,.6) }
+.t-plunder  .st-art  { animation-name: stGrab; transform-origin: bottom center }
+.t-plunder  small    { color: #d9a05a }
+.t-devour   .st-tint { background: radial-gradient(ellipse at 50% 115%, rgba(2,6,12,.92) 0%, rgba(6,14,24,.6) 48%, rgba(10,20,32,.2) 100%) }
+.t-devour   .st-rim  { box-shadow: inset 0 -9px 13px -4px rgba(140,215,250,.7) }
+.t-devour   .st-art  { animation-name: stRise; transform-origin: bottom center }
+.t-devour   small    { color: #9fd8f0 }
+
+@keyframes stOoze    { 0%, 100% { transform: scaleY(.94) } 50% { transform: scaleY(1.08) } }
+@keyframes stBoil    { 0%, 100% { transform: scaleY(.95) } 50% { transform: scaleY(1.07) } }
+@keyframes stSqueeze { 0%, 100% { transform: scale(1) } 50% { transform: scale(.93) } }
+@keyframes stJitter  { 0%, 88%, 100% { transform: translate(0, 0) }
+  90% { transform: translate(.8px, -.6px); filter: drop-shadow(0 0 5px rgba(220,240,255,.95)) }
+  93% { transform: translate(-.7px, .5px) } 96% { transform: translate(.4px, 0) } }
+@keyframes stCreep   { 0%, 100% { transform: scaleY(.93); opacity: .85 } 50% { transform: scaleY(1.07); opacity: 1 } }
+@keyframes stHover   { 0%, 100% { transform: translateY(1.2px) } 50% { transform: translateY(-1.6px) } }
+@keyframes stMist    { 0%, 100% { filter: drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(.94) saturate(.95) }
+  50% { filter: drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(1.1) saturate(1.12) } }
+@keyframes stWax     { 0%, 100% { filter: drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(.9) }
+  50% { filter: drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(1.06) } }
+@keyframes stBulge   { 0%, 100% { transform: scale(.94) } 55% { transform: scale(1.09) } }
+@keyframes stTaut    { 0%, 100% { transform: scaleX(1) } 50% { transform: scaleX(1.05) } }
+@keyframes stZap     { 0%, 100% { opacity: .25 } 4% { opacity: 1 } 10% { opacity: .3 } 16% { opacity: 1 }
+  22% { opacity: .2 } 46% { opacity: .9 } 52% { opacity: .25 } 70% { opacity: 1 } 76% { opacity: .3 } }
+@keyframes stGrab    { 0%, 100% { transform: translate(1px, 1.5px) rotate(1.6deg) } 50% { transform: translate(-.8px, -1px) rotate(-1.6deg) } }
+@keyframes stRise    { 0%, 100% { transform: translateY(1.4px) scaleY(.94) } 50% { transform: translateY(-1.4px) scaleY(1.07) } }
+
+/* 혼란만 사각 윤곽을 고정하고 안쪽 안개를 돌린다 (사각형을 통째로 돌리면 모서리가 삐져나온다) */
+.st-swirlbox { position: absolute; left: 8px; top: 12px; width: 46px; height: 46px;
+  border-radius: 7px; overflow: hidden; z-index: 3; pointer-events: none; }
+.st-swirl { position: absolute; left: 50%; top: 50%; width: 150%; height: 150%;
+  margin-left: -75%; margin-top: -75%; opacity: .62; filter: blur(.4px);
+  animation: stSpin 7s linear infinite; }
+@keyframes stSpin { to { transform: rotate(360deg) } }
+.roll-btn .cost { font-size: 11px; color: #ffb1a2; }
