@@ -189,23 +189,37 @@ sheet('적', '적 44종', '강화 행동은 4~6턴마다 예고 없이 한 번�
       rows, [16,16,6,5,14,10,7,6,20,14,22,34,18])
 
 # ---------- 7. 적 행동 ----------
+def weight_text(e, mid):
+    pats = [(f"국면{i+1}", p['pattern']) for i, p in enumerate(e['phases'])] if e.get('phases') \
+        else ([('', e['pattern'])] if e.get('pattern') else [])
+    out = []
+    for label, p in pats:
+        pre = (label + ' ') if label else ''
+        if p['mode'] == 'sequence':
+            i = p['order'].index(mid) + 1 if mid in p['order'] else 0
+            out.append(pre + (f"순서 {i}번째" if i else '순서 밖'))
+        else:
+            w = p.get('weights', {})
+            out.append(pre + (str(w[mid]) if mid in w else '없음'))
+    return ' / '.join(out) if out else '—'
+
 rows = []
 for e in enemies:
     for mid, m in e['moves'].items():
         fu = m.get('followUp')
         rows.append([e['id'], e['name'], mid, m['name'], eff_text(m.get('effects')),
-                     m.get('minTurn') or '', m.get('cooldown') or 0, '숨김' if m.get('hidden') else '',
+                     weight_text(e, mid), m.get('minTurn') or '', m.get('cooldown') or 0, '숨김' if m.get('hidden') else '',
                      (f"{e['moves'][fu['move']]['name']} {int(fu['chance']*100)}%" if fu else ''),
                      e['tier']])
     if e.get('surgeMove'):
         rows.append([e['id'], e['name'], '__surge', e['surgeMove']['name'],
-                     eff_text(e['surgeMove'].get('effects')), '', '', '강화(4~6턴 주기)', '', e['tier']])
+                     eff_text(e['surgeMove'].get('effects')), '전용 트랙', '', '', '강화(4~6턴 주기)', '', e['tier']])
     if e.get('enlightenedMove'):
         rows.append([e['id'], e['name'], '__enlight', e['enlightenedMove']['name'],
-                     eff_text(e['enlightenedMove'].get('effects')), '', '', '계몽 17~19단계', '', e['tier']])
+                     eff_text(e['enlightenedMove'].get('effects')), '3번째 행동마다', '', '', '계몽 17~19단계', '', e['tier']])
 sheet('적행동', '적 행동 전량',
-      '발동 조건은 셋이다 — 해금 턴은 "이 턴부터 나올 수 있다", 쿨다운은 "쓰고 나서 몇 턴 쉰다", 연계는 "앞 행동을 쓰면 확률로 확정된다". 쿨다운 0은 제한 없음.',
-      ['적 id','적 이름','행동 id','행동명','효과','해금 턴','쿨다운','비고','연계'], rows, [16,16,16,20,30,8,8,16,22])
+      '발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정".',
+      ['적 id','적 이름','행동 id','행동명','효과','가중치','해금 턴','쿨다운','비고','연계'], rows, [16,16,16,20,30,18,8,8,16,22])
 
 # ---------- 8. 무기 ----------
 NAMEOF = {v['id']: (c['name'], v['name']) for c in scoring['categories'] for v in c['variants']}
