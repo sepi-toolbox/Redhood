@@ -3,7 +3,7 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.13'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.14'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -837,6 +837,7 @@ function renderBattle(opts = {}) {
         const b = battle.buffs;
         const chips = [
           b.strength > 0 ? `${ico('status_strength')}${b.strength}` : '', b.focus > 0 ? `${ico('status_focus')}+${b.focus}` : '', b.regen > 0 ? `${ico('status_regen')}+${b.regen}` : '',
+          battle.player.dot > 0 ? `${ico('status_bleed')}${DOT_KO[battle.player.dotKind] || '독'} ${battle.player.dot}` : '',
         ].filter(Boolean);
         return chips.length ? `<div class="buff-strip" id="buff-strip">${chips.map(c => `<span class="buff-chip">${c}</span>`).join('')}</div>` : '';
       })()}
@@ -844,8 +845,14 @@ function renderBattle(opts = {}) {
         <span class="pb-side"></span>
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${hpPct}%"></div>
+          ${(() => {   // v1.14: 독·출혈로 곧 빠질 몫을 체력 끝자락에 초록으로 겹쳐 보여준다
+            if (!(p.dot > 0)) return '';
+            const lose = Math.min(p.hp, p.dot);
+            const w = lose / p.maxHp * 100;
+            return `<div class="hp-dot" style="left:${Math.max(0, hpPct - w)}%; width:${w}%"></div>`;
+          })()}
           ${p.block > 0 ? `<div class="hp-shield" style="left:${hpPct}%; width:${shieldPct}%"></div>` : ''}
-          <span class="hp-text">${p.hp} / ${p.maxHp}${p.block > 0 ? `<span class="shield-num">${ico('status_block')}${p.block}</span>` : ''}</span>
+          <span class="hp-text">${p.hp} / ${p.maxHp}${p.block > 0 ? `<span class="shield-num">${ico('status_block')}${p.block}</span>` : ''}${p.dot > 0 ? `<span class="dot-num">${DOT_KO[p.dotKind] || '독'} ${p.dot}</span>` : ''}</span>
         </div>
         <span class="pb-side">${battle.pendingBuff > 0 ? `⚡+${battle.pendingBuff}` : ''}</span>
       </div>
@@ -953,6 +960,7 @@ function updateComboHint() {
 
 // ---------- 적 행동 상세 (치트): 적 길게 눌러 예고 행동의 실제 내용 확인 — ❓ 의문도 공개 ----------
 const ENEMY_TIER_KO = { normal: '일반', elite: '정예', boss: '보스' };
+const DOT_KO = { poison: '독', bleed: '출혈' };   // v1.14: 같은 장치, 이름만 다르다
 function enemyEffectText(e, ef) {
   const weak = e.debuffs ? e.debuffs.weak : 0;
   switch (ef.op) {
@@ -966,6 +974,8 @@ function enemyEffectText(e, ef) {
       const head = n > 1 ? `피해 ${final} × ${n}타 = ${final * n}` : `피해 ${final}`;
       return `${ico('intent_attack')} ${head}` + (parts.length ? ` (한 대당 기본 ${base} ${parts.join(' ')})` : '');
     }
+    case 'poison':
+    case 'bleed': return `${ico('intent_confuse')} ${DOT_KO[ef.op]} ${ef.amount} — 내 행동이 끝날 때마다 쌓인 만큼 피해, 그 뒤 1 감소 (방어도로 막힘)`;
     case 'selfDamage': return `❓ 자해 — 스스로 ${ef.amount} 피해를 입는다 (방어도 무시)`;
     case 'block': return `${ico('intent_defend')} 방어 ${ef.amount} 획득`;
     case 'confuse': return `${ico('intent_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;

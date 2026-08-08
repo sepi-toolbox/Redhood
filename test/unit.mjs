@@ -498,6 +498,48 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
 }
 
+// v1.14: 독·출혈 — 같은 장치, 이름만 다름. 내 행동 후 누적만큼 아프고 1 줄어든다
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = Math.random;
+  const mk = () => eng.createBattle({ hp: 100, maxHp: 100, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__dotenemy'], 'battle');
+  DB.enemyById.__dotenemy = { id: '__dotenemy', name: '독적', tier: 'normal', art: '🧪', hp: [9e6, 9e6],
+    moves: { spit: { name: '뱉기', effects: [{ op: 'poison', amount: 3 }] } },
+    pattern: { mode: 'weighted', weights: { spit: 1 } } };
+  {
+    const b = mk(); const e = b.enemies[0];
+    eq('독 예고는 혼란과 같은 소용돌이', eng.intentOf(e), '🌀');
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('독 3 부여', [b.player.dot, b.player.dotKind], [3, 'poison']);
+    b.player.block = 0;
+    const hp0 = b.player.hp;
+    eq('행동 후 누적만큼 피해', eng.tickDot(b), 3);
+    eq('HP가 그만큼 줄고 누적도 1 감소', [hp0 - b.player.hp, b.player.dot], [3, 2]);
+    eng.tickDot(b); eng.tickDot(b);
+    eq('2 → 1 → 0 으로 소진', b.player.dot, 0);
+    eq('0이면 더 안 아픔', eng.tickDot(b), 0);
+  }
+  {   // 방어도가 먼저 막는다
+    const b = mk(); b.player.dot = 5; b.player.block = 3;
+    const hp0 = b.player.hp;
+    eng.tickDot(b);
+    eq('방어도 3이 먼저 깎이고 나머지 2만 HP로', [b.player.block, hp0 - b.player.hp], [0, 2]);
+  }
+  {   // 출혈은 이름만 다르다
+    DB.enemyById.__dotenemy.moves.spit.effects = [{ op: 'bleed', amount: 4 }];
+    const b = mk(); b.await = 'enemy'; eng.enemyPhase(b);
+    eq('출혈도 같은 칸에 쌓인다', [b.player.dot, b.player.dotKind], [4, 'bleed']);
+    DB.enemyById.__dotenemy.moves.spit.effects = [{ op: 'poison', amount: 3 }];
+  }
+  {   // 독으로 죽을 수 있다
+    const b = mk(); b.player.hp = 2; b.player.block = 0; b.player.dot = 5;
+    eng.tickDot(b);
+    eq('독으로 쓰러지면 패배', [b.player.hp, b.over, b.result], [0, true, 'defeat']);
+  }
+}
+
 // v0.85: 지도 생성 규칙 — 휴식 강제 연속 금지 / 보스 앞 휴식 / 갈림길 구성 상이
 {
   const run_ = await import('../js/run.js');
