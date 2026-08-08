@@ -1962,6 +1962,11 @@
           {
             "op": "block",
             "amount": 12
+          },
+          {
+            "op": "status",
+            "kind": "chain",
+            "amount": 2
           }
         ],
         "followUp": {
@@ -2140,6 +2145,12 @@
           {
             "op": "damage",
             "amount": 15
+          },
+          {
+            "op": "status",
+            "kind": "rot",
+            "amount": 1,
+            "power": 12
           }
         ],
         "minTurn": 6,
@@ -3044,6 +3055,11 @@
           {
             "op": "damage",
             "amount": 13
+          },
+          {
+            "op": "status",
+            "kind": "numb",
+            "amount": 1
           }
         ],
         "cooldown": 3
@@ -3234,6 +3250,11 @@
           {
             "op": "empower",
             "amount": 4
+          },
+          {
+            "op": "status",
+            "kind": "plunder",
+            "amount": 1
           }
         ],
         "hidden": true,
