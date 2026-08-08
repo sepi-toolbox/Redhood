@@ -2,16 +2,19 @@
 
 // faces: 현재 눈 배열(5), diceDefs: 각 슬롯의 주사위 정의(dice.json 항목)
 // 반환: { valid, base, contributing(인덱스 배열) }
-export function evalCategory(cat, faces) {
+// zeroed: 눈이 0으로 계산되는 슬롯(기절). 족보 성립에는 그대로 들어가되 합산에서만 빠진다.
+// faces[i] === 0 인 슬롯(봉인)은 아예 없는 것으로 친다.
+export function evalCategory(cat, faces, zeroed = null) {
   const n = faces.length;
-  const all = [...Array(n).keys()];
+  const all = [...Array(n).keys()].filter(i => faces[i] > 0);
+  const val = (i) => (zeroed && zeroed.has(i) ? 0 : faces[i]);
   const counts = {};
-  for (const f of faces) counts[f] = (counts[f] || 0) + 1;
+  for (const i of all) counts[faces[i]] = (counts[faces[i]] || 0) + 1;
 
   switch (cat.kind) {
     case 'upper': {
       const idx = all.filter(i => faces[i] === cat.face);
-      return { valid: true, base: idx.length * cat.face, contributing: idx };
+      return { valid: true, base: idx.reduce((a, i) => a + val(i), 0), contributing: idx };
     }
     case 'ofKind': {
       const ok = Object.values(counts).some(c => c >= cat.count);
@@ -22,9 +25,9 @@ export function evalCategory(cat, faces) {
         const face = Math.max(...Object.entries(counts)
           .filter(([, n]) => n >= cat.count).map(([f]) => +f));
         const idx = all.filter(i => faces[i] === face);
-        return { valid: true, base: Math.floor(face * idx.length * mult), contributing: idx };
+        return { valid: true, base: Math.floor(idx.reduce((a, i) => a + val(i), 0) * mult), contributing: idx };
       }
-      const base = cat.score === 'sumAll' ? faces.reduce((a, b) => a + b, 0) : cat.score;
+      const base = cat.score === 'sumAll' ? all.reduce((a, i) => a + val(i), 0) : cat.score;
       return { valid: true, base, contributing: all };
     }
     case 'twoPair': {
@@ -41,7 +44,7 @@ export function evalCategory(cat, faces) {
         }
       }
       const mult = cat.mult || 1;
-      return { valid: true, base: Math.floor(2 * (pairFaces[0] + pairFaces[1]) * mult), contributing: idx };
+      return { valid: true, base: Math.floor(idx.reduce((a, i) => a + val(i), 0) * mult), contributing: idx };
     }
     case 'fullHouse': {
       const cs = Object.values(counts).sort((a, b) => a - b);
@@ -94,8 +97,8 @@ export function evalCategory(cat, faces) {
 // 최종 피해 = (기본 + 금박 기여) × Π(categoryMult) + Σ(categoryBonus) + Σ(flatDamage)
 // (v0.8: 족보 레벨 폐지 — 성장은 변형 교체·주사위·유물로)
 // 기본+금박이 0이면 성립 실패 — total 0 (선택 불가 처리 대상)
-export function computeDamage(cat, faces, diceDefs, relics) {
-  const ev = evalCategory(cat, faces);
+export function computeDamage(cat, faces, diceDefs, relics, zeroed = null) {
+  const ev = evalCategory(cat, faces, zeroed);
   let gold = 0;
   for (const i of ev.contributing) {
     if (diceDefs[i] && diceDefs[i].gold) gold += faces[i];

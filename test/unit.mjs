@@ -568,5 +568,151 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('갈림길의 두 갈래는 서로 다름', v3, 0);
 }
 
+
+// v1.17: 주사위 상태이상 13종
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  const mk = () => {
+    eng.rng.next = () => 0.5;
+    const run = { hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics: [],
+      dice: ['normal','normal','normal','normal','normal'],
+      categories: { onePair: ['clasped_hands'] } };
+    return eng.createBattle(run, ['stray_dog'], 'battle');
+  };
+
+  // 부착 규칙 — 빈 칸 먼저, 다 차면 덮어쓴다
+  { const b = mk();
+    eng.applyStatus(b, 'bleed', 3);
+    eq('세 칸에만 붙는다', b.dice.filter(d => d.st).length, 3);
+    eng.applyStatus(b, 'stun', 2);
+    eq('빈 칸을 먼저 채운다', b.dice.filter(d => d.st).length, 5);
+    eq('출혈은 그대로 셋', b.dice.filter(d => d.st.kind === 'bleed').length, 3);
+    eng.applyStatus(b, 'curse', 1);
+    eq('다 차면 덮어쓴다 (칸 수는 그대로)', b.dice.filter(d => d.st).length, 5);
+    eq('덮어쓴 저주가 하나 생김', b.dice.filter(d => d.st.kind === 'curse').length, 1);
+  }
+
+  // 저주·축복 — 나오는 눈이 잘린다
+  { const b = mk();
+    eng.rng.next = Math.random;
+    b.dice[0].st = { kind: 'curse', left: 0, fuse: 0, opened: false };
+    b.dice[1].st = { kind: 'blessing', left: 0, fuse: 0, opened: false };
+    let lo = [], hi = [];
+    for (let k = 0; k < 60; k++) { b.rolled = false; eng.initialRoll(b); lo.push(b.dice[0].face); hi.push(b.dice[1].face); }
+    eq('저주는 3 이하만', lo.every(v => v <= 3), true);
+    eq('축복은 4 이상만', hi.every(v => v >= 4), true);
+    eng.rng.next = () => 0.5;
+  }
+
+  // 봉인 — 다시 굴리기 전에는 값이 없다
+  { const b = mk(); eng.initialRoll(b);
+    b.dice[0].st = { kind: 'seal', left: 0, fuse: 0, opened: false };
+    eq('봉인은 값이 0으로 빠진다', eng.facesOf(b)[0], 0);
+    b.dice[0].held = false; eng.reroll(b);
+    eq('한 번 굴리면 값이 돌아온다', eng.facesOf(b)[0] > 0, true);
+  }
+
+  // 포박 — 다시 굴릴 대상으로 못 고른다
+  { const b = mk(); eng.initialRoll(b);
+    b.dice[2].st = { kind: 'bind', left: 0, fuse: 0, opened: false };
+    eng.toggleHold(b, 2);
+    eq('포박은 선택이 안 된다', b.dice[2].held, true);
+  }
+
+  // 마비 — 리롤을 두 칸 먹는다
+  { const b = mk(); eng.initialRoll(b);
+    const before = b.rollsLeft;
+    b.dice[1].st = { kind: 'numb', left: 0, fuse: 0, opened: false };
+    eng.toggleHold(b, 1); eng.reroll(b);
+    eq('마비가 끼면 리롤 2 소모', before - b.rollsLeft, 2);
+  }
+
+  // 결속 — 묶인 것끼리 같이 움직인다
+  { const b = mk(); eng.initialRoll(b);
+    b.dice[0].st = { kind: 'chain', left: 0, fuse: 0, opened: false };
+    b.dice[3].st = { kind: 'chain', left: 0, fuse: 0, opened: false };
+    eng.toggleHold(b, 0);
+    eq('하나 고르면 짝도 같이', [b.dice[0].held, b.dice[3].held], [false, false]);
+  }
+
+  // 기절 — 족보에는 들어가되 눈금이 0
+  { const cat = { id: 'x', kind: 'upper', face: 3 };
+    eq('기절 하나가 빠진 합', evalCategory(cat, [3,3,3,1,2], new Set([0])).base, 6);
+    eq('족보 성립 자체는 유지', evalCategory(cat, [3,3,3,1,2], new Set([0])).contributing.length, 3);
+  }
+
+  // 부패 — 심지가 다 타면 터지고, 그 전에 쓰면 해제된다
+  { const b = mk();
+    b.dice[0].st = { kind: 'rot', left: 0, fuse: 1, opened: false };
+    const hp = b.player.hp;
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('부패가 터져 아프다', hp - b.player.hp >= DB.statusById.rot.amount, true);
+    eq('터진 뒤에는 사라진다', b.dice[0].st, null);
+  }
+
+  // 약탈 — 족보에 쓰면 코인을 잃는다
+  { const b = mk(); eng.initialRoll(b);
+    b.dice.forEach(d => d.face = 4);
+    b.dice[0].st = { kind: 'plunder', left: 0, fuse: 0, opened: false };
+    eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
+    eq('눈금만큼 코인을 뺏긴다', b.coinsLost, 4);
+  }
+
+  // 출혈 — 족보에 쓰면 눈금만큼 아프다 (방어도가 있으면 그게 먼저 막는다)
+  { const b = mk(); eng.initialRoll(b);
+    b.dice.forEach(d => d.face = 5);
+    b.dice[0].st = { kind: 'bleed', left: 0, fuse: 0, opened: false };
+    const r = eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
+    eq('쓴 눈금만큼 출혈', r.bonusHits.includes('🩸-5'), true);
+  }
+  // 쓰지 않은 출혈 주사위는 아프지 않다
+  { const b = mk(); eng.initialRoll(b);
+    b.dice[0].face = 6; b.dice[1].face = 6; b.dice[2].face = 1; b.dice[3].face = 2; b.dice[4].face = 3;
+    b.dice[2].st = { kind: 'bleed', left: 0, fuse: 0, opened: false };
+    const r = eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
+    eq('안 쓴 주사위는 대가 없음', r.bonusHits.some(x => x.startsWith('🩸')), false);
+  }
+
+  // 잠식 — 쓰지 않으면 양옆으로 번지고, 다 차면 공허의 부름만 남는다
+  { const b = mk(); eng.initialRoll(b);
+    b.dice[0].face = 4; b.dice[1].face = 4; b.dice[2].face = 1; b.dice[3].face = 2; b.dice[4].face = 3;
+    b.dice[2].st = { kind: 'devour', left: 0, fuse: 0, opened: false };
+    eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
+    eq('안 쓰면 양옆으로 번진다', [b.dice[1].st && b.dice[1].st.kind, b.dice[3].st && b.dice[3].st.kind], ['devour','devour']);
+    b.dice.forEach(d => d.st = { kind: 'devour', left: 0, fuse: 0, opened: false });
+    b.await = null; b.over = false; b.rolled = true;
+    b.voidLocked = true;
+    const pv = eng.previewAll(b);
+    eq('족보가 공허의 부름 하나만 남는다', [pv.length, pv[0].variant.id], [1, 'void_call']);
+    const hp2 = b.player.hp, sum = eng.facesOf(b).reduce((a, v) => a + v, 0);
+    eng.confirmVoidCall(b);
+    eq('눈 총합만큼 내가 아프다', hp2 - b.player.hp, sum);
+    eq('잠식이 걷힌다', b.dice.filter(d => d.st).length, 0);
+  }
+
+  // 적 행동이 상태이상을 걸 수 있다
+  { const b = mk();
+    const before = b.dice.filter(d => d.st).length;
+    b.enemies[0].nextMove = { id: 'test', name: '시험', effects: [{ op: 'status', kind: 'poison', amount: 2 }] };
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('적이 건 상태이상이 붙는다', b.dice.filter(d => d.st && d.st.kind === 'poison').length >= 2, true);
+  }
+
+  // 정화는 주사위 상태이상까지 씻는다
+  { const b = mk();
+    eng.applyStatus(b, 'curse', 3);
+    eq('정화 전', b.dice.filter(d => d.st).length, 3);
+    eng.clearStatuses(b);
+    eq('정화 후', b.dice.filter(d => d.st).length, 0);
+  }
+
+  // 데이터 무결성
+  eq('상태이상 13종', DB.statuses.list.length, 13);
+  eq('규칙이 전부 구현된 것만 쓴다',
+    DB.statuses.list.every(s => ['onUseFaceDamage','noReroll','zeroValue','faceLow','faceHigh',
+      'hideFace','needReroll','fuse','linked','rerollCost','onUseFaceCoin','spread'].includes(s.rule)), true);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);

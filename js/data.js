@@ -3,10 +3,11 @@ export const DB = {
   dice: null, diceById: {}, relics: null, relicById: {},
   scoring: null, enemies: null, enemyById: {}, act1: null,
   events: null, weaponById: {}, eventById: {}, acts: null,
+  statuses: null, statusById: {},
 };
 
 export async function loadAll() {
-  const [dice, relics, scoring, enemies, act1, events, acts] = await Promise.all([
+  const [dice, relics, scoring, enemies, act1, events, acts, statuses] = await Promise.all([
     fetchJson('./data/dice.json'),
     fetchJson('./data/relics.json'),
     fetchJson('./data/scoring.json'),
@@ -14,9 +15,12 @@ export async function loadAll() {
     fetchJson('./data/act1.json'),
     fetchJson('./data/events.json'),
     fetchJson('./data/acts.json'),
+    fetchJson('./data/statuses.json'),
   ]);
   DB.dice = dice; DB.relics = relics; DB.scoring = scoring;
   DB.enemies = enemies; DB.act1 = act1; DB.events = events; DB.acts = acts;
+  DB.statuses = statuses;
+  DB.statusById = {}; for (const st of statuses.list) DB.statusById[st.id] = st;
   DB.diceById = {}; for (const d of dice) DB.diceById[d.id] = d;
   DB.relicById = {}; for (const r of relics) DB.relicById[r.id] = r;
   DB.enemyById = {}; for (const e of enemies) DB.enemyById[e.id] = e;
@@ -56,12 +60,13 @@ function validate() {
     }
   }
   // 적 행동 효과 검증 (v1.08: 휴식 추가, 유니크 행동·기본 행동·파쇄 대상까지 함께 본다)
-  const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal', 'rest', 'selfDamage', 'poison', 'bleed']);
+  const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal', 'rest', 'selfDamage', 'poison', 'bleed', 'status']);
   for (const e of DB.enemies) {
     const all = { ...e.moves, ...(e.uniqueMoves || {}) };
     for (const [mid, mv] of Object.entries(all)) {
       for (const ef of mv.effects) {
         if (!ENEMY_OPS.has(ef.op)) throw new Error(`enemies.json: ${e.id}.${mid} 미지원 효과 "${ef.op}"`);
+        if (ef.op === 'status' && !DB.statusById[ef.kind]) throw new Error(`enemies.json: ${e.id}.${mid} 없는 상태이상 "${ef.kind}"`);
       }
       if (mv.break) {
         if (!(e.uniqueMoves || {})[mv.break.move]) throw new Error(`enemies.json: ${e.id}.${mid} 파쇄 대상 "${mv.break.move}" 은(는) 유니크 행동이어야 합니다`);

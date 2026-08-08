@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.16 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.17 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -161,7 +161,12 @@ function cell(tr, node, ro){ const td=document.createElement('td'); if(ro) td.cl
   if(node instanceof Node) td.appendChild(node); else td.innerHTML = node==null?'':node; tr.appendChild(td); return td; }
 
 /* ---------- 공통 도우미 ---------- */
-const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['confuse','혼란'],['heal','회복'],['rest','휴식'],['poison','독(🌀)'],['bleed','출혈(🌀)'],['selfDamage','자해(❓)']];
+const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['status','상태이상 부여'],['confuse','혼란(구)'],['heal','회복'],['rest','휴식'],['poison','독(🌀)'],['bleed','출혈(🌀)'],['selfDamage','자해(❓)']];
+const ST_OPS=(DB.statuses.list||[]).map(s=>[s.id,s.name]);
+const ST_RULES=[['onUseFaceDamage','쓰면 눈금만큼 피해'],['onUseFaceCoin','쓰면 눈금만큼 코인'],['noReroll','다시 못 굴림'],
+  ['zeroValue','눈금 0 계산'],['faceLow','수치 이하만 나옴'],['faceHigh','수치 이상만 나옴'],['hideFace','눈 가림'],
+  ['needReroll','한 번 굴리기 전 값 없음'],['fuse','턴 지나면 폭발'],['linked','같이 굴러감'],
+  ['rerollCost','리롤 더 소모'],['spread','양옆으로 번짐']];
 const NO_AMOUNT=new Set(['rest']);   // 수치가 없는 효과
 const ABILITY_OPS=[['strength','힘'],['focus','집중'],['regen','재생'],['block','방어'],['heal','회복'],
   ['weakEnemy','적 약화'],['bleed','출혈'],['vulnerable','취약'],['stun','기절'],['dodge','회피'],
@@ -198,6 +203,7 @@ const TABS=[
  ['국면','보스의 국면 전환. HP가 임계 아래로 떨어지는 순간 진입 행동(유니크)이 현재 예고를 밀어내고 강제로 나온다.',tabPhase],
  ['막·테마','어느 테마에 어느 적이 나오는지. 배율은 [수치] 탭에.',tabTheme],
  ['만남','이벤트 선택지의 대가와 보상.',tabEvent],
+ ['상태이상','주사위 한 칸에 하나씩 붙는 13종. 규칙은 코드에 박혀 있고 여기서는 수치와 지속 턴만 고친다. 지속 0은 영구(정화하거나 조건을 만족해야 풀림)다. 적 행동에서 [상태이상 부여]를 고르면 여기 있는 종류를 건다.',tabStatus],
  ['수치','지도·보상·경제·전역 배율. 게임 전체의 손잡이.',tabConst],
 ];
 const view=document.getElementById('view'), nav=document.getElementById('tabs');
@@ -326,6 +332,7 @@ function tabMoves(v){
       (m.effects||[]).forEach((x,k)=>{
         const row=document.createElement('div'); row.className='efrow';
         row.appendChild(select(`${base}.effects.${k}.op`, e.name+' '+m.name+' 효과'+(k+1), ENEMY_OPS, {after:redraw}));
+        if(x.op==='status') row.appendChild(select(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 상태이상 종류', ST_OPS, {def:'bleed'}));
         row.appendChild(miniBtn('×','이 효과 지우기',()=>{ removeP(`${base}.effects.${k}`); mark(`${base}.effects`, e.name+' '+m.name+' 효과 삭제'); redraw(); }));
         efBox.appendChild(row);
       });
@@ -566,6 +573,33 @@ function tabEvent(v){
     tb.appendChild(tr);
   }));
 }
+function tabStatus(v){
+  const tb=table(v,['id','이름','규칙','수치','지속 턴','색','설명']);
+  DB.statuses.list.forEach((st,i)=>{
+    const tr=document.createElement('tr');
+    tr.dataset.k=(st.id+' '+st.name).toLowerCase();
+    cell(tr, st.id, 1);
+    cell(tr, field(`statuses:list.${i}.name`, st.id+' 이름'));
+    cell(tr, select(`statuses:list.${i}.rule`, st.id+' 규칙', ST_RULES, {after:redraw}));
+    cell(tr, field(`statuses:list.${i}.amount`, st.name+' 수치', {num:true, def:0}));
+    cell(tr, field(`statuses:list.${i}.turns`, st.name+' 지속 턴', {num:true, def:0}));
+    cell(tr, field(`statuses:list.${i}.color`, st.name+' 색'));
+    cell(tr, field(`statuses:list.${i}.text`, st.name+' 설명'));
+    tb.appendChild(tr);
+  });
+  const p=document.createElement('p'); p.className='note';
+  p.innerHTML='<b>규칙별 수치가 뜻하는 것</b> — 출혈·독·약탈은 눈금에 곱하는 배수, 저주·축복은 나올 수 있는 눈의 경계, '
+    +'부패는 터질 때 피해(지속 턴이 심지 길이), 마비는 리롤을 몇 칸 먹는지. 나머지는 수치를 안 쓴다.';
+  v.appendChild(p);
+  const q=document.createElement('p'); q.className='note';
+  q.textContent='공허의 부름: '+DB.statuses.voidCall.name+' — '+DB.statuses.voidCall.text;
+  v.appendChild(q);
+  const r=document.createElement('div'); r.className='kv'; r.style.marginTop='8px';
+  const b=document.createElement('b'); b.textContent='공허의 부름 자해 배수'; r.appendChild(b);
+  r.appendChild(field('statuses:voidCall.selfDamageMult','공허의 부름 자해 배수',{num:true,def:1}));
+  v.appendChild(r);
+}
+
 function tabConst(v){
   const A=DB.act1;
   const box=(title, pairs)=>{
@@ -632,12 +666,15 @@ const dlg=document.getElementById('dlg');
 document.getElementById('close').onclick=()=>dlg.close();
 // 게임의 data.js 가 로딩 때 하는 검사를 여기서 미리 돌린다 — 깨진 데이터를 넘기지 않으려고
 function validateDB(){
-  const bad=[]; const OPS=new Set(ENEMY_OPS.map(([id])=>id));   // 드롭다운 목록에서 직접 뽑는다 — 따로 적어두면 또 어긋난다
+  const bad=[]; const OPS=new Set(ENEMY_OPS.map(([id])=>id)); const STK=new Set(ST_OPS.map(([id])=>id));   // 드롭다운 목록에서 직접 뽑는다 — 따로 적어두면 또 어긋난다
   for(const e of DB.enemies){
     const all={...e.moves, ...(e.uniqueMoves||{})};
     if(!Object.keys(e.moves).length) bad.push(`${e.name}: 일반 행동이 하나도 없음`);
     for(const [mid,m] of Object.entries(all)){
-      for(const ef of (m.effects||[])) if(!OPS.has(ef.op)) bad.push(`${e.name}/${m.name}: 모르는 효과 "${ef.op}"`);
+      for(const ef of (m.effects||[])){
+        if(!OPS.has(ef.op)) bad.push(`${e.name}/${m.name}: 모르는 효과 "${ef.op}"`);
+        if(ef.op==='status' && !STK.has(ef.kind)) bad.push(`${e.name}/${m.name}: 없는 상태이상 "${ef.kind||'(빈칸)'}"`);
+      }
       if(m.break){
         if(!(e.uniqueMoves||{})[m.break.move]) bad.push(`${e.name}/${m.name}: 파쇄 대상이 유니크 행동이 아님`);
         if(!(m.break.damage>0)) bad.push(`${e.name}/${m.name}: 파쇄 피해가 0`);
