@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REDHOOD 배치 편집기 — v2.07 기준</title>
+<title>REDHOOD 배치 편집기 — v2.08 기준</title>
 <link rel="stylesheet" href="https://sepi-toolbox.github.io/Redhood/assets/fonts/song-myung/index.css">
 <style id="game-css">
 /* REDHOOD v0.2 — 다크 페어리테일 · 주사위판 · 모바일 세로 전용 */
@@ -1336,21 +1336,30 @@ span.enemy-art {
 .cb-hand { position: absolute; bottom: var(--cb-handBottom, -22px); left: 0; width: 100%; height: 224px; }
 .cb-card {
   position: absolute; left: 50%; bottom: 0; width: var(--cb-cardW, 118px); height: var(--cb-cardH, 162px); margin-left: calc(var(--cb-cardW, 118px) / -2);
-  border-radius: 10px; background: linear-gradient(180deg, #f2e7cd, #e3d3ab); border: 3px solid #a8352e;
-  box-shadow: 0 4px 10px rgba(0,0,0,.7); transform-origin: 50% 120%; transition: transform .22s;
-  display: flex; flex-direction: column; overflow: hidden; touch-action: none;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/card_frame.webp') center / 100% 100% no-repeat;
+  border: none; border-radius: 0;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .65));
+  transform-origin: 50% 120%; transition: transform .22s;
+  touch-action: none;
 }
 .cb-card.dragging { transition: none; z-index: 40; }
 .cb-card.broke { filter: grayscale(.55) brightness(.8); }
 .cb-card .ccost {
-  position: absolute; top: -2px; left: -2px; width: 25px; height: 25px; border-radius: 50%;
-  background: radial-gradient(#e8b64d, #b07f22); border: 2px solid #7d5a17; color: #241c07;
-  display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; z-index: 2;
+  position: absolute; top: 6%; left: 4.5%; width: 18%; height: 12%;
+  display: flex; align-items: center; justify-content: center;
+  color: #3d2413; font-weight: 800; font-size: calc(var(--cb-cardW, 118px) * .115); z-index: 2;
 }
-.cb-card .cart { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 44px;
-  background: linear-gradient(180deg, #2a2018, #3d2c1e); }
-.cb-card .cnm { flex: none; text-align: center; font-size: 12.5px; font-weight: 700; color: #3d2413;
-  padding: 4px 2px 5px; background: linear-gradient(180deg, #e8d8b2, #d8c69a); border-top: 2px solid #a8352e; white-space: nowrap; }
+.cb-card .cart {
+  position: absolute; left: 12%; right: 12%; top: 13%; height: 46%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--cb-cardW, 118px) * .38); background: none;
+}
+.cb-card .cnm {
+  position: absolute; left: 13%; right: 13%; top: 65.5%; height: 21%;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font-size: calc(var(--cb-cardW, 118px) * .1); font-weight: 700; color: #3d2413;
+  background: none; border: none; white-space: nowrap; overflow: hidden;
+}
 .battle-screen > .cb-end {
   position: absolute; right: var(--cb-endX, 60px); bottom: var(--cb-endY, 216px); z-index: 42;
   width: var(--cb-endW, 150px); height: var(--cb-endH, 46px); box-sizing: border-box;
@@ -1367,15 +1376,10 @@ span.enemy-art {
 .battle-screen > .cb-orb.empty { filter: grayscale(.8) brightness(.6); box-shadow: none; }
 .battle-screen > .cb-pile {
   position: absolute; bottom: 10px; z-index: 42;
-  width: var(--cb-pileW, 44px); height: var(--cb-pileH, 58px); border-radius: 7px;
-  background: linear-gradient(160deg, #4a1f1a, #2a120f);
-  border: 2px solid #7d3a2e; box-shadow: 2px 2px 0 #1c0c0a, 4px 4px 0 #14080788, 0 4px 8px rgba(0,0,0,.6);
+  width: var(--cb-pileW, 44px); height: var(--cb-pileH, 58px); border-radius: 4px;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/card_back.webp') center / 100% 100% no-repeat;
+  border: 1px solid #1c0c0a; box-shadow: 2px 2px 0 #1c0c0a, 4px 4px 0 rgba(20, 8, 7, .53), 0 4px 8px rgba(0,0,0,.6);
   display: flex; align-items: center; justify-content: center;
-}
-.battle-screen > .cb-pile::before {
-  content: ''; position: absolute; inset: 5px; border-radius: 4px;
-  border: 1px solid rgba(232,182,77,.35);
-  background: radial-gradient(circle, rgba(232,182,77,.14) 0%, transparent 70%);
 }
 .battle-screen > .cb-pile.deck { left: var(--cb-deckX, 66px); bottom: var(--cb-deckY, 210px); }
 .battle-screen > .cb-pile.disc { right: var(--cb-discX, 10px); bottom: var(--cb-discY, 210px); transform: rotate(4deg); filter: brightness(.75); }
@@ -1394,13 +1398,17 @@ span.enemy-art {
 .battle-screen > .cb-zoom { position: absolute; inset: 0; z-index: 60; background: rgba(0,0,0,.62); display: none;
   align-items: center; justify-content: center; }
 .cb-zoom.on { display: flex; }
-.cb-zoom .zbig { width: 230px; border-radius: 14px; background: linear-gradient(180deg, #f2e7cd, #e3d3ab);
-  border: 4px solid #a8352e; overflow: hidden; box-shadow: 0 8px 30px #000; }
-.cb-zoom .zart { height: 122px; display: flex; align-items: center; justify-content: center; font-size: 68px;
-  background: linear-gradient(180deg, #2a2018, #3d2c1e); }
-.cb-zoom .ztt { padding: 10px 12px 2px; font-size: 17px; font-weight: 800; color: #3d2413; }
-.cb-zoom .zcc { padding: 0 12px; font-size: 12px; color: #7d5a17; font-weight: 700; }
-.cb-zoom .zdd { padding: 8px 12px 14px; font-size: 13.5px; line-height: 1.55; color: #4a3a28; }
+.cb-zoom .zbig { position: relative; width: 258px; height: 387px;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/card_frame.webp') center / 100% 100% no-repeat;
+  filter: drop-shadow(0 10px 30px #000); }
+.cb-zoom .zart { position: absolute; left: 12%; right: 12%; top: 12%; height: 47%;
+  display: flex; align-items: center; justify-content: center; font-size: 84px; }
+.cb-zoom .zcc { position: absolute; top: 6%; left: 4.5%; width: 18%; height: 12%;
+  display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #3d2413; }
+.cb-zoom .ztt { position: absolute; left: 13%; right: 13%; top: 66.5%; text-align: center;
+  font-size: 17px; font-weight: 800; color: #3d2413; }
+.cb-zoom .zdd { position: absolute; left: 14%; right: 14%; top: 74.5%; bottom: 11%;
+  font-size: 12px; line-height: 1.5; color: #4a3a28; text-align: center; overflow: hidden; }
 .battle-screen > .cb-float {
   position: absolute; z-index: 55; font-size: 17px; font-weight: 800; color: #f0c05a;
   text-shadow: 0 1px 3px #000; pointer-events: none; animation: cb-rise 1s forwards;
@@ -1478,7 +1486,7 @@ span.enemy-art {
 </head>
 <body>
 <header class="ed-top">
-  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.07 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
+  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.08 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
   <div class="ed-btns">
     <button id="tg-multi">적 2마리</button>
     <button id="tg-loot">전리품 화면</button>
