@@ -100,7 +100,7 @@ export function evalCategory(cat, faces, zeroed = null) {
 // v1.29 벼름(whet) — 전투 중에 쌓았다가 족보로 터뜨리는 곱연산 자원.
 //   배수 = 1 + 벼름 × WHET_STEP. 확정하면 0으로 돌아간다 (턴마다 깎이지 않는다).
 export const WHET_STEP = 0.5;
-export const WHET_CAP = 10;
+export const WHET_CAP = 6;
 export const whetMultOf = (whet) => 1 + Math.min(whet || 0, WHET_CAP) * WHET_STEP;
 
 export function computeDamage(cat, faces, diceDefs, relics, zeroed = null, opts = {}) {

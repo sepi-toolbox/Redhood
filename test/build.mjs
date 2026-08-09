@@ -38,14 +38,14 @@ function scoreChoice(battle,p,smart){
     else if(o.op==='strength') v+=amt*turnsLeft*0.8; else if(o.op==='focus') v+=amt*turnsLeft*1.2;
     else if(o.op==='regen') v+=amt*turnsLeft*(0.6+danger); else if(o.op==='weakEnemy') v+=amt*turnsLeft*0.7;
     else if(o.op==='bleed') v+=amt*2.2; else if(o.op==='vulnerable') v+=amt*turnsLeft*0.5;
-    else if(o.op==='whet') v+=amt*0.5*Math.max(12,p.bd.total)*(turnsLeft>1?1:0); }
+    else if(o.op==='whet') v+=(battle.whet>=6?0:amt*0.5*Math.max(12,p.bd.total))*(turnsLeft>1?1:0); }
   return smart ? gimAdjust(battle,p,v) : v;
 }
 
 // 원형별 덱 — 유물·주사위·족보를 다 갖췄을 때를 본다
 const BUILDS = {
   '시작': { dice:['normal','normal','normal','normal','normal'], relics:[],
-    cats:{chance:['instinct'],onePair:['clasped_hands'],threeKind:['triple_axe']} },
+    cats:{chance:['catch_breath'],onePair:['clasped_hands','clash'],threeKind:['triple_axe']} },
   '지금 만렙(예전 방식)': { dice:['gold','lead','high','lead','high'],
     relics:['wolf_fang','wolfmoon_pendant','old_bone','poison_apple','red_cloak'],
     cats:{chance:['instinct'],onePair:['red_shoes'],twoPair:['twin_sisters'],threeKind:['triple_axe'],
@@ -53,19 +53,19 @@ const BUILDS = {
   '🩸 사냥': { dice:['nail','nail','mirror','twin','gold'],
     relics:['hunters_eye','whetstone','old_bone','silver_bullet','grandma_book'],
     cats:{chance:['catch_breath'],onePair:['clasped_hands'],threeKind:['chopping'],
-      fourKind:['hunger'],yahtzee:['blood_moon']} },
+      fourKind:['hunger','heavy_blow'],yahtzee:['judgment_night']} },
   '🌾 길': { dice:['chainlink','guide','moonlit','normal','gold'],
     relics:['waymark','silver_knife','moss_compass','red_cloak','fate_thimble'],
-    cats:{chance:['catch_breath'],onePair:['clasped_hands'],smallStraight:['windpath'],
-      largeStraight:['moonpath'],threeKind:['chopping']} },
+    cats:{chance:['catch_breath'],onePair:['clasped_hands'],smallStraight:['windpath','snare'],
+      largeStraight:['moonpath','storm_run'],threeKind:['chopping']} },
   '🔥 피': { dice:['cursed','cursed','fang','spark','gold'],
     relics:['leech_ring','dried_heart','poison_apple','whetstone','wolf_pelt'],
-    cats:{chance:['catch_breath'],onePair:['clasped_hands'],threeKind:['chopping'],
-      fourKind:['hunger'],twoPair:['two_moons']} },
+    cats:{chance:['catch_breath'],onePair:['clasped_hands'],threeKind:['chopping','downstroke'],
+      fourKind:['hunger','heavy_blow'],twoPair:['two_moons']} },
   '🛡 둥지': { dice:['straw','bramble','straw','normal','gold'],
     relics:['bears_back','gate_bar','firewood','whetstone','hunters_charm'],
-    cats:{chance:['catch_breath'],onePair:['clasped_hands'],twoPair:['twin_sisters'],
-      fullHouse:['cottage'],smallStraight:['hunt_drive']} },
+    cats:{chance:['catch_breath'],onePair:['clasped_hands','clash'],twoPair:['twin_sisters'],
+      fullHouse:['cottage','wedge'],smallStraight:['hunt_drive']} },
 };
 
 function fight(b0, id, floor, log, smart){
@@ -90,7 +90,7 @@ function fight(b0, id, floor, log, smart){
     const whetNow=b.whet;
     confirmCategory(b,best.cat.id,best.variant.id,e&&e.uid);
     peak=Math.max(peak,best.bd.total); sum+=best.bd.total; n++;
-    if(log) console.log(`${String(b.turn).padStart(2)}턴 ${best.variant.name.padEnd(10)} ${String(best.bd.total).padStart(3)} 피해 (벼름 ${whetNow} · ×${(1+Math.min(whetNow,10)*0.5).toFixed(1)}) · 적HP ${Math.max(0,e.hp)} · 적:${nm||'?'}`);
+    if(log) console.log(`${String(b.turn).padStart(2)}턴 ${(best.variant.burst?'⚡':'  ')+best.variant.name.padEnd(10)} ${String(best.bd.total).padStart(3)} 피해 ${best.variant.burst?`(벼름 ${whetNow} 태움 ×${(1+Math.min(whetNow,6)*0.5).toFixed(1)})`:`(벼름 ${b.whet} 보유)`} · 적HP ${Math.max(0,e.hp)} · 적:${nm||'?'}`);
     if(b.over) break;
     enemyPhase(b);
   }

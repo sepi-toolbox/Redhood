@@ -5,8 +5,8 @@
     "tier": "normal",
     "art": "🐦‍⬛",
     "hp": [
-      35,
-      39
+      34,
+      38
     ],
     "moves": {
       "peck": {
@@ -85,8 +85,8 @@
     "tier": "normal",
     "art": "🔥",
     "hp": [
-      31,
-      36
+      30,
+      35
     ],
     "moves": {
       "scorch": {
@@ -201,8 +201,8 @@
     "tier": "normal",
     "art": "🕷️",
     "hp": [
-      38,
-      42
+      37,
+      41
     ],
     "moves": {
       "bite": {
@@ -288,8 +288,8 @@
     "tier": "normal",
     "art": "🐕",
     "hp": [
-      42,
-      46
+      41,
+      45
     ],
     "moves": {
       "bite": {
@@ -369,8 +369,8 @@
     "tier": "normal",
     "art": "🥀",
     "hp": [
-      45,
-      49
+      44,
+      48
     ],
     "moves": {
       "scratch": {
@@ -451,8 +451,8 @@
     "tier": "normal",
     "art": "🌳",
     "hp": [
-      53,
-      58
+      51,
+      56
     ],
     "moves": {
       "slam": {
@@ -542,8 +542,8 @@
     "tier": "normal",
     "art": "💧",
     "hp": [
-      33,
-      38
+      32,
+      37
     ],
     "moves": {
       "splash": {
@@ -650,8 +650,8 @@
     "tier": "normal",
     "art": "🪱",
     "hp": [
-      30,
-      33
+      29,
+      32
     ],
     "moves": {
       "suck": {
@@ -771,8 +771,8 @@
     "tier": "normal",
     "art": "🐀",
     "hp": [
-      31,
-      36
+      30,
+      35
     ],
     "moves": {
       "gnaw": {
@@ -845,8 +845,8 @@
     "tier": "normal",
     "art": "🧹",
     "hp": [
-      36,
-      40
+      35,
+      39
     ],
     "moves": {
       "sweep": {
@@ -921,8 +921,8 @@
     "tier": "elite",
     "art": "🦮",
     "hp": [
-      75,
-      75
+      71,
+      71
     ],
     "moves": {
       "bite": {
@@ -1073,8 +1073,8 @@
     "tier": "elite",
     "art": "🐟",
     "hp": [
-      78,
-      78
+      74,
+      74
     ],
     "moves": {
       "snap": {
@@ -1171,8 +1171,8 @@
     "tier": "elite",
     "art": "👤",
     "hp": [
-      80,
-      80
+      76,
+      76
     ],
     "moves": {
       "scratch": {
@@ -1268,8 +1268,8 @@
     "tier": "boss",
     "art": "🐺",
     "hp": [
-      130,
-      130
+      121,
+      121
     ],
     "moves": {
       "bite": {
@@ -1415,8 +1415,8 @@
     "tier": "boss",
     "art": "🗿",
     "hp": [
-      126,
-      126
+      117,
+      117
     ],
     "moves": {
       "grasp": {
@@ -1584,8 +1584,8 @@
         "effects": [
           {
             "op": "ward",
-            "amount": 46,
-            "turns": 3
+            "amount": 80,
+            "turns": 4
           }
         ],
         "cooldown": 2,
@@ -1715,8 +1715,8 @@
     "tier": "boss",
     "art": "🧸",
     "hp": [
-      128,
-      128
+      119,
+      119
     ],
     "moves": {
       "hug": {
@@ -1852,8 +1852,8 @@
     "tier": "normal",
     "art": "🐸",
     "hp": [
-      38,
-      42
+      37,
+      41
     ],
     "moves": {
       "tongue": {
@@ -1932,8 +1932,8 @@
     "tier": "normal",
     "art": "🦟",
     "hp": [
-      27,
-      31
+      26,
+      30
     ],
     "moves": {
       "drain": {
@@ -2014,8 +2014,8 @@
     "tier": "normal",
     "art": "👻",
     "hp": [
-      35,
-      39
+      34,
+      38
     ],
     "moves": {
       "chill": {
@@ -2099,8 +2099,8 @@
     "tier": "normal",
     "art": "🦌",
     "hp": [
-      40,
-      44
+      39,
+      43
     ],
     "moves": {
       "gore": {
@@ -2174,8 +2174,8 @@
     "tier": "normal",
     "art": "☠️",
     "hp": [
-      38,
-      42
+      37,
+      41
     ],
     "moves": {
       "slash": {
@@ -2254,8 +2254,8 @@
     "tier": "normal",
     "art": "🐛",
     "hp": [
-      33,
-      37
+      32,
+      36
     ],
     "moves": {
       "bite": {
@@ -2335,8 +2335,8 @@
     "tier": "elite",
     "art": "🗿",
     "hp": [
-      85,
-      85
+      81,
+      81
     ],
     "moves": {
       "slam": {
@@ -2399,8 +2399,8 @@
         "effects": [
           {
             "op": "ward",
-            "amount": 24,
-            "turns": 3
+            "amount": 40,
+            "turns": 4
           }
         ],
         "cooldown": 2,
@@ -2437,8 +2437,8 @@
     "tier": "elite",
     "art": "🏇",
     "hp": [
-      80,
-      80
+      76,
+      76
     ],
     "moves": {
       "lance": {
@@ -2531,8 +2531,8 @@
     "tier": "elite",
     "art": "⚰️",
     "hp": [
-      83,
-      83
+      79,
+      79
     ],
     "moves": {
       "shovel": {
@@ -2592,8 +2592,8 @@
         "effects": [
           {
             "op": "ward",
-            "amount": 22,
-            "turns": 3
+            "amount": 36,
+            "turns": 4
           }
         ],
         "cooldown": 2,
@@ -2630,8 +2630,8 @@
     "tier": "boss",
     "art": "🐊",
     "hp": [
-      134,
-      134
+      125,
+      125
     ],
     "moves": {
       "chomp": {
@@ -2760,8 +2760,8 @@
     "tier": "boss",
     "art": "🌫️",
     "hp": [
-      130,
-      130
+      121,
+      121
     ],
     "moves": {
       "caress": {
@@ -2896,8 +2896,8 @@
     "tier": "boss",
     "art": "🧟",
     "hp": [
-      137,
-      137
+      127,
+      127
     ],
     "moves": {
       "claw": {
@@ -2969,8 +2969,8 @@
         "effects": [
           {
             "op": "ward",
-            "amount": 48,
-            "turns": 3
+            "amount": 85,
+            "turns": 4
           }
         ],
         "cooldown": 2,
@@ -3028,8 +3028,8 @@
     "tier": "normal",
     "art": "🐇",
     "hp": [
-      36,
-      40
+      35,
+      39
     ],
     "moves": {
       "nibble": {
@@ -3106,8 +3106,8 @@
     "tier": "normal",
     "art": "👁️",
     "hp": [
-      31,
-      36
+      30,
+      35
     ],
     "moves": {
       "gaze": {
@@ -3187,8 +3187,8 @@
     "tier": "normal",
     "art": "🦋",
     "hp": [
-      33,
-      38
+      32,
+      37
     ],
     "moves": {
       "dust": {
@@ -3269,8 +3269,8 @@
     "tier": "normal",
     "art": "🦠",
     "hp": [
-      38,
-      42
+      37,
+      41
     ],
     "moves": {
       "whisper": {
@@ -3357,8 +3357,8 @@
     "tier": "normal",
     "art": "🕯️",
     "hp": [
-      36,
-      40
+      35,
+      39
     ],
     "moves": {
       "dagger": {
@@ -3436,8 +3436,8 @@
     "tier": "normal",
     "art": "🪨",
     "hp": [
-      44,
-      48
+      43,
+      47
     ],
     "moves": {
       "scream": {
@@ -3520,8 +3520,8 @@
     "tier": "elite",
     "art": "⏳",
     "hp": [
-      83,
-      83
+      79,
+      79
     ],
     "moves": {
       "sand": {
@@ -3631,8 +3631,8 @@
     "tier": "elite",
     "art": "🦑",
     "hp": [
-      86,
-      86
+      82,
+      82
     ],
     "moves": {
       "slap": {
@@ -3740,8 +3740,8 @@
     "tier": "elite",
     "art": "🔔",
     "hp": [
-      80,
-      80
+      76,
+      76
     ],
     "moves": {
       "toll": {
@@ -3843,8 +3843,8 @@
     "tier": "boss",
     "art": "🌙",
     "hp": [
-      140,
-      140
+      130,
+      130
     ],
     "moves": {
       "dream_blade": {
@@ -3977,8 +3977,8 @@
     "tier": "boss",
     "art": "🕳️",
     "hp": [
-      143,
-      143
+      133,
+      133
     ],
     "moves": {
       "gnash": {
@@ -4105,8 +4105,8 @@
     "tier": "boss",
     "art": "😇",
     "hp": [
-      137,
-      137
+      127,
+      127
     ],
     "moves": {
       "hymn": {
@@ -4335,8 +4335,8 @@
     "tier": "normal",
     "art": "🧎",
     "hp": [
-      38,
-      42
+      37,
+      41
     ],
     "moves": {
       "sermon": {
@@ -4419,8 +4419,8 @@
     "tier": "normal",
     "art": "👥",
     "hp": [
-      33,
-      38
+      32,
+      37
     ],
     "moves": {
       "hymn": {
@@ -4498,8 +4498,8 @@
     "tier": "normal",
     "art": "🎇",
     "hp": [
-      31,
-      36
+      30,
+      35
     ],
     "moves": {
       "singe": {

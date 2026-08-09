@@ -1157,3 +1157,10 @@ span.enemy-art {
 .enemy-buffs .gim.cap{background:#2f3a4b;color:#bcd2ee;border-color:#5c7ba6}
 .enemy-buffs .gim.demand{background:#4a2f4b;color:#f0c8f0;border-color:#9a5f9c;animation:gimBlink 1.4s ease-in-out infinite}
 @keyframes gimBlink{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* ---------- v1.31 일격(⚡) 족보 ---------- */
+.sheet-row.combo-row.burst{position:relative}
+.sheet-row.combo-row.burst .bolt{color:#ffcf6b;margin-right:2px;
+  filter:drop-shadow(0 0 3px rgba(255,180,60,.7));animation:boltFlick 2s ease-in-out infinite}
+@keyframes boltFlick{0%,100%{opacity:1}45%{opacity:.55}}
+.sheet-row.combo-row.burst:not(.used) .sheet-preview{color:#ffd98a;text-shadow:0 0 6px rgba(255,170,60,.45)}

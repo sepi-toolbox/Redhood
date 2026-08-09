@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.30 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.31 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -202,7 +202,7 @@ function labelFor(path, fallback){
       const CN={name:'족보 이름',ruleText:'족보 설명',mult:'배수',kind:'판정',score:'점수 방식'};
       if(ks[2]==='variants'){
         const vr=(c.variants||[])[Number(ks[3])]; if(!vr) return fallback;
-        const t=tailOf(4), VN={name:'이름',tier:'등급',abilityText:'부가 설명'};
+        const t=tailOf(4), VN={name:'이름',tier:'등급',abilityText:'부가 설명',burst:'일격 여부'};
         if(ks[4]==='ability'&&ks[5]!==undefined){
           const a=(vr.ability||[])[Number(ks[5])]||{}, nth='능력'+(Number(ks[5])+1);
           return `${vr.name} ${nth}${ks[6]==='amount'?' '+(OPN[a.op]||'수치'):''}`;
@@ -638,7 +638,7 @@ function tabMoves(v){
   });
 }
 function tabScore(v){
-  const tb=table(v,['족보','판정','점수','배수','변형','등급','부가 능력','수치','부가 설명','족보 설명']);
+  const tb=table(v,['족보','판정','점수','배수','변형','등급','⚡일격','부가 능력','수치','부가 설명','족보 설명']);
   DB.scoring.categories.forEach((c,ci)=>{
     c.variants.forEach((vr,vi)=>{
       const tr=document.createElement('tr'); tr.className='t-'+(vr.tier||'common');
@@ -652,6 +652,10 @@ function tabScore(v){
       cell(tr, field(`scoring:categories.${ci}.variants.${vi}.name`,vr.id+' 이름'));
       const vb=`scoring:categories.${ci}.variants.${vi}`;
       cell(tr, select(`${vb}.tier`, vr.name+' 등급', TIER_OPS, {def:'common', after:redraw}));
+      // 일격 — 이 변형만 벼름을 태우고 그만큼 증폭된다
+      cell(tr, select(`${vb}.burst`, vr.name+' 일격 여부',
+        [['','보통 — 벼름을 안 건드림'],['true','⚡ 일격 — 벼름을 전부 태운다']],
+        {removable:true, removePath:`${vb}.burst`, onCreate:()=>{ vr.burst=true; }}));
       const ab=document.createElement('div');
       (vr.ability||[]).forEach((a,k)=>{ const r=document.createElement('div'); r.className='efrow';
         r.appendChild(select(`${vb}.ability.${k}.op`, vr.name+' 능력'+(k+1), ABILITY_OPS, {after:redraw}));

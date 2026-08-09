@@ -797,7 +797,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
   eq('벼름 0이면 배수 1', whetMultOf(0), 1);
   eq('벼름 2면 배수 2', whetMultOf(2), 2);
-  eq('벼름은 10에서 멈춘다', whetMultOf(99), 6);
+  eq('벼름은 6에서 멈춘다', whetMultOf(99), 4);
 
   // 공식에 곱연산으로 들어간다: 원페어 [5,5] = 10 → 벼름 2면 20
   const five = [5, 5, 1, 2, 3], N5 = Array(5).fill({ faces: [1,2,3,4,5,6] });
@@ -815,14 +815,20 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
   // 확정하면 벼름이 0으로 돌아간다
   {
-    const b = mk(['normal','normal','normal','normal','normal'], ['whetstone'], { onePair: ['red_shoes'] });
+    const b = mk(['normal','normal','normal','normal','normal'], ['whetstone'], { onePair: ['clash'] });
     eng.rng.next = () => 0.5;                       // 항상 4가 나온다 → 원페어 성립
     eng.initialRoll(b);
     const before = b.whet;
-    const r = eng.confirmCategory(b, 'onePair', 'red_shoes', b.enemies[0].uid);
+    const r = eng.confirmCategory(b, 'onePair', 'clash', b.enemies[0].uid);   // 맞부딪기 = 일격
     eq('확정 전 벼름이 있었다', before > 0, true);
-    eq('확정하면 벼름 0', b.whet, 0);
+    eq('일격으로 터뜨리면 벼름 0', b.whet, 0);
     eq('쓴 벼름을 기록한다', r.spentWhet, before);
+    // 일격이 아니면 벼름은 그대로 남는다
+    const b3 = mk(['normal','normal','normal','normal','normal'], ['whetstone'], { onePair: ['red_shoes'] });
+    eng.initialRoll(b3);
+    const keep = b3.whet;
+    eng.confirmCategory(b3, 'onePair', 'red_shoes', b3.enemies[0].uid);
+    eq('일격이 아니면 벼름이 안 깎인다', b3.whet, keep);
     // 벼름을 주는 변형이면 확정 직후 다시 쌓이기 시작한다
     const b2 = mk(['normal','normal','normal','normal','normal'], [], { onePair: ['clasped_hands'] });
     eng.initialRoll(b2);
@@ -949,6 +955,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eq('문턱: 20 이하는 안 통한다', e.hp, hp0);
     eng.__test_deal(b, e, 25);
     eq('문턱: 넘기면 통째로 들어간다', e.hp, hp0 - 25);
+    eq('문턱: 한 번 뚫리면 부서진다', e.wardLeft, 0);
   }
   // 상한 — 한 번에 그 이상은 못 준다
   {

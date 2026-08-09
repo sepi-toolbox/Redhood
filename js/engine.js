@@ -358,7 +358,8 @@ function situationalFlat(battle) {
   }
   return v;
 }
-const dmgOpts = (battle) => ({ whet: battle.whet, hpRatio: battle.player.hp / Math.max(1, battle.player.maxHp) });
+const dmgOpts = (battle, variant) => ({ whet: (variant && variant.burst) ? battle.whet : 0,
+  hpRatio: battle.player.hp / Math.max(1, battle.player.maxHp) });
 
 // ---------- 미리보기 ----------
 // v0.9: 족보당 변형을 여러 개 보유(누적) — 같은 족보의 변형은 목록에서 이웃하게 정렬됨
@@ -379,15 +380,16 @@ export function previewAll(battle) {
   for (const cat of DB.scoring.categories) {
     const ownedList = battle.categories[cat.id];
     if (!ownedList || ownedList.length === 0) continue;
-    const bd0 = battle.rolled
-      ? computeDamage(cat, faces, battle.diceDefs, battle.relics, zero, dmgOpts(battle))
-      : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, whetMult: 1, bonus: 0, flat: 0 };
-    const total = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ + battle.buffs.strength : bd0.total;
     const seal = battle.sealed[cat.id] || 0;
-    // 성립하지 않는(또는 0점) 족보는 선택 불가
-    const locked = seal > 0 || !battle.rolled || total === 0;
     for (const vid of ownedList) {
-      out.push({ cat, variant: variantOf(cat, vid), seal, locked, bd: { ...bd0, total } });
+      const variant = variantOf(cat, vid);
+      // v1.31 일격(burst) — 이 변형만 벼름을 태우고 그만큼 증폭된다. 나머지는 벼름을 건드리지 않는다.
+      const bd0 = battle.rolled
+        ? computeDamage(cat, faces, battle.diceDefs, battle.relics, zero, dmgOpts(battle, variant))
+        : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, whetMult: 1, bonus: 0, flat: 0 };
+      const total = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ + battle.buffs.strength : bd0.total;
+      const locked = seal > 0 || !battle.rolled || total === 0;
+      out.push({ cat, variant, seal, locked, burst: !!variant.burst, bd: { ...bd0, total } });
     }
   }
   return out;
@@ -515,11 +517,15 @@ function applyAbility(battle, variant, bd, targets) {
 // 적에게 피해 — 취약(받는 피해 +N) 가산 후 방어(block)가 흡수 (v0.19)
 function dealToEnemy(battle, t, amount) {
   let total = amount + (t.debuffs ? t.debuffs.vulnerable : 0);
-  // 문턱 — 얕은 타격은 아예 안 닿는다. 한 방을 크게 만들어야 뚫린다.
-  if (t.wardLeft > 0 && total > 0 && total <= t.ward) {
-    battle.lastHits.push({ uid: t.uid, amount: 0, warded: true });
-    if (battle.lastResult) battle.lastResult.bonusHits.push(`🪨문턱 ${t.ward} — 안 통했다`);
-    return 0;
+  // 문턱 — 얕은 타격은 아예 안 닿는다. 한 번 넘겨서 뚫으면 그대로 부서진다(자물쇠).
+  if (t.wardLeft > 0 && total > 0) {
+    if (total <= t.ward) {
+      battle.lastHits.push({ uid: t.uid, amount: 0, warded: true });
+      if (battle.lastResult) battle.lastResult.bonusHits.push(`🪨문턱 ${t.ward} — 안 통했다`);
+      return 0;
+    }
+    t.ward = 0; t.wardLeft = 0;                       // 뚫렸다 — 다시 걸기 전까지 열려 있다
+    if (battle.lastResult) battle.lastResult.bonusHits.push('🪨문턱을 부쉈다!');
   }
   // 상한 — 한 번에 이 이상은 못 준다. 크게 벼려도 소용없으니 꾸준히 쳐야 한다.
   if (t.capLeft > 0 && total > t.cap) {
@@ -585,7 +591,7 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   }
 
   const faces = facesOf(battle);
-  const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics, zeroedOf(battle), dmgOpts(battle));
+  const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics, zeroedOf(battle), dmgOpts(battle, variant));
   if (bd.total === 0) return null; // 성립 불가 족보는 확정 불가 (0점 버리기 폐지)
   if (bd.total > 0) {
     const situ = situationalFlat(battle); // 독사과 등 조건부 가산 + 힘 버프
@@ -602,10 +608,11 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
     for (const t of targets) dealToEnemy(battle, t, bd.total);
   }
 
-  // 벼름은 터뜨리는 순간 전부 쓰인다 — 다음 계산 전에 비운다
-  const spentWhet = battle.whet;
-  battle.whet = 0;
+  // 벼름은 일격에만 쓰인다. 일격이 아니면 그대로 남아 다음을 기다린다.
+  const spentWhet = variant.burst ? battle.whet : 0;
+  if (variant.burst) battle.whet = 0;
   battle.lastResult.spentWhet = spentWhet;
+  battle.lastResult.burst = !!variant.burst;
   // 못 주사위: 이번에 굴러 나온 눈을 그대로 새겨 다음 턴까지 들고 간다
   battle.dice.forEach((d, i) => { if (dieOp(battle, i) === 'pin' && d.face > 0) d.pinned = true; });
   applyAbility(battle, variant, bd, targets);

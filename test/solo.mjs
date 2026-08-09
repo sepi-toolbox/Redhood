@@ -36,7 +36,7 @@ function scoreChoice(battle,p){
     else if(o.op==='strength') v+=amt*turnsLeft*0.8; else if(o.op==='focus') v+=amt*turnsLeft*1.2;
     else if(o.op==='regen') v+=amt*turnsLeft*(0.6+danger); else if(o.op==='weakEnemy') v+=amt*turnsLeft*0.7;
     else if(o.op==='bleed') v+=amt*2.2; else if(o.op==='vulnerable') v+=amt*turnsLeft*0.5;
-    else if(o.op==='whet') v+=amt*0.5*Math.max(12,p.bd.total)*(turnsLeft>1?1:0); }
+    else if(o.op==='whet') v+=(battle.whet>=6?0:amt*0.5*Math.max(12,p.bd.total))*(turnsLeft>1?1:0); }
   return gimAdjust(battle,p,v);
 }
 // 진행도: 유물(평타 +N)과 족보 수로 흉내낸다
