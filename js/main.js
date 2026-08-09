@@ -6,7 +6,7 @@ import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind } from './cardbattle.js';
 
-export const VERSION = 'v2.09'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v2.10'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1847,9 +1847,12 @@ function cbRenderHand() {
     const L = layoutOf();
     const spacing = n > 1 ? Math.min(L.handMaxGap ?? 58, Math.max(18, (W - (L.handMargin ?? 100) - (L.cardW ?? 118)) / (n - 1))) : 0;
     const el = document.createElement('div');
-    el.className = 'cb-card' + (battle.res < c.cost ? ' broke' : '');
+    el.className = `cb-card t-${c.tier || 'common'}` + (battle.res < c.cost ? ' broke' : '');
     el.dataset.hi = hi;
-    el.innerHTML = `<span class="ccost">${c.cost}</span><span class="cart">${c.icon}</span><span class="cnm">${esc(c.name)}</span>`;
+    const art = CARD_ART.has(key)
+      ? `<span class="cart" style="background-image:url('assets/cards/card_${key}.webp')"></span>`
+      : `<span class="cart">${c.icon}</span>`;
+    el.innerHTML = `<span class="ccost">${c.cost}</span>${art}<span class="cnm">${esc(c.name)}</span>`;
     el.style.transform = `translateX(${off * spacing}px) rotate(${off * 5}deg) translateY(${Math.abs(off) * 8}px)`;
     hand.appendChild(el);
     bindCbCard(el, hi, key);
@@ -1909,12 +1912,16 @@ function cbTryPlay(hi, key) {
   cbUpdate();
 }
 
+const CARD_ART = new Set(['courage', 'stalk', 'elate', 'repair']);   // 일러 보유 카드
 function cbZoom(key) {
   const z = document.getElementById('cb-zoom');
   if (!z) return;
   if (!key) { z.classList.remove('on'); return; }
   const c = cardOf(key);
-  z.innerHTML = `<div class="zbig"><div class="zart">${c.icon}</div><div class="ztt">${esc(c.name)}</div>
+  const art = CARD_ART.has(key)
+    ? `<div class="zart" style="background-image:url('assets/cards/card_${key}.webp')"></div>`
+    : `<div class="zart">${c.icon}</div>`;
+  z.innerHTML = `<div class="zbig t-${c.tier || 'common'}">${art}<div class="ztt">${esc(c.name)}</div>
     <div class="zcc" title="자원">${c.cost}</div><div class="zdd">${esc(c.desc)}</div></div>`;
   z.classList.add('on');
 }

@@ -15,7 +15,7 @@
 |---|---|---|---|
 | 카드 프레임 | `assets/ui/card_frame.webp` | 768×1024 | ✅ 적용됨 (v2.08) — 카드 전체 배경 |
 | 카드 뒷면 | `assets/ui/card_back.webp` | 768×1024 | ✅ 적용됨 (v2.08) — 덱·버림 더미 표지 |
-| 일러스트 4종 | `assets/cards/card_{id}.png` | 1024×1024 | 프레임 창(위쪽 2/3)에 cover 크롭 |
+| 일러스트 4종 | `assets/cards/card_{id}.webp` | 1024×1024 | ✅ 적용됨 (v2.10) — 프레임 창에 cover |
 
 일러스트는 **정사각으로 뽑되 주제를 정중앙에** — 게임이 위아래를 잘라 쓴다.
 카드가 화면에서 104×142px로 작게 보이므로, **한 가지 소재가 화면의 절반 이상을 차지하는 단순한 구도**여야 한다. 배경이 복잡하면 엄지손톱 크기에서 죽이 된다.
@@ -83,6 +83,53 @@ No text, no letters, no numbers, no watermark.
 ```
 
 생성본이 오면: 게임의 이름 글자가 그 리본 위에 얹히도록 좌표를 맞춘다 (지금은 임시로 어두운 프레임 위에 밝은 글자).
+
+## 1-1) 레어리티 프레임 3종 — `card_frame_{uncommon|rare|epic}.png`
+
+> ✅ v2 프레임(이름판 포함)이 **일반 등급**이 된다. 나머지 세 등급은 v2 프레임을 첨부하고
+> **틀의 금속 재질만** 바꿔 뽑는다 — 족보 판과 같은 문법(`COMBO_PLATE_PROMPTS.md` v4 규칙):
+> 굵기·장식·구도는 그대로, **색이 다르다.** 게임은 등급 파일이 들어오는 즉시 자동 적용된다
+> (없는 등급은 일반 프레임으로 표시).
+
+| 등급 | 파일 | 재질 |
+|---|---|---|
+| 일반 | `card_frame` (v2 그대로) | 붉은 나무 + 낡은 청동 |
+| 언커먼 | `card_frame_uncommon` | **은** — 차가운 흰빛 회색 |
+| 레어 | `card_frame_rare` | **금** — 따뜻한 노랑, 은은한 발광 |
+| 전설 | `card_frame_epic` | **백금 + 루비 상감** — 흰 금속에 끊기지 않는 핏빛 한 줄, 강한 붉은 발광 |
+
+**언커먼 (은):**
+```
+Modify the attached dark fairytale trading card frame, keeping its exact
+layout, ornaments, name plate, cost medallion, art window and parchment band
+UNCHANGED. Change ONLY the metal trim material: all gold metal parts (frame
+trim, medallion ring, name plate border, decorations' metal) become aged
+SILVER — cold pale grey-white metal with soft white sheen. The red wood and
+parchment stay the same. No glow.
+No text, no letters, no numbers, no watermark.
+```
+
+**레어 (금):**
+```
+Modify the attached dark fairytale trading card frame, keeping its exact
+layout, ornaments, name plate, cost medallion, art window and parchment band
+UNCHANGED. Change ONLY the metal trim material: all metal parts become
+polished bright GOLD — warm rich yellow gold with a subtle warm glow along
+the outer frame edges, as if catching candlelight. The red wood and
+parchment stay the same.
+No text, no letters, no numbers, no watermark.
+```
+
+**전설 (백금+루비):**
+```
+Modify the attached dark fairytale trading card frame, keeping its exact
+layout, ornaments, name plate, cost medallion, art window and parchment band
+UNCHANGED. Change ONLY the metal trim material: all metal parts become white
+PLATINUM, and a single CONTINUOUS thin blood-red ruby inlay line runs along
+the middle of the outer frame trim all the way around, glowing strongly red.
+The red wood and parchment stay the same. Ominous and precious.
+No text, no letters, no numbers, no watermark.
+```
 
 ## 2) 카드 뒷면 — `card_back.png`
 

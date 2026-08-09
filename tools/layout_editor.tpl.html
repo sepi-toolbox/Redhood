@@ -158,16 +158,16 @@ function renderDice() {
       ${d.dead ? '' : `<img class="pip-art" src="${SITE}/assets/dice/normal${d.v}.png" draggable="false">`}
     </button>`).join('');
 }
-const CARDS = [['🦁', '용기', 2], ['🌘', '어둠 속의 추적', 2], ['🔥', '고양', 1], ['🧵', '복구', 1], ['🔥', '고양', 1]];
+const CARDS = [['courage', '용기', 2, 'rare'], ['stalk', '어둠 속의 추적', 2, 'uncommon'], ['elate', '고양', 1, 'common'], ['repair', '복구', 1, 'common'], ['elate', '고양', 1, 'common']];
 function renderHand() {
   const hand = $('#hand');
   const n = CARDS.length;
   const W = hand.clientWidth || 390;
   const gap = n > 1 ? Math.min(L.handMaxGap, Math.max(18, (W - L.handMargin - L.cardW) / (n - 1))) : 0;
-  hand.innerHTML = CARDS.map(([ico, nm, cost], i) => {
+  hand.innerHTML = CARDS.map(([id, nm, cost, tier], i) => {
     const off = i - (n - 1) / 2;
-    return `<div class="cb-card" style="transform: translateX(${off * gap}px) rotate(${off * 5}deg) translateY(${Math.abs(off) * 8}px)">
-      <span class="ccost">${cost}</span><span class="cart">${ico}</span><span class="cnm">${nm}</span></div>`;
+    return `<div class="cb-card t-${tier}" style="transform: translateX(${off * gap}px) rotate(${off * 5}deg) translateY(${Math.abs(off) * 8}px)">
+      <span class="ccost">${cost}</span><span class="cart" style="background-image:url('${SITE}/assets/cards/card_${id}.webp')"></span><span class="cnm">${nm}</span></div>`;
   }).join('');
 }
 function renderLoot() {
