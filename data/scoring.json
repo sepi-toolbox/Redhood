@@ -20,7 +20,7 @@
       "variants": [
         {
           "id": "instinct",
-          "name": "떠돌이의 직감",
+          "name": "들짐승 눈",
           "ability": [],
           "abilityText": "부가 없음 — 언제나 성립하는 보험",
           "tier": "common"
@@ -92,7 +92,7 @@
         },
         {
           "id": "red_shoes",
-          "name": "한 켤레 붉은 구두",
+          "name": "붉은 구두",
           "ability": [
             {
               "op": "strength",
@@ -174,7 +174,7 @@
       "variants": [
         {
           "id": "triple_axe",
-          "name": "세 번 찍는 도끼",
+          "name": "세 번 도끼",
           "ability": [
             {
               "op": "strength",
@@ -186,7 +186,7 @@
         },
         {
           "id": "woodsman_breath",
-          "name": "나무꾼의 호흡",
+          "name": "나무꾼 숨",
           "ability": [
             {
               "op": "weakEnemy",
@@ -247,7 +247,7 @@
       "variants": [
         {
           "id": "four_fangs",
-          "name": "네 개의 송곳니",
+          "name": "네 송곳니",
           "ability": [
             {
               "op": "bleed",
@@ -304,7 +304,7 @@
       "variants": [
         {
           "id": "cottage",
-          "name": "할머니의 오두막",
+          "name": "오두막",
           "ability": [
             {
               "op": "block",
