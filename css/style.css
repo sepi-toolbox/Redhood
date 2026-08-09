@@ -1330,9 +1330,12 @@ span.enemy-art {
 .cb-hand { pointer-events: none; }
 .cb-card { pointer-events: auto; }
 .cb-hand { position: absolute; bottom: var(--cb-handBottom, -22px); left: 0; width: 100%; height: 224px; }
-.cb-card.t-uncommon::after, .cb-zoom .zbig.t-uncommon::after { background-image: url('../assets/ui/card_frame_uncommon.webp'), url('../assets/ui/card_frame.webp'); }
-.cb-card.t-rare::after, .cb-zoom .zbig.t-rare::after { background-image: url('../assets/ui/card_frame_rare.webp'), url('../assets/ui/card_frame.webp'); }
-.cb-card.t-epic::after, .cb-zoom .zbig.t-epic::after { background-image: url('../assets/ui/card_frame_epic.webp'), url('../assets/ui/card_frame.webp'); }
+/* 등급 프레임: 생성본이 assets/ui/card_frame_{tier}.webp 로 들어오면
+   main.js 의 CARD_FRAME_READY 에 등급을 추가 — 그 등급만 아래 규칙이 켜진다.
+   (다중 배경 폴백은 iOS에서 한 층이 404면 전체가 안 그려져 금지) */
+.cb-card.tf-uncommon::after, .cb-zoom .zbig.tf-uncommon::after { background-image: url('../assets/ui/card_frame_uncommon.webp'); }
+.cb-card.tf-rare::after, .cb-zoom .zbig.tf-rare::after { background-image: url('../assets/ui/card_frame_rare.webp'); }
+.cb-card.tf-epic::after, .cb-zoom .zbig.tf-epic::after { background-image: url('../assets/ui/card_frame_epic.webp'); }
 .cb-card::after, .cb-zoom .zbig::after {
   content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background: url('../assets/ui/card_frame.webp') center / 100% 100% no-repeat;
