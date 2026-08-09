@@ -1350,22 +1350,22 @@ span.enemy-art {
 .cb-card.dragging { transition: none; z-index: 40; }
 .cb-card.broke { filter: grayscale(.55) brightness(.8); }
 .cb-card .ccost {
-  position: absolute; top: 3.6%; left: 4%; width: 18.5%; height: 12.5%;
+  position: absolute; left: var(--cb-ccX, 4%); top: var(--cb-ccY, 3.6%); width: var(--cb-ccW, 18.5%); height: var(--cb-ccH, 12.5%);
   display: flex; align-items: center; justify-content: center;
   color: #3d2413; font-weight: 800; font-size: calc(var(--cb-cardW, 118px) * .115); z-index: 2;
 }
 .cb-card .cnm { z-index: 2; }
 .cb-card .cart {
-  position: absolute; left: 6%; right: 6%; top: 9%; height: 62%; z-index: 0;
+  position: absolute; left: var(--cb-caX, 6%); top: var(--cb-caY, 9%); width: var(--cb-caW, 88%); height: var(--cb-caH, 62%); z-index: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: calc(var(--cb-cardW, 118px) * .38);
   background: none center / cover no-repeat;
 }
 .cb-card .cnm {
-  position: absolute; left: 25%; right: 9%; top: 5.6%; height: 5.6%;
+  position: absolute; left: var(--cb-cnX, 25%); top: var(--cb-cnY, 4.5%); width: var(--cb-cnW, 59%); height: var(--cb-cnH, 8%);
   display: flex; align-items: center; justify-content: center; text-align: center;
-  font-size: calc(var(--cb-cardW, 118px) * .088); font-weight: 700; color: #3d2413;
-  background: none; border: none; white-space: nowrap; overflow: hidden;
+  font-size: calc(var(--cb-cardW, 118px) * .082); line-height: 1; font-weight: 700; color: #3d2413;
+  background: none; border: none; white-space: nowrap; overflow: visible;  /* 글자를 자르지 않는다 */
 }
 .battle-screen > .cb-end {
   position: absolute; right: var(--cb-endX, 60px); bottom: var(--cb-endY, 216px); z-index: 42;
@@ -1408,15 +1408,15 @@ span.enemy-art {
 .cb-zoom .zbig { position: relative; width: 258px; height: 387px;
   background: none;
   filter: drop-shadow(0 10px 30px #000); }
-.cb-zoom .zart { position: absolute; left: 6%; right: 6%; top: 9%; height: 62%; z-index: 0;
+.cb-zoom .zart { position: absolute; left: var(--cb-caX, 6%); top: var(--cb-caY, 9%); width: var(--cb-caW, 88%); height: var(--cb-caH, 62%); z-index: 0;
   display: flex; align-items: center; justify-content: center; font-size: 84px;
   background: none center / cover no-repeat; }
-.cb-zoom .zcc { z-index: 2; position: absolute; top: 3.6%; left: 4%; width: 18.5%; height: 12.5%;
+.cb-zoom .zcc { z-index: 2; position: absolute; left: var(--cb-ccX, 4%); top: var(--cb-ccY, 3.6%); width: var(--cb-ccW, 18.5%); height: var(--cb-ccH, 12.5%);
   display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #3d2413; }
-.cb-zoom .ztt { z-index: 2; position: absolute; left: 25%; right: 9%; top: 5.6%; height: 5.6%;
+.cb-zoom .ztt { z-index: 2; position: absolute; left: var(--cb-cnX, 25%); top: var(--cb-cnY, 4.5%); width: var(--cb-cnW, 59%); height: var(--cb-cnH, 8%);
   display: flex; align-items: center; justify-content: center; text-align: center;
-  font-size: 17px; font-weight: 800; color: #3d2413; }
-.cb-zoom .zdd { z-index: 2; position: absolute; left: 13%; right: 13%; top: 72.5%; bottom: 13%;
+  font-size: 17px; line-height: 1; font-weight: 800; color: #3d2413; }
+.cb-zoom .zdd { z-index: 2; position: absolute; left: var(--cb-cdX, 13%); top: var(--cb-cdY, 72.5%); width: var(--cb-cdW, 74%); height: var(--cb-cdH, 14.5%);
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; line-height: 1.55; color: #4a3a28; text-align: center; overflow: hidden; }
 .battle-screen > .cb-float {
