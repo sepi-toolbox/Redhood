@@ -20,6 +20,33 @@
 일러스트는 **정사각으로 뽑되 주제를 정중앙에** — 게임이 위아래를 잘라 쓴다.
 카드가 화면에서 104×142px로 작게 보이므로, **한 가지 소재가 화면의 절반 이상을 차지하는 단순한 구도**여야 한다. 배경이 복잡하면 엄지손톱 크기에서 죽이 된다.
 
+## ⚠ 주사위 눈(pip) 규칙 — AI가 가장 자주 틀리는 부분
+
+이미지 모델은 **개수를 못 센다.** "주사위" 라고만 쓰면 눈이 7개 박히거나, 엉뚱한 배치가 나오거나, 면 바깥에 눈이 떠다니는 그림이 절반쯤 나온다. 그래서 주사위가 들어가는 모든 프롬프트는 아래 규칙을 따른다 (아래 일러스트 4종 프롬프트에는 이미 반영돼 있다).
+
+**대책 1 — 진짜 주사위 그림을 참조로 첨부한다 (가장 강력).**
+키아트와 함께 **게임의 실제 주사위 시트**(`assets/dice/normal1.png` ~ `normal6.png` 중 그 카드가 쓰는 눈)를 같이 첨부하고, 프롬프트의 "matching the attached reference die exactly" 가 그걸 가리키게 한다.
+
+**대책 2 — 보이는 면을 하나로 고정하고, 눈 배치를 기하로 명시한다.**
+"a six" 이 아니라 "EXACTLY six pips in two straight vertical columns of three" 처럼 **개수 + 배열**을 같이 쓴다. 눈이 적을수록 성공률이 높다: **1눈은 거의 안 틀리고, 4눈 이상부터 자주 틀린다.**
+
+**대책 3 — 개수가 중요 없는 카드는 면을 아예 가린다.**
+회전 모션 블러, 그림자, 불빛 번짐으로 눈이 안 읽히게 하면 틀릴 것도 없다 (고양이 이 방식).
+
+**공통 부정 태그** — 모든 주사위 프롬프트 끝에 이미 들어 있다:
+`Pips must match a real casino die. No stray pips, no pips off the die faces, no seven-pip faces.`
+
+**검수 기준** — 생성본에서 눈이 하나라도 이 표와 다르면 그 장은 버린다:
+
+| 눈 | 배치 |
+|---|---|
+| 1 | 정중앙 하나 |
+| 2 | 대각 모서리 둘 |
+| 3 | 대각선 일직선 셋 |
+| 4 | 네 모서리 |
+| 5 | 네 모서리 + 중앙 |
+| 6 | 세로 3 + 3 두 줄 |
+
 ## 감정이라는 주제
 
 이 카드들은 장비나 마법이 아니라 **빨간 두건의 감정**이다. 물건을 그리더라도
@@ -57,41 +84,56 @@ No text, no letters, no numbers, no watermark.
 
 가장 약한 주사위가 가장 세지는 카드 — "작은 것이 일어선다".
 
+> 첨부: `keyart_stilllife` + `assets/dice/normal1.png` (참조 주사위)
+
 ```
 Dark fairytale storybook illustration, painterly style matching the attached
-still-life key art: a single small ivory die standing upright on its corner in
-a shaft of warm golden light, casting a LONG shadow shaped like a rearing lion
-across dark forest ground. Embers drift upward. The die is small but defiant,
-centered, occupying most of the frame. Deep shadows, warm gold against near
-black, high contrast, simple composition readable at thumbnail size.
-No text, no letters, no numbers, no watermark.
+still-life key art: a single small ivory die standing upright in a shaft of
+warm golden light, casting a LONG shadow shaped like a rearing lion across
+dark forest ground. The die shows only its top face, with EXACTLY ONE large
+round dark pip in the very center of that face — a one, the weakest roll,
+matching the attached reference die exactly. Other faces fall into deep
+shadow, unreadable. Embers drift upward. The die is small but defiant,
+centered, occupying most of the frame. Warm gold against near black, high
+contrast, simple composition readable at thumbnail size.
+Pips must match a real casino die. No stray pips, no pips off the die faces,
+no seven-pip faces. No text, no letters, no numbers, no watermark.
 ```
 
 ## 4) 어둠 속의 추적 — `card_stalk.png` (자원 2 · 주사위 하나를 6으로)
 
 어둠 속에서 원하는 것을 정확히 찾아내는 카드.
 
+> 첨부: `keyart_stilllife` + `assets/dice/normal6.png` (참조 주사위)
+
 ```
 Dark fairytale storybook illustration, painterly style matching the attached
 still-life key art: a moonlit forest floor at night, nearly black, with a
-trail of faintly glowing pawprints leading to a single ivory die whose six
-pips glow cold silver-blue like eyes in the dark. A crescent moon sliver
-above. One clear focal point, centered, deep blacks with icy highlights,
-simple composition readable at thumbnail size.
-No text, no letters, no numbers, no watermark.
+trail of faintly glowing pawprints leading to a single ivory die showing only
+one face. On that face: EXACTLY SIX pips arranged as two straight vertical
+columns of three pips each — a real die six, matching the attached reference
+die exactly — each pip glowing cold silver-blue like an eye in the dark.
+No other faces readable. A crescent moon sliver above. One clear focal point,
+centered, deep blacks with icy highlights, readable at thumbnail size.
+Pips must match a real casino die. No stray pips, no pips off the die faces,
+no seven-pip faces. No text, no letters, no numbers, no watermark.
 ```
 
 ## 5) 고양 — `card_elate.png` (자원 1 · 무작위 주사위 +2)
 
 속에서 치솟는 불길 — 값이 싸고 방향은 제멋대로다.
 
+> 첨부: `keyart_stilllife` (주사위 눈은 일부러 안 보이게 — 참조 주사위 불필요)
+
 ```
 Dark fairytale storybook illustration, painterly style matching the attached
 still-life key art: a small campfire flame flaring suddenly upward into a
 bright column of orange-gold fire, sparks scattering in RANDOM directions,
-one ivory die tumbling upward inside the rising flame, glowing hot at its
-edges. Dark forest night behind. Strong vertical motion, warm orange against
-black, single focal point, readable at thumbnail size.
+one ivory die tumbling upward inside the rising flame, spinning fast — its
+faces blurred by motion and firelight so no pips are readable, only hot
+glowing edges. Dark forest night behind. Strong vertical motion, warm orange
+against black, single focal point, readable at thumbnail size.
+Any visible pips must match a real casino die. No stray pips.
 No text, no letters, no numbers, no watermark.
 ```
 
@@ -99,14 +141,20 @@ No text, no letters, no numbers, no watermark.
 
 부서진 것을 손으로 꿰매 되살리는 카드 — 할머니의 바느질.
 
+> 첨부: `keyart_stilllife` + `assets/dice/normal3.png` (참조 주사위 — 3 수리와 맞춘 3눈)
+
 ```
 Dark fairytale storybook illustration, painterly style matching the attached
 still-life key art: a cracked ivory die held together by visible red thread
 stitches, a small sewing needle still piercing through mid-stitch, warm
 lantern light from the side, loose red thread coiling below on dark wood.
-The mended crack glows faintly warm gold. Single object centered, occupying
-most of the frame, tender and quiet mood, readable at thumbnail size.
-No text, no letters, no numbers, no watermark.
+The die shows only one face: EXACTLY THREE pips in a straight diagonal line
+from one corner to the opposite corner — a real die three, matching the
+attached reference die exactly. Other faces in shadow, unreadable. The mended
+crack glows faintly warm gold. Single object centered, occupying most of the
+frame, tender and quiet mood, readable at thumbnail size.
+Pips must match a real casino die. No stray pips, no pips off the die faces,
+no seven-pip faces. No text, no letters, no numbers, no watermark.
 ```
 
 ---
