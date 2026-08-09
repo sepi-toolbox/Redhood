@@ -1,9 +1,10 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall } from './engine.js';
+import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.28'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.29'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -807,13 +808,15 @@ function renderBattle(opts = {}) {
           const st = d.st ? DB.statusById[d.st.kind] : null;
           const hidden = st && st.rule === 'hideFace';
           const sealedOff = st && st.rule === 'needReroll' && !d.st.opened;
-          return `<button class="die art ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''} ${st ? 'st t-' + st.id : ''}"
+          const pinned = !!d.pinned && def.effect && def.effect.op === 'pin';
+          return `<button class="die art ${pinned ? 'pinned' : ''} ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''} ${st ? 'st t-' + st.id : ''}"
             data-idx="${i}" title="${esc(def.name)}${st ? ' · ' + st.name + ' — ' + st.text : ''}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
             ${blank || hidden || sealedOff
               ? '<span class="pip-art empty"></span>'
               : `<img class="pip-art" src="${dieFaceSrc(def.id, d.face)}" alt="${d.face}" draggable="false">`}
             ${st ? `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>${st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''}` : ''}
-            <small>${st ? esc(st.name) : marked ? '다시' : ''}</small>
+            ${pinned ? '<span class="pin-mark">📌</span>' : ''}
+            <small>${st ? esc(st.name) : marked ? '다시' : pinned ? '새김' : ''}</small>
           </button>`;
         }).join('')}
       </div>
@@ -840,6 +843,7 @@ function renderBattle(opts = {}) {
         // 내 버프 칩 — 체력바 위, 길게 눌러 상세 (v0.19)
         const b = battle.buffs;
         const chips = [
+          battle.whet > 0 ? `<span class="whet-chip">🔥벼름 ${battle.whet} <b>×${whetMultOf(battle.whet).toFixed(1)}</b></span>` : '',
           b.strength > 0 ? `${ico('status_strength')}${b.strength}` : '', b.focus > 0 ? `${ico('status_focus')}+${b.focus}` : '', b.regen > 0 ? `${ico('status_regen')}+${b.regen}` : '',
           battle.player.dot > 0 ? `${ico('status_bleed')}${DOT_KO[battle.player.dotKind] || '독'} ${battle.player.dot}` : '',
         ].filter(Boolean);
@@ -997,6 +1001,7 @@ function showPlayerBuffs() {
     b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 모든 족보 피해 +${b.strength} · 매 턴 1 소멸</li>` : '',
     b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus} — 매 턴 리롤 +${b.focus} · 매 턴 1 소멸</li>` : '',
     b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen} · 매 턴 1 소멸</li>` : '',
+    battle.whet > 0 ? `<li>🔥 벼름 ${battle.whet} — 다음에 확정하는 족보 피해가 <b>×${whetMultOf(battle.whet).toFixed(1)}</b>. 쓰면 0으로 돌아간다</li>` : '',
     battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
     confusedNow > 0 ? `<li>${ico('status_confuse')} 혼란 — 이번 턴 주사위 ${confusedNow}개가 뒤틀려 다시 굴릴 수 없음</li>` : '',
     battle.pendingConfuse > 0 ? `<li>${ico('status_confuse')} 혼란 예고 — 다음 턴 주사위 ${battle.pendingConfuse}개가 뒤틀린다</li>` : '',

@@ -219,9 +219,10 @@
     "name": "문지기의 빗장",
     "icon": "🚪",
     "tier": "elite",
-    "desc": "방어도가 턴이 지나도 사라지지 않는다.",
+    "desc": "턴이 지나도 방어도의 절반이 남는다.",
     "hook": {
-      "type": "blockKeep"
+      "type": "blockKeep",
+      "ratio": 0.5
     }
   },
   {
@@ -291,6 +292,77 @@
       "type": "categoryMult",
       "category": "yahtzee",
       "mult": 2
+    }
+  },
+  {
+    "id": "whetstone",
+    "name": "숫돌",
+    "icon": "🪨",
+    "tier": "normal",
+    "desc": "매 턴 시작 시 🔥벼름 +1.",
+    "hook": {
+      "type": "turnWhet",
+      "amount": 1
+    }
+  },
+  {
+    "id": "hunters_eye",
+    "name": "사냥꾼의 눈",
+    "icon": "👁",
+    "tier": "normal",
+    "desc": "같은 눈이 3개 이상 나온 판을 확정하면 🔥벼름 +1.",
+    "hook": {
+      "type": "whetOnKind",
+      "count": 3,
+      "amount": 1
+    }
+  },
+  {
+    "id": "waymark",
+    "name": "길표",
+    "icon": "🪧",
+    "tier": "normal",
+    "desc": "스트레이트 족보를 확정하면 다음 턴 리롤 +2 · 🔥벼름 +1.",
+    "hook": {
+      "type": "rerollOnCategory",
+      "kind": "straight",
+      "amount": 2,
+      "whet": 1
+    }
+  },
+  {
+    "id": "bears_back",
+    "name": "곰의 등",
+    "icon": "🐻",
+    "tier": "elite",
+    "desc": "두르고 있는 방어도 10마다 모든 족보 피해 +3.",
+    "hook": {
+      "type": "blockScaleDamage",
+      "per": 10,
+      "amount": 3
+    }
+  },
+  {
+    "id": "dried_heart",
+    "name": "말라붙은 심장",
+    "icon": "🫀",
+    "tier": "elite",
+    "desc": "HP가 3분의 1 이하면 모든 족보 피해 1.5배.",
+    "hook": {
+      "type": "lowHpMult",
+      "ratio": 0.34,
+      "mult": 1.5
+    }
+  },
+  {
+    "id": "leech_ring",
+    "name": "거머리 반지",
+    "icon": "💍",
+    "tier": "elite",
+    "desc": "주사위 때문에 자해할 때마다 🔥벼름 +2.",
+    "hook": {
+      "type": "whetOnSelfDamage",
+      "amount": 2
     }
   }
 ]
