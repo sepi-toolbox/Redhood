@@ -14,7 +14,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 3,
+            "amount": 4,
             "hits": 2
           }
         ],
@@ -36,7 +36,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 2,
+            "amount": 3,
             "kind": "confuse"
           }
         ],
@@ -70,7 +70,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 8
+          "amount": 9
         },
         {
           "op": "confuse",
@@ -121,7 +121,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 16
           }
         ],
         "minTurn": 5,
@@ -150,7 +150,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 30
+            "amount": 32
           }
         ],
         "minTurn": 5,
@@ -175,7 +175,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 11
+          "amount": 13
         },
         {
           "op": "confuse",
@@ -210,7 +210,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 2,
+            "amount": 3,
             "kind": "poison"
           },
           {
@@ -226,7 +226,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 2,
+            "amount": 3,
             "kind": "bind"
           }
         ],
@@ -247,7 +247,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 5,
+            "amount": 4,
             "kind": "poison"
           },
           {
@@ -273,7 +273,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 9
+          "amount": 11
         },
         {
           "op": "confuse",
@@ -297,7 +297,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 10,
+            "amount": 11,
             "hits": 1
           }
         ],
@@ -354,7 +354,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 12
+          "amount": 14
         },
         {
           "op": "heal",
@@ -399,11 +399,11 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           },
           {
             "op": "status",
-            "amount": 2,
+            "amount": 3,
             "kind": "bind"
           }
         ],
@@ -436,7 +436,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 10
+          "amount": 12
         },
         {
           "op": "block",
@@ -484,7 +484,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 14
+            "amount": 15
           }
         ],
         "minTurn": 5,
@@ -527,7 +527,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 13
+          "amount": 15
         },
         {
           "op": "block",
@@ -566,7 +566,7 @@
           {
             "op": "status",
             "kind": "confuse",
-            "amount": 2
+            "amount": 3
           }
         ],
         "followUp": {
@@ -610,12 +610,12 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 20
+            "amount": 22
           },
           {
             "op": "status",
             "kind": "confuse",
-            "amount": 5
+            "amount": 3
           }
         ]
       }
@@ -635,7 +635,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 8
+          "amount": 9
         },
         {
           "op": "confuse",
@@ -671,7 +671,7 @@
           "chance": 0.5
         },
         "break": {
-          "damage": 20,
+          "damage": 24,
           "move": "unique1"
         }
       },
@@ -726,7 +726,7 @@
           "chance": 0.5
         },
         "break": {
-          "damage": 5,
+          "damage": 6,
           "move": "unique1"
         }
       }
@@ -746,7 +746,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 7
+          "amount": 8
         },
         {
           "op": "heal",
@@ -834,7 +834,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 9
+          "amount": 11
         }
       ]
     }
@@ -865,7 +865,7 @@
         "effects": [
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "cooldown": 3
@@ -910,7 +910,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 11
+          "amount": 13
         }
       ]
     }
@@ -963,7 +963,7 @@
           },
           {
             "op": "status",
-            "amount": 5,
+            "amount": 3,
             "kind": "bleed"
           }
         ],
@@ -980,7 +980,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 5,
+            "amount": 3,
             "kind": "bleed"
           }
         ],
@@ -993,8 +993,14 @@
           {
             "op": "demand",
             "turns": 2,
-            "amount": 16,
-            "category": "twoPair"
+            "amount": 18,
+            "category": "twoPair",
+            "power": 2
+          },
+          {
+            "op": "status",
+            "kind": "bleed",
+            "amount": 3
           }
         ],
         "cooldown": 3,
@@ -1006,7 +1012,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 19
+          "amount": 24
         },
         {
           "op": "empower",
@@ -1098,7 +1104,7 @@
         "hidden": true,
         "cooldown": 1,
         "break": {
-          "damage": 11,
+          "damage": 14,
           "move": "unique1"
         },
         "followUp": {
@@ -1111,7 +1117,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 1,
+            "amount": 2,
             "kind": "stun"
           },
           {
@@ -1129,6 +1135,11 @@
             "op": "cap",
             "amount": 22,
             "turns": 3
+          },
+          {
+            "op": "status",
+            "kind": "stun",
+            "amount": 2
           }
         ],
         "cooldown": 2,
@@ -1149,7 +1160,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 21
+          "amount": 26
         }
       ]
     },
@@ -1159,7 +1170,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 21
+            "amount": 22
           }
         ]
       }
@@ -1205,7 +1216,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 16
+            "amount": 17
           }
         ],
         "minTurn": 6,
@@ -1232,6 +1243,11 @@
           {
             "op": "empower",
             "amount": 4
+          },
+          {
+            "op": "status",
+            "kind": "confuse",
+            "amount": 3
           }
         ],
         "cooldown": 2,
@@ -1253,7 +1269,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 19
+          "amount": 24
         },
         {
           "op": "confuse",
@@ -1282,7 +1298,7 @@
         ],
         "cooldown": 0,
         "break": {
-          "damage": 22,
+          "damage": 29,
           "move": "unique1"
         },
         "followUp": {
@@ -1295,7 +1311,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 17
+            "amount": 18
           }
         ],
         "minTurn": 0,
@@ -1310,7 +1326,7 @@
           },
           {
             "op": "status",
-            "amount": 5,
+            "amount": 4,
             "kind": "bleed"
           }
         ],
@@ -1333,8 +1349,14 @@
           {
             "op": "demand",
             "turns": 2,
-            "amount": 22,
-            "category": "fourKind"
+            "amount": 40,
+            "category": "fourKind",
+            "power": 3
+          },
+          {
+            "op": "status",
+            "kind": "bleed",
+            "amount": 4
           }
         ],
         "cooldown": 3,
@@ -1376,7 +1398,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 19
+          "amount": 25
         },
         {
           "op": "empower",
@@ -1403,7 +1425,7 @@
           {
             "op": "status",
             "kind": "bleed",
-            "amount": 5
+            "amount": 4
           }
         ]
       }
@@ -1424,7 +1446,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 1,
+            "amount": 3,
             "kind": "stun"
           }
         ],
@@ -1442,7 +1464,7 @@
         "minTurn": 1,
         "cooldown": 1,
         "break": {
-          "damage": 33,
+          "damage": 43,
           "move": "unique1"
         },
         "followUp": {
@@ -1470,7 +1492,7 @@
           }
         ],
         "break": {
-          "damage": 22,
+          "damage": 29,
           "move": "unique1"
         },
         "followUp": {
@@ -1483,7 +1505,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 22
+            "amount": 24
           }
         ]
       },
@@ -1492,7 +1514,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 2,
+            "amount": 3,
             "kind": "stun"
           }
         ],
@@ -1507,7 +1529,7 @@
           }
         ],
         "break": {
-          "damage": 39,
+          "damage": 51,
           "move": "unique1"
         },
         "followUp": {
@@ -1529,7 +1551,7 @@
           "chance": 1
         },
         "break": {
-          "damage": 27,
+          "damage": 35,
           "move": "unique1"
         }
       },
@@ -1554,7 +1576,7 @@
         ],
         "cooldown": 1,
         "break": {
-          "damage": 44,
+          "damage": 57,
           "move": "unique1"
         },
         "followUp": {
@@ -1575,7 +1597,7 @@
           "chance": 1
         },
         "break": {
-          "damage": 33,
+          "damage": 43,
           "move": "unique1"
         }
       },
@@ -1586,6 +1608,11 @@
             "op": "ward",
             "amount": 80,
             "turns": 4
+          },
+          {
+            "op": "status",
+            "kind": "stun",
+            "amount": 3
           }
         ],
         "cooldown": 2,
@@ -1663,7 +1690,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 15
+          "amount": 20
         },
         {
           "op": "confuse",
@@ -1678,7 +1705,7 @@
           {
             "op": "status",
             "kind": "stun",
-            "amount": 1
+            "amount": 3
           }
         ]
       },
@@ -1724,7 +1751,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 12
+            "amount": 13
           }
         ],
         "cooldown": 2
@@ -1734,7 +1761,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 1,
+            "amount": 3,
             "kind": "curse"
           },
           {
@@ -1754,7 +1781,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 19
+            "amount": 21
           }
         ],
         "minTurn": 6,
@@ -1794,7 +1821,7 @@
           {
             "op": "status",
             "kind": "curse",
-            "amount": 1
+            "amount": 3
           }
         ],
         "cooldown": 2,
@@ -1837,7 +1864,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 15
+          "amount": 20
         },
         {
           "op": "empower",
@@ -1917,7 +1944,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 12
+          "amount": 14
         },
         {
           "op": "heal",
@@ -1955,7 +1982,7 @@
         "effects": [
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "followUp": {
@@ -1999,7 +2026,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 7
+          "amount": 8
         },
         {
           "op": "confuse",
@@ -2052,7 +2079,7 @@
           },
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "minTurn": 5,
@@ -2084,7 +2111,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 11
+          "amount": 13
         },
         {
           "op": "confuse",
@@ -2131,7 +2158,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 12
+            "amount": 13
           }
         ],
         "minTurn": 5
@@ -2163,7 +2190,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 14
+          "amount": 17
         }
       ]
     }
@@ -2207,7 +2234,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 10
+            "amount": 11
           }
         ],
         "minTurn": 5,
@@ -2239,7 +2266,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 13
+          "amount": 15
         },
         {
           "op": "block",
@@ -2288,7 +2315,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           }
         ],
         "minTurn": 5,
@@ -2320,7 +2347,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 12
+          "amount": 14
         },
         {
           "op": "heal",
@@ -2359,7 +2386,7 @@
           {
             "op": "status",
             "kind": "chain",
-            "amount": 2
+            "amount": 3
           }
         ],
         "followUp": {
@@ -2373,11 +2400,11 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 16
           },
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "minTurn": 6,
@@ -2401,6 +2428,11 @@
             "op": "ward",
             "amount": 40,
             "turns": 4
+          },
+          {
+            "op": "status",
+            "kind": "chain",
+            "amount": 3
           }
         ],
         "cooldown": 2,
@@ -2422,7 +2454,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 20
+          "amount": 25
         },
         {
           "op": "confuse",
@@ -2498,7 +2530,13 @@
             "op": "demand",
             "kind": "straight",
             "turns": 2,
-            "amount": 18
+            "amount": 18,
+            "power": 2
+          },
+          {
+            "op": "status",
+            "kind": "bind",
+            "amount": 2
           }
         ],
         "cooldown": 3,
@@ -2520,7 +2558,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 23
+          "amount": 29
         }
       ]
     }
@@ -2550,7 +2588,7 @@
         "effects": [
           {
             "op": "confuse",
-            "amount": 2
+            "amount": 3
           }
         ],
         "followUp": {
@@ -2564,12 +2602,12 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 16
+            "amount": 17
           },
           {
             "op": "status",
             "kind": "rot",
-            "amount": 1,
+            "amount": 2,
             "power": 12
           }
         ],
@@ -2594,6 +2632,11 @@
             "op": "ward",
             "amount": 36,
             "turns": 4
+          },
+          {
+            "op": "status",
+            "kind": "rot",
+            "amount": 2
           }
         ],
         "cooldown": 2,
@@ -2615,7 +2658,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 18
+          "amount": 22
         },
         {
           "op": "empower",
@@ -2639,7 +2682,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 14
           }
         ],
         "cooldown": 2
@@ -2654,7 +2697,7 @@
           {
             "op": "status",
             "kind": "bind",
-            "amount": 1
+            "amount": 3
           }
         ],
         "hidden": true,
@@ -2669,7 +2712,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 20
+            "amount": 22
           }
         ],
         "minTurn": 6,
@@ -2702,7 +2745,13 @@
             "op": "demand",
             "kind": "straight",
             "turns": 2,
-            "amount": 24
+            "amount": 40,
+            "power": 3
+          },
+          {
+            "op": "status",
+            "kind": "bind",
+            "amount": 3
           }
         ],
         "cooldown": 3,
@@ -2745,7 +2794,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 17
+          "amount": 22
         },
         {
           "op": "heal",
@@ -2769,11 +2818,11 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 12
+            "amount": 13
           },
           {
             "op": "status",
-            "amount": 2,
+            "amount": 3,
             "kind": "confuse"
           }
         ],
@@ -2798,7 +2847,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 19
+            "amount": 21
           }
         ],
         "minTurn": 6,
@@ -2809,7 +2858,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 2,
+            "amount": 3,
             "kind": "confuse"
           },
           {
@@ -2838,7 +2887,7 @@
           {
             "op": "status",
             "kind": "confuse",
-            "amount": 2
+            "amount": 3
           }
         ],
         "cooldown": 2,
@@ -2881,7 +2930,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 15
+          "amount": 20
         },
         {
           "op": "confuse",
@@ -2905,7 +2954,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 14
           }
         ],
         "cooldown": 2
@@ -2933,7 +2982,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 17
+            "amount": 18
           }
         ],
         "minTurn": 6,
@@ -2944,7 +2993,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 2,
+            "amount": 4,
             "kind": "poison"
           },
           {
@@ -2971,6 +3020,11 @@
             "op": "ward",
             "amount": 85,
             "turns": 4
+          },
+          {
+            "op": "status",
+            "kind": "poison",
+            "amount": 3
           }
         ],
         "cooldown": 2,
@@ -3013,7 +3067,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 17
+          "amount": 22
         },
         {
           "op": "empower",
@@ -3059,11 +3113,11 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 9
+            "amount": 10
           },
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "minTurn": 5
@@ -3095,7 +3149,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 13
+          "amount": 15
         }
       ]
     }
@@ -3115,7 +3169,7 @@
         "effects": [
           {
             "op": "confuse",
-            "amount": 2
+            "amount": 3
           }
         ],
         "followUp": {
@@ -3129,7 +3183,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 10
+            "amount": 11
           }
         ],
         "minTurn": 5,
@@ -3172,7 +3226,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 11
+          "amount": 13
         },
         {
           "op": "confuse",
@@ -3196,7 +3250,7 @@
         "effects": [
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ]
       },
@@ -3254,7 +3308,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 10
+          "amount": 12
         },
         {
           "op": "heal",
@@ -3278,7 +3332,7 @@
         "effects": [
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           },
           {
             "op": "empower",
@@ -3310,7 +3364,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           }
         ],
         "minTurn": 5,
@@ -3342,7 +3396,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 13
+          "amount": 15
         },
         {
           "op": "empower",
@@ -3389,7 +3443,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 14
           }
         ],
         "minTurn": 5
@@ -3421,7 +3475,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 11
+          "amount": 13
         },
         {
           "op": "heal",
@@ -3449,7 +3503,7 @@
           },
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "cooldown": 2
@@ -3473,7 +3527,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 12
+            "amount": 13
           }
         ],
         "minTurn": 5,
@@ -3505,7 +3559,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 13
+          "amount": 15
         },
         {
           "op": "confuse",
@@ -3529,7 +3583,7 @@
         "effects": [
           {
             "op": "confuse",
-            "amount": 2
+            "amount": 3
           }
         ],
         "cooldown": 3
@@ -3544,7 +3598,7 @@
           {
             "op": "status",
             "kind": "numb",
-            "amount": 1
+            "amount": 2
           }
         ],
         "cooldown": 3
@@ -3593,6 +3647,11 @@
           },
           {
             "op": "confuse",
+            "amount": 3
+          },
+          {
+            "op": "status",
+            "kind": "numb",
             "amount": 2
           }
         ],
@@ -3616,7 +3675,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 21
+          "amount": 26
         },
         {
           "op": "confuse",
@@ -3650,11 +3709,11 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 9
+            "amount": 10
           },
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "cooldown": 3
@@ -3682,7 +3741,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 19
+            "amount": 20
           }
         ],
         "minTurn": 6,
@@ -3706,7 +3765,13 @@
             "op": "demand",
             "kind": "fullHouse",
             "turns": 2,
-            "amount": 20
+            "amount": 18,
+            "power": 2
+          },
+          {
+            "op": "status",
+            "kind": "bind",
+            "amount": 3
           }
         ],
         "cooldown": 3,
@@ -3729,7 +3794,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 23
+          "amount": 29
         }
       ]
     }
@@ -3753,7 +3818,7 @@
           },
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "cooldown": 2
@@ -3768,7 +3833,7 @@
           {
             "op": "status",
             "kind": "plunder",
-            "amount": 1
+            "amount": 2
           }
         ],
         "hidden": true,
@@ -3807,6 +3872,11 @@
             "op": "cap",
             "amount": 20,
             "turns": 3
+          },
+          {
+            "op": "status",
+            "kind": "plunder",
+            "amount": 2
           }
         ],
         "cooldown": 2,
@@ -3828,7 +3898,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 22
+          "amount": 27
         },
         {
           "op": "confuse",
@@ -3852,7 +3922,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 14
+            "amount": 15
           }
         ],
         "cooldown": 2
@@ -3881,7 +3951,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 21
+            "amount": 22
           }
         ],
         "minTurn": 6,
@@ -3892,7 +3962,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 1,
+            "amount": 3,
             "kind": "seal"
           },
           {
@@ -3919,7 +3989,13 @@
             "op": "demand",
             "category": "fullHouse",
             "turns": 2,
-            "amount": 24
+            "amount": 40,
+            "power": 3
+          },
+          {
+            "op": "status",
+            "kind": "seal",
+            "amount": 3
           }
         ],
         "cooldown": 3,
@@ -3962,7 +4038,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 19
+          "amount": 25
         },
         {
           "op": "confuse",
@@ -3986,7 +4062,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 14
+            "amount": 15
           }
         ],
         "cooldown": 2
@@ -4010,7 +4086,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 1,
+            "amount": 3,
             "kind": "devour"
           },
           {
@@ -4024,7 +4100,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 23
+            "amount": 25
           }
         ],
         "minTurn": 6,
@@ -4048,6 +4124,11 @@
             "op": "cap",
             "amount": 38,
             "turns": 3
+          },
+          {
+            "op": "status",
+            "kind": "devour",
+            "amount": 2
           }
         ],
         "cooldown": 2,
@@ -4090,7 +4171,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 20
+          "amount": 26
         },
         {
           "op": "empower",
@@ -4114,7 +4195,7 @@
         "effects": [
           {
             "op": "status",
-            "amount": 1,
+            "amount": 3,
             "kind": "blessing"
           },
           {
@@ -4129,7 +4210,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 16
           }
         ],
         "cooldown": 2,
@@ -4160,7 +4241,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 22
+            "amount": 24
           }
         ],
         "minTurn": 6,
@@ -4188,6 +4269,11 @@
             "op": "status",
             "kind": "blessing",
             "amount": 1
+          },
+          {
+            "op": "status",
+            "kind": "curse",
+            "amount": 3
           }
         ],
         "cooldown": 2,
@@ -4230,7 +4316,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 17
+          "amount": 22
         },
         {
           "op": "heal",
@@ -4344,7 +4430,7 @@
         "effects": [
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ],
         "followUp": {
@@ -4404,7 +4490,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 12
+          "amount": 14
         },
         {
           "op": "confuse",
@@ -4432,7 +4518,7 @@
           },
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           }
         ]
       },
@@ -4441,7 +4527,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 10
+            "amount": 11
           }
         ],
         "minTurn": 5,
@@ -4487,7 +4573,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 13
+          "amount": 15
         }
       ]
     }
@@ -4517,7 +4603,7 @@
         "effects": [
           {
             "op": "confuse",
-            "amount": 1
+            "amount": 2
           },
           {
             "op": "empower",
@@ -4535,7 +4621,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           }
         ],
         "minTurn": 5,
@@ -4567,7 +4653,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 12
+          "amount": 14
         },
         {
           "op": "heal",

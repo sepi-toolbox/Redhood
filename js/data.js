@@ -73,6 +73,7 @@ function validate() {
       if (!ef.kind && !ef.category) throw new Error(`enemies.json: ${e.id}/${mid} 요구에 대상 족보가 없습니다`);
       if (ef.kind && !KINDS.has(ef.kind)) throw new Error(`enemies.json: ${e.id}/${mid} 없는 족보군 "${ef.kind}"`);
       if (ef.category && !IDS.has(ef.category)) throw new Error(`enemies.json: ${e.id}/${mid} 없는 족보 "${ef.category}"`);
+      if (!(ef.amount > 0)) throw new Error(`enemies.json: ${e.id}/${mid} 요구에 벌 피해가 없습니다`);
     }
     if (ef.op === 'status') {
           if (!DB.statusById[ef.kind]) throw new Error(`enemies.json: ${e.id}.${mid} 없는 상태이상 "${ef.kind}"`);

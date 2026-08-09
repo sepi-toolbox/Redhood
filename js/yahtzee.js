@@ -1,3 +1,4 @@
+import { DB } from './data.js';
 // yahtzee.js — 족보 판정·점수 계산 (순수 함수, DOM/fetch 무관 → node 단독 테스트 가능)
 
 // faces: 현재 눈 배열(5), diceDefs: 각 슬롯의 주사위 정의(dice.json 항목)
@@ -99,9 +100,9 @@ export function evalCategory(cat, faces, zeroed = null) {
 // 기본+금박이 0이면 성립 실패 — total 0 (선택 불가 처리 대상)
 // v1.29 벼름(whet) — 전투 중에 쌓았다가 족보로 터뜨리는 곱연산 자원.
 //   배수 = 1 + 벼름 × WHET_STEP. 확정하면 0으로 돌아간다 (턴마다 깎이지 않는다).
-export const WHET_STEP = 0.5;
-export const WHET_CAP = 6;
-export const whetMultOf = (whet) => 1 + Math.min(whet || 0, WHET_CAP) * WHET_STEP;
+export const whetStep = () => (DB.scoring && DB.scoring.whetStep != null) ? DB.scoring.whetStep : 0.5;
+export const whetCap = () => (DB.scoring && DB.scoring.whetCap != null) ? DB.scoring.whetCap : 6;
+export const whetMultOf = (whet) => 1 + Math.min(whet || 0, whetCap()) * whetStep();
 
 export function computeDamage(cat, faces, diceDefs, relics, zeroed = null, opts = {}) {
   const ev = evalCategory(cat, faces, zeroed);

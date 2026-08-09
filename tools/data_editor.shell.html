@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.31 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.32 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -197,6 +197,8 @@ function labelFor(path, fallback){
         'hook.ratio':'비율','hook.per':'간격','hook.count':'개수','hook.whet':'벼름','hook.category':'대상 족보','hook.kind':'대상 족보군'};
       if(RN[tailOf(1)]) return `${r.name} ${RN[tailOf(1)]}`;
       return `${r.name} ${F_LABEL[tailOf(1)]||tailOf(1)}`; }
+    if(f==='scoring'&&ks[0]!=='categories'){ const SN={whetStep:'벼름 한 스택 배수',whetCap:'벼름 상한',rerollsPerTurn:'턴당 리롤'};
+      return SN[ks[0]]||('족보 설정 '+ks[0]); }
     if(f==='scoring'&&ks[0]==='categories'){
       const c=(DB.scoring.categories||[])[Number(ks[1])]; if(!c) return fallback;
       const CN={name:'족보 이름',ruleText:'족보 설명',mult:'배수',kind:'판정',score:'점수 방식'};
@@ -530,6 +532,11 @@ function tabMoves(v){
             }}));
         }
         // 문턱·상한·요구는 몇 턴 가는지가 따로 있다
+        if(x.op==='demand'){
+          const l2=document.createElement('span'); l2.className='sub'; l2.textContent='실패 시 적 힘';
+          const pf=field(`${base}.effects.${k}.power`, e.name+' '+m.name+' 실패 시 적 강화', {num:true, def:0});
+          pf.style.maxWidth='44px'; row.appendChild(l2); row.appendChild(pf);
+        }
         if(x.op==='ward'||x.op==='cap'||x.op==='demand'){
           const l=document.createElement('span'); l.className='sub'; l.textContent='턴';
           const tf=field(`${base}.effects.${k}.turns`, e.name+' '+m.name+' 지속 턴', {num:true, def:x.op==='demand'?2:3});
@@ -871,6 +878,11 @@ function tabConst(v){
       const w=document.createElement('div'); if(node instanceof Node) w.appendChild(node); else w.innerHTML=node; d.appendChild(w); });
     v.appendChild(d);
   };
+  box('벼름(🔥)',[
+    ['한 스택당 배수 증가', field('scoring:whetStep','벼름 한 스택 배수', {num:true, def:0.5})],
+    ['벼름 상한', field('scoring:whetCap','벼름 상한', {num:true, def:6})],
+    ['턴당 리롤', field('scoring:rerollsPerTurn','턴당 리롤', {num:true, def:2})],
+  ]);
   box('지도',[
     ['층수', field('act1:map.floors','층수')],
     ['갈림길 최소', field('act1:map.choicesMin','갈림길 최소')],

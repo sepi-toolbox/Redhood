@@ -1,6 +1,6 @@
 // engine.js — 전투 상태 머신 v0.5: 다중 적, 단일/전체 공격, 굴림 페이즈 분리
 import { DB } from './data.js';
-import { computeDamage, rollFace, relicValue, whetMultOf, WHET_CAP } from './yahtzee.js';
+import { computeDamage, rollFace, relicValue, whetMultOf, whetCap } from './yahtzee.js';
 
 export const rng = { next: Math.random };
 
@@ -163,7 +163,7 @@ const rollWith = (die, d) => { const f = allowedFaces(die, d); return f[Math.flo
 export function addWhet(battle, n, tag) {
   if (!(n > 0)) return 0;
   const before = battle.whet;
-  battle.whet = Math.min(WHET_CAP, battle.whet + n);
+  battle.whet = Math.min(whetCap(), battle.whet + n);
   const got = battle.whet - before;
   if (got > 0) battle.whetGained += got;
   if (got > 0 && battle.lastResult) battle.lastResult.bonusHits.push(`🔥벼름 +${got}${tag ? ' ' + tag : ''}`);
@@ -768,6 +768,7 @@ export function enemyPhase(battle) {
       if (e.demand.met) e.demand = null;
       else if (e.demand.left <= 0) {
         const dmg = e.demand.damage;
+        if (e.demand.power > 0) e.power = (e.power || 0) + e.demand.power;   // 못 지키면 적이 기세를 얻는다
         e.demand = null;
         if (dmg > 0) {
           const ab = Math.min(battle.player.block, dmg);
@@ -838,7 +839,8 @@ export function enemyPhase(battle) {
           break;
         case 'demand':                                     // 📜 요구 — 정한 족보를 내지 않으면 벌을 받는다
           e.demand = { kind: ef.kind || null, category: ef.category || null,
-                       left: Math.max(1, ef.turns || 2), damage: ef.amount || 0, met: false };
+                       left: Math.max(1, ef.turns || 2), damage: ef.amount || 0,
+                       power: ef.power || 0, met: false };
           break;
         case 'drainWhet':                                  // 🌀 벼름 흡수 — 쌓아둔 벼름을 빼앗는다
           battle.whet = ef.amount > 0 ? Math.max(0, battle.whet - ef.amount) : 0;
