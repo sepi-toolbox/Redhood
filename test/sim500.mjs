@@ -29,8 +29,9 @@ function takeReward(run, card) {
   if (kind === 'relic') { run_.applyRelicPickup(run, item); stats.relicsGained++; }
   else if (kind === 'die') { run.dice[Math.floor(Math.random() * run.dice.length)] = item.id; stats.diceGained++; }
   else if (kind === 'category' && item.cat && item.variant) {
-    const list = (run.categories[item.cat.id] = run.categories[item.cat.id] || []);
-    if (!list.includes(item.variant.id)) { list.push(item.variant.id); stats.catsGained++; }
+    if (run.categories[item.cat.id] !== item.variant.id) {   // v1.34 그 자리에 끼운다
+      run.categories[item.cat.id] = item.variant.id; stats.catsGained++;
+    }
   }
 }
 

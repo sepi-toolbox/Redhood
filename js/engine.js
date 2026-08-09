@@ -16,6 +16,16 @@ function enlightMults(enlight, tier) {
 }
 
 // ---------- 전투 생성 ----------
+// 옛 저장본(변형 배열)도 받아준다 — 첫 칸을 끼워진 것으로 본다
+export function slotsOf(cats) {
+  const out = {};
+  for (const c of DB.scoring.categories) {
+    const v = cats ? cats[c.id] : null;
+    out[c.id] = Array.isArray(v) ? (v[0] || null) : (v || null);
+  }
+  return out;
+}
+
 export function createBattle(run, encounterIds) {
   const enlight = run.enlight || 0;
   // 막 스케일 × 층 스케일 (최종전(act 4)은 절대 수치)
@@ -34,7 +44,7 @@ export function createBattle(run, encounterIds) {
     dice: run.dice.map(() => ({ face: 0, held: false, st: null })),  // st: 이 칸에 걸린 상태이상
     rolled: false,                        // 이번 턴 첫 굴림 여부
     relics: run.relics.map(id => DB.relicById[id]),
-    categories: Object.fromEntries(Object.entries(run.categories).map(([k, v]) => [k, [...v]])),
+    categories: slotsOf(run.categories),   // 족보 id -> 끼워진 변형 id (없으면 null = 기본)
     sealed: {},
     lastUsedCat: null,
     rollsLeft: 0,
@@ -342,9 +352,17 @@ export function aliveEnemies(battle) { return battle.enemies.filter(e => e.hp > 
 
 export function isAoE(cat) { return cat.target === 'allEnemies'; }
 
-// 보유 중인 변형 정의 (없으면 첫 변형으로 방어)
+// v1.34 슬롯 구조 — 아홉 족보는 처음부터 전부 가지고 있다.
+//   기본 족보는 배수만 있고 부가 능력이 없다. 얻은 변형을 그 자리에 끼우면 기본을 대신한다.
+export const baseIdOf = (catId) => `${catId}__base`;
+export function baseVariantOf(cat) {
+  return { id: baseIdOf(cat.id), name: cat.name, ability: [], base: true, tier: 'common',
+           abilityText: '기본 — 부가 능력 없음' };
+}
+// 이 자리에 끼워진 변형 정의 (빈 자리면 기본 족보)
 export function variantOf(cat, variantId) {
-  return (cat.variants || []).find(v => v.id === variantId) || (cat.variants || [])[0] || { id: 'none', name: cat.name, ability: [], abilityText: '' };
+  if (!variantId || variantId === baseIdOf(cat.id)) return baseVariantOf(cat);
+  return (cat.variants || []).find(v => v.id === variantId) || baseVariantOf(cat);
 }
 
 // 저체력 보너스(독사과 등): 조건 충족 시 모든 족보 피해 가산
@@ -378,11 +396,9 @@ export function previewAll(battle) {
               bd: { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 } }];
   }
   for (const cat of DB.scoring.categories) {
-    const ownedList = battle.categories[cat.id];
-    if (!ownedList || ownedList.length === 0) continue;
     const seal = battle.sealed[cat.id] || 0;
-    for (const vid of ownedList) {
-      const variant = variantOf(cat, vid);
+    {
+      const variant = variantOf(cat, battle.categories[cat.id]);
       // v1.31 일격(burst) — 이 변형만 벼름을 태우고 그만큼 증폭된다. 나머지는 벼름을 건드리지 않는다.
       const bd0 = battle.rolled
         ? computeDamage(cat, faces, battle.diceDefs, battle.relics, zero, dmgOpts(battle, variant))
@@ -576,9 +592,10 @@ export function __test_deal(battle, enemy, amount) { battle.lastHits = battle.la
 export function confirmCategory(battle, catId, variantId, targetUid = null) {
   if (battle.over || !battle.rolled || battle.await) return null;
   const cat = DB.scoring.categories.find(c => c.id === catId);
-  const ownedList = battle.categories[catId] || [];
-  if (!cat || !ownedList.includes(variantId)) return null;
-  const variant = variantOf(cat, variantId);
+  if (!cat) return null;
+  const slot = battle.categories[catId] || baseIdOf(catId);
+  if (variantId !== slot && variantId !== baseIdOf(catId)) return null;   // 그 자리에 없는 변형은 못 쓴다
+  const variant = variantOf(cat, slot);
   if ((battle.sealed[catId] || 0) > 0) return null;
 
   const alive = aliveEnemies(battle);

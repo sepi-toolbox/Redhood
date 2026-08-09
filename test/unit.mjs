@@ -95,7 +95,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const eng = await import('../js/engine.js');
   eng.rng.next = () => 0.5;
   const run = { hp: 70, maxHp: 70, act: 1, floor: 1, enlight: 0, relics: [],
-    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } };
+    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { onePair: 'clasped_hands' } };
   const b = eng.createBattle(run, ['stray_dog'], 'battle');
   const baseRerolls = b.rollsLeft;
   b.buffs.focus += 1; b.buffs.strength += 2; b.buffs.regen += 1;
@@ -124,7 +124,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { onePair: 'clasped_hands' } }, [id], 'battle');
   const surgeId = () => 'surge';
   eq('전용 트랙(surgeMove)이 남아 있지 않음', DB.enemies.some(e => e.surgeMove), false);
   eq('순서(sequence) 패턴이 남아 있지 않음',
@@ -192,7 +192,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { onePair: 'clasped_hands' } }, [id], 'battle');
   const def = DB.enemyById.wolf;
   const [aId, aMv] = Object.entries(def.moves).find(([, m]) => m.followUp);
   eq('보스에 연계기가 설정됨', !!aMv.followUp.move, true);
@@ -240,7 +240,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     pattern: { mode: 'weighted', weights: { jab: 1, poke: 1, hammer: 8 } },
   };
   const mk = () => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } }, ['__cdtest'], 'battle');
+    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { onePair: 'clasped_hands' } }, ['__cdtest'], 'battle');
   let minGap = 99, uses = 0, tooSoon = 0;
   for (let n = 0; n < 200; n++) {
     const b = mk(); const e = b.enemies[0];
@@ -264,7 +264,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   let back2back = 0;
   for (let n = 0; n < 120; n++) {
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-      dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { pair: ['pair_basic'] } }, ['__cdtest2'], 'battle');
+      dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { onePair: 'clasped_hands' } }, ['__cdtest2'], 'battle');
     const e = b.enemies[0]; let last = -99;
     for (let t = 1; t <= 16; t++) {
       if (e.nextMove.id === 'hammer') { if (t - last === 2) back2back++; last = t; }
@@ -284,7 +284,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     hp: [9e6, 9e6], moves, pattern: { mode: 'weighted', weights } }; };
   const play = (id, T) => {
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+      dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, [id], 'battle');
     const e = b.enemies[0]; const out = [];
     for (let t = 1; t <= T; t++) { out.push(e.nextMove.id); b.await = 'enemy'; eng.enemyPhase(b); }
     return out;
@@ -320,7 +320,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     moves: { nap: { name: '숨 고르기', effects: [{ op: 'rest' }] } },
     pattern: { mode: 'weighted', weights: { nap: 1 } } };
   const b = eng.createBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics: [],
-    dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__rest'], 'battle');
+    dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__rest'], 'battle');
   const e = b.enemies[0];
   const hp0 = b.player.hp, ehp0 = e.hp;
   for (let t = 0; t < 8; t++) { b.await = 'enemy'; eng.enemyPhase(b); }
@@ -340,7 +340,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     moves: { hit: { name: '난타', effects: [ef] } }, pattern: { mode: 'weighted', weights: { hit: 1 } } }; };
   const run = (id, turns, power) => {
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+      dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, [id], 'battle');
     b.enemies[0].power = power;
     const hp0 = b.player.hp;
     for (let t = 0; t < turns; t++) { b.await = 'enemy'; eng.enemyPhase(b); b.enemies[0].power = power; }
@@ -354,7 +354,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   // 약화도 타수마다 빠진다
   {
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__multi'], 'battle');
+      dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__multi'], 'battle');
     b.enemies[0].debuffs.weak = 2; const hp0 = b.player.hp;
     b.await = 'enemy'; eng.enemyPhase(b);
     eq('약화도 타수마다 빠진다', hp0 - b.player.hp, (4 - 2) * 3);
@@ -362,7 +362,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   // 방어는 한 대씩 갉힌다 — 방어 5는 첫 대를 막고 남은 두 대가 들어온다
   {
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__multi'], 'battle');
+      dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__multi'], 'battle');
     b.player.block = 5; const hp0 = b.player.hp;
     b.await = 'enemy'; eng.enemyPhase(b);
     eq('방어를 타수로 갉는다', hp0 - b.player.hp, 12 - 5);
@@ -370,7 +370,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   // 의도 표시에 타수가 보인다
   {
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-      dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__multi'], 'battle');
+      dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__multi'], 'battle');
     eq('의도에 타수 표기', eng.intentOf(b.enemies[0]), '⚔️4×3');
     b.enemies[0].power = 6;
     eq('강화가 반영된 한 대 피해로 표기', eng.intentOf(b.enemies[0]), '⚔️10×3');
@@ -385,7 +385,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eng.rng.next = Math.random;
   const D = (n) => [{ op: 'damage', amount: n }];
   const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-    dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+    dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, [id], 'battle');
 
   // --- 락 턴: minTurn 2, lockTurn 5 → 2·3·4턴에만 나온다
   DB.enemyById.__lock = { id: '__lock', name: '락', tier: 'normal', art: '🧪', hp: [9e6, 9e6],
@@ -489,7 +489,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-    dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, [id], 'battle');
+    dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, [id], 'battle');
   DB.enemyById.__self = { id: '__self', name: '자해', tier: 'normal', art: '🧪', hp: [40, 40],
     moves: { burn: { name: '타들어감', effects: [{ op: 'selfDamage', amount: 15 }] } },
     pattern: { mode: 'weighted', weights: { burn: 1 } } };
@@ -516,7 +516,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const mk = () => eng.createBattle({ hp: 100, maxHp: 100, act: 1, floor: 1, enlight: 0, relics: [],
-    dice: ['normal','normal','normal','normal','normal'], categories: { pair: ['pair_basic'] } }, ['__dotenemy'], 'battle');
+    dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__dotenemy'], 'battle');
   DB.enemyById.__dotenemy = { id: '__dotenemy', name: '독적', tier: 'normal', art: '🧪', hp: [9e6, 9e6],
     moves: { spit: { name: '뱉기', effects: [{ op: 'poison', amount: 3 }] } },
     pattern: { mode: 'weighted', weights: { spit: 1 } } };
@@ -589,7 +589,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.rng.next = () => 0.5;
     const run = { hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics: [],
       dice: ['normal','normal','normal','normal','normal'],
-      categories: { onePair: ['clasped_hands'] } };
+      categories: { onePair: 'clasped_hands' } };
     return eng.createBattle(run, ['stray_dog'], 'battle');
   };
 
@@ -883,7 +883,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
   // 불티 주사위 — 족보에 안 쓰이면 벼름
   {
-    const b = mk(['spark','normal','normal','normal','normal'], [], { chance: ['instinct'] });
+    const b = mk(['spark','normal','normal','normal','normal'], [], { chance: 'instinct' });
     eng.rng.next = () => 0.99;                      // 전부 최대 눈 → 불티는 3, 나머지 6
     eng.initialRoll(b);
     eng.confirmCategory(b, 'chance', 'instinct', b.enemies[0].uid);
@@ -1009,6 +1009,75 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
       .filter(e => Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
       .map(e => e.name);
     eq('일반 적에는 기믹을 안 붙인다', normalsWithGim, []);
+  }
+}
+
+// ---------------------------------------------------------------
+// v1.34 슬롯 구조 — 아홉 족보를 처음부터 다 갖고, 자리마다 변형 하나를 끼운다
+// ---------------------------------------------------------------
+{
+  const { DB } = await import('../js/data.js');
+  const eng = await import('../js/engine.js');
+  const mkS = (cats) => eng.createBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal','normal','normal','normal','normal'], categories: cats }, ['crow'], 'battle');
+
+  // 아무것도 안 끼워도 아홉 자리가 다 열려 있다
+  {
+    const b = mkS({});
+    eng.rng.next = () => 0.5;
+    eng.initialRoll(b);
+    const pv = eng.previewAll(b);
+    eq('족보 줄은 언제나 아홉 개', pv.length, DB.scoring.categories.length);
+    eq('빈 자리는 기본 족보', pv.every(p => p.variant.base || p.variant.id === b.categories[p.cat.id]), true);
+    eq('기본 족보는 부가 능력이 없다', pv.filter(p => p.variant.base).every(p => (p.variant.ability || []).length === 0), true);
+    eq('기본 족보는 일격이 아니다', pv.filter(p => p.variant.base).every(p => !p.variant.burst), true);
+    eng.rng.next = Math.random;
+  }
+  // 끼운 자리는 그 변형으로 바뀐다
+  {
+    const b = mkS({ onePair: 'clash' });
+    eng.rng.next = () => 0.5;
+    eng.initialRoll(b);
+    const row = eng.previewAll(b).find(p => p.cat.id === 'onePair');
+    eq('끼운 변형이 그 자리를 대신한다', row.variant.id, 'clash');
+    eq('끼운 변형이 일격이면 일격으로 뜬다', row.burst, true);
+    eng.rng.next = Math.random;
+  }
+  // 그 자리에 없는 변형은 확정할 수 없다
+  {
+    const b = mkS({ onePair: 'clasped_hands' });
+    eng.rng.next = () => 0.5;
+    eng.initialRoll(b);
+    eq('안 끼운 변형은 확정 불가', eng.confirmCategory(b, 'onePair', 'red_shoes', b.enemies[0].uid), null);
+    const r = eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
+    eq('끼운 변형은 확정된다', !!r, true);
+    eng.rng.next = Math.random;
+  }
+  // 기본 족보도 그냥 확정된다 (배수만 있는 값)
+  {
+    const b = mkS({});
+    eng.rng.next = () => 0.5;
+    eng.initialRoll(b);
+    const r = eng.confirmCategory(b, 'onePair', eng.baseIdOf('onePair'), b.enemies[0].uid);
+    eq('기본 족보로도 때릴 수 있다', r && r.total > 0, true);
+    eng.rng.next = Math.random;
+  }
+  // 옛 저장본(변형 배열)도 첫 칸을 끼운 것으로 받아준다
+  {
+    const b = mkS({ onePair: ['red_shoes', 'clash'] });
+    eq('배열이면 첫 칸을 끼운 것으로 본다', b.categories.onePair, 'red_shoes');
+    eq('안 적힌 자리는 비어 있다', b.categories.yahtzee, null);
+  }
+  // 무기 여섯은 저마다 벼름 원천과 일격을 하나씩 쥐고 시작한다
+  {
+    const burst = new Set(DB.scoring.categories.flatMap(c => (c.variants || []).filter(v => v.burst).map(v => v.id)));
+    const whet = new Set(DB.scoring.categories.flatMap(c => (c.variants || [])
+      .filter(v => (v.ability || []).some(a => a.op === 'whet')).map(v => v.id)));
+    const bad = DB.events.weapons.filter(w => {
+      const vs = Object.values(w.start);
+      return !vs.some(v => burst.has(v)) || !vs.some(v => whet.has(v));
+    }).map(w => w.name);
+    eq('무기마다 벼름 원천 + 일격을 쥐고 시작', bad, []);
   }
 }
 

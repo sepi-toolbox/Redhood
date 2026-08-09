@@ -40,9 +40,9 @@ function scoreChoice(battle,p){
   return gimAdjust(battle,p,v);
 }
 // 진행도: 유물(평타 +N)과 족보 수로 흉내낸다
-const CATS = {chance:['instinct'],onePair:['clasped_hands'],twoPair:['twin_sisters'],
-  threeKind:['triple_axe'],fullHouse:['cottage'],smallStraight:['windpath'],
-  largeStraight:['moonpath'],fourKind:['four_fangs'],yahtzee:['judgment_night']};
+const CATS = {chance:'catch_breath',onePair:'clash',twoPair:'twin_sisters',
+  threeKind:'chopping',fullHouse:'cottage',smallStraight:'windpath',
+  largeStraight:'moonpath',fourKind:'heavy_blow',yahtzee:'judgment_night'};
 function deckAt(level){
   const keys=Object.keys(CATS).slice(0, Math.min(Object.keys(CATS).length, 2+level));
   const c={}; for(const k of keys) c[k]=CATS[k]; return c;

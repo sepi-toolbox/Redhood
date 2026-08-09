@@ -16,19 +16,19 @@ const {previewAll,createBattle,initialRoll,reroll,confirmCategory,enemyPhase,ali
 
 const BUILDS={
  '시작': { dice:['normal','normal','normal','normal','normal'], relics:[],
-   cats:{chance:['catch_breath'],onePair:['clasped_hands','clash'],threeKind:['triple_axe']} },
+   cats:{chance:'catch_breath',onePair:'clash'} },
  '🩸 사냥': { dice:['nail','nail','mirror','twin','gold'],
    relics:['hunters_eye','whetstone','old_bone','silver_bullet','grandma_book'],
-   cats:{chance:['catch_breath'],onePair:['clasped_hands'],threeKind:['chopping'],
-     fourKind:['hunger','heavy_blow'],yahtzee:['judgment_night']} },
+   cats:{chance:'catch_breath',onePair:'clasped_hands',threeKind:'chopping',
+     fourKind:'heavy_blow',yahtzee:'judgment_night'} },
  '🌾 길': { dice:['chainlink','guide','moonlit','normal','gold'],
    relics:['waymark','silver_knife','moss_compass','red_cloak','fate_thimble'],
-   cats:{chance:['catch_breath'],onePair:['clasped_hands'],smallStraight:['windpath','snare'],
-     largeStraight:['moonpath','storm_run'],threeKind:['chopping']} },
+   cats:{chance:'catch_breath',onePair:'clasped_hands',smallStraight:'snare',
+     largeStraight:'storm_run',threeKind:'chopping'} },
  '🛡 둥지': { dice:['straw','bramble','straw','normal','gold'],
    relics:['bears_back','gate_bar','firewood','whetstone','hunters_charm'],
-   cats:{chance:['catch_breath'],onePair:['clasped_hands','clash'],twoPair:['twin_sisters'],
-     fullHouse:['cottage','wedge'],smallStraight:['hunt_drive']} },
+   cats:{chance:'catch_breath',onePair:'clash',twoPair:'twin_sisters',
+     fullHouse:'wedge',smallStraight:'hunt_drive'} },
 };
 function scoreChoice(battle,p){
   const ab=p.variant.ability, ops=ab?(Array.isArray(ab)?ab:[ab]):[]; const p_=battle.player;

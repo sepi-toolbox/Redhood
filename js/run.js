@@ -55,7 +55,7 @@ export function newRun() {
     dice,
     relics: [],
     weapon: null,        // 무기 id (인트로에서 선택)
-    categories: {},      // 족보 id -> 보유 변형 id 배열 (누적 수집)
+    categories: {},      // v1.34 족보 id -> 그 자리에 끼운 변형 id (null = 기본 족보)
     seenEvents: [],      // 이번 런에서 만난 대화 이벤트 id
     coins: 0,            // 🪙 상점 화폐 — 전투 승리로 획득 (v0.13)
     enlight,             // 계몽 스냅샷 (런 시작 시점 고정)
@@ -87,8 +87,10 @@ export function chooseWeapon(run, weaponId) {
   const w = DB.weaponById[weaponId];
   if (!w) return false;
   run.weapon = weaponId;
+  // 아홉 족보 자리는 처음부터 전부 열려 있다. 무기가 그중 몇 자리를 채워준다.
   run.categories = {};
-  for (const [cid, vid] of Object.entries(w.start)) run.categories[cid] = [vid];
+  for (const c of DB.scoring.categories) run.categories[c.id] = null;
+  for (const [cid, vid] of Object.entries(w.start)) run.categories[cid] = vid;
   return true;
 }
 
@@ -178,13 +180,13 @@ export function applyEventEffects(run, effects) {
       case 'gainVariant': {
         const pool = [];
         for (const c of DB.scoring.categories) {
-          const owned = run.categories[c.id] || [];
-          for (const v of (c.variants || [])) if (!owned.includes(v.id)) pool.push({ c, v });
+          for (const v of (c.variants || [])) if (run.categories[c.id] !== v.id) pool.push({ c, v });
         }
         if (pool.length === 0) { messages.push('더 얻을 족보가 없다'); break; }
         const { c, v } = pool[Math.floor(rng.next() * pool.length)];
-        (run.categories[c.id] = run.categories[c.id] || []).push(v.id);
-        messages.push(`📜 ${v.name}(${c.name}) 획득`);
+        const before = run.categories[c.id];
+        run.categories[c.id] = v.id;
+        messages.push(`📜 ${c.name} 자리에 ${v.name}${before ? ' (앞의 것을 대신한다)' : ''}`);
         break;
       }
       case 'gainDie': {
@@ -355,11 +357,12 @@ function rewardPoolOf(run, kind, allowedTiers = null) {
   }
   const pool = [];
   for (const c of DB.scoring.categories) {
-    const ownedList = run.categories[c.id] || [];
+    const cur = run.categories[c.id] || null;
     for (const v of (c.variants || [])) {
-      if (ownedList.includes(v.id)) continue;
+      if (cur === v.id) continue;
       if (allowedTiers && !allowedTiers.has(v.tier)) continue;
-      pool.push({ id: `${c.id}:${v.id}`, tier: v.tier, cat: c, variant: v, owned: ownedList.length > 0 });
+      pool.push({ id: `${c.id}:${v.id}`, tier: v.tier, cat: c, variant: v, owned: !!cur,
+                  replaces: cur ? (c.variants || []).find(x => x.id === cur) || null : null });
     }
   }
   return pool;
@@ -367,7 +370,7 @@ function rewardPoolOf(run, kind, allowedTiers = null) {
 
 // 보유 변형 수 (족보 누적 → 주사위 확률 보정용)
 function ownedVariantCount(run) {
-  return Object.values(run.categories).reduce((s, a) => s + a.length, 0);
+  return Object.values(run.categories).filter(Boolean).length;   // 채워진 자리 수
 }
 
 export function rollRewards(run, nodeType) {
@@ -454,10 +457,11 @@ export function bossRelicChoices(run) {
 export function bossLegendaryChoices(run) {
   const pool = [];
   for (const c of DB.scoring.categories) {
-    const ownedList = run.categories[c.id] || [];
+    const cur = run.categories[c.id] || null;
     for (const v of (c.variants || [])) {
-      if (v.tier !== 'epic' || ownedList.includes(v.id)) continue;
-      pool.push({ kind: 'category', item: { id: `${c.id}:${v.id}`, tier: 'epic', cat: c, variant: v, owned: ownedList.length > 0 } });
+      if (v.tier !== 'epic' || cur === v.id) continue;
+      pool.push({ kind: 'category', item: { id: `${c.id}:${v.id}`, tier: 'epic', cat: c, variant: v, owned: !!cur,
+                  replaces: cur ? (c.variants || []).find(x => x.id === cur) || null : null } });
     }
   }
   for (const d of DB.dice) if (d.tier === 'epic') pool.push({ kind: 'die', item: d });
@@ -545,7 +549,10 @@ export function loadRun() {
     if (!s.dice.every(id => DB.diceById[id])) { clearSave(); return null; }
     if (!s.relics.every(id => DB.relicById[id])) { clearSave(); return null; }
     if (!s.weapon || !DB.weaponById[s.weapon]) { clearSave(); return null; }
-    if (Object.keys(s.categories || {}).length === 0) { clearSave(); return null; }
+    if (!s.categories || typeof s.categories !== 'object') { clearSave(); return null; }
+    // v1.34 이전 저장본: 변형 배열 -> 첫 칸을 끼운 것으로 옮긴다
+    for (const [cid, v] of Object.entries(s.categories)) if (Array.isArray(v)) s.categories[cid] = v[0] || null;
+    for (const c of DB.scoring.categories) if (!(c.id in s.categories)) s.categories[c.id] = null;
     if (!Array.isArray(s.seenEvents)) s.seenEvents = [];
     if (typeof s.coins !== 'number') s.coins = 0;
     if (typeof s.enlight !== 'number') s.enlight = 0;
@@ -554,10 +561,10 @@ export function loadRun() {
     if (!actDef || !actDef.themes.some(t => t.id === s.theme)) { clearSave(); return null; }
     const byId = {};
     for (const c of DB.scoring.categories) byId[c.id] = c;
-    for (const [cid, vids] of Object.entries(s.categories || {})) {
+    for (const [cid, vid] of Object.entries(s.categories)) {
       const c = byId[cid];
-      if (!c || !Array.isArray(vids) || vids.length === 0) { clearSave(); return null; }
-      if (!vids.every(vid => (c.variants || []).some(v => v.id === vid))) { clearSave(); return null; }
+      if (!c) { clearSave(); return null; }
+      if (vid && !(c.variants || []).some(v => v.id === vid)) { clearSave(); return null; }
     }
     return s;
   } catch (e) { return null; }
