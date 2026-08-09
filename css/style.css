@@ -225,9 +225,9 @@ body {
 }
 .enemy.targeted .enemy-name { color: #f0d9b5; }
 .target-pin {
-  position: absolute; top: -2px; left: 4px;
+  position: absolute; top: -2px; left: 50%;
   color: #c9302f; font-size: 13px; text-shadow: 0 1px 2px #000;
-  margin-left: var(--cb-pinX, 0px); margin-top: var(--cb-pinY, 0px);
+  margin-left: calc(var(--cb-pinX, 0px) - 6px); margin-top: var(--cb-pinY, 0px);
   animation: youBob 1.2s ease-in-out infinite alternate;
   opacity: 0; transition: opacity .15s; /* v0.58: 표시 전환을 재렌더 없이 */
 }
@@ -1330,13 +1330,16 @@ span.enemy-art {
 .cb-hand { pointer-events: none; }
 .cb-card { pointer-events: auto; }
 .cb-hand { position: absolute; bottom: var(--cb-handBottom, -22px); left: 0; width: 100%; height: 224px; }
-.cb-card.t-uncommon, .cb-zoom .zbig.t-uncommon { background-image: url('../assets/ui/card_frame_uncommon.webp'), url('../assets/ui/card_frame.webp'); }
-.cb-card.t-rare, .cb-zoom .zbig.t-rare { background-image: url('../assets/ui/card_frame_rare.webp'), url('../assets/ui/card_frame.webp'); }
-.cb-card.t-epic, .cb-zoom .zbig.t-epic { background-image: url('../assets/ui/card_frame_epic.webp'), url('../assets/ui/card_frame.webp'); }
+.cb-card.t-uncommon::after, .cb-zoom .zbig.t-uncommon::after { background-image: url('../assets/ui/card_frame_uncommon.webp'), url('../assets/ui/card_frame.webp'); }
+.cb-card.t-rare::after, .cb-zoom .zbig.t-rare::after { background-image: url('../assets/ui/card_frame_rare.webp'), url('../assets/ui/card_frame.webp'); }
+.cb-card.t-epic::after, .cb-zoom .zbig.t-epic::after { background-image: url('../assets/ui/card_frame_epic.webp'), url('../assets/ui/card_frame.webp'); }
+.cb-card::after, .cb-zoom .zbig::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: url('../assets/ui/card_frame.webp') center / 100% 100% no-repeat;
+}
 .cb-card {
   position: absolute; left: 50%; bottom: 0; width: var(--cb-cardW, 118px); height: var(--cb-cardH, 162px); margin-left: calc(var(--cb-cardW, 118px) / -2);
-  background: url('../assets/ui/card_frame.webp') center / 100% 100% no-repeat;
-  border: none; border-radius: 0;
+  background: none; border: none; border-radius: 0;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .65));
   transform-origin: 50% 120%; transition: transform .22s;
   touch-action: none;
@@ -1348,8 +1351,9 @@ span.enemy-art {
   display: flex; align-items: center; justify-content: center;
   color: #3d2413; font-weight: 800; font-size: calc(var(--cb-cardW, 118px) * .115); z-index: 2;
 }
+.cb-card .cnm { z-index: 2; }
 .cb-card .cart {
-  position: absolute; left: 10.5%; right: 10.5%; top: 12.8%; height: 55%;
+  position: absolute; left: 6%; right: 6%; top: 9%; height: 62%; z-index: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: calc(var(--cb-cardW, 118px) * .38);
   background: none center / cover no-repeat;
@@ -1399,17 +1403,17 @@ span.enemy-art {
   align-items: center; justify-content: center; }
 .cb-zoom.on { display: flex; }
 .cb-zoom .zbig { position: relative; width: 258px; height: 387px;
-  background: url('../assets/ui/card_frame.webp') center / 100% 100% no-repeat;
+  background: none;
   filter: drop-shadow(0 10px 30px #000); }
-.cb-zoom .zart { position: absolute; left: 10.5%; right: 10.5%; top: 12.8%; height: 55%;
+.cb-zoom .zart { position: absolute; left: 6%; right: 6%; top: 9%; height: 62%; z-index: 0;
   display: flex; align-items: center; justify-content: center; font-size: 84px;
   background: none center / cover no-repeat; }
-.cb-zoom .zcc { position: absolute; top: 3.6%; left: 4%; width: 18.5%; height: 12.5%;
+.cb-zoom .zcc { z-index: 2; position: absolute; top: 3.6%; left: 4%; width: 18.5%; height: 12.5%;
   display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #3d2413; }
-.cb-zoom .ztt { position: absolute; left: 25%; right: 9%; top: 5.6%; height: 5.6%;
+.cb-zoom .ztt { z-index: 2; position: absolute; left: 25%; right: 9%; top: 5.6%; height: 5.6%;
   display: flex; align-items: center; justify-content: center; text-align: center;
   font-size: 17px; font-weight: 800; color: #3d2413; }
-.cb-zoom .zdd { position: absolute; left: 13%; right: 13%; top: 72.5%; bottom: 13%;
+.cb-zoom .zdd { z-index: 2; position: absolute; left: 13%; right: 13%; top: 72.5%; bottom: 13%;
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; line-height: 1.55; color: #4a3a28; text-align: center; overflow: hidden; }
 .battle-screen > .cb-float {
