@@ -1,0 +1,319 @@
+{
+  "_comment": "v2.17 초벌 밸런스 시안 B — 예산: 일반솔로 합<=13(들개 예외 18.75), 페어 합<=17, 정예/보스 합~20. 일반은 n 미지정(5/3 규칙), 정예·보스만 n.",
+  "enemies": {
+    "crow": {
+      "battleDice": {
+        "faces": [
+          1,
+          2,
+          3
+        ]
+      },
+      "faceAbilities": {
+        "3": {
+          "op": "bleed",
+          "amount": 1,
+          "name": "눈 쪼기"
+        }
+      }
+    },
+    "will_o_wisp": {
+      "battleDice": {
+        "faces": [
+          1,
+          2,
+          4
+        ]
+      },
+      "faceAbilities": {
+        "4": {
+          "op": "heal",
+          "amount": 3,
+          "name": "일렁임"
+        }
+      }
+    },
+    "forest_spider": {
+      "battleDice": {
+        "faces": [
+          1,
+          2,
+          5
+        ]
+      },
+      "faceAbilities": {
+        "5": {
+          "op": "bleed",
+          "amount": 2,
+          "name": "독니"
+        }
+      }
+    },
+    "stray_dog": {
+      "battleDice": {
+        "faces": [
+          1,
+          3,
+          5,
+          6
+        ]
+      },
+      "faceAbilities": {
+        "1": {
+          "op": "damage",
+          "name": "물기"
+        },
+        "3": {
+          "op": "bleed",
+          "amount": 2,
+          "name": "이빨 박기"
+        },
+        "5": {
+          "op": "armor",
+          "amount": 5,
+          "name": "웅크리기"
+        },
+        "6": {
+          "op": "lifesteal",
+          "name": "피 핥기"
+        }
+      }
+    },
+    "thorn_bush": {
+      "battleDice": {
+        "faces": [
+          2,
+          3,
+          4
+        ]
+      },
+      "faceAbilities": {
+        "4": {
+          "op": "armor",
+          "amount": 4,
+          "name": "가시 돋기"
+        }
+      }
+    },
+    "twig_golem": {
+      "battleDice": {
+        "faces": [
+          1,
+          5
+        ]
+      },
+      "faceAbilities": {
+        "5": {
+          "op": "armor",
+          "amount": 6,
+          "name": "재조립"
+        }
+      }
+    },
+    "brook_sprite": {
+      "battleDice": {
+        "faces": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "faceAbilities": {
+        "2": {
+          "op": "heal",
+          "amount": 2,
+          "name": "물장난"
+        }
+      }
+    },
+    "leech": {
+      "battleDice": {
+        "faces": [
+          1,
+          2,
+          3
+        ]
+      },
+      "faceAbilities": {
+        "3": {
+          "op": "lifesteal",
+          "name": "빨아먹기"
+        }
+      }
+    },
+    "rat_swarm": {
+      "battleDice": {
+        "faces": [
+          1,
+          2
+        ],
+        "n": 6
+      },
+      "faceAbilities": {
+        "2": {
+          "op": "bleed",
+          "amount": 1,
+          "name": "갉기"
+        }
+      }
+    },
+    "living_broom": {
+      "battleDice": {
+        "faces": [
+          1,
+          3,
+          4
+        ]
+      },
+      "faceAbilities": {
+        "3": {
+          "op": "armor",
+          "amount": 3,
+          "name": "쓸어내기"
+        }
+      }
+    },
+    "alpha_dog": {
+      "battleDice": {
+        "faces": [
+          2,
+          4,
+          6,
+          8
+        ],
+        "n": 4
+      },
+      "faceAbilities": {
+        "4": {
+          "op": "bleed",
+          "amount": 2,
+          "name": "생채기"
+        },
+        "6": {
+          "op": "armor",
+          "amount": 5,
+          "name": "울부짖음"
+        },
+        "8": {
+          "op": "lifesteal",
+          "name": "물어뜯기"
+        }
+      }
+    },
+    "old_pike": {
+      "battleDice": {
+        "faces": [
+          3,
+          5,
+          9
+        ],
+        "n": 3
+      },
+      "faceAbilities": {
+        "5": {
+          "op": "armor",
+          "amount": 4,
+          "name": "비늘 세우기"
+        },
+        "9": {
+          "op": "bleed",
+          "amount": 3,
+          "name": "물어채기"
+        }
+      }
+    },
+    "cellar_thing": {
+      "battleDice": {
+        "faces": [
+          1,
+          4,
+          8
+        ],
+        "n": 4
+      },
+      "faceAbilities": {
+        "1": {
+          "op": "heal",
+          "amount": 4,
+          "name": "스멀거림"
+        },
+        "8": {
+          "op": "damage",
+          "name": "덮침"
+        }
+      }
+    },
+    "wolf": {
+      "battleDice": {
+        "faces": [
+          2,
+          4,
+          6,
+          8
+        ],
+        "n": 4
+      },
+      "faceAbilities": {
+        "4": {
+          "op": "bleed",
+          "amount": 2,
+          "name": "핏빛 발톱"
+        },
+        "6": {
+          "op": "armor",
+          "amount": 5,
+          "name": "경계"
+        },
+        "8": {
+          "op": "lifesteal",
+          "name": "물어뜯기"
+        }
+      }
+    },
+    "river_hag": {
+      "battleDice": {
+        "faces": [
+          1,
+          3,
+          5,
+          7
+        ],
+        "n": 5
+      },
+      "faceAbilities": {
+        "1": {
+          "op": "heal",
+          "amount": 5,
+          "name": "물거품"
+        },
+        "7": {
+          "op": "bleed",
+          "amount": 3,
+          "name": "낚아채기"
+        }
+      }
+    },
+    "old_teddy": {
+      "battleDice": {
+        "faces": [
+          2,
+          5,
+          8
+        ],
+        "n": 4
+      },
+      "faceAbilities": {
+        "2": {
+          "op": "armor",
+          "amount": 6,
+          "name": "솜 채우기"
+        },
+        "8": {
+          "op": "damage",
+          "name": "으스러뜨리기"
+        }
+      }
+    }
+  }
+}
