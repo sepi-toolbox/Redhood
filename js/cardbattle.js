@@ -34,10 +34,11 @@ export function createCardBattle(run, encounterIds) {
   const b = {
     over: false, result: null, turn: 0,
     player: { hp: run.hp, maxHp: run.maxHp },
+    playerBleed: 0,                    // 출혈 — 적 반격 뒤 터지고 1씩 잦아든다
     res: 0,
     deck: shuffle(deckSrc.slice()), discard: [], hand: [],
     myDice: [],
-    enemies: encounterIds.map((id, i) => spawnFoe(id, i, hpScale, actKey)),
+    enemies: encounterIds.map((id, i) => spawnFoe(id, i, hpScale, actKey, encounterIds.length)),
     target: null,
   };
   b.target = b.enemies[0].uid;
@@ -45,7 +46,7 @@ export function createCardBattle(run, encounterIds) {
   return b;
 }
 
-function spawnFoe(id, idx, hpScale, actKey) {
+function spawnFoe(id, idx, hpScale, actKey, packSize = 1) {
   const def = DB.enemyById[id];
   const cfg = cfgOf();
   const t = cfg.tiers[def.tier] || cfg.tiers.normal;
@@ -58,9 +59,12 @@ function spawnFoe(id, idx, hpScale, actKey) {
     art: def.art || (def.tier === 'boss' ? '🐺' : def.tier === 'elite' ? '💀' : '🌑'),
     final: !!def.final,
     hp, maxHpInit: hp,
-    diceN: ov.n ?? t.dice ?? 2,
+    diceN: ov.n ?? (packSize === 1 ? 5 : 3),   // 혼자면 5개, 여럿이면 각 3개 (데이터로 개별 지정 가능)
     dmin: Math.min(4, (ov.min ?? t.min ?? 1) + (ab.minBonus || 0)),
     dmax: ov.max ?? t.max ?? 6,
+    faces: Array.isArray(ov.faces) && ov.faces.length ? ov.faces.slice() : null,   // 나오는 눈 목록 (예: 들개 [1,3,5,6])
+    abilities: def.faceAbilities || null,   // 눈별 능력 — 원래 눈 기준, 깎여도 유지, 다 막으면 무효
+    block: 0,                               // 눈 능력으로 얻는 방어도 — 내 다음 공격을 깎는다
     dice: [],
   };
 }
@@ -73,7 +77,7 @@ function rollFoe(b, e) {
   // 최종 보스: 죽지 않는 대신 주사위가 점점 는다 — 버틸 수 있는 만큼 버텨라
   const extra = e.final ? Math.min(cfg.finalExtraMax ?? 4, Math.floor((b.turn - 1) / (cfg.finalExtraEvery ?? 2))) : 0;
   e.dice = Array.from({ length: e.diceN + extra }, () => {
-    const v = ri(e.dmin, e.dmax);
+    const v = e.faces ? e.faces[Math.floor(rng.next() * e.faces.length)] : ri(e.dmin, e.dmax);
     return { v, orig: v, dead: false };
   });
 }
@@ -182,7 +186,8 @@ export function playCard(b, hi, dieIdx = -1) {
 export function previewTurn(b) {
   const atk = aliveVal(b.myDice);
   const tgt = b.enemies.find(x => x.uid === b.target && x.hp > 0) || null;
-  const kills = !!tgt && !tgt.final && atk >= tgt.hp;
+  const effAtk = tgt ? Math.max(0, atk - (tgt.block || 0)) : atk;
+  const kills = !!tgt && !tgt.final && effAtk >= tgt.hp;
   let take = 0;
   for (const e of aliveFoes(b)) {
     if (!(kills && e.uid === tgt.uid)) take += aliveVal(e.dice);
@@ -197,18 +202,41 @@ export function endCardTurn(b) {
   if (b.over) return null;
   const atk = aliveVal(b.myDice);
   const tgt = b.enemies.find(x => x.uid === b.target && x.hp > 0) || aliveFoes(b)[0] || null;
-  const script = { atk, targetUid: tgt ? tgt.uid : null, killed: false, foeHits: [], result: null };
+  const script = { atk, targetUid: tgt ? tgt.uid : null, killed: false, blocked: 0, foeHits: [], bleed: 0, result: null };
   if (tgt && atk > 0) {
-    if (tgt.final) tgt.hp = Math.max(1, tgt.hp - Math.min(atk, tgt.hp - 1)); // 최종 보스는 죽지 않는다
-    else { tgt.hp = Math.max(0, tgt.hp - atk); script.killed = tgt.hp <= 0; }
+    // 적 방어도(눈 능력)가 내 공격을 먼저 깎는다
+    script.blocked = Math.min(tgt.block || 0, atk);
+    tgt.block = (tgt.block || 0) - script.blocked;
+    const eff = atk - script.blocked;
+    if (tgt.final) tgt.hp = Math.max(1, tgt.hp - Math.min(eff, tgt.hp - 1)); // 최종 보스는 죽지 않는다
+    else { tgt.hp = Math.max(0, tgt.hp - eff); script.killed = tgt.hp <= 0; }
   }
+  // 적 반격 — 살아남은 주사위마다: 현재 값만큼 피해 + 원래 눈의 능력 (다 막힌 주사위는 능력도 무효)
   for (const e of aliveFoes(b)) {
-    const dmg = aliveVal(e.dice);
-    if (dmg > 0) {
+    let dmg = 0;
+    const abs = [];
+    for (const d of e.dice) {
+      if (d.dead) continue;
+      dmg += d.v;
+      const ab = e.abilities && e.abilities[String(d.orig)];
+      if (!ab) continue;
+      if (ab.op === 'bleed') { b.playerBleed += ab.amount || 1; abs.push({ op: 'bleed', name: ab.name || '출혈', amount: ab.amount || 1 }); }
+      else if (ab.op === 'armor') { e.block += ab.amount || 3; abs.push({ op: 'armor', name: ab.name || '방어', amount: ab.amount || 3 }); }
+      else if (ab.op === 'lifesteal') { const h = Math.min(d.v, e.maxHpInit - e.hp); if (h > 0) e.hp += h; abs.push({ op: 'lifesteal', name: ab.name || '흡혈', amount: d.v }); }
+      else if (ab.op === 'heal') { const h = Math.min(ab.amount || 3, e.maxHpInit - e.hp); if (h > 0) e.hp += h; abs.push({ op: 'heal', name: ab.name || '회복', amount: ab.amount || 3 }); }
+      // 'damage' 는 표기용 — 값 피해 그대로
+    }
+    if (dmg > 0 || abs.length) {
       b.player.hp = Math.max(0, b.player.hp - dmg);
-      script.foeHits.push({ uid: e.uid, dmg });
+      script.foeHits.push({ uid: e.uid, dmg, abs });
       if (b.player.hp <= 0) break;
     }
+  }
+  // 출혈은 반격이 끝난 뒤 터지고 1 잦아든다
+  if (b.player.hp > 0 && b.playerBleed > 0) {
+    script.bleed = b.playerBleed;
+    b.player.hp = Math.max(0, b.player.hp - b.playerBleed);
+    b.playerBleed = Math.max(0, b.playerBleed - 1);
   }
   if (b.player.hp <= 0) { b.over = true; b.result = 'defeat'; }
   else if (b.enemies.every(e => e.hp <= 0)) { b.over = true; b.result = 'victory'; }

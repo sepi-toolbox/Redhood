@@ -6,7 +6,7 @@ import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind } from './cardbattle.js';
 
-export const VERSION = 'v2.14'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v2.15'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1704,7 +1704,7 @@ function renderCardBattle() {
             <span class="target-pin">▼</span>
             <span class="enemy-name">${esc(e.name)}</span>
             <span class="bar t-${e.tier}"><i style="width:${e.final ? 100 : Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
-            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}</span>
+            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${e.block > 0 ? ` <b class="fshield">🛡${e.block}</b>` : ''}</span>
             ${enemyArtHtml(e)}
             <span class="fdice" data-uid="${e.uid}"></span>
           </button>`).join('')}
@@ -1714,6 +1714,7 @@ function renderCardBattle() {
           <div class="hp-fill" style="width:${Math.max(0, battle.player.hp / battle.player.maxHp * 100)}%"></div>
           <span class="hp-text">${battle.player.hp} / ${battle.player.maxHp}</span>
         </div>
+        <span class="cb-bleedbadge" id="cb-bleed"></span>
       </div>
       <div class="cb-preview" id="cb-preview"></div>
       <div class="cb-dice" id="cb-dice"></div>
@@ -1728,6 +1729,7 @@ function renderCardBattle() {
       <div class="cb-banner" id="cb-banner"></div>
       <div class="cb-zoom" id="cb-zoom"></div>
     </div>`));
+  document.getElementById('cb-zoom').addEventListener('pointerdown', () => cbZoom(null));
   applyLayout(app.querySelector('.card-battle'));
   cbUpdate();
   requestAnimationFrame(cbFitEnemyZone);
@@ -1756,9 +1758,7 @@ function cbUpdate() {
     if (!zone) continue;
     zone.innerHTML = e.hp > 0 ? e.dice.map((d, di) => `
       <b class="fdie ${d.dead ? 'dead' : ''} ${cbSel >= 0 && !d.dead ? 'pickable' : ''}" data-di="${di}">${
-        d.dead ? '' : (d.v >= 1 && d.v <= 6
-          ? `<img src="${dieFaceSrc('normal', d.v)}" alt="${d.v}" draggable="false">`
-          : d.v)}</b>`).join('') : '';
+        d.dead ? '' : `<img src="assets/dice/blank.png" alt="" draggable="false"><span class="fnum">${d.v}</span>`}</b>`).join('') : '';
     zone.querySelectorAll('.fdie:not(.dead)').forEach(fd => {
       fd.addEventListener('click', (ev) => {
         ev.stopPropagation();
@@ -1777,11 +1777,8 @@ function cbUpdate() {
   if (dz) {
     dz.innerHTML = battle.myDice.map((d, i) => {
       const pick = cbPicking && ((cbPicking.kind === 'active' && !d.dead) || (cbPicking.kind === 'dead' && d.dead));
-      const defId = run.dice && DIE_SKINS.has(run.dice[i]) ? run.dice[i] : 'normal';
       const face = d.dead ? ''
-        : (d.v >= 1 && d.v <= 6)
-          ? `<img class="pip-art" src="${dieFaceSrc(defId, d.v)}" alt="${d.v}" draggable="false">`
-          : `<span class="cval">${d.v}</span>`;
+        : `<img class="pip-art" src="assets/dice/blank.png" alt="" draggable="false"><span class="cnum">${d.v}</span>`;
       return `<button class="cdie art ${d.dead ? 'dead' : ''} ${i === cbSel ? 'sel' : ''} ${pick ? 'pickable' : ''}" data-i="${i}">
         ${face}${!d.dead && d.v !== d.orig ? `<span class="corig">${d.orig}</span>` : ''}</button>`;
     }).join('');
@@ -1813,6 +1810,8 @@ function cbUpdate() {
   if (dk) dk.querySelector('b').textContent = battle.deck.length;
   const dc = document.getElementById('cb-disc');
   if (dc) dc.querySelector('b').textContent = battle.discard.length;
+  const bl = document.getElementById('cb-bleed');
+  if (bl) bl.textContent = battle.playerBleed > 0 ? `🩸${battle.playerBleed}` : '';
   cbPreviewUpdate();
   cbRenderHand();
 }
@@ -1860,6 +1859,16 @@ function cbCardFx(res) {
   }
 }
 
+// 카드 사용 가능 판정 — 비용과 '대상이 있는가'까지 본다
+function cbCardUsable(key) {
+  const c = cardOf(key);
+  if (!c || battle.res < c.cost) return false;
+  const kind = cardTargetKind(key);
+  if (kind === 'dead') return battle.myDice.some(d => d.dead);
+  if (kind === 'active') return battle.myDice.some(d => !d.dead);
+  return battle.myDice.some(d => !d.dead);   // 용기·고양도 살아있는 주사위가 필요
+}
+
 // ---------- 손패 (부채꼴) ----------
 function cbRenderHand() {
   const hand = document.getElementById('cb-hand');
@@ -1873,14 +1882,15 @@ function cbRenderHand() {
     const W = hand.clientWidth || 390;
     const L = layoutOf();
     const spacing = n > 1 ? Math.min(L.handMaxGap ?? 58, Math.max(18, (W - (L.handMargin ?? 100) - (L.cardW ?? 118)) / (n - 1))) : 0;
+    const usable = cbCardUsable(key);
     const el = document.createElement('div');
-    el.className = `cb-card t-${c.tier || 'common'}` + tierFrameCls(c.tier) + (battle.res < c.cost ? ' broke' : '');
+    el.className = `cb-card t-${c.tier || 'common'}` + tierFrameCls(c.tier) + (usable ? ' usable' : ' unusable');
     el.dataset.hi = hi;
     const art = CARD_ART.has(key)
       ? `<span class="cart" style="background-image:url('assets/cards/card_${key}.webp')"></span>`
       : `<span class="cart">${c.icon}</span>`;
     el.innerHTML = `<span class="ccost">${c.cost}</span>${art}<span class="cnm">${esc(c.name)}</span>`;
-    el.style.transform = `translateX(${off * spacing}px) rotate(${off * 5}deg) translateY(${Math.abs(off) * 8}px)`;
+    el.style.transform = `translateX(${off * spacing}px) rotate(${off * 5}deg) translateY(${Math.abs(off) * 8 + (usable ? 0 : 16)}px)`;
     hand.appendChild(el);
     bindCbCard(el, hi, key);
   });
@@ -1902,14 +1912,17 @@ function bindCbCard(el, hi, key) {
       if (zoomed) { cbZoom(null); zoomed = false; }
       el.classList.add('dragging');
     }
-    if (drag) el.style.transform = `translate(${dx}px,${dy}px) scale(1.1)`;
+    if (drag) el.style.transform = `translate3d(${dx}px,${dy}px,0) scale(1.1)`;
   };
   const up = (y) => {
     if (!pressed) return;
     pressed = false; clearTimeout(holdT);
     if (zoomed) { cbZoom(null); cbRenderHand(); return; }
     if (drag) {
-      if (sy - y > 70) cbTryPlay(hi, key);
+      // 주사위 줄까지 끌어올려야 발동 — 그 아래는 구경/오동작으로 보고 되돌린다
+      const diceRow = app.querySelector('.cb-dice');
+      const limit = diceRow ? diceRow.getBoundingClientRect().bottom : 300;
+      if (y < limit) cbTryPlay(hi, key);
       else cbRenderHand();
     }
   };
@@ -2013,8 +2026,13 @@ function cbEndTurn() {
       if (el) { el.classList.add('attacking'); setTimeout(() => el.classList.remove('attacking'), 700); }
       hpShown = Math.max(0, hpShown - hit.dmg);
       cbShowPlayerHit(hit.dmg, hpShown);
+      if (hit.abs && hit.abs.length) cbBanner(hit.abs.map(a => `${a.name} ${a.amount || ''}`).join(' · '), 1300);
     }, t);
     t += 760;
+  }
+  if (script.bleed > 0) {
+    setTimeout(() => { hpShown = Math.max(0, hpShown - script.bleed); cbShowPlayerHit(script.bleed, hpShown); cbBanner(`🩸 출혈 ${script.bleed}`, 1100); }, t);
+    t += 700;
   }
   // 3) 마무리
   setTimeout(() => {
@@ -2099,7 +2117,9 @@ function cbFoeInfo(uid) {
       <div class="modal">
         <h3>${e.art} ${esc(e.name)} <small class="cat-tag">${ENEMY_TIER_KO[e.tier] || e.tier}${e.final ? ' · 무한' : ''}</small></h3>
         <p class="modal-text">${e.final ? '체력 ∞ — 쓰러지지 않는다' : `HP ${e.hp}/${e.maxHpInit}`}</p>
-        <p class="modal-text">🎲 매 턴 주사위 ${e.diceN}개 (${e.dmin}~${e.dmax})${e.final ? ' — 시간이 갈수록 늘어난다' : ''}</p>
+        <p class="modal-text">🎲 매 턴 주사위 ${e.diceN}개 ${e.faces ? `— 나오는 눈: ${e.faces.join(', ')}` : `(${e.dmin}~${e.dmax})`}${e.final ? ' — 시간이 갈수록 늘어난다' : ''}</p>
+        ${e.abilities ? `<ul class="deck-list">${Object.entries(e.abilities).map(([f, a]) =>
+          `<li><b>${f}</b> — ${esc(a.name || a.op)}${a.amount ? ' ' + a.amount : ''} <span class="modal-text">(막으면 무효 · 깎여도 능력은 유지)</span></li>`).join('')}</ul>` : ''}
         <p class="hint">남은 주사위가 턴 종료에 전부 나를 때린다. 내 주사위로 부딪쳐 깎아내자.</p>
         <button class="btn primary" id="foe-info-close">닫기</button>
       </div>
