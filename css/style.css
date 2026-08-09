@@ -652,69 +652,55 @@ span.enemy-art {
 .sheet-row.used { opacity: .32; filter: grayscale(.6); }
 .sheet-row.used .sheet-preview { color: #6f6353; }
 /* ==========================================================================
-   v1.40 족보판 — 여덟 자리
-   기본은 '한 줄씩'(시안 A): [메달][이름 · 족보][숫자] 한 줄. 몬스터 칸은 안 건드린다.
-   세로가 720px 이하로 짧아 한 줄로는 도저히 안 들어갈 때만 두 칸으로 접는다.
+   v1.41 족보판 — 여덟 자리를 두 칸 × 네 줄로
+   한 줄씩(A)은 8개로도 줄 높이가 39px(844) · 31px(780) 밖에 안 나와 손가락이
+   못 짚는다. 두 칸으로 접으면 칸 높이를 터치 기준(44px) 위로 올릴 수 있다.
+   몬스터 칸은 어느 크기에서도 건드리지 않는다.
    ========================================================================== */
 .sheet-zone.combo-grid {
-  display: grid; grid-template-columns: 1fr; grid-auto-rows: minmax(0, 1fr);
-  gap: 4px; padding: 6px 13px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  grid-auto-rows: minmax(44px, 1fr);          /* 손가락이 짚을 수 있는 최소 높이 */
+  gap: 6px; padding: 8px 12px;
 }
-/* 전리품은 같은 자리를 빌려 쓴다 — 그때는 예전 그대로 */
+/* 전리품은 같은 자리를 빌려 쓴다 — 그때는 예전 그대로 한 줄씩 */
 .sheet-zone.combo-grid.loot-list {
   display: flex; flex-direction: column; gap: 6px; padding: 10px 14px;
 }
 
-/* ---- 한 줄씩 (기본) ---- */
 .combo-grid .combo-row {
-  display: flex; align-items: center; gap: 7px;
-  padding: 0 2px 0 15px; font-size: 14px;
-  border-width: 9px 15px; min-width: 0; min-height: 0; text-align: left;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  column-gap: 6px; row-gap: 0; padding: 0 1px; font-size: 13.5px;
+  border-width: 10px 13px; min-width: 0; min-height: 0; text-align: left;
 }
-.combo-grid .combo-row.has-plate { padding-left: 5px; }
-.combo-grid .combo-row.has-plate .row-icon { display: none; }
-.combo-grid .combo-row .row-icon {
-  position: absolute; left: -15px; top: 50%; margin: -15px 0 0 0;
-  width: 30px; height: 30px; border-width: 1.5px;
-}
-.combo-grid .combo-row .row-icon .row-ico-tmp { font-size: 17px; }
-.combo-grid .combo-row .row-body {
-  flex: 1; min-width: 0; flex-direction: row; align-items: baseline; gap: 5px;
-}
+.combo-grid .combo-row .row-icon { display: none; }   /* 칸이 좁아 메달은 뺀다 — 능력은 길게 눌러 본다 */
+/* row-body 를 투명하게 만들어 이름·꼬리표·숫자를 한 격자 안에 놓는다
+   [이름     ][숫자]
+   [족보     ][    ]  */
+.combo-grid .combo-row .row-body { display: contents; }
 .combo-grid .combo-row .sheet-name {
-  flex: none; font-size: 14px; line-height: 18px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.combo-grid .combo-row .cat-tag {
-  flex: 1; min-width: 0; font-size: 10.5px; line-height: 18px;
-  border: none; background: none; padding: 0; margin: 0;
+  grid-column: 1; grid-row: 1; min-width: 0; display: block;
+  font-size: 13.5px; line-height: 17px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .combo-grid .combo-row .sheet-preview {
-  flex: none; font-size: 19px; line-height: 19px; min-width: 34px; padding-right: 0;
+  grid-column: 2; grid-row: 1 / span 2; align-self: center;
+  font-size: 19px; line-height: 19px; min-width: 34px; padding-right: 0;
+}
+.combo-grid .combo-row .cat-tag {
+  grid-column: 1; grid-row: 2; min-width: 0;
+  display: block; font-size: 10.5px; line-height: 14px; border: none; background: none;
+  padding: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .combo-grid .combo-row .cat-tag .burst-mark { color: #8a5a12; font-weight: 800; }
 .combo-grid .combo-row .cat-tag.t-slot { background: none; border: none; color: #8b7b66; }
 
-/* ---- 아주 짧은 화면: 두 칸으로 접는다 ----
-   칸이 좁으니 메달을 빼고 [이름 · 숫자] / [족보] 두 줄로 쌓는다. */
-@media (max-height: 720px) {
-  .sheet-zone.combo-grid { grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px 12px; }
-  .combo-grid .combo-row {
-    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
-    column-gap: 6px; row-gap: 0; padding: 0 1px; font-size: 13px; border-width: 9px 12px;
-  }
-  .combo-grid .combo-row .row-icon { display: none; }
-  .combo-grid .combo-row .row-body { display: contents; }
-  .combo-grid .combo-row .sheet-name {
-    grid-column: 1; grid-row: 1; display: block; font-size: 13px; line-height: 16px;
-  }
-  .combo-grid .combo-row .sheet-preview {
-    grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 18px; line-height: 18px;
-  }
-  .combo-grid .combo-row .cat-tag {
-    grid-column: 1; grid-row: 2; display: block; font-size: 10px; line-height: 13px;
-  }
+/* 세로가 아주 짧으면(iPhone SE 667 등) 40px 까지만 양보한다 — 그래도 스크롤은 없다 */
+@media (max-height: 700px) {
+  .sheet-zone.combo-grid { grid-auto-rows: minmax(40px, 1fr); gap: 3px; padding: 4px 12px; }
+  .combo-grid .combo-row { border-width: 8px 12px; font-size: 12.5px; }
+  .combo-grid .combo-row .sheet-name { font-size: 12.5px; line-height: 15px; }
+  .combo-grid .combo-row .cat-tag { font-size: 9.5px; line-height: 12px; }
+  .combo-grid .combo-row .sheet-preview { font-size: 17px; line-height: 17px; }
 }
 
 /* ---------- 보상: 상자 ---------- */
