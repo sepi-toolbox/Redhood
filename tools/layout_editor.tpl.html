@@ -154,14 +154,14 @@ function renderFoes() {
       <span class="bar t-normal"><i style="width:${f.pct}%"></i></span>
       <span class="enemy-hp">${f.hp}</span>
       <img class="enemy-art enemy-art-img" src="${SITE}/assets/enemies/${f.id}.png" alt="" draggable="false">
-      <span class="fdice">${f.dice.map(v => `<b class="fdie"><img src="${SITE}/assets/dice/normal${v}.png" draggable="false"></b>`).join('')}</span>
+      <span class="fdice">${f.dice.map(v => `<b class="fdie"><img src="${SITE}/assets/dice/blank.png" draggable="false"><span class="fnum">${v}</span></b>`).join('')}</span>
     </button>`).join('');
 }
 function renderDice() {
   const vals = [{ v: 1 }, { v: 5 }, { v: 3 }, { v: 1, dead: true }, { v: 4 }];
   $('#dice').innerHTML = vals.map(d => `
     <button class="cdie art ${d.dead ? 'dead' : ''}">
-      ${d.dead ? '' : `<img class="pip-art" src="${SITE}/assets/dice/normal${d.v}.png" draggable="false">`}
+      ${d.dead ? '' : `<img class="pip-art" src="${SITE}/assets/dice/blank.png" draggable="false"><span class="cnum">${d.v}</span>`}
     </button>`).join('');
 }
 const CARDS = [['courage', '용기', 2, 'rare'], ['stalk', '어둠 속의 추적', 2, 'uncommon'], ['elate', '고양', 1, 'common'], ['repair', '복구', 1, 'common'], ['elate', '고양', 1, 'common']];

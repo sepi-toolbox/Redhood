@@ -52,6 +52,22 @@ function validate() {
   for (const id of DB.act1.player.startDice) {
     if (!DB.diceById[id]) throw new Error(`act1.json: startDice에 없는 주사위 id "${id}"`);
   }
+  // v2.15 적 주사위: 눈 목록·눈별 능력
+  const FACE_OPS = new Set(['damage', 'bleed', 'armor', 'lifesteal', 'heal']);
+  for (const e of DB.enemies) {
+    const bd = e.battleDice;
+    if (bd && bd.faces) {
+      if (!Array.isArray(bd.faces) || !bd.faces.every(f => Number.isInteger(f) && f >= 1 && f <= 9)) {
+        throw new Error(`enemies.json: ${e.id} battleDice.faces 는 1~9 정수 목록이어야 합니다`);
+      }
+    }
+    for (const [f, a] of Object.entries(e.faceAbilities || {})) {
+      if (!FACE_OPS.has(a.op)) throw new Error(`enemies.json: ${e.id} 눈 ${f} 미지원 능력 "${a.op}"`);
+      if (bd && bd.faces && !bd.faces.includes(parseInt(f, 10))) {
+        throw new Error(`enemies.json: ${e.id} 눈 ${f} 능력이 있지만 faces 목록에 그 눈이 없습니다`);
+      }
+    }
+  }
   for (const d of DB.dice) {
     if (!Array.isArray(d.faces) || d.faces.length !== 6) throw new Error(`dice.json: ${d.id} faces는 6면이어야 함`);
   }

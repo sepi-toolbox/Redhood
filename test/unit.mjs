@@ -1098,6 +1098,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 // ========== v2.0 카드 전투 ==========
 {
   const { DB } = await import('../js/data.js');
+  (await import('../js/engine.js')).rng.next = () => 0.5;   // 결정론 — 아래 실측은 손으로 판을 깐다
   if (!DB.cards) DB.cards = JSON.parse((await import('fs')).readFileSync(new URL('../data/cards.json', import.meta.url), 'utf8'));
   DB.cardById = {}; for (const c of DB.cards.list) DB.cardById[c.id] = c;
   const CB = await import('../js/cardbattle.js');
@@ -1106,7 +1107,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('카드 전투: 손패 5장', b.hand.length, 5);
   eq('카드 전투: 자원 3', b.res, 3);
   eq('카드 전투: 내 주사위 5개', b.myDice.length, 5);
-  eq('카드 전투: 보스 주사위 수 = 설정값', b.enemies[0].dice.length, DB.cards.config.tiers.boss.dice);
+  eq('카드 전투: 혼자인 적은 주사위 5개', b.enemies[0].dice.length, 5);
   eq('카드 전투: 리롤 없음(rollsLeft 개념 없음)', b.rollsLeft === undefined, true);
 
   // 대결: 상호 차감 — 큰 쪽이 차액만큼 잔존
@@ -1148,6 +1149,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
   // 턴 종료: 내 공격 먼저 — 처치하면 그 적의 공격은 불발
   const b3 = CB.createCardBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, cards: DB.cards.starterDeck.slice() }, ['crow', 'crow']);
+  eq('둘이면 각 3개', b3.enemies.every(e => e.dice.length === 3), true);
   const [c1, c2] = b3.enemies;
   c1.hp = 10;
   b3.myDice = [6, 6, 6, 6, 6].map(v => ({ v, orig: v, dead: false }));   // 합 30 ≥ 10 → 처치
@@ -1174,6 +1176,71 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   b5.enemies[0].dice = [6, 6, 6, 6].map(v => ({ v, orig: v, dead: false }));
   CB.endCardTurn(b5);
   eq('맞아 죽으면 패배', b5.result, 'defeat');
+}
+
+
+// ========== v2.15 적 주사위 눈 능력 ==========
+{
+  const { DB } = await import('../js/data.js');
+  (await import('../js/engine.js')).rng.next = () => 0.5;   // 결정론 — 재굴림에 흡혈이 섞여 판정이 흔들리는 것 방지
+  const CB = await import('../js/cardbattle.js');
+  const mk = (foeSetup) => {
+    const b = CB.createCardBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, cards: DB.cards.starterDeck.slice() }, ['stray_dog']);
+    const e = b.enemies[0];
+    Object.assign(e, foeSetup(e));
+    return [b, e];
+  };
+  // 들개 눈 목록에서만 굴린다
+  {
+    const b = CB.createCardBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, cards: DB.cards.starterDeck.slice() }, ['stray_dog']);
+    const ok = b.enemies[0].dice.every(d => [1, 3, 5, 6].includes(d.orig));
+    eq('들개는 1·3·5·6 만 굴린다', ok, true);
+  }
+  // 출혈: 반격 뒤 터지고 1 잦아든다
+  {
+    const [b, e] = mk(() => ({}));
+    e.dice = [{ v: 3, orig: 3, dead: false }];
+    b.myDice = [{ v: 1, orig: 1, dead: true }];
+    e.hp = 999; e.maxHpInit = 999;
+    CB.endCardTurn(b);
+    eq('출혈 부여: 피해 3 + 출혈 2', 60 - b.player.hp, 5);
+    eq('출혈 스택 잦아듦 (2→1)', b.playerBleed, 1);
+  }
+  // 방어도: 다음 내 공격을 깎는다
+  {
+    const [b, e] = mk(() => ({}));
+    e.dice = [{ v: 5, orig: 5, dead: false }];
+    b.myDice = [{ v: 1, orig: 1, dead: true }];
+    e.hp = 100; e.maxHpInit = 100;
+    CB.endCardTurn(b);
+    eq('웅크리기: 방어도 5', e.block, 5);
+    const hpBefore = e.hp;
+    b.myDice = [{ v: 8, orig: 6, dead: false }];
+    b.target = e.uid;
+    const sc = CB.endCardTurn(b);
+    eq('방어도가 내 공격 8 중 5를 깎음', hpBefore - e.hp, 3);
+    eq('깎은 만큼 기록', sc.blocked, 5);
+  }
+  // 흡혈: 준 피해만큼 회복
+  {
+    const [b, e] = mk(() => ({}));
+    e.hp = 10; e.maxHpInit = 30;
+    e.dice = [{ v: 6, orig: 6, dead: false }];
+    b.myDice = [{ v: 1, orig: 1, dead: true }];
+    CB.endCardTurn(b);
+    eq('흡혈: 6 피해 주고 6 회복', b.enemies[0].hp, 16);
+  }
+  // 깎여도 능력은 원래 눈 기준 / 다 막으면 무효
+  {
+    const [b, e] = mk(() => ({}));
+    e.hp = 999; e.maxHpInit = 999;
+    e.dice = [{ v: 1, orig: 3, dead: false }, { v: 0, orig: 6, dead: true }];
+    b.myDice = [{ v: 1, orig: 1, dead: true }];
+    b.playerBleed = 0;
+    CB.endCardTurn(b);
+    eq('3이 1로 깎여도 출혈은 걸린다', b.playerBleed >= 1, true);
+    eq('막은 6(흡혈)은 무효 — 피해는 깎인 1만', 60 - b.player.hp <= 1 + 2, true);
+  }
 }
 
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);

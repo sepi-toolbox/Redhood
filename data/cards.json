@@ -7,20 +7,17 @@
     "floorHpScale": 0.02,
     "tiers": {
       "normal": {
-        "dice": 2,
         "min": 1,
-        "max": 6,
+        "max": 4,
         "hpMult": 0.85
       },
       "elite": {
-        "dice": 4,
         "min": 2,
         "max": 6,
         "hpMult": 0.6
       },
       "boss": {
-        "dice": 6,
-        "min": 1,
+        "min": 2,
         "max": 6,
         "hpMult": 0.45
       }

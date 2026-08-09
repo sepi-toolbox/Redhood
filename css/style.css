@@ -1236,7 +1236,7 @@ span.enemy-art {
 .card-battle .bg-layer { height: 100%; }   /* v2.01: 족보판이 사라졌으니 배경이 화면 전체를 덮는다 */
 /* v2.02: 몬스터가 화면 가운데를 채운다 — v2.03부터 배치는 data/layout.json + 📐 배치 모드로 조정 */
 .card-battle .enemy-zone { height: var(--cb-enemyH, 306px); }
-.card-battle .enemy { transform: translateY(var(--cb-enemyY, 0px)); }
+.card-battle .enemy { margin-top: var(--cb-enemyY, 0px); }
 .card-battle .target-pin { font-size: var(--cb-pinSize, 13px); }
 .card-battle .enemy-art-img { height: var(--cb-artH, 288px); }
 .card-battle span.enemy-art { font-size: 170px; height: 250px; line-height: 250px; }
@@ -1251,6 +1251,7 @@ span.enemy-art {
 }
 .card-battle .enemy-zone { margin-bottom: var(--cb-fdiceY, 46px) !important; } /* 칩이 내려앉을 자리 */
 .fdie {
+  position: relative;
   width: var(--cb-fdieSize, 38px); height: var(--cb-fdieSize, 38px); border-radius: 8px; background: transparent; border: none; padding: 0;
   display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800;
   color: #f4c9ae; font-style: normal;
@@ -1259,6 +1260,11 @@ span.enemy-art {
 .fdie img {
   width: 100%; height: 100%; object-fit: contain; pointer-events: none;
   filter: sepia(1) hue-rotate(-28deg) saturate(2.6) brightness(.72) drop-shadow(0 2px 3px rgba(0,0,0,.65));
+}
+.fdie .fnum {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--cb-fdieSize, 38px) * .5); font-weight: 800; color: #ffe2c8;
+  text-shadow: 0 1px 2px #000, 0 0 4px rgba(0,0,0,.8); pointer-events: none;
 }
 .fdie.dead { opacity: 0; transform: scale(.2) rotate(40deg); pointer-events: none; }
 .fdie.pickable img { filter: sepia(1) hue-rotate(-28deg) saturate(2.6) brightness(.85) drop-shadow(0 0 7px rgba(232,182,77,.9)); }
@@ -1273,6 +1279,8 @@ span.enemy-art {
 }
 .card-battle .cb-hud .hp-gauge { height: var(--cb-hpH, 36px); max-width: none; }
 .cb-hud .hp-gauge { flex: 1; position: relative; }
+.cb-bleedbadge { flex: none; font-size: 13px; font-weight: 800; color: #ff9a84; text-shadow: 0 1px 2px #000; min-width: 0; }
+.enemy-hp .fshield { font-style: normal; font-size: 11px; color: #cfd8e8; text-shadow: 0 1px 2px #000; }
 .cb-res { display: flex; align-items: center; gap: 4px; }
 .cb-res i { width: 13px; height: 13px; border-radius: 50%; background: #e8b64d; box-shadow: 0 0 6px rgba(232,182,77,.6); }
 .cb-res i.off { background: #3a3226; box-shadow: none; }
@@ -1299,13 +1307,15 @@ span.enemy-art {
   border-color: transparent; box-shadow: none;
 }
 .cdie.art .pip-art {
-  width: calc(var(--cb-diceSize, 58px) - 14px); height: calc(var(--cb-diceSize, 58px) - 14px); object-fit: contain; pointer-events: none;
+  width: calc(var(--cb-diceSize, 58px) * .88); height: calc(var(--cb-diceSize, 58px) * .88); object-fit: contain; pointer-events: none;
   filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
 }
-.cdie.art .cval {
-  font-size: 26px; font-weight: 800; color: #3d2413;
-  text-shadow: 0 0 8px rgba(232,182,77,.8); /* 6을 넘긴 값 — 카드의 힘 */
+.cdie.art .cnum {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--cb-diceSize, 58px) * .46); font-weight: 800; color: #2a2018;
+  text-shadow: 0 1px 0 rgba(255,245,220,.5); pointer-events: none;
 }
+.cdie.art .cnum { padding-bottom: 6%; } /* 받침 그림자만큼 살짝 위로 */
 .cdie.art.dead { background-image: url('../assets/ui/die_pad.png'); filter: grayscale(.9) brightness(.55); }
 .cdie.art.sel { filter: drop-shadow(0 0 10px rgba(232,182,77,.85)); }
 .cdie.art.pickable { filter: drop-shadow(0 0 10px rgba(143,208,138,.85)); }
@@ -1342,13 +1352,16 @@ span.enemy-art {
 }
 .cb-card {
   position: absolute; left: 50%; bottom: 0; width: var(--cb-cardW, 118px); height: var(--cb-cardH, 162px); margin-left: calc(var(--cb-cardW, 118px) / -2);
-  background: none; border: none; border-radius: 0;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .65));
+  background: none; border: none; border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, .55);
   transform-origin: 50% 120%; transition: transform .22s;
   touch-action: none;
 }
+.cb-card.dragging { box-shadow: 0 12px 26px rgba(0, 0, 0, .7); }
+.cb-card.usable { box-shadow: 0 0 13px rgba(232, 182, 77, .55), 0 4px 8px rgba(0, 0, 0, .55); }
+.cb-card.unusable { opacity: .78; }
 .cb-card.dragging { transition: none; z-index: 40; }
-.cb-card.broke { filter: grayscale(.55) brightness(.8); }
+
 .cb-card .ccost {
   position: absolute; left: var(--cb-ccX, 4%); top: var(--cb-ccY, 3.6%); width: var(--cb-ccW, 18.5%); height: var(--cb-ccH, 12.5%);
   display: flex; align-items: center; justify-content: center;
@@ -1406,8 +1419,8 @@ span.enemy-art {
   align-items: center; justify-content: center; }
 .cb-zoom.on { display: flex; }
 .cb-zoom .zbig { position: relative; width: 258px; height: 387px;
-  background: none;
-  filter: drop-shadow(0 10px 30px #000); }
+  background: none; border-radius: 8px;
+  box-shadow: 0 10px 30px #000; }
 .cb-zoom .zart { position: absolute; left: var(--cb-caX, 6%); top: var(--cb-caY, 9%); width: var(--cb-caW, 88%); height: var(--cb-caH, 62%); z-index: 0;
   display: flex; align-items: center; justify-content: center; font-size: 84px;
   background: none center / cover no-repeat; }
