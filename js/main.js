@@ -6,7 +6,7 @@ import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind } from './cardbattle.js';
 
-export const VERSION = 'v2.11'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v2.12'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1729,6 +1729,7 @@ function renderCardBattle() {
     </div>`));
   applyLayout(app.querySelector('.card-battle'));
   cbUpdate();
+  requestAnimationFrame(cbFitEnemyZone);
   // 적: 탭 = 표적, 길게 = 정보
   app.querySelectorAll('.enemy').forEach(el => {
     addLongPress(el, () => cbFoeInfo(el.dataset.uid));
@@ -1815,6 +1816,31 @@ function cbUpdate() {
   cbRenderHand();
 }
 
+/* 화면 높이가 낮으면 몬스터 묶음(그림·주사위·이름)이 체력바를 침범한다.
+ * 실제 배치 결과를 재서 넘치는 만큼 위 기준으로 축소 — 어떤 해상도에서도 겹치지 않는다. */
+function cbFitEnemyZone() {
+  const scr = app.querySelector('.card-battle');
+  if (!scr) return;
+  const zone = scr.querySelector('.enemy-zone');
+  const hud = scr.querySelector('.cb-hud');
+  if (!zone || !hud) return;
+  zone.style.transform = '';
+  const zr = zone.getBoundingClientRect();
+  let low = zr.bottom;
+  zone.querySelectorAll('.enemy, .fdice, .enemy-art-img, span.enemy-art').forEach(el => {
+    const r = el.getBoundingClientRect();
+    if (r.bottom > low) low = r.bottom;
+  });
+  const availBottom = hud.getBoundingClientRect().top - 6;
+  const used = low - zr.top;
+  const avail = availBottom - zr.top;
+  if (used > avail && avail > 60) {
+    zone.style.transformOrigin = '50% 0';
+    zone.style.transform = `scale(${Math.max(0.5, avail / used).toFixed(3)})`;
+  }
+}
+window.addEventListener('resize', () => { if (battle && battle.myDice) cbFitEnemyZone(); });
+
 function cbPreviewUpdate() {
   const pv = document.getElementById('cb-preview');
   if (!pv) return;
@@ -1847,7 +1873,7 @@ function cbRenderHand() {
     const L = layoutOf();
     const spacing = n > 1 ? Math.min(L.handMaxGap ?? 58, Math.max(18, (W - (L.handMargin ?? 100) - (L.cardW ?? 118)) / (n - 1))) : 0;
     const el = document.createElement('div');
-    el.className = `cb-card t-${c.tier || 'common'}` + (battle.res < c.cost ? ' broke' : '');
+    el.className = `cb-card t-${c.tier || 'common'}` + tierFrameCls(c.tier) + (battle.res < c.cost ? ' broke' : '');
     el.dataset.hi = hi;
     const art = CARD_ART.has(key)
       ? `<span class="cart" style="background-image:url('assets/cards/card_${key}.webp')"></span>`
@@ -1913,6 +1939,8 @@ function cbTryPlay(hi, key) {
 }
 
 const CARD_ART = new Set(['courage', 'stalk', 'elate', 'repair']);   // 일러 보유 카드
+const CARD_FRAME_READY = new Set([]);   // 등급 프레임 생성본이 온 등급만 (uncommon/rare/epic)
+const tierFrameCls = (tier) => (CARD_FRAME_READY.has(tier) ? ` tf-${tier}` : '');
 function cbZoom(key) {
   const z = document.getElementById('cb-zoom');
   if (!z) return;
@@ -1921,7 +1949,7 @@ function cbZoom(key) {
   const art = CARD_ART.has(key)
     ? `<div class="zart" style="background-image:url('assets/cards/card_${key}.webp')"></div>`
     : `<div class="zart">${c.icon}</div>`;
-  z.innerHTML = `<div class="zbig t-${c.tier || 'common'}">${art}<div class="ztt">${esc(c.name)}</div>
+  z.innerHTML = `<div class="zbig t-${c.tier || 'common'}${tierFrameCls(c.tier)}">${art}<div class="ztt">${esc(c.name)}</div>
     <div class="zcc" title="자원">${c.cost}</div><div class="zdd">${esc(c.desc)}</div></div>`;
   z.classList.add('on');
 }
