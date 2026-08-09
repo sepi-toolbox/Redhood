@@ -1233,12 +1233,20 @@ span.enemy-art {
  * ========================================================================== */
 .card-battle { display: flex; flex-direction: column; overflow: hidden; }
 .card-battle .bg-layer { height: 100%; }   /* v2.01: 족보판이 사라졌으니 배경이 화면 전체를 덮는다 */
+/* v2.02: 몬스터가 화면 가운데를 채운다 — 더 크게, 더 아래로 */
+.card-battle .enemy-zone { height: 306px; }
+.card-battle .enemy-art-img { height: 288px; }
+.card-battle span.enemy-art { font-size: 170px; height: 250px; line-height: 250px; }
+.card-battle .enemy-zone.multi .enemy-art-img { height: 238px; margin-bottom: -34px; }
+.card-battle .enemy-zone.multi span.enemy-art { height: 210px; line-height: 210px; font-size: 136px; margin-bottom: -34px; }
+.card-battle .enemy-zone.multi .enemy.t-elite .enemy-art-img { height: 252px; margin-bottom: -46px; }
+.card-battle .enemy-zone.multi .enemy.t-boss .enemy-art-img { height: 266px; margin-bottom: -58px; }
 /* 적 주사위 — 그림 아래 붉은 칩 (몬스터 영역 높이는 그대로) */
 .card-battle .enemy .fdice {
   position: absolute; left: 50%; bottom: -46px; transform: translateX(-50%);
   display: flex; gap: 5px; z-index: 3;
 }
-.card-battle .enemy-zone { margin-bottom: 46px; } /* 칩이 내려앉을 자리 */
+.card-battle .enemy-zone { margin-bottom: 46px !important; } /* 칩이 내려앉을 자리 */
 .fdie {
   width: 38px; height: 38px; border-radius: 8px; background: transparent; border: none; padding: 0;
   display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800;
@@ -1303,9 +1311,9 @@ span.enemy-art {
 
 /* 손패 — 부채꼴, 화면 아래 걸침 */
 .cb-handzone { position: relative; flex: 1; min-height: 0; }
-.cb-hand { position: absolute; bottom: -24px; left: 0; width: 100%; height: 200px; }
+.cb-hand { position: absolute; bottom: -22px; left: 0; width: 100%; height: 224px; }
 .cb-card {
-  position: absolute; left: 50%; bottom: 0; width: 104px; height: 142px; margin-left: -52px;
+  position: absolute; left: 50%; bottom: 0; width: 118px; height: 162px; margin-left: -59px;
   border-radius: 10px; background: linear-gradient(180deg, #f2e7cd, #e3d3ab); border: 3px solid #a8352e;
   box-shadow: 0 4px 10px rgba(0,0,0,.7); transform-origin: 50% 120%; transition: transform .22s;
   display: flex; flex-direction: column; overflow: hidden; touch-action: none;
@@ -1317,17 +1325,17 @@ span.enemy-art {
   background: radial-gradient(#e8b64d, #b07f22); border: 2px solid #7d5a17; color: #241c07;
   display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; z-index: 2;
 }
-.cb-card .cart { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 36px;
+.cb-card .cart { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 44px;
   background: linear-gradient(180deg, #2a2018, #3d2c1e); }
-.cb-card .cnm { flex: none; text-align: center; font-size: 11.5px; font-weight: 700; color: #3d2413;
+.cb-card .cnm { flex: none; text-align: center; font-size: 12.5px; font-weight: 700; color: #3d2413;
   padding: 4px 2px 5px; background: linear-gradient(180deg, #e8d8b2, #d8c69a); border-top: 2px solid #a8352e; white-space: nowrap; }
 .battle-screen > .cb-end {
-  position: absolute; right: 10px; bottom: 92px; z-index: 42;
+  position: absolute; right: 60px; bottom: 216px; z-index: 42;
   display: inline-block; width: auto; padding: 10px 12px; font-size: 13.5px;
 }
 .battle-screen > .cb-orb {
-  position: absolute; left: 12px; bottom: 92px; z-index: 42;
-  width: 52px; height: 52px; border-radius: 50%;
+  position: absolute; left: 10px; bottom: 212px; z-index: 42;
+  width: 50px; height: 50px; border-radius: 50%;
   background: radial-gradient(circle at 36% 30%, #ffdf9a, #d89b2e 55%, #7d4a12);
   border: 2px solid #5a3c10; box-shadow: 0 0 14px rgba(232,182,77,.5), 0 3px 6px rgba(0,0,0,.6);
   display: flex; align-items: center; justify-content: center;
@@ -1346,8 +1354,8 @@ span.enemy-art {
   border: 1px solid rgba(232,182,77,.35);
   background: radial-gradient(circle, rgba(232,182,77,.14) 0%, transparent 70%);
 }
-.battle-screen > .cb-pile.deck { left: 12px; }
-.battle-screen > .cb-pile.disc { right: 12px; transform: rotate(4deg); filter: brightness(.75); }
+.battle-screen > .cb-pile.deck { left: 66px; bottom: 210px; }
+.battle-screen > .cb-pile.disc { right: 10px; bottom: 210px; transform: rotate(4deg); filter: brightness(.75); }
 .battle-screen > .cb-pile b {
   position: absolute; right: -7px; bottom: -7px; min-width: 21px; height: 21px; border-radius: 11px;
   background: #241f18; border: 1.5px solid #8d8064; color: #f0e2c0;
@@ -1378,7 +1386,7 @@ span.enemy-art {
 /* 전투 중에는 전리품 판·힌트 줄을 감춘다 → 승리 후 loot-mode에서 켠다 */
 .card-battle .cb-hintline, .card-battle .sheet-zone.cb-loot { display: none; }
 .card-battle.loot-mode .cb-hintline { display: block; }
-.card-battle.loot-mode .sheet-zone.cb-loot { display: flex; position: absolute; left: 0; right: 0; bottom: 0; top: 340px; z-index: 45; }
+.card-battle.loot-mode .sheet-zone.cb-loot { display: flex; position: absolute; left: 0; right: 0; bottom: 0; top: 430px; z-index: 45; }
 .card-battle.loot-mode .cb-hand, .card-battle.loot-mode .cb-end, .card-battle.loot-mode .cb-dice,
 .card-battle.loot-mode .cb-preview, .card-battle.loot-mode .cb-help, .card-battle.loot-mode .fdice { display: none; }
-.card-battle.loot-mode .cb-hintline { position: absolute; top: 316px; width: 100%; text-align: center; z-index: 45; }
+.card-battle.loot-mode .cb-hintline { position: absolute; top: 402px; width: 100%; text-align: center; z-index: 45; }
