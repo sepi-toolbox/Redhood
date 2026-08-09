@@ -23,12 +23,12 @@ const BUILDS={
      fourKind:'heavy_blow',yahtzee:'judgment_night'} },
  '🌾 길': { dice:['chainlink','guide','moonlit','normal','gold'],
    relics:['waymark','silver_knife','moss_compass','red_cloak','fate_thimble'],
-   cats:{chance:'catch_breath',onePair:'clasped_hands',smallStraight:'snare',
+   cats:{chance:'catch_breath',onePair:'clasped_hands',largeStraight:'snare',
      largeStraight:'storm_run',threeKind:'chopping'} },
  '🛡 둥지': { dice:['straw','bramble','straw','normal','gold'],
    relics:['bears_back','gate_bar','firewood','whetstone','hunters_charm'],
    cats:{chance:'catch_breath',onePair:'clash',twoPair:'twin_sisters',
-     fullHouse:'wedge',smallStraight:'hunt_drive'} },
+     fullHouse:'wedge',largeStraight:'hunt_drive'} },
 };
 function scoreChoice(battle,p){
   const ab=p.variant.ability, ops=ab?(Array.isArray(ab)?ab:[ab]):[]; const p_=battle.player;

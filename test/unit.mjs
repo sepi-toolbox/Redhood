@@ -928,10 +928,10 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   // 길표 — 스트레이트를 확정하면 다음 턴 리롤
   {
     const b = mk(['normal','normal','normal','normal','normal'], ['waymark'],
-      { smallStraight: ['hunt_drive'] });
+      { largeStraight: 'moonpath' });
     eng.initialRoll(b);
-    b.dice[0].face = 1; b.dice[1].face = 2; b.dice[2].face = 3; b.dice[3].face = 4; b.dice[4].face = 6;
-    eng.confirmCategory(b, 'smallStraight', 'hunt_drive', b.enemies[0].uid);
+    b.dice[0].face = 1; b.dice[1].face = 2; b.dice[2].face = 3; b.dice[3].face = 4; b.dice[4].face = 5;
+    eng.confirmCategory(b, 'largeStraight', 'moonpath', b.enemies[0].uid);
     eq('길표: 다음 턴 리롤 예약 2', b.nextTurnRerolls, 2);
   }
 }

@@ -287,6 +287,158 @@
       "short": "포카드"
     },
     {
+      "id": "largeStraight",
+      "name": "스트레이트",
+      "kind": "straight",
+      "length": 5,
+      "score": 60,
+      "tier": "rare",
+      "ruleText": "다섯 눈이 이어진다 — 피해 60 (전체 공격)",
+      "target": "allEnemies",
+      "example": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "fx": "bigwave",
+      "variants": [
+        {
+          "id": "moonpath",
+          "name": "달빛 오솔길",
+          "ability": [
+            {
+              "op": "vulnerable",
+              "amount": 3
+            },
+            {
+              "op": "focus",
+              "amount": 1
+            }
+          ],
+          "abilityText": "🎯 맞은 모든 적 취약 +3 + 🎲 집중 +1",
+          "tier": "rare"
+        },
+        {
+          "id": "storm_run",
+          "name": "폭풍 질주",
+          "ability": [
+            {
+              "op": "strength",
+              "amount": 4
+            },
+            {
+              "op": "weakEnemy",
+              "amount": 2
+            }
+          ],
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🗡️ 힘 +4 · 🔻 약화 2",
+          "tier": "epic",
+          "burst": true
+        },
+        {
+          "id": "windpath",
+          "name": "바람길",
+          "ability": [
+            {
+              "op": "weakEnemy",
+              "amount": 2
+            },
+            {
+              "op": "whet",
+              "amount": 1
+            }
+          ],
+          "abilityText": "🔻 적 약화 2 · 🔥 벼름 +1",
+          "tier": "uncommon"
+        },
+        {
+          "id": "hunt_drive",
+          "name": "몰이사냥",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 10
+            }
+          ],
+          "abilityText": "방어도 +10",
+          "tier": "common"
+        },
+        {
+          "id": "snare",
+          "name": "덫 놓기",
+          "ability": [
+            {
+              "op": "weakEnemy",
+              "amount": 2
+            }
+          ],
+          "burst": true,
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🔻 적 약화 2",
+          "tier": "rare"
+        }
+      ],
+      "short": "스트레이트"
+    },
+    {
+      "id": "yahtzee",
+      "name": "야찌",
+      "kind": "ofKind",
+      "count": 5,
+      "score": 70,
+      "tier": "epic",
+      "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50.",
+      "example": [
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "fx": "judgment",
+      "variants": [
+        {
+          "id": "judgment_night",
+          "name": "심판의 밤",
+          "ability": [
+            {
+              "op": "bleed",
+              "amount": 6
+            },
+            {
+              "op": "weakEnemy",
+              "amount": 4
+            },
+            {
+              "op": "block",
+              "amount": 12
+            }
+          ],
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🩸 출혈 6 · 🔻 약화 4 · 🛡 방어 12",
+          "tier": "epic",
+          "burst": true
+        },
+        {
+          "id": "blood_moon",
+          "name": "핏빛 만월",
+          "ability": [
+            {
+              "op": "strength",
+              "amount": 6
+            },
+            {
+              "op": "bleed",
+              "amount": 5
+            }
+          ],
+          "abilityText": "🗡️ 힘 +6 + 🩸 출혈 +5",
+          "tier": "epic"
+        }
+      ],
+      "short": "야찌"
+    },
+    {
       "id": "fullHouse",
       "name": "풀하우스",
       "kind": "fullHouse",
@@ -345,178 +497,6 @@
         }
       ],
       "short": "풀하우스"
-    },
-    {
-      "id": "smallStraight",
-      "name": "스몰 스트레이트",
-      "kind": "straight",
-      "length": 4,
-      "score": 28,
-      "tier": "uncommon",
-      "ruleText": "연속된 눈 4개(예: 2·3·4·5)면 성립. 모든 적에게 피해 30.",
-      "target": "allEnemies",
-      "example": [
-        2,
-        3,
-        4,
-        5
-      ],
-      "fx": "wave",
-      "variants": [
-        {
-          "id": "windpath",
-          "name": "바람길",
-          "ability": [
-            {
-              "op": "weakEnemy",
-              "amount": 2
-            },
-            {
-              "op": "whet",
-              "amount": 1
-            }
-          ],
-          "abilityText": "🔻 적 약화 2 · 🔥 벼름 +1",
-          "tier": "uncommon"
-        },
-        {
-          "id": "hunt_drive",
-          "name": "몰이사냥",
-          "ability": [
-            {
-              "op": "block",
-              "amount": 10
-            }
-          ],
-          "abilityText": "방어도 +10",
-          "tier": "common"
-        },
-        {
-          "id": "snare",
-          "name": "덫 놓기",
-          "ability": [
-            {
-              "op": "weakEnemy",
-              "amount": 2
-            }
-          ],
-          "burst": true,
-          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🔻 적 약화 2",
-          "tier": "rare"
-        }
-      ],
-      "short": "스몰"
-    },
-    {
-      "id": "largeStraight",
-      "name": "라지 스트레이트",
-      "kind": "straight",
-      "length": 5,
-      "score": 60,
-      "tier": "rare",
-      "ruleText": "연속된 눈 5개(1~5 또는 2~6)면 성립. 모든 적에게 피해 40.",
-      "target": "allEnemies",
-      "example": [
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "fx": "bigwave",
-      "variants": [
-        {
-          "id": "moonpath",
-          "name": "달빛 오솔길",
-          "ability": [
-            {
-              "op": "vulnerable",
-              "amount": 3
-            },
-            {
-              "op": "focus",
-              "amount": 1
-            }
-          ],
-          "abilityText": "🎯 맞은 모든 적 취약 +3 + 🎲 집중 +1",
-          "tier": "rare"
-        },
-        {
-          "id": "storm_run",
-          "name": "폭풍 질주",
-          "ability": [
-            {
-              "op": "strength",
-              "amount": 4
-            },
-            {
-              "op": "weakEnemy",
-              "amount": 2
-            }
-          ],
-          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🗡️ 힘 +4 · 🔻 약화 2",
-          "tier": "epic",
-          "burst": true
-        }
-      ],
-      "short": "라지"
-    },
-    {
-      "id": "yahtzee",
-      "name": "야찌",
-      "kind": "ofKind",
-      "count": 5,
-      "score": 70,
-      "tier": "epic",
-      "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50.",
-      "example": [
-        6,
-        6,
-        6,
-        6,
-        6
-      ],
-      "fx": "judgment",
-      "variants": [
-        {
-          "id": "judgment_night",
-          "name": "심판의 밤",
-          "ability": [
-            {
-              "op": "bleed",
-              "amount": 6
-            },
-            {
-              "op": "weakEnemy",
-              "amount": 4
-            },
-            {
-              "op": "block",
-              "amount": 12
-            }
-          ],
-          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🩸 출혈 6 · 🔻 약화 4 · 🛡 방어 12",
-          "tier": "epic",
-          "burst": true
-        },
-        {
-          "id": "blood_moon",
-          "name": "핏빛 만월",
-          "ability": [
-            {
-              "op": "strength",
-              "amount": 6
-            },
-            {
-              "op": "bleed",
-              "amount": 5
-            }
-          ],
-          "abilityText": "🗡️ 힘 +6 + 🩸 출혈 +5",
-          "tier": "epic"
-        }
-      ],
-      "short": "야찌"
     }
   ],
   "whetStep": 0.5,

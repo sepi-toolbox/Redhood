@@ -72,10 +72,10 @@
     "name": "까마귀 깃털",
     "icon": "🪶",
     "tier": "normal",
-    "desc": "스몰 스트레이트 피해 +8.",
+    "desc": "스트레이트 피해 +8.",
     "hook": {
       "type": "categoryBonus",
-      "category": "smallStraight",
+      "category": "largeStraight",
       "bonus": 8
     }
   },

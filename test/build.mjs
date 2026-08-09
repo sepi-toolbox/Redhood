@@ -49,14 +49,14 @@ const BUILDS = {
   '지금 만렙(예전 방식)': { dice:['gold','lead','high','lead','high'],
     relics:['wolf_fang','wolfmoon_pendant','old_bone','poison_apple','red_cloak'],
     cats:{chance:'instinct',onePair:'red_shoes',twoPair:'twin_sisters',threeKind:'triple_axe',
-      fourKind:'heavy_blow',fullHouse:'cottage',smallStraight:'hunt_drive'} },
+      fourKind:'heavy_blow',fullHouse:'cottage',largeStraight:'hunt_drive'} },
   '🩸 사냥': { dice:['nail','nail','mirror','twin','gold'],
     relics:['hunters_eye','whetstone','old_bone','silver_bullet','grandma_book'],
     cats:{chance:'catch_breath',onePair:'clasped_hands',threeKind:'chopping',
       fourKind:'heavy_blow',yahtzee:'judgment_night'} },
   '🌾 길': { dice:['chainlink','guide','moonlit','normal','gold'],
     relics:['waymark','silver_knife','moss_compass','red_cloak','fate_thimble'],
-    cats:{chance:'catch_breath',onePair:'clasped_hands',smallStraight:'snare',
+    cats:{chance:'catch_breath',onePair:'clasped_hands',largeStraight:'snare',
       largeStraight:'storm_run',threeKind:'chopping'} },
   '🔥 피': { dice:['cursed','cursed','fang','spark','gold'],
     relics:['leech_ring','dried_heart','poison_apple','whetstone','wolf_pelt'],
@@ -65,7 +65,7 @@ const BUILDS = {
   '🛡 둥지': { dice:['straw','bramble','straw','normal','gold'],
     relics:['bears_back','gate_bar','firewood','whetstone','hunters_charm'],
     cats:{chance:'catch_breath',onePair:'clash',twoPair:'twin_sisters',
-      fullHouse:'wedge',smallStraight:'hunt_drive'} },
+      fullHouse:'wedge',largeStraight:'hunt_drive'} },
 };
 
 function fight(b0, id, floor, log, smart){
