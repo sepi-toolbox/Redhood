@@ -23,16 +23,19 @@
     "handMargin": 96,
     "handMaxGap": 58,
     "lootTop": 430,
-    "hpY": 503,
     "hpSide": 7,
     "hpH": 36,
-    "pvY": 539,
-    "diceY": 562,
-    "helpY": 632,
     "endW": 141,
     "endH": 40,
     "pileW": 35,
     "pileH": 43,
-    "enemyY": 0
+    "enemyY": 0,
+    "hpBot": 305,
+    "pvBot": 286,
+    "diceBot": 220,
+    "helpBot": 198,
+    "pinX": 0,
+    "pinY": 0,
+    "pinSize": 13
   }
 }
