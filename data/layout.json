@@ -4,7 +4,7 @@
     "enemyH": 460,
     "artH": 288,
     "artHMulti": 238,
-    "fdiceY": 120,
+    "fdiceY": 64,
     "fdieSize": 38,
     "diceSize": 58,
     "diceGap": 10,
@@ -29,13 +29,13 @@
     "endH": 40,
     "pileW": 35,
     "pileH": 43,
-    "enemyY": 0,
+    "enemyY": 84,
     "hpBot": 305,
     "pvBot": 286,
     "diceBot": 220,
     "helpBot": 198,
-    "pinX": 0,
-    "pinY": 0,
-    "pinSize": 13
+    "pinX": 75,
+    "pinY": -23,
+    "pinSize": 21
   }
 }
