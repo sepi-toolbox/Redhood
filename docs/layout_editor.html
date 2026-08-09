@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REDHOOD 배치 편집기 — v2.16 기준</title>
+<title>REDHOOD 배치 편집기 — v2.17 기준</title>
 <link rel="stylesheet" href="https://sepi-toolbox.github.io/Redhood/assets/fonts/song-myung/index.css">
 <style id="game-css">
 /* REDHOOD v0.2 — 다크 페어리테일 · 주사위판 · 모바일 세로 전용 */
@@ -1289,6 +1289,23 @@ span.enemy-art {
 .cb-hud .hp-gauge { flex: 1; position: relative; }
 .cb-bleedbadge { flex: none; font-size: 13px; font-weight: 800; color: #ff9a84; text-shadow: 0 1px 2px #000; min-width: 0; }
 .enemy-hp .fshield { font-style: normal; font-size: 11px; color: #cfd8e8; text-shadow: 0 1px 2px #000; }
+
+/* v2.17 적 행동 예고 — 위력은 남은 주사위 합이라 깎을 때마다 즉시 줄어든다 */
+.cb-intent {
+  display: inline-flex; align-items: center; gap: 4px; justify-content: center;
+  margin: 2px auto 0; padding: 2px 9px; border-radius: 999px;
+  font-size: 12px; line-height: 16px; color: #e8dcc8; white-space: nowrap;
+  background: rgba(14, 10, 8, .62); border: 1px solid rgba(180, 140, 90, .35);
+  text-shadow: 0 1px 2px #000;
+}
+.cb-intent:empty { display: none; }
+.cb-intent b { font-size: 14px; }
+.cb-intent.hurt { border-color: rgba(220, 90, 70, .55); }
+.cb-intent.hurt b { color: #ff9d7e; }
+.cb-intent.util { border-color: rgba(110, 150, 200, .45); }
+.cb-intent.util b { color: #9fc5ef; }
+.cb-intent small { font-size: 10px; opacity: .9; }
+.cb-intent .ico-intent { width: 14px; height: 14px; }
 .cb-res { display: flex; align-items: center; gap: 4px; }
 .cb-res i { width: 13px; height: 13px; border-radius: 50%; background: #e8b64d; box-shadow: 0 0 6px rgba(232,182,77,.6); }
 .cb-res i.off { background: #3a3226; box-shadow: none; }
@@ -1538,7 +1555,7 @@ span.enemy-art {
 </head>
 <body>
 <header class="ed-top">
-  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.16 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
+  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.17 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
   <div class="ed-btns">
     <button id="tg-multi">적 2마리</button>
     <button id="tg-loot">전리품 화면</button>
@@ -1620,6 +1637,7 @@ function renderFoes() {
       <span class="enemy-name">${f.name}</span>
       <span class="bar t-normal"><i style="width:${f.pct}%"></i></span>
       <span class="enemy-hp">${f.hp}</span>
+      <span class="cb-intent hurt"><img class="ico-intent" src="${SITE}/assets/icons/intent_attack.png" alt=""> 물어뜯기 <b>14</b></span>
       <img class="enemy-art enemy-art-img" src="${SITE}/assets/enemies/${f.id}.png" alt="" draggable="false">
       <span class="fdice">${f.dice.map(v => `<b class="fdie"><img src="${SITE}/assets/dice/blank.png" draggable="false"><span class="fnum">${v}</span></b>`).join('')}</span>
     </button>`).join('');

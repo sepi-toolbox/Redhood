@@ -24,14 +24,15 @@
     },
     "acts": {
       "2": {
-        "minBonus": 1
+        "diceBonus": 1
       },
       "3": {
-        "minBonus": 2
+        "diceBonus": 2
       }
     },
     "finalExtraEvery": 2,
-    "finalExtraMax": 4
+    "finalExtraMax": 4,
+    "victoryHeal": 5
   },
   "starterDeck": [
     "courage",

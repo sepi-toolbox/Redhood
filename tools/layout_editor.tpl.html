@@ -152,6 +152,7 @@ function renderFoes() {
       <span class="enemy-name">${f.name}</span>
       <span class="bar t-normal"><i style="width:${f.pct}%"></i></span>
       <span class="enemy-hp">${f.hp}</span>
+      <span class="cb-intent hurt"><img class="ico-intent" src="${SITE}/assets/icons/intent_attack.png" alt=""> 물어뜯기 <b>14</b></span>
       <img class="enemy-art enemy-art-img" src="${SITE}/assets/enemies/${f.id}.png" alt="" draggable="false">
       <span class="fdice">${f.dice.map(v => `<b class="fdie"><img src="${SITE}/assets/dice/blank.png" draggable="false"><span class="fnum">${v}</span></b>`).join('')}</span>
     </button>`).join('');

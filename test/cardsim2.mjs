@@ -31,20 +31,18 @@ if (cfgIdx >= 0) {
   console.log(`(오버라이드 주입: ${argv[cfgIdx + 1]})\n`);
 }
 
-// ---------- 눈 능력 인지 위협 평가 ----------
-// 주사위 하나가 살아서 턴을 넘기면 얼마나 아픈가 = 현재 값 + 능력 가중치.
-// 능력은 "완전히 깨야만" 무효 — 깎기만 해선 능력이 남는다.
-function abilityWeight(e, d) {
-  const ab = e.abilities && e.abilities[String(d.orig)];
-  if (!ab) return 0;
-  if (ab.op === 'bleed') return (ab.amount || 1) * 2;        // 도트: n+(n-1)+… 근사
-  if (ab.op === 'lifesteal') return d.v;                     // 피해+회복 = 두 배 효과
-  if (ab.op === 'armor') return (ab.amount || 3) * 0.8;      // 내 다음 처치를 늦춘다
-  if (ab.op === 'heal') return (ab.amount || 3) * 0.8;
-  return 0;                                                  // damage 는 표기용
+// ---------- 예고 인지 위협 평가 (v2.17) ----------
+// 적의 위협 = 예고한 행동이 아프게 하는 정도. 유틸 예고(방어·회복·강화)를 깎는 가치는 낮다.
+function opWeight(mv) {
+  if (!mv) return 1;
+  if (mv.op === 'damage' || mv.op === 'lifesteal') return 1;
+  if (mv.op === 'bleed') return 1.15;         // 도트가 얹힌다
+  if (mv.op === 'empower') return mv.mult ?? 0.25;   // 다음 턴 위협의 선지불
+  if (mv.op === 'heal') return 0.3;           // 깎기보다 그냥 때리는 게 낫다
+  return 0.1;                                 // armor
 }
-const dieThreat = (e, d) => (d.dead ? 0 : d.v + abilityWeight(e, d));
-const foeThreat = (e) => e.dice.reduce((s, d) => s + dieThreat(e, d), 0);
+const foeThreat = (e) => CB.movePower(e) * opWeight(e.move) + (e.move && e.move.op === 'bleed' ? (e.move.amount ?? 2) * 2 : 0);
+const dieThreat = (e, d) => (d.dead ? 0 : d.v * opWeight(e.move));
 
 // ---------- 플레이 정책 (능력 인지) ----------
 function playTurn(b) {

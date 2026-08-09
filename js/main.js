@@ -4,9 +4,9 @@ import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPh
 import { whetMultOf } from './yahtzee.js';
 import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
-import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind } from './cardbattle.js';
+import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v2.16'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v2.17'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1705,6 +1705,7 @@ function renderCardBattle() {
             <span class="enemy-name">${esc(e.name)}</span>
             <span class="bar t-${e.tier}"><i style="width:${e.final ? 100 : Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
             <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${e.block > 0 ? ` <b class="fshield">🛡${e.block}</b>` : ''}</span>
+            <span class="cb-intent" data-uid="${e.uid}"></span>
             ${enemyArtHtml(e)}
             <span class="fdice" data-uid="${e.uid}"></span>
           </button>`).join('')}
@@ -1752,14 +1753,34 @@ function renderCardBattle() {
   document.getElementById('cb-end').addEventListener('click', cbEndTurn);
 }
 
+// 적 예고 한 줄 — 위력은 남은 주사위 합이라 깎을 때마다 즉시 줄어든다
+function cbIntentHtml(e) {
+  const mv = e.move;
+  if (!mv || e.hp <= 0) return '';
+  const P = movePower(e);
+  if (mv.op === 'damage') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
+  if (mv.op === 'bleed') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>🩸${mv.amount ?? 2}</small>`;
+  if (mv.op === 'lifesteal') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>💚흡혈</small>`;
+  if (mv.op === 'armor') return `${ico('intent_defend', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
+  if (mv.op === 'heal') return `${ico('intent_heal', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
+  if (mv.op === 'empower') return `${ico('intent_empower', 'ico-intent')} ${esc(mv.name)} <b>+${Math.max(1, P)}</b>`;
+  return esc(mv.name);
+}
+
 // ---------- 제자리 갱신 (적 그림을 다시 만들지 않는다 — 깜빡임 방지) ----------
 function cbUpdate() {
   const scrEl = app.querySelector('.card-battle');
   if (scrEl) scrEl.classList.toggle('aiming', cbSel >= 0);
   const top = document.getElementById('cb-top');
   if (top) top.textContent = `${run.floor}층 · ${battle.turn}턴`;
-  // 적 주사위
+  // 적 예고 + 주사위
   for (const e of battle.enemies) {
+    const it = app.querySelector(`.cb-intent[data-uid="${e.uid}"]`);
+    if (it) {
+      it.innerHTML = cbIntentHtml(e);
+      it.classList.toggle('hurt', moveHurts(e.move));
+      it.classList.toggle('util', !moveHurts(e.move));
+    }
     const zone = app.querySelector(`.fdice[data-uid="${e.uid}"]`);
     if (!zone) continue;
     zone.innerHTML = e.hp > 0 ? e.dice.map((d, di) => `
@@ -2105,15 +2126,22 @@ function cbEndTurn() {
     if (script.killed) setTimeout(() => cbBanner('처치! 공격 불발', 1400), impact + 350);
     t = impact + 800;
   }
-  // 2) 살아남은 적들의 반격 (순서대로)
+  // 2) 살아남은 적들의 예고 행동 실행 (순서대로)
   let hpShown = hpBefore;
   for (const hit of script.foeHits) {
+    const mv = hit.move || {};
     setTimeout(() => {
       const el = app.querySelector(`.enemy[data-uid="${hit.uid}"]`);
       if (el) { el.classList.add('attacking'); setTimeout(() => el.classList.remove('attacking'), 700); }
-      hpShown = Math.max(0, hpShown - hit.dmg);
-      cbShowPlayerHit(hit.dmg, hpShown);
-      if (hit.abs && hit.abs.length) cbBanner(hit.abs.map(a => `${a.name} ${a.amount || ''}`).join(' · '), 1300);
+      if (hit.dmg > 0) { hpShown = Math.max(0, hpShown - hit.dmg); cbShowPlayerHit(hit.dmg, hpShown); }
+      const extra = mv.op === 'bleed' ? ` · 🩸출혈 ${mv.amount ?? 2}`
+        : mv.op === 'lifesteal' ? (mv.heal ? ` · 💚흡혈 ${mv.heal}` : '')
+        : mv.op === 'armor' ? ` 🛡${mv.block ?? 0}`
+        : mv.op === 'heal' ? ` 💚${mv.heal ?? 0}`
+        : mv.op === 'empower' ? ` — 다음 턴 주사위 +${mv.power ?? 1}` : '';
+      cbBanner(`${esc(mv.name || '공격')}${hit.dmg > 0 ? ` ${hit.dmg}` : ''}${extra}`, 1250);
+      const foe = battle.enemies.find(x => x.uid === hit.uid);   // 회복·흡혈이 게이지에 보이게
+      if (foe && (mv.heal || 0) > 0) cbSetFoeHp(hit.uid, foe.hp);
     }, t);
     t += 760;
   }
@@ -2167,6 +2195,8 @@ function finishCardBattle() {
   setTimeout(() => {
     busy = false;
     run.hp = battle.player.hp;
+    // 승리 회복 (기본) — 소모전 완화, cards.json config.victoryHeal
+    run.hp = Math.min(run.maxHp, run.hp + (DB.cards.config.victoryHeal || 0));
     // 승리 시 회복 유물 (빵부스러기·꿀단지)
     const heal = run.relics.map(id => DB.relicById[id])
       .filter(r => r.hook.type === 'healOnVictory')
@@ -2196,6 +2226,11 @@ function showCardReward() {
   renderLoot();
 }
 
+const CB_MOVE_KO = {
+  damage: '피해', bleed: '피해 + 출혈', armor: '자기 방어도', lifesteal: '피해 + 같은 값 회복',
+  heal: '자기 회복', empower: '다음 턴 자기 주사위 강화',
+};
+
 function cbFoeInfo(uid) {
   const e = battle && battle.enemies.find(x => x.uid === uid);
   if (!e) return;
@@ -2204,10 +2239,9 @@ function cbFoeInfo(uid) {
       <div class="modal">
         <h3>${e.art} ${esc(e.name)} <small class="cat-tag">${ENEMY_TIER_KO[e.tier] || e.tier}${e.final ? ' · 무한' : ''}</small></h3>
         <p class="modal-text">${e.final ? '체력 ∞ — 쓰러지지 않는다' : `HP ${e.hp}/${e.maxHpInit}`}</p>
-        <p class="modal-text">🎲 매 턴 주사위 ${e.diceN}개 ${e.faces ? `— 나오는 눈: ${e.faces.join(', ')}` : `(${e.dmin}~${e.dmax})`}${e.final ? ' — 시간이 갈수록 늘어난다' : ''}</p>
-        ${e.abilities ? `<ul class="deck-list">${Object.entries(e.abilities).map(([f, a]) =>
-          `<li><b>${f}</b> — ${esc(a.name || a.op)}${a.amount ? ' ' + a.amount : ''} <span class="modal-text">(막으면 무효 · 깎여도 능력은 유지)</span></li>`).join('')}</ul>` : ''}
-        <p class="hint">남은 주사위가 턴 종료에 전부 나를 때린다. 내 주사위로 부딪쳐 깎아내자.</p>
+        <p class="modal-text">🎲 매 턴 주사위 ${e.dice.length || e.diceN}개 ${e.faces ? `— 나오는 눈: ${e.faces.join(', ')}${battle.actBonus ? ` (+${battle.actBonus})` : ''}` : `(${e.dmin + battle.actBonus}~${e.dmax + battle.actBonus})`}${e.final ? ' — 시간이 갈수록 늘어난다' : ''}</p>
+        <ul class="deck-list">${(e.moves || []).map(m => `<li>${esc(m.name)} — ${CB_MOVE_KO[m.op] || m.op}${m.op === 'bleed' ? ` ${m.amount ?? 2}` : ''}</li>`).join('')}</ul>
+        <p class="hint">예고한 행동의 위력 = 남은 주사위 합. 내 주사위로 부딪쳐 깎을수록 약해진다.</p>
         <button class="btn primary" id="foe-info-close">닫기</button>
       </div>
     </div>`));

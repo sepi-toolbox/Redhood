@@ -1103,11 +1103,12 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   DB.cardById = {}; for (const c of DB.cards.list) DB.cardById[c.id] = c;
   const CB = await import('../js/cardbattle.js');
   const run = { hp: 60, maxHp: 60, act: 1, floor: 3, cards: DB.cards.starterDeck.slice() };
-  const b = CB.createCardBattle(run, ['wolf']);
+  const b = CB.createCardBattle(run, ['crow']);   // n 미지정 적 — 혼자5·둘이3 규칙 확인용
   eq('카드 전투: 손패 5장', b.hand.length, 5);
   eq('카드 전투: 자원 3', b.res, 3);
   eq('카드 전투: 내 주사위 5개', b.myDice.length, 5);
   eq('카드 전투: 혼자인 적은 주사위 5개', b.enemies[0].dice.length, 5);
+  eq('카드 전투: n 명시 적은 그 개수 (늑대 4)', CB.createCardBattle({ ...run, cards: run.cards.slice() }, ['wolf']).enemies[0].dice.length, 4);
   eq('카드 전투: 리롤 없음(rollsLeft 개념 없음)', b.rollsLeft === undefined, true);
 
   // 대결: 상호 차감 — 큰 쪽이 차액만큼 잔존
@@ -1179,67 +1180,116 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 }
 
 
-// ========== v2.15 적 주사위 눈 능력 ==========
+// ========== v2.17 적 행동 예고 — 위력 = 남은 주사위 합 ==========
 {
   const { DB } = await import('../js/data.js');
-  (await import('../js/engine.js')).rng.next = () => 0.5;   // 결정론 — 재굴림에 흡혈이 섞여 판정이 흔들리는 것 방지
+  (await import('../js/engine.js')).rng.next = () => 0.5;   // 결정론
   const CB = await import('../js/cardbattle.js');
-  const mk = (foeSetup) => {
-    const b = CB.createCardBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, cards: DB.cards.starterDeck.slice() }, ['stray_dog']);
+  const mk = (act = 1) => {
+    const b = CB.createCardBattle({ hp: 60, maxHp: 60, act, floor: 1, cards: DB.cards.starterDeck.slice() }, ['stray_dog']);
     const e = b.enemies[0];
-    Object.assign(e, foeSetup(e));
+    e.hp = 999; e.maxHpInit = 999;
     return [b, e];
   };
-  // 들개 눈 목록에서만 굴린다
+  // 들개 눈 목록에서만 굴린다 + 예고가 있다
   {
-    const b = CB.createCardBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, cards: DB.cards.starterDeck.slice() }, ['stray_dog']);
-    const ok = b.enemies[0].dice.every(d => [1, 3, 5, 6].includes(d.orig));
-    eq('들개는 1·3·5·6 만 굴린다', ok, true);
+    const [b, e] = mk();
+    eq('들개는 1·3·5·6 만 굴린다', e.dice.every(d => [1, 3, 5, 6].includes(d.orig)), true);
+    eq('예고 행동이 정해져 있다', !!(e.move && e.move.name && e.move.op), true);
   }
-  // 출혈: 반격 뒤 터지고 1 잦아든다
+  // 위력 = 남은 주사위 합 — 깎으면 즉시 줄어든다
   {
-    const [b, e] = mk(() => ({}));
+    const [b, e] = mk();
+    e.move = { id: 't', name: '시험', op: 'damage' };
+    e.dice = [{ v: 4, orig: 4, dead: false }, { v: 3, orig: 3, dead: false }];
+    eq('예고 위력 = 합 7', CB.movePower(e), 7);
+    b.myDice = [{ v: 3, orig: 3, dead: false }];
+    CB.clashDice(b, 0, e.uid, 1);
+    eq('3을 깎으면 위력 4', CB.movePower(e), 4);
+  }
+  // damage: 남은 합 그대로 피해
+  {
+    const [b, e] = mk();
+    e.move = { id: 't', name: '시험', op: 'damage' };
+    e.dice = [{ v: 7, orig: 7, dead: false }];
+    b.myDice = [{ v: 1, orig: 1, dead: true }];
+    CB.endCardTurn(b);
+    eq('damage: 7 피해', 60 - b.player.hp, 7);
+  }
+  // bleed: 피해 + 출혈, 반격 뒤 터지고 1 잦아든다
+  {
+    const [b, e] = mk();
+    e.move = { id: 't', name: '시험', op: 'bleed', amount: 2 };
     e.dice = [{ v: 3, orig: 3, dead: false }];
     b.myDice = [{ v: 1, orig: 1, dead: true }];
-    e.hp = 999; e.maxHpInit = 999;
     CB.endCardTurn(b);
-    eq('출혈 부여: 피해 3 + 출혈 2', 60 - b.player.hp, 5);
+    eq('bleed: 피해 3 + 출혈 2 = 5', 60 - b.player.hp, 5);
     eq('출혈 스택 잦아듦 (2→1)', b.playerBleed, 1);
   }
-  // 방어도: 다음 내 공격을 깎는다
+  // armor: 피해 없이 방어도 — 다음 내 공격을 깎는다
   {
-    const [b, e] = mk(() => ({}));
+    const [b, e] = mk();
+    e.move = { id: 't', name: '시험', op: 'armor' };
     e.dice = [{ v: 5, orig: 5, dead: false }];
     b.myDice = [{ v: 1, orig: 1, dead: true }];
-    e.hp = 100; e.maxHpInit = 100;
     CB.endCardTurn(b);
-    eq('웅크리기: 방어도 5', e.block, 5);
+    eq('armor: 피해 0', b.player.hp, 60);
+    eq('armor: 방어도 5', e.block, 5);
     const hpBefore = e.hp;
+    e.move = { id: 't', name: '시험', op: 'armor' };
+    e.dice = [];
     b.myDice = [{ v: 8, orig: 6, dead: false }];
     b.target = e.uid;
     const sc = CB.endCardTurn(b);
     eq('방어도가 내 공격 8 중 5를 깎음', hpBefore - e.hp, 3);
     eq('깎은 만큼 기록', sc.blocked, 5);
   }
-  // 흡혈: 준 피해만큼 회복
+  // lifesteal: 피해 + 같은 값 회복 / heal: 회복만
   {
-    const [b, e] = mk(() => ({}));
+    const [b, e] = mk();
     e.hp = 10; e.maxHpInit = 30;
+    e.move = { id: 't', name: '시험', op: 'lifesteal' };
     e.dice = [{ v: 6, orig: 6, dead: false }];
     b.myDice = [{ v: 1, orig: 1, dead: true }];
     CB.endCardTurn(b);
-    eq('흡혈: 6 피해 주고 6 회복', b.enemies[0].hp, 16);
+    eq('lifesteal: 6 피해 주고 6 회복', e.hp, 16);
+    eq('lifesteal: 나는 6 잃음', 60 - b.player.hp, 6);
   }
-  // 깎여도 능력은 원래 눈 기준 / 다 막으면 무효
   {
-    const [b, e] = mk(() => ({}));
-    e.hp = 999; e.maxHpInit = 999;
-    e.dice = [{ v: 1, orig: 3, dead: false }, { v: 0, orig: 6, dead: true }];
+    const [b, e] = mk();
+    e.hp = 10; e.maxHpInit = 12;
+    e.move = { id: 't', name: '시험', op: 'heal' };
+    e.dice = [{ v: 6, orig: 6, dead: false }];
     b.myDice = [{ v: 1, orig: 1, dead: true }];
-    b.playerBleed = 0;
     CB.endCardTurn(b);
-    eq('3이 1로 깎여도 출혈은 걸린다', b.playerBleed >= 1, true);
-    eq('막은 6(흡혈)은 무효 — 피해는 깎인 1만', 60 - b.player.hp <= 1 + 2, true);
+    eq('heal: 최대 체력 한도 (10→12)', e.hp, 12);
+    eq('heal: 피해 없음', b.player.hp, 60);
+  }
+  // empower: 다음 턴 자기 주사위 전부 강화
+  {
+    const [b, e] = mk();
+    e.move = { id: 't', name: '시험', op: 'empower', mult: 0.25 };
+    e.dice = [{ v: 8, orig: 8, dead: false }];
+    b.myDice = [{ v: 1, orig: 1, dead: true }];
+    CB.endCardTurn(b);   // power = round(8×0.25) = 2 → 다음 굴림 rng 0.5 → 눈 5 → 7
+    eq('empower: 다음 턴 주사위 전부 +2 (눈5→7)', e.dice.every(d => d.v === 7), true);
+  }
+  // 막 성장: 2막은 양측 주사위 +1
+  {
+    const [b, e] = mk(2);
+    eq('2막 actBonus 1', b.actBonus, 1);
+    eq('2막 내 주사위 = 2~7 (rng 0.5 → 5)', b.myDice.every(d => d.v === 5), true);
+    eq('2막 적 눈 +1 (들개 5 → 6)', e.dice.every(d => d.v === 6), true);
+  }
+  // 미리보기: 피해 없는 예고는 예상 피격에 안 잡힌다
+  {
+    const [b, e] = mk();
+    e.move = { id: 't', name: '시험', op: 'armor' };
+    e.dice = [{ v: 9, orig: 9, dead: false }];
+    b.myDice = [{ v: 1, orig: 1, dead: false }];
+    eq('미리보기: armor 예고는 피격 0', CB.previewTurn(b).take, 0);
+    e.move = { id: 't', name: '시험', op: 'bleed', amount: 2 };
+    eq('미리보기: bleed 예고는 피격 9', CB.previewTurn(b).take, 9);
   }
 }
 
