@@ -230,61 +230,64 @@
       "short": "트리플"
     },
     {
-      "id": "fourKind",
-      "name": "포카드",
-      "kind": "ofKind",
-      "count": 4,
-      "score": "matchedSum",
-      "tier": "rare",
-      "ruleText": "같은 눈 4개 이상 — 피해: 같은 눈들의 합 ×3",
+      "id": "fullHouse",
+      "name": "풀하우스",
+      "kind": "fullHouse",
+      "score": 35,
+      "tier": "uncommon",
+      "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25.",
       "example": [
-        4,
-        4,
-        4,
-        4
+        5,
+        5,
+        5,
+        2,
+        2
       ],
-      "fx": "smash",
+      "fx": "ring",
       "variants": [
         {
-          "id": "four_fangs",
-          "name": "네 송곳니",
+          "id": "cottage",
+          "name": "오두막",
           "ability": [
             {
-              "op": "bleed",
-              "amount": 4
+              "op": "block",
+              "amount": 15
             }
           ],
-          "abilityText": "🩸 맞은 적 출혈 +4 (행동마다 피해, 점차 감소)",
+          "abilityText": "방어도 +15",
+          "tier": "uncommon"
+        },
+        {
+          "id": "hearth",
+          "name": "따뜻한 화덕",
+          "ability": [
+            {
+              "op": "regen",
+              "amount": 2
+            },
+            {
+              "op": "block",
+              "amount": 8
+            }
+          ],
+          "abilityText": "❤️ 재생 +2 + 방어도 8",
           "tier": "rare"
         },
         {
-          "id": "heavy_blow",
-          "name": "묵직한 일격",
+          "id": "wedge",
+          "name": "쐐기",
           "ability": [
             {
-              "op": "strength",
-              "amount": 3
-            }
-          ],
-          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🗡️ 힘 +3",
-          "tier": "uncommon",
-          "burst": true
-        },
-        {
-          "id": "hunger",
-          "name": "굶주림",
-          "ability": [
-            {
-              "op": "whet",
+              "op": "vulnerable",
               "amount": 2
             }
           ],
-          "abilityText": "🔥 벼름 +2 — 크게 벼려 다음을 노린다",
+          "burst": true,
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🎯 취약 2",
           "tier": "rare"
         }
       ],
-      "mult": 3,
-      "short": "포카드"
+      "short": "풀하우스"
     },
     {
       "id": "largeStraight",
@@ -382,6 +385,63 @@
       "short": "스트레이트"
     },
     {
+      "id": "fourKind",
+      "name": "포카드",
+      "kind": "ofKind",
+      "count": 4,
+      "score": "matchedSum",
+      "tier": "rare",
+      "ruleText": "같은 눈 4개 이상 — 피해: 같은 눈들의 합 ×3",
+      "example": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "fx": "smash",
+      "variants": [
+        {
+          "id": "four_fangs",
+          "name": "네 송곳니",
+          "ability": [
+            {
+              "op": "bleed",
+              "amount": 4
+            }
+          ],
+          "abilityText": "🩸 맞은 적 출혈 +4 (행동마다 피해, 점차 감소)",
+          "tier": "rare"
+        },
+        {
+          "id": "heavy_blow",
+          "name": "묵직한 일격",
+          "ability": [
+            {
+              "op": "strength",
+              "amount": 3
+            }
+          ],
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🗡️ 힘 +3",
+          "tier": "uncommon",
+          "burst": true
+        },
+        {
+          "id": "hunger",
+          "name": "굶주림",
+          "ability": [
+            {
+              "op": "whet",
+              "amount": 2
+            }
+          ],
+          "abilityText": "🔥 벼름 +2 — 크게 벼려 다음을 노린다",
+          "tier": "rare"
+        }
+      ],
+      "mult": 3,
+      "short": "포카드"
+    },
+    {
       "id": "yahtzee",
       "name": "야찌",
       "kind": "ofKind",
@@ -437,66 +497,6 @@
         }
       ],
       "short": "야찌"
-    },
-    {
-      "id": "fullHouse",
-      "name": "풀하우스",
-      "kind": "fullHouse",
-      "score": 35,
-      "tier": "uncommon",
-      "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25.",
-      "example": [
-        5,
-        5,
-        5,
-        2,
-        2
-      ],
-      "fx": "ring",
-      "variants": [
-        {
-          "id": "cottage",
-          "name": "오두막",
-          "ability": [
-            {
-              "op": "block",
-              "amount": 15
-            }
-          ],
-          "abilityText": "방어도 +15",
-          "tier": "uncommon"
-        },
-        {
-          "id": "hearth",
-          "name": "따뜻한 화덕",
-          "ability": [
-            {
-              "op": "regen",
-              "amount": 2
-            },
-            {
-              "op": "block",
-              "amount": 8
-            }
-          ],
-          "abilityText": "❤️ 재생 +2 + 방어도 8",
-          "tier": "rare"
-        },
-        {
-          "id": "wedge",
-          "name": "쐐기",
-          "ability": [
-            {
-              "op": "vulnerable",
-              "amount": 2
-            }
-          ],
-          "burst": true,
-          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🎯 취약 2",
-          "tier": "rare"
-        }
-      ],
-      "short": "풀하우스"
     }
   ],
   "whetStep": 0.5,
