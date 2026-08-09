@@ -1264,17 +1264,27 @@ span.enemy-art {
 @keyframes cb-pulse { 50% { box-shadow: 0 0 16px rgba(232,182,77,.8); } }
 
 /* HUD: 내 체력 + 자원 */
-.cb-hud { flex: none; display: flex; align-items: center; gap: 8px; padding: 2px 12px 0; }
+.battle-screen > .cb-hud {
+  position: absolute; left: var(--cb-hpSide, 12px); right: var(--cb-hpSide, 12px);
+  top: var(--cb-hpY, 386px); z-index: 6; display: flex; align-items: center; gap: 8px; padding: 0;
+}
+.card-battle .cb-hud .hp-gauge { height: var(--cb-hpH, 36px); max-width: none; }
 .cb-hud .hp-gauge { flex: 1; position: relative; }
 .cb-res { display: flex; align-items: center; gap: 4px; }
 .cb-res i { width: 13px; height: 13px; border-radius: 50%; background: #e8b64d; box-shadow: 0 0 6px rgba(232,182,77,.6); }
 .cb-res i.off { background: #3a3226; box-shadow: none; }
 .cb-res small { font-size: 9.5px; color: #8d8064; margin-left: 3px; }
-.cb-preview { flex: none; text-align: center; font-size: 12px; color: #b3a685; padding: 3px 10px 0; min-height: 19px; }
+.battle-screen > .cb-preview {
+  position: absolute; left: 0; right: 0; top: var(--cb-pvY, 424px); z-index: 6;
+  text-align: center; font-size: 12px; color: #b3a685; padding: 0 10px; min-height: 19px;
+}
 .cb-preview b.atk { color: #f0c05a; } .cb-preview b.dmg { color: #e88a72; } .cb-preview b.kill { color: #8fd08a; }
 
 /* 내 주사위 */
-.cb-dice { flex: none; display: flex; justify-content: center; gap: var(--cb-diceGap, 10px); padding: 6px 8px 2px; }
+.battle-screen > .cb-dice {
+  position: absolute; left: 0; right: 0; top: var(--cb-diceY, 448px); z-index: 7;
+  display: flex; justify-content: center; gap: var(--cb-diceGap, 10px); padding: 0 8px;
+}
 .cdie {
   width: var(--cb-diceSize, 58px); height: calc(var(--cb-diceSize, 58px) + 4px); border-radius: 12px; background: #efe6d0; color: #26201a;
   border: 2px solid #b9a67f; display: flex; align-items: center; justify-content: center;
@@ -1307,7 +1317,10 @@ span.enemy-art {
   position: absolute; top: -7px; right: -5px; font-size: 10px; background: #5a4a2e; color: #e8dcae;
   border-radius: 8px; padding: 0 4px; font-weight: 600;
 }
-.cb-help { flex: none; text-align: center; font-size: 10px; color: #7d7258; padding: 2px 8px 0; }
+.battle-screen > .cb-help {
+  position: absolute; left: 0; right: 0; top: var(--cb-helpY, 516px); z-index: 6;
+  text-align: center; font-size: 10px; color: #7d7258; padding: 0 8px;
+}
 
 /* 손패 — 부채꼴, 화면 아래 걸침 */
 .cb-handzone { position: relative; flex: 1; min-height: 0; }
@@ -1331,7 +1344,8 @@ span.enemy-art {
   padding: 4px 2px 5px; background: linear-gradient(180deg, #e8d8b2, #d8c69a); border-top: 2px solid #a8352e; white-space: nowrap; }
 .battle-screen > .cb-end {
   position: absolute; right: var(--cb-endX, 60px); bottom: var(--cb-endY, 216px); z-index: 42;
-  display: inline-block; width: auto; padding: 10px 12px; font-size: 13.5px;
+  width: var(--cb-endW, 150px); height: var(--cb-endH, 46px); box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center; padding: 0 2px; font-size: 15px;
 }
 .battle-screen > .cb-orb {
   position: absolute; left: var(--cb-orbX, 10px); bottom: var(--cb-orbY, 212px); z-index: 42;
