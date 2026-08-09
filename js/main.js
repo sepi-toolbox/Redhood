@@ -6,7 +6,7 @@ import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind } from './cardbattle.js';
 
-export const VERSION = 'v2.15'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v2.16'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1718,7 +1718,6 @@ function renderCardBattle() {
       </div>
       <div class="cb-preview" id="cb-preview"></div>
       <div class="cb-dice" id="cb-dice"></div>
-      <div class="cb-help">주사위: 내 것 탭 → 적 것 탭 = 부딪치기 · 카드: 꾹=상세, 위로 끌면 발동 · 적 탭 = 🎯</div>
       <div class="cb-handzone"><div class="cb-hand" id="cb-hand"></div></div>
       <div class="cb-orb" id="cb-orb" title="자원 — 카드를 쓰는 힘"><b>${battle.res}</b></div>
       <div class="cb-pile deck" id="cb-deck" title="덱에 남은 카드"><b>0</b></div>
@@ -1730,9 +1729,14 @@ function renderCardBattle() {
       <div class="cb-zoom" id="cb-zoom"></div>
     </div>`));
   document.getElementById('cb-zoom').addEventListener('pointerdown', () => cbZoom(null));
+  // 조준 중 빈 곳 탭 = 선택 해제 (주사위 탭은 각자 처리)
+  app.querySelector('.card-battle').addEventListener('click', (e) => {
+    if (cbSel >= 0 && !e.target.closest('.cdie') && !e.target.closest('.fdie')) { cbSel = -1; cbUpdate(); }
+  });
   applyLayout(app.querySelector('.card-battle'));
   cbUpdate();
   requestAnimationFrame(cbFitEnemyZone);
+  if (battle.turn !== cbLastRollTurn) { cbLastRollTurn = battle.turn; requestAnimationFrame(cbRollFx); }
   // 적: 탭 = 표적, 길게 = 정보
   app.querySelectorAll('.enemy').forEach(el => {
     addLongPress(el, () => cbFoeInfo(el.dataset.uid));
@@ -1750,6 +1754,8 @@ function renderCardBattle() {
 
 // ---------- 제자리 갱신 (적 그림을 다시 만들지 않는다 — 깜빡임 방지) ----------
 function cbUpdate() {
+  const scrEl = app.querySelector('.card-battle');
+  if (scrEl) scrEl.classList.toggle('aiming', cbSel >= 0);
   const top = document.getElementById('cb-top');
   if (top) top.textContent = `${run.floor}층 · ${battle.turn}턴`;
   // 적 주사위
@@ -1762,13 +1768,26 @@ function cbUpdate() {
     zone.querySelectorAll('.fdie:not(.dead)').forEach(fd => {
       fd.addEventListener('click', (ev) => {
         ev.stopPropagation();
-        if (busy || battle.over || cbSel < 0) return;
+        if (busy || battle.over || cbSel < 0 || cbShooting) return;
+        const myIdx = cbSel;
+        const myEl = document.getElementById('cb-dice')?.querySelectorAll('.cdie')[myIdx];
         const di = parseInt(fd.dataset.di, 10);
-        const r = clashDice(battle, cbSel, e.uid, di);
+        const r = clashDice(battle, myIdx, e.uid, di);
         if (!r) return;
-        cbFloat(fd, `-${r.x}`, '#f4c9ae');
+        cbShooting = true;
+        // 발사되며 내 주사위가 먼저 줄어든다
+        const m = battle.myDice[myIdx];
+        if (myEl) {
+          const n = myEl.querySelector('.cnum');
+          if (m.dead) { myEl.classList.add('dead'); myEl.innerHTML = ''; }
+          else if (n) n.textContent = m.v;
+        }
         if (r.myDead) cbSel = -1;               // 잔존하면 이어서 부딪칠 수 있게 선택 유지
-        cbUpdate();
+        cbShoot(myEl, fd, () => {               // 명중 → 상대 주사위 감소
+          cbShooting = false;
+          cbFloat(fd, `-${r.x}`, '#f4c9ae');
+          cbUpdate();
+        });
       });
     });
   }
@@ -1844,6 +1863,7 @@ window.addEventListener('resize', () => { if (battle && battle.myDice) cbFitEnem
 function cbPreviewUpdate() {
   const pv = document.getElementById('cb-preview');
   if (!pv) return;
+  if (cbSel >= 0) { pv.innerHTML = '🛡 <b class="kill">방어할 주사위를 골라주세요</b>'; return; }
   const p = previewTurn(battle);
   const tgt = battle.enemies.find(e => e.uid === p.targetUid);
   pv.innerHTML = `턴 종료 → 내 공격 <b class="atk">${p.atk}</b>${tgt ? ` (🎯${esc(tgt.name)})` : ''}`
@@ -1898,10 +1918,11 @@ function cbRenderHand() {
 
 // 카드 제스처: 꾹 누르면 상세, 위로 끌어올리면 발동
 function bindCbCard(el, hi, key) {
-  let sx = 0, sy = 0, drag = false, holdT = null, zoomed = false, pressed = false;
+  let sx = 0, sy = 0, drag = false, holdT = null, zoomed = false, pressed = false, baseT = '';
   const down = (x, y) => {
     if (busy || battle.over) return;
     pressed = true; sx = x; sy = y; drag = false; zoomed = false;
+    baseT = el.style.transform;                       // 부채꼴 자리·기울기 보존
     holdT = setTimeout(() => { zoomed = true; cbZoom(key); }, 400);
   };
   const move = (x, y) => {
@@ -1912,7 +1933,7 @@ function bindCbCard(el, hi, key) {
       if (zoomed) { cbZoom(null); zoomed = false; }
       el.classList.add('dragging');
     }
-    if (drag) el.style.transform = `translate3d(${dx}px,${dy}px,0) scale(1.1)`;
+    if (drag) el.style.transform = `translate3d(${dx}px,${dy}px,0) ${baseT} scale(1.08)`;   // 잡은 지점 그대로 따라온다
   };
   const up = (y) => {
     if (!pressed) return;
@@ -1988,6 +2009,60 @@ document.addEventListener('click', (e) => {
   cbUpdate(); cbRenderHand();
 }, true);
 
+let cbShooting = false;
+// 투사체: from → to 로 금빛 구슬이 날아가 명중 시 onHit
+function cbShoot(fromEl, toEl, onHit, opts = {}) {
+  const scr = app.querySelector('.battle-screen');
+  if (!scr || !fromEl || !toEl || !fromEl.isConnected || !toEl.isConnected) { if (onHit) onHit(); return; }
+  const sr = scr.getBoundingClientRect();
+  const a = fromEl.getBoundingClientRect();
+  const b2 = toEl.getBoundingClientRect();
+  const p = document.createElement('div');
+  p.className = 'cb-proj';
+  const x0 = a.left - sr.left + a.width / 2 - 7, y0 = a.top - sr.top + a.height / 2 - 7;
+  const x1 = b2.left - sr.left + b2.width / 2 - 7, y1 = b2.top - sr.top + b2.height / 2 - 7;
+  p.style.left = `${x0}px`;
+  p.style.top = `${y0}px`;
+  scr.appendChild(p);
+  let done = false;
+  const finish = () => { if (done) return; done = true; p.remove(); if (onHit) onHit(); };
+  try {
+    const anim = p.animate(
+      [{ transform: 'translate(0,0) scale(.7)' }, { transform: `translate(${x1 - x0}px,${y1 - y0}px) scale(1.05)` }],
+      { duration: opts.dur || 280, easing: 'cubic-bezier(.3,.1,.6,1)' });
+    anim.onfinish = finish;
+  } catch (err) { /* WAAPI 미지원 폴백 */ }
+  setTimeout(finish, (opts.dur || 280) + 120);
+}
+// 턴 시작 굴림 연출: 숫자가 구르다 멈춘다
+let cbLastRollTurn = 0;
+function cbRollFx() {
+  app.querySelectorAll('.cdie .cnum, .fdie .fnum').forEach(sp => {
+    const cell = sp.closest('.cdie, .fdie');
+    const real = sp.textContent;
+    let steps = 5 + Math.floor(Math.random() * 4);
+    let delay = 45;
+    if (cell) cell.classList.add('rolling');
+    (function cyc() {
+      if (!sp.isConnected) return;
+      if (steps-- <= 0) { sp.textContent = real; if (cell) cell.classList.remove('rolling'); return; }
+      sp.textContent = 1 + Math.floor(Math.random() * 6);
+      delay *= 1.2;
+      setTimeout(cyc, delay);
+    })();
+  });
+}
+// 적 HP 게이지만 제자리 갱신 (명중 → 피해 → 게이지 순서용)
+function cbSetFoeHp(uid, hp) {
+  const el = app.querySelector(`.enemy[data-uid="${uid}"]`);
+  const e = battle.enemies.find(x => x.uid === uid);
+  if (!el || !e) return;
+  const bar = el.querySelector('.bar i');
+  if (bar) bar.style.width = `${e.final ? 100 : Math.max(0, hp / e.maxHpInit * 100)}%`;
+  const t = el.querySelector('.enemy-hp');
+  if (t) t.childNodes[0].textContent = e.final ? '∞' : `${Math.max(0, hp)}/${e.maxHpInit}`;
+}
+
 function cbFloat(el, txt, color) {
   const r = el.getBoundingClientRect();
   const screen = app.querySelector('.battle-screen');
@@ -2009,14 +2084,26 @@ function cbEndTurn() {
   busy = true;
   cbPicking = null; cbBanner('');
   const hpBefore = battle.player.hp;
+  const foeHpBefore = {};
+  battle.enemies.forEach(e => { foeHpBefore[e.uid] = e.hp; });
+  const atkDiceEls = [...app.querySelectorAll('.cdie:not(.dead)')];
   const script = endCardTurn(battle);
   if (!script) { busy = false; return; }
-  // 1) 내 공격 — 대상에게 베기
+  // 1) 내 공격 — 살아남은 주사위마다 투사체 → 명중(베기·피해 숫자) → 게이지 감소
   let t = 150;
   if (script.atk > 0 && script.targetUid) {
-    setTimeout(() => playHitEffects([{ uid: script.targetUid, amount: script.atk, killed: script.killed }], 'slash'), t);
-    t += 800;
-    if (script.killed) { setTimeout(() => cbBanner('처치! 공격 불발', 1400), t - 500); }
+    const foeEl = app.querySelector(`.enemy[data-uid="${script.targetUid}"] .enemy-art-img`)
+      || app.querySelector(`.enemy[data-uid="${script.targetUid}"]`);
+    atkDiceEls.forEach((de, i) => setTimeout(() => cbShoot(de, foeEl, null, { dur: 300 }), t + i * 80));
+    const impact = t + Math.max(0, atkDiceEls.length - 1) * 80 + 300;
+    const eff = script.atk - script.blocked;
+    setTimeout(() => {
+      playHitEffects([{ uid: script.targetUid, amount: eff, killed: script.killed }], 'slash');
+      if (script.blocked > 0) cbBanner(`🛡 방어도가 ${script.blocked} 막음`, 1300);
+    }, impact);
+    setTimeout(() => cbSetFoeHp(script.targetUid, Math.max(0, (foeHpBefore[script.targetUid] || 0) - eff)), impact + 300);
+    if (script.killed) setTimeout(() => cbBanner('처치! 공격 불발', 1400), impact + 350);
+    t = impact + 800;
   }
   // 2) 살아남은 적들의 반격 (순서대로)
   let hpShown = hpBefore;
