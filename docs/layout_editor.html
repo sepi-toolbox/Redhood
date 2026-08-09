@@ -1489,6 +1489,7 @@ span.enemy-art {
   .ed-io .box { width: min(560px, 92vw); background: #221c15; border: 1px solid #5a4c3e; border-radius: 12px; padding: 14px; }
   .ed-io textarea { width: 100%; height: 260px; background: #17130f; color: #e8dcc8; border: 1px solid #4a3b2c; border-radius: 8px; font-size: 12px; padding: 8px; box-sizing: border-box; }
   .ed-io .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+  #scr .enemy .target-pin { opacity: 1 !important; }  /* 편집기: 화살표를 모든 적에게 표시 */
 </style>
 </head>
 <body>
@@ -1633,11 +1634,13 @@ const ITEMS = [
     move: (dx, dy) => { L.pvBot -= dy; } },
   { id: 'help', label: '도움말 줄 (위아래)', keys: ['helpBot'], find: () => $('.cb-help'),
     move: (dx, dy) => { L.helpBot -= dy; } },
-  { id: 'pin', label: '타게팅 화살표 ▼ (⤡=크기)', keys: ['pinX', 'pinY', 'pinSize'], find: () => $('.enemy.targeted .target-pin'),
+  { id: 'pin', label: '타게팅 화살표 ▼ (⤡=크기 · 값은 모든 적 공용)', keys: ['pinX', 'pinY', 'pinSize'],
+    findAll: () => [...document.querySelectorAll('.enemy .target-pin')],
     move: (dx, dy) => { L.pinX += dx; L.pinY += dy; },
     resize: (dx, dy) => { L.pinSize = clampL(L.pinSize + dx, 8, 40); } },
-  { id: 'fdice', label: '적 주사위 (위아래로)', keys: ['fdiceY', 'fdieSize'], find: () => $('.fdice'),
-    move: (dx, dy) => { L.fdiceY = clampL(L.fdiceY + dy, 0, 120); }, resize: (dx, dy) => { L.fdieSize = clampL(L.fdieSize + dx, 22, 64); } },
+  { id: 'fdice', label: '적 주사위 (위아래로 · 값은 모든 적 공용)', keys: ['fdiceY', 'fdieSize'],
+    findAll: () => [...document.querySelectorAll('.fdice')],
+    move: (dx, dy) => { L.fdiceY = clampL(L.fdiceY + dy, 0, 220); }, resize: (dx, dy) => { L.fdieSize = clampL(L.fdieSize + dx, 22, 64); } },
   { id: 'mydice', label: '내 주사위 (위아래=위치, 좌우=간격)', keys: ['diceBot', 'diceSize', 'diceGap'], find: () => $('.cb-dice'),
     move: (dx, dy) => { L.diceBot -= dy; L.diceGap = clampL(L.diceGap + dx / 3, 0, 30); }, resize: (dx, dy) => { L.diceSize = clampL(L.diceSize + dx, 40, 90); } },
   { id: 'hand', label: '손패 (위아래=높이, 좌우=펼침)', keys: ['cardW', 'cardH', 'handBottom', 'handMargin'], find: () => $('.cb-hand'),
@@ -1666,13 +1669,14 @@ function leMove(e) {
   apply();
 }
 const leEnd = () => { drag = null; };
+const elsOf = (it) => (it.findAll ? it.findAll() : [it.find()]).filter(Boolean);
 layer.addEventListener('pointerdown', (e) => {
-  const hit = ITEMS.map(it => ({ it, el: it.find() })).filter(x => x.el)
+  const hit = ITEMS.flatMap(it => elsOf(it).map(el => ({ it, el })))
     .map(x => ({ ...x, r: x.el.getBoundingClientRect() }))
     .filter(x => e.clientX >= x.r.left - 6 && e.clientX <= x.r.right + 6 && e.clientY >= x.r.top - 6 && e.clientY <= x.r.bottom + 6)
     .sort((a, b) => a.r.width * a.r.height - b.r.width * b.r.height)[0];
   if (hit) {
-    sel = hit.it;
+    sel = { it: hit.it, el: hit.el };
     drag = { item: hit.it, mode: 'move', x: e.clientX, y: e.clientY };
     try { layer.setPointerCapture(e.pointerId); } catch (_) {}
   } else sel = null;
@@ -1683,25 +1687,26 @@ layer.addEventListener('pointerup', leEnd);
 layer.addEventListener('pointercancel', leEnd);
 
 function leSync() {
-  if (!sel || !sel.find()) {
+  if (sel && sel.el && !sel.el.isConnected) sel = null;   // 화면 전환으로 사라진 요소
+  if (!sel) {
     if (box) { box.remove(); box = null; boxFor = null; }
     return;
   }
-  const el = sel.find();
+  const el = sel.el;
   const sr = scr.getBoundingClientRect();
   const r = el.getBoundingClientRect();
-  if (!box || boxFor !== sel) {
+  if (!box || boxFor !== el) {
     if (box) box.remove();
     box = document.createElement('div');
     box.className = 'le-box';
-    box.innerHTML = `<span class="le-tag">${sel.label}</span>${sel.resize ? '<span class="le-grip">⤡</span>' : ''}`;
+    box.innerHTML = `<span class="le-tag">${sel.it.label}</span>${sel.it.resize ? '<span class="le-grip">⤡</span>' : ''}`;
     scr.appendChild(box);
-    boxFor = sel;
+    boxFor = el;
     const grip = box.querySelector('.le-grip');
     if (grip) {
       grip.addEventListener('pointerdown', (e) => {
         e.stopPropagation();
-        drag = { item: sel, mode: 'resize', x: e.clientX, y: e.clientY };
+        drag = { item: sel.it, mode: 'resize', x: e.clientX, y: e.clientY };
         try { grip.setPointerCapture(e.pointerId); } catch (_) {}
       });
       grip.addEventListener('pointermove', leMove);
@@ -1754,6 +1759,7 @@ $('#tg-multi').addEventListener('click', () => {
   multi = !multi;
   $('#tg-multi').classList.toggle('on', multi);
   $('#tg-multi').textContent = multi ? '적 1마리' : '적 2마리';
+  sel = null;
   renderFoes(); apply();
 });
 $('#tg-loot').addEventListener('click', () => {
