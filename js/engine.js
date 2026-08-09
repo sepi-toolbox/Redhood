@@ -1011,7 +1011,7 @@ export const hitCount = (ef) => Math.max(1, Math.floor(ef.hits || 1));
 
 export const DEMAND_KO = { ofKind: '같은 눈', straight: '스트레이트', fullHouse: '풀하우스', twoPair: '투페어',
   chance: '노페어', onePair: '원페어', threeKind: '트리플', fourKind: '포카드', yahtzee: '야찌',
-  smallStraight: '스몰', largeStraight: '라지' };
+  largeStraight: '스트레이트' };
 // 의도 표기 (v0.11): ⚔️공격 / 🛡방어 / 🌀혼란 / 💪강화 / 💚치료 / ❓의문 — 혼합은 병기
 export function intentOf(enemy) {
   const mv = enemy.nextMove;

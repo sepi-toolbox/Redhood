@@ -563,8 +563,8 @@ export function loadRun() {
     for (const c of DB.scoring.categories) byId[c.id] = c;
     for (const [cid, vid] of Object.entries(s.categories)) {
       const c = byId[cid];
-      if (!c) { clearSave(); return null; }
-      if (vid && !(c.variants || []).some(v => v.id === vid)) { clearSave(); return null; }
+      if (!c) { delete s.categories[cid]; continue; }        // 없어진 족보 자리는 버린다 (스몰 스트레이트 등)
+      if (vid && !(c.variants || []).some(v => v.id === vid)) s.categories[cid] = null;
     }
     return s;
   } catch (e) { return null; }

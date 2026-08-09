@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.37'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.40'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -865,7 +865,7 @@ function renderBattle(opts = {}) {
           : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft < rerollCost(battle) || battle.await || battle.dice.every(d => d.held) ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})${rerollCost(battle) > 1 ? ` <span class="cost">-${rerollCost(battle)}</span>` : ''}</button>`}
       </div>
       <div class="hint-line">${hintHtml()}</div>
-      <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
+      <div class="sheet-zone combo-grid ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, variant, seal, locked, burst, bd }) => `
           <button class="sheet-row combo-row t-${variant.tier || 'common'} ${burst ? 'burst' : ''} ${locked ? 'used' : ''} ${COMBO_PLATE_READY.has(variant.id) ? 'has-plate' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
             data-cat="${cat.id}" data-variant="${variant.id}" data-locked="${locked ? 1 : 0}"
