@@ -4,10 +4,11 @@ export const DB = {
   scoring: null, enemies: null, enemyById: {}, act1: null,
   events: null, weaponById: {}, eventById: {}, acts: null,
   statuses: null, statusById: {},
+  cards: null, cardById: {},            // v2.0 감정 카드
 };
 
 export async function loadAll() {
-  const [dice, relics, scoring, enemies, act1, events, acts, statuses] = await Promise.all([
+  const [dice, relics, scoring, enemies, act1, events, acts, statuses, cards] = await Promise.all([
     fetchJson('./data/dice.json'),
     fetchJson('./data/relics.json'),
     fetchJson('./data/scoring.json'),
@@ -16,10 +17,12 @@ export async function loadAll() {
     fetchJson('./data/events.json'),
     fetchJson('./data/acts.json'),
     fetchJson('./data/statuses.json'),
+    fetchJson('./data/cards.json'),
   ]);
   DB.dice = dice; DB.relics = relics; DB.scoring = scoring;
   DB.enemies = enemies; DB.act1 = act1; DB.events = events; DB.acts = acts;
-  DB.statuses = statuses;
+  DB.statuses = statuses; DB.cards = cards;
+  DB.cardById = {}; for (const c of cards.list) DB.cardById[c.id] = c;
   DB.statusById = {}; for (const st of statuses.list) DB.statusById[st.id] = st;
   DB.diceById = {}; for (const d of dice) DB.diceById[d.id] = d;
   DB.relicById = {}; for (const r of relics) DB.relicById[r.id] = r;
@@ -37,6 +40,14 @@ async function fetchJson(path) {
 }
 
 function validate() {
+  // v2.0 감정 카드: 시작 덱은 전부 존재하는 카드여야 한다
+  for (const id of DB.cards.starterDeck) {
+    if (!DB.cardById[id]) throw new Error(`cards.json: starterDeck에 없는 카드 id "${id}"`);
+  }
+  for (const c of DB.cards.list) {
+    if (!(c.cost >= 0)) throw new Error(`cards.json: ${c.id} cost가 없습니다`);
+    if (c.target && !['active', 'dead'].includes(c.target)) throw new Error(`cards.json: ${c.id} 미지원 target "${c.target}"`);
+  }
   for (const id of DB.act1.player.startDice) {
     if (!DB.diceById[id]) throw new Error(`act1.json: startDice에 없는 주사위 id "${id}"`);
   }

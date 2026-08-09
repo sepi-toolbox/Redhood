@@ -3,9 +3,10 @@ import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf } from './engine.js';
 import { whetMultOf } from './yahtzee.js';
 import { DEMAND_KO } from './engine.js';
-import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
+import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
+import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind } from './cardbattle.js';
 
-export const VERSION = 'v1.42'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v2.0'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -136,7 +137,7 @@ function showTitle() {
 // v0.65: 로컬에서만 열리는 테스트 훅 — 보스 전리품처럼 손으로 도달하기 어려운 화면 검증용
 if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
   window.__dev = { showBossReward: (cb) => showBossReward(cb || (() => showMap())), get run() { return run; },
-    get battle() { return battle; }, redraw: () => renderBattle(), DB };
+    get battle() { return battle; }, redraw: () => (battle && battle.myDice ? renderCardBattle() : renderBattle()), DB };
 }
 
 // v0.81: 배경 층 — 화면 위쪽 띠에만 그린다.
@@ -477,10 +478,9 @@ function afterBossVictory() {
 function startFinalBattle() {
   run.act = 4;
   currentNodeType = 'final';
-  battle = createBattle(run, finalEncounter(run));
-  selectedCat = null; busy = false;
-  targetUid = aliveEnemies(battle)[0]?.uid || null;
-  renderBattle();
+  battle = createCardBattle(run, finalEncounter(run));
+  busy = false;
+  renderCardBattle();
 }
 
 function showFinalEnd(turns) {
@@ -715,10 +715,9 @@ function enterNode(type) {
   if (type === 'rest') { showRest(); return; }
   if (type === 'event') { showEvent(pickEvent(run)); return; }
   if (type === 'shop') { showShop(); return; }
-  battle = createBattle(run, rollEncounter(run, type));
-  selectedCat = null; busy = false;
-  targetUid = aliveEnemies(battle)[0]?.uid || null; // 기본 표적: 맨 왼쪽
-  renderBattle();
+  battle = createCardBattle(run, rollEncounter(run, type));
+  busy = false;
+  renderCardBattle();
 }
 
 // 표적 유지: 죽었으면 다음(맨 왼쪽 생존)으로 자동 이동
@@ -1477,6 +1476,7 @@ const LOOT_META = {
   die: { icon: '\u{1F3B2}', name: '주사위' },
   relic: { icon: '\u{1FAAC}', name: '유물' },
   legend: { icon: '\u{1F31F}', name: '전설의 유산' },
+  card: { icon: '\u{1F0CF}', name: '감정 카드' },
 };
 
 function showReward() {
@@ -1589,6 +1589,7 @@ function showLootModal(gi) {
             const name = isCat ? c.item.variant.name : c.item.name;
             const sub = c.kind === 'die' ? `[${c.item.faces.join(',')}] ${c.item.desc || ''}`
               : c.kind === 'relic' ? (c.item.desc || '')
+              : c.kind === 'card' ? `자원 ${c.item.cost} · ${c.item.desc || ''}`
               : `${c.item.cat.name} 자리 · ${c.item.replaces ? `${c.item.replaces.name} 을(를) 대신한다` : '지금은 기본'} · ${c.item.variant.abilityText || '부가 없음'}`;
             return `
               <button class="sheet-row choice-row loot-choice t-${c.item.tier}" data-idx="${i}">
@@ -1609,7 +1610,8 @@ function showLootModal(gi) {
   back.querySelectorAll('.loot-choice').forEach(el => {
     el.addEventListener('click', () => {
       const c = g.choices[parseInt(el.dataset.idx, 10)];
-      if (c.kind === 'relic') { applyRelicPickup(run, c.item); take(); }
+      if (c.kind === 'card') { run.cards.push(c.item.id); take(); }
+      else if (c.kind === 'relic') { applyRelicPickup(run, c.item); take(); }
       else if (c.kind === 'category') {
         run.categories[c.item.cat.id] = c.item.variant.id;   // 그 자리에 끼운다 (있던 건 밀려난다)
         take();
@@ -1652,6 +1654,391 @@ function showReplaceDie(newDie, onDone = null, onCancel = null) {
     if (onCancel) onCancel();
     else if (onDone) onDone();
   });
+}
+
+/* ==========================================================================
+ * v2.0 카드 전투 화면 — 상호 차감 배정 + 감정 카드
+ *  · 주사위: 내 것 탭 → 적 것 탭 = 즉시 부딪치기 (큰 쪽이 차액만큼 잔존)
+ *  · 카드: 꾹 누르면 상세, 위로 끌어올리면 발동 (대상 카드는 이어서 주사위 탭)
+ *  · 턴 종료: 내 공격 먼저 (처치된 적의 공격 불발) → 살아남은 적들의 반격
+ * ========================================================================== */
+let cbSel = -1;          // 선택된 내 주사위
+let cbPicking = null;    // 대상 선택 중인 카드 { hi, kind }
+
+function renderCardBattle() {
+  setScene('battle', {
+    act: run.act,
+    kind: currentNodeType,
+    bossId: currentNodeType === 'boss' && run.act <= 3 ? themeOf(run).boss : null,
+  });
+  cbSel = -1; cbPicking = null;
+  const multi = aliveFoes(battle).length > 1;
+  app.innerHTML = '';
+  app.append(h(`
+    <div class="screen battle-screen card-battle">
+      ${bgLayer()}
+      <header class="topbar">
+        <span id="cb-top">${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
+        <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
+        <span class="coin-slot">🪙${run.coins} <span class="hp">❤️</span></span>
+      </header>
+      <div class="enemy-zone ${multi ? 'multi' : ''}">
+        ${battle.enemies.filter(e => e.hp > 0).map(e => `
+          <button class="enemy t-${e.tier} ${battle.target === e.uid ? 'targeted' : ''}" data-uid="${e.uid}">
+            <span class="target-pin">▼</span>
+            <span class="enemy-name">${esc(e.name)}</span>
+            <span class="bar t-${e.tier}"><i style="width:${e.final ? 100 : Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
+            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}</span>
+            ${enemyArtHtml(e)}
+            <span class="fdice" data-uid="${e.uid}"></span>
+          </button>`).join('')}
+      </div>
+      <div class="cb-hud">
+        <div class="hp-gauge">
+          <div class="hp-fill" style="width:${Math.max(0, battle.player.hp / battle.player.maxHp * 100)}%"></div>
+          <span class="hp-text">${battle.player.hp} / ${battle.player.maxHp}</span>
+        </div>
+        <span class="cb-res" id="cb-res"></span>
+      </div>
+      <div class="cb-preview" id="cb-preview"></div>
+      <div class="cb-dice" id="cb-dice"></div>
+      <div class="cb-help">주사위: 내 것 탭 → 적 것 탭 = 부딪치기 · 카드: 꾹=상세, 위로 끌면 발동 · 적 탭 = 🎯</div>
+      <div class="cb-handzone"><div class="cb-hand" id="cb-hand"></div></div>
+      <button class="btn primary cb-end" id="cb-end">턴 종료 ⚔</button>
+      <div class="hint-line cb-hintline"></div>
+      <div class="sheet-zone combo-grid cb-loot"></div>
+      <div class="cb-banner" id="cb-banner"></div>
+      <div class="cb-zoom" id="cb-zoom"></div>
+    </div>`));
+  cbUpdate();
+  // 적: 탭 = 표적, 길게 = 정보
+  app.querySelectorAll('.enemy').forEach(el => {
+    addLongPress(el, () => cbFoeInfo(el.dataset.uid));
+    el.addEventListener('click', (e) => {
+      if (busy || battle.over) return;
+      if (e.target.closest('.fdie')) return;             // 주사위 탭은 대결 쪽에서
+      if (setTarget(battle, el.dataset.uid)) {
+        app.querySelectorAll('.enemy').forEach(x => x.classList.toggle('targeted', x.dataset.uid === battle.target));
+        cbPreviewUpdate();
+      }
+    });
+  });
+  document.getElementById('cb-end').addEventListener('click', cbEndTurn);
+}
+
+// ---------- 제자리 갱신 (적 그림을 다시 만들지 않는다 — 깜빡임 방지) ----------
+function cbUpdate() {
+  const top = document.getElementById('cb-top');
+  if (top) top.textContent = `${run.floor}층 · ${battle.turn}턴`;
+  // 적 주사위
+  for (const e of battle.enemies) {
+    const zone = app.querySelector(`.fdice[data-uid="${e.uid}"]`);
+    if (!zone) continue;
+    zone.innerHTML = e.hp > 0 ? e.dice.map((d, di) => `
+      <b class="fdie ${d.dead ? 'dead' : ''} ${cbSel >= 0 && !d.dead ? 'pickable' : ''}" data-di="${di}">${d.dead ? '' : d.v}</b>`).join('') : '';
+    zone.querySelectorAll('.fdie:not(.dead)').forEach(fd => {
+      fd.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (busy || battle.over || cbSel < 0) return;
+        const di = parseInt(fd.dataset.di, 10);
+        const r = clashDice(battle, cbSel, e.uid, di);
+        if (!r) return;
+        cbFloat(fd, `-${r.x}`, '#f4c9ae');
+        if (r.myDead) cbSel = -1;               // 잔존하면 이어서 부딪칠 수 있게 선택 유지
+        cbUpdate();
+      });
+    });
+  }
+  // 내 주사위
+  const dz = document.getElementById('cb-dice');
+  if (dz) {
+    dz.innerHTML = battle.myDice.map((d, i) => {
+      const pick = cbPicking && ((cbPicking.kind === 'active' && !d.dead) || (cbPicking.kind === 'dead' && d.dead));
+      return `<button class="cdie ${d.dead ? 'dead' : ''} ${i === cbSel ? 'sel' : ''} ${pick ? 'pickable' : ''}" data-i="${i}">
+        ${d.dead ? '' : d.v}${!d.dead && d.v !== d.orig ? `<span class="corig">${d.orig}</span>` : ''}</button>`;
+    }).join('');
+    dz.querySelectorAll('.cdie').forEach(el => {
+      el.addEventListener('click', () => {
+        if (busy || battle.over) return;
+        const i = parseInt(el.dataset.i, 10);
+        const d = battle.myDice[i];
+        if (cbPicking) {                                   // 카드 대상 선택
+          const ok = (cbPicking.kind === 'active' && !d.dead) || (cbPicking.kind === 'dead' && d.dead);
+          if (!ok) return;
+          const res = playCard(battle, cbPicking.hi, i);
+          cbPicking = null;
+          cbBanner('');
+          if (res) { cbCardFx(res); }
+          cbUpdate(); cbRenderHand();
+          return;
+        }
+        if (d.dead) return;
+        cbSel = (cbSel === i ? -1 : i);
+        cbUpdate();
+      });
+    });
+  }
+  // 자원·미리보기·손패
+  const res = document.getElementById('cb-res');
+  if (res) res.innerHTML = Array.from({ length: DB.cards.config.resPerTurn }, (_, i) =>
+    `<i class="${i < battle.res ? '' : 'off'}"></i>`).join('')
+    + `<small>덱${battle.deck.length}·버림${battle.discard.length}</small>`;
+  cbPreviewUpdate();
+  cbRenderHand();
+}
+
+function cbPreviewUpdate() {
+  const pv = document.getElementById('cb-preview');
+  if (!pv) return;
+  const p = previewTurn(battle);
+  const tgt = battle.enemies.find(e => e.uid === p.targetUid);
+  pv.innerHTML = `턴 종료 → 내 공격 <b class="atk">${p.atk}</b>${tgt ? ` (🎯${esc(tgt.name)})` : ''}`
+    + `${p.kills ? ' <b class="kill">처치! 공격 불발</b>' : ''} · 예상 피격 <b class="dmg">${p.take}</b>`;
+}
+
+function cbCardFx(res) {
+  const dz = document.getElementById('cb-dice');
+  if (!dz) return;
+  for (const f of res.fx) {
+    const el = dz.querySelectorAll('.cdie')[f.i];
+    if (el) cbFloat(el, f.txt, '#9fd89a');
+  }
+}
+
+// ---------- 손패 (부채꼴) ----------
+function cbRenderHand() {
+  const hand = document.getElementById('cb-hand');
+  if (!hand) return;
+  hand.innerHTML = '';
+  battle.hand.forEach((key, hi) => {
+    const c = cardOf(key);
+    const n = battle.hand.length;
+    const off = hi - (n - 1) / 2;
+    const el = document.createElement('div');
+    el.className = 'cb-card' + (battle.res < c.cost ? ' broke' : '');
+    el.dataset.hi = hi;
+    el.innerHTML = `<span class="ccost">${c.cost}</span><span class="cart">${c.icon}</span><span class="cnm">${esc(c.name)}</span>`;
+    el.style.transform = `translateX(${off * 64}px) rotate(${off * 6}deg) translateY(${Math.abs(off) * 9}px)`;
+    hand.appendChild(el);
+    bindCbCard(el, hi, key);
+  });
+}
+
+// 카드 제스처: 꾹 누르면 상세, 위로 끌어올리면 발동
+function bindCbCard(el, hi, key) {
+  let sx = 0, sy = 0, drag = false, holdT = null, zoomed = false, pressed = false;
+  const down = (x, y) => {
+    if (busy || battle.over) return;
+    pressed = true; sx = x; sy = y; drag = false; zoomed = false;
+    holdT = setTimeout(() => { zoomed = true; cbZoom(key); }, 400);
+  };
+  const move = (x, y) => {
+    if (!pressed) return;
+    const dx = x - sx, dy = y - sy;
+    if (!drag && Math.hypot(dx, dy) > 12) {
+      drag = true; clearTimeout(holdT);
+      if (zoomed) { cbZoom(null); zoomed = false; }
+      el.classList.add('dragging');
+    }
+    if (drag) el.style.transform = `translate(${dx}px,${dy}px) scale(1.1)`;
+  };
+  const up = (y) => {
+    if (!pressed) return;
+    pressed = false; clearTimeout(holdT);
+    if (zoomed) { cbZoom(null); cbRenderHand(); return; }
+    if (drag) {
+      if (sy - y > 70) cbTryPlay(hi, key);
+      else cbRenderHand();
+    }
+  };
+  el.addEventListener('pointerdown', (e) => { try { el.setPointerCapture(e.pointerId); } catch (_) {} down(e.clientX, e.clientY); });
+  el.addEventListener('pointermove', (e) => move(e.clientX, e.clientY));
+  el.addEventListener('pointerup', (e) => up(e.clientY));
+  el.addEventListener('pointercancel', () => { pressed = false; clearTimeout(holdT); cbZoom(null); cbRenderHand(); });
+  el.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
+function cbTryPlay(hi, key) {
+  const c = cardOf(key);
+  if (battle.res < c.cost) { cbBanner(`자원이 부족해 (${c.cost} 필요)`, 1300); cbRenderHand(); return; }
+  const kind = cardTargetKind(key);
+  if (kind) {
+    // 대상이 있는지 먼저 확인 (복구인데 부서진 주사위가 없으면 헛걸음)
+    const has = battle.myDice.some(d => (kind === 'active' ? !d.dead : d.dead));
+    if (!has) { cbBanner(kind === 'dead' ? '부서진 주사위가 없어' : '살아있는 주사위가 없어', 1300); cbRenderHand(); return; }
+    cbPicking = { hi, kind };
+    cbBanner(`${c.name} — 대상 주사위를 골라줘 (다른 곳을 누르면 취소)`);
+    cbUpdate(); cbRenderHand();
+    return;
+  }
+  const res = playCard(battle, hi);
+  if (!res) { cbBanner('지금은 쓸 수 없어', 1200); cbRenderHand(); return; }
+  cbCardFx(res);
+  cbUpdate();
+}
+
+function cbZoom(key) {
+  const z = document.getElementById('cb-zoom');
+  if (!z) return;
+  if (!key) { z.classList.remove('on'); return; }
+  const c = cardOf(key);
+  z.innerHTML = `<div class="zbig"><div class="zart">${c.icon}</div><div class="ztt">${esc(c.name)}</div>
+    <div class="zcc">자원 ${c.cost}</div><div class="zdd">${esc(c.desc)}</div></div>`;
+  z.classList.add('on');
+}
+
+let cbBannerT = null;
+function cbBanner(t, ms) {
+  const b = document.getElementById('cb-banner');
+  if (!b) return;
+  clearTimeout(cbBannerT);
+  if (!t) { b.classList.remove('on'); return; }
+  b.textContent = t;
+  b.classList.add('on');
+  if (ms) cbBannerT = setTimeout(() => b.classList.remove('on'), ms);
+}
+
+// 대상 선택 중 빈 곳을 누르면 취소
+document.addEventListener('click', (e) => {
+  if (!cbPicking || !battle || !battle.myDice) return;
+  if (e.target.closest('.cdie') || e.target.closest('.cb-card')) return;
+  cbPicking = null;
+  cbBanner('');
+  cbUpdate(); cbRenderHand();
+}, true);
+
+function cbFloat(el, txt, color) {
+  const r = el.getBoundingClientRect();
+  const screen = app.querySelector('.battle-screen');
+  if (!screen) return;
+  const sr = screen.getBoundingClientRect();
+  const s = document.createElement('span');
+  s.className = 'cb-float';
+  s.textContent = txt;
+  s.style.left = `${r.left - sr.left + r.width / 2 - 8}px`;
+  s.style.top = `${r.top - sr.top - 8}px`;
+  if (color) s.style.color = color;
+  screen.appendChild(s);
+  setTimeout(() => s.remove(), 950);
+}
+
+// ---------- 턴 종료 연출 ----------
+function cbEndTurn() {
+  if (busy || battle.over) return;
+  busy = true;
+  cbPicking = null; cbBanner('');
+  const hpBefore = battle.player.hp;
+  const script = endCardTurn(battle);
+  if (!script) { busy = false; return; }
+  // 1) 내 공격 — 대상에게 베기
+  let t = 150;
+  if (script.atk > 0 && script.targetUid) {
+    setTimeout(() => playHitEffects([{ uid: script.targetUid, amount: script.atk, killed: script.killed }], 'slash'), t);
+    t += 800;
+    if (script.killed) { setTimeout(() => cbBanner('처치! 공격 불발', 1400), t - 500); }
+  }
+  // 2) 살아남은 적들의 반격 (순서대로)
+  let hpShown = hpBefore;
+  for (const hit of script.foeHits) {
+    setTimeout(() => {
+      const el = app.querySelector(`.enemy[data-uid="${hit.uid}"]`);
+      if (el) { el.classList.add('attacking'); setTimeout(() => el.classList.remove('attacking'), 700); }
+      hpShown = Math.max(0, hpShown - hit.dmg);
+      cbShowPlayerHit(hit.dmg, hpShown);
+    }, t);
+    t += 760;
+  }
+  // 3) 마무리
+  setTimeout(() => {
+    if (script.result === 'defeat') { cbDeathFx(); return; }
+    if (script.result === 'victory') { finishCardBattle(); return; }
+    busy = false;
+    renderCardBattle();
+  }, t + 300);
+}
+
+function cbShowPlayerHit(dmg, hpShown) {
+  const screen = app.querySelector('.battle-screen');
+  if (!screen) return;
+  screen.classList.add('screen-shake');
+  const veil = document.createElement('div');
+  veil.className = 'hurt-veil';
+  screen.appendChild(veil);
+  setTimeout(() => { screen.classList.remove('screen-shake'); veil.remove(); }, 640);
+  const g = app.querySelector('.cb-hud .hp-gauge');
+  if (g) {
+    g.querySelector('.hp-fill').style.width = `${Math.max(0, hpShown / battle.player.maxHp * 100)}%`;
+    g.querySelector('.hp-text').textContent = `${hpShown} / ${battle.player.maxHp}`;
+    const f = document.createElement('span');
+    f.className = 'pdmg-float';
+    f.textContent = `-${dmg}`;
+    g.appendChild(f);
+    setTimeout(() => f.remove(), 1900);
+  }
+}
+
+function cbDeathFx() {
+  const veil = document.createElement('div');
+  veil.className = 'death-veil';
+  app.append(veil);
+  setTimeout(() => {
+    busy = false;
+    run.hp = 0;
+    clearSave();
+    if (currentNodeType === 'final') { showFinalEnd(battle.turn); return; }
+    showEnd(false);
+  }, 1000);
+}
+
+function finishCardBattle() {
+  setTimeout(() => {
+    busy = false;
+    run.hp = battle.player.hp;
+    // 승리 시 회복 유물 (빵부스러기·꿀단지)
+    const heal = run.relics.map(id => DB.relicById[id])
+      .filter(r => r.hook.type === 'healOnVictory')
+      .reduce((s, r) => s + r.hook.amount, 0);
+    if (heal > 0) run.hp = Math.min(run.maxHp, run.hp + heal);
+    if (currentNodeType === 'boss') { showBossReward(afterBossVictory); return; }
+    lastCoinGain = coinReward(run, currentNodeType);
+    run.coins -= lastCoinGain;  // 전리품 창에서 눌러 받는다
+    showCardReward();
+  }, 900);
+}
+
+// 전투 보상: 재화 + 감정 카드 3장 중 1장 (엘리트는 유물 줄 추가)
+function showCardReward() {
+  const choices = rollCardRewards(run, currentNodeType);
+  const groups = choices.length ? [{ kind: 'card', choices }] : [];
+  if (currentNodeType === 'elite') {
+    const relics = eliteRelicChoices(run);
+    if (relics.length) groups.push({ kind: 'relic', choices: relics, label: relics[0].item.tier === 'elite' ? '정예 유물' : '유물' });
+  }
+  lootState = {
+    title: '승리!',
+    coins: lastCoinGain,
+    groups,
+    onExit: () => { saveRun(run); showMap(); },
+  };
+  renderLoot();
+}
+
+function cbFoeInfo(uid) {
+  const e = battle && battle.enemies.find(x => x.uid === uid);
+  if (!e) return;
+  app.append(h(`
+    <div class="modal-back" id="foe-info">
+      <div class="modal">
+        <h3>${e.art} ${esc(e.name)} <small class="cat-tag">${ENEMY_TIER_KO[e.tier] || e.tier}${e.final ? ' · 무한' : ''}</small></h3>
+        <p class="modal-text">${e.final ? '체력 ∞ — 쓰러지지 않는다' : `HP ${e.hp}/${e.maxHpInit}`}</p>
+        <p class="modal-text">🎲 매 턴 주사위 ${e.diceN}개 (${e.dmin}~${e.dmax})${e.final ? ' — 시간이 갈수록 늘어난다' : ''}</p>
+        <p class="hint">남은 주사위가 턴 종료에 전부 나를 때린다. 내 주사위로 부딪쳐 깎아내자.</p>
+        <button class="btn primary" id="foe-info-close">닫기</button>
+      </div>
+    </div>`));
+  const back = document.getElementById('foe-info');
+  document.getElementById('foe-info-close').addEventListener('click', () => back.remove());
+  back.addEventListener('click', (ev) => { if (ev.target === back) back.remove(); });
 }
 
 // ---------- 엔딩 ----------

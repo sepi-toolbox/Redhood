@@ -1227,3 +1227,108 @@ span.enemy-art {
 .deck-list li.slot-empty { opacity: .62; }
 .cat-tag.t-slot { color: #8e8172; border-color: #4a4038; background: #221d19; font-style: italic; }
 .sheet-row.combo-grid .combo-row .cat-tag.t-slot { opacity: .85; }
+
+/* ==========================================================================
+ * v2.0 카드 전투 — 상호 차감 배정 + 감정 카드
+ * ========================================================================== */
+.card-battle { display: flex; flex-direction: column; overflow: hidden; }
+/* 적 주사위 — 그림 아래 붉은 칩 (몬스터 영역 높이는 그대로) */
+.card-battle .enemy .fdice {
+  position: absolute; left: 50%; bottom: -46px; transform: translateX(-50%);
+  display: flex; gap: 5px; z-index: 3;
+}
+.card-battle .enemy-zone { margin-bottom: 46px; } /* 칩이 내려앉을 자리 */
+.fdie {
+  width: 34px; height: 34px; border-radius: 8px; background: #3a1713; border: 1.5px solid #7d3a2e;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800;
+  color: #f4c9ae; box-shadow: 0 2px 4px rgba(0,0,0,.5); font-style: normal;
+  transition: transform .3s, opacity .3s;
+}
+.fdie.dead { opacity: 0; transform: scale(.2) rotate(40deg); pointer-events: none; }
+.fdie.pickable { border-color: #e8b64d; box-shadow: 0 0 10px rgba(232,182,77,.55); animation: cb-pulse 1s infinite; }
+@keyframes cb-pulse { 50% { box-shadow: 0 0 16px rgba(232,182,77,.8); } }
+
+/* HUD: 내 체력 + 자원 */
+.cb-hud { flex: none; display: flex; align-items: center; gap: 8px; padding: 2px 12px 0; }
+.cb-hud .hp-gauge { flex: 1; position: relative; }
+.cb-res { display: flex; align-items: center; gap: 4px; }
+.cb-res i { width: 13px; height: 13px; border-radius: 50%; background: #e8b64d; box-shadow: 0 0 6px rgba(232,182,77,.6); }
+.cb-res i.off { background: #3a3226; box-shadow: none; }
+.cb-res small { font-size: 9.5px; color: #8d8064; margin-left: 3px; }
+.cb-preview { flex: none; text-align: center; font-size: 12px; color: #b3a685; padding: 3px 10px 0; min-height: 19px; }
+.cb-preview b.atk { color: #f0c05a; } .cb-preview b.dmg { color: #e88a72; } .cb-preview b.kill { color: #8fd08a; }
+
+/* 내 주사위 */
+.cb-dice { flex: none; display: flex; justify-content: center; gap: 10px; padding: 6px 8px 2px; }
+.cdie {
+  width: 54px; height: 54px; border-radius: 12px; background: #efe6d0; color: #26201a;
+  border: 2px solid #b9a67f; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 800; box-shadow: 0 3px 6px rgba(0,0,0,.55);
+  position: relative; transition: transform .15s; font-family: inherit;
+}
+.cdie.sel { transform: translateY(-7px); border-color: #e8b64d; box-shadow: 0 0 14px rgba(232,182,77,.65); }
+.cdie.dead { background: #37312a; color: #6b6152; border-color: #4a4238; box-shadow: none; }
+.cdie.dead::after {
+  content: ''; position: absolute; inset: 4px; border-radius: 8px;
+  background: linear-gradient(45deg, transparent 46%, #221d17 46%, #221d17 54%, transparent 54%);
+}
+.cdie.pickable { border-color: #8fd08a; box-shadow: 0 0 12px rgba(143,208,138,.6); animation: cb-pulse 1s infinite; }
+.cdie .corig {
+  position: absolute; top: -7px; right: -5px; font-size: 10px; background: #5a4a2e; color: #e8dcae;
+  border-radius: 8px; padding: 0 4px; font-weight: 600;
+}
+.cb-help { flex: none; text-align: center; font-size: 10px; color: #7d7258; padding: 2px 8px 0; }
+
+/* 손패 — 부채꼴, 화면 아래 걸침 */
+.cb-handzone { position: relative; flex: 1; min-height: 0; }
+.cb-hand { position: absolute; bottom: -26px; left: 0; width: 100%; height: 200px; }
+.cb-card {
+  position: absolute; left: 50%; bottom: 0; width: 104px; height: 142px; margin-left: -52px;
+  border-radius: 10px; background: linear-gradient(180deg, #f2e7cd, #e3d3ab); border: 3px solid #a8352e;
+  box-shadow: 0 4px 10px rgba(0,0,0,.7); transform-origin: 50% 120%; transition: transform .22s;
+  display: flex; flex-direction: column; overflow: hidden; touch-action: none;
+}
+.cb-card.dragging { transition: none; z-index: 40; }
+.cb-card.broke { filter: grayscale(.55) brightness(.8); }
+.cb-card .ccost {
+  position: absolute; top: -2px; left: -2px; width: 25px; height: 25px; border-radius: 50%;
+  background: radial-gradient(#e8b64d, #b07f22); border: 2px solid #7d5a17; color: #241c07;
+  display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; z-index: 2;
+}
+.cb-card .cart { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 36px;
+  background: linear-gradient(180deg, #2a2018, #3d2c1e); }
+.cb-card .cnm { flex: none; text-align: center; font-size: 11.5px; font-weight: 700; color: #3d2413;
+  padding: 4px 2px 5px; background: linear-gradient(180deg, #e8d8b2, #d8c69a); border-top: 2px solid #a8352e; white-space: nowrap; }
+.battle-screen > .cb-end {
+  position: absolute; right: 12px; bottom: 205px; z-index: 30;
+  display: inline-block; width: auto; padding: 12px 18px; font-size: 14.5px;
+}
+
+/* 안내·확대·전리품 */
+.battle-screen > .cb-banner {
+  position: absolute; top: 300px; width: 100%; text-align: center; z-index: 50; font-size: 13px;
+  color: #f4dfa8; text-shadow: 0 1px 3px #000; display: none; pointer-events: none;
+}
+.cb-banner.on { display: block; }
+.battle-screen > .cb-zoom { position: absolute; inset: 0; z-index: 60; background: rgba(0,0,0,.62); display: none;
+  align-items: center; justify-content: center; }
+.cb-zoom.on { display: flex; }
+.cb-zoom .zbig { width: 230px; border-radius: 14px; background: linear-gradient(180deg, #f2e7cd, #e3d3ab);
+  border: 4px solid #a8352e; overflow: hidden; box-shadow: 0 8px 30px #000; }
+.cb-zoom .zart { height: 122px; display: flex; align-items: center; justify-content: center; font-size: 68px;
+  background: linear-gradient(180deg, #2a2018, #3d2c1e); }
+.cb-zoom .ztt { padding: 10px 12px 2px; font-size: 17px; font-weight: 800; color: #3d2413; }
+.cb-zoom .zcc { padding: 0 12px; font-size: 12px; color: #7d5a17; font-weight: 700; }
+.cb-zoom .zdd { padding: 8px 12px 14px; font-size: 13.5px; line-height: 1.55; color: #4a3a28; }
+.battle-screen > .cb-float {
+  position: absolute; z-index: 55; font-size: 17px; font-weight: 800; color: #f0c05a;
+  text-shadow: 0 1px 3px #000; pointer-events: none; animation: cb-rise 1s forwards;
+}
+@keyframes cb-rise { to { transform: translateY(-40px); opacity: 0; } }
+/* 전투 중에는 전리품 판·힌트 줄을 감춘다 → 승리 후 loot-mode에서 켠다 */
+.card-battle .cb-hintline, .card-battle .sheet-zone.cb-loot { display: none; }
+.card-battle.loot-mode .cb-hintline { display: block; }
+.card-battle.loot-mode .sheet-zone.cb-loot { display: flex; position: absolute; left: 0; right: 0; bottom: 0; top: 340px; z-index: 45; }
+.card-battle.loot-mode .cb-hand, .card-battle.loot-mode .cb-end, .card-battle.loot-mode .cb-dice,
+.card-battle.loot-mode .cb-preview, .card-battle.loot-mode .cb-help, .card-battle.loot-mode .fdice { display: none; }
+.card-battle.loot-mode .cb-hintline { position: absolute; top: 316px; width: 100%; text-align: center; z-index: 45; }
