@@ -1232,6 +1232,7 @@ span.enemy-art {
  * v2.0 카드 전투 — 상호 차감 배정 + 감정 카드
  * ========================================================================== */
 .card-battle { display: flex; flex-direction: column; overflow: hidden; }
+.card-battle .bg-layer { height: 100%; }   /* v2.01: 족보판이 사라졌으니 배경이 화면 전체를 덮는다 */
 /* 적 주사위 — 그림 아래 붉은 칩 (몬스터 영역 높이는 그대로) */
 .card-battle .enemy .fdice {
   position: absolute; left: 50%; bottom: -46px; transform: translateX(-50%);
@@ -1239,13 +1240,19 @@ span.enemy-art {
 }
 .card-battle .enemy-zone { margin-bottom: 46px; } /* 칩이 내려앉을 자리 */
 .fdie {
-  width: 34px; height: 34px; border-radius: 8px; background: #3a1713; border: 1.5px solid #7d3a2e;
+  width: 38px; height: 38px; border-radius: 8px; background: transparent; border: none; padding: 0;
   display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800;
-  color: #f4c9ae; box-shadow: 0 2px 4px rgba(0,0,0,.5); font-style: normal;
+  color: #f4c9ae; font-style: normal;
   transition: transform .3s, opacity .3s;
 }
+.fdie img {
+  width: 100%; height: 100%; object-fit: contain; pointer-events: none;
+  filter: sepia(1) hue-rotate(-28deg) saturate(2.6) brightness(.72) drop-shadow(0 2px 3px rgba(0,0,0,.65));
+}
 .fdie.dead { opacity: 0; transform: scale(.2) rotate(40deg); pointer-events: none; }
-.fdie.pickable { border-color: #e8b64d; box-shadow: 0 0 10px rgba(232,182,77,.55); animation: cb-pulse 1s infinite; }
+.fdie.pickable img { filter: sepia(1) hue-rotate(-28deg) saturate(2.6) brightness(.85) drop-shadow(0 0 7px rgba(232,182,77,.9)); }
+.fdie.pickable { animation: cb-pulse-t 1s infinite; }
+@keyframes cb-pulse-t { 50% { transform: translateY(-2px); } }
 @keyframes cb-pulse { 50% { box-shadow: 0 0 16px rgba(232,182,77,.8); } }
 
 /* HUD: 내 체력 + 자원 */
@@ -1261,11 +1268,26 @@ span.enemy-art {
 /* 내 주사위 */
 .cb-dice { flex: none; display: flex; justify-content: center; gap: 10px; padding: 6px 8px 2px; }
 .cdie {
-  width: 54px; height: 54px; border-radius: 12px; background: #efe6d0; color: #26201a;
+  width: 58px; height: 62px; border-radius: 12px; background: #efe6d0; color: #26201a;
   border: 2px solid #b9a67f; display: flex; align-items: center; justify-content: center;
   font-size: 26px; font-weight: 800; box-shadow: 0 3px 6px rgba(0,0,0,.55);
   position: relative; transition: transform .15s; font-family: inherit;
 }
+.cdie.art {
+  background: transparent url('../assets/ui/die_pad.png') center / contain no-repeat;
+  border-color: transparent; box-shadow: none;
+}
+.cdie.art .pip-art {
+  width: 44px; height: 44px; object-fit: contain; pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
+}
+.cdie.art .cval {
+  font-size: 26px; font-weight: 800; color: #3d2413;
+  text-shadow: 0 0 8px rgba(232,182,77,.8); /* 6을 넘긴 값 — 카드의 힘 */
+}
+.cdie.art.dead { background-image: url('../assets/ui/die_pad.png'); filter: grayscale(.9) brightness(.55); }
+.cdie.art.sel { filter: drop-shadow(0 0 10px rgba(232,182,77,.85)); }
+.cdie.art.pickable { filter: drop-shadow(0 0 10px rgba(143,208,138,.85)); }
 .cdie.sel { transform: translateY(-7px); border-color: #e8b64d; box-shadow: 0 0 14px rgba(232,182,77,.65); }
 .cdie.dead { background: #37312a; color: #6b6152; border-color: #4a4238; box-shadow: none; }
 .cdie.dead::after {
@@ -1281,7 +1303,7 @@ span.enemy-art {
 
 /* 손패 — 부채꼴, 화면 아래 걸침 */
 .cb-handzone { position: relative; flex: 1; min-height: 0; }
-.cb-hand { position: absolute; bottom: -26px; left: 0; width: 100%; height: 200px; }
+.cb-hand { position: absolute; bottom: -24px; left: 0; width: 100%; height: 200px; }
 .cb-card {
   position: absolute; left: 50%; bottom: 0; width: 104px; height: 142px; margin-left: -52px;
   border-radius: 10px; background: linear-gradient(180deg, #f2e7cd, #e3d3ab); border: 3px solid #a8352e;
@@ -1300,8 +1322,36 @@ span.enemy-art {
 .cb-card .cnm { flex: none; text-align: center; font-size: 11.5px; font-weight: 700; color: #3d2413;
   padding: 4px 2px 5px; background: linear-gradient(180deg, #e8d8b2, #d8c69a); border-top: 2px solid #a8352e; white-space: nowrap; }
 .battle-screen > .cb-end {
-  position: absolute; right: 12px; bottom: 205px; z-index: 30;
-  display: inline-block; width: auto; padding: 12px 18px; font-size: 14.5px;
+  position: absolute; right: 10px; bottom: 92px; z-index: 42;
+  display: inline-block; width: auto; padding: 10px 12px; font-size: 13.5px;
+}
+.battle-screen > .cb-orb {
+  position: absolute; left: 12px; bottom: 92px; z-index: 42;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #ffdf9a, #d89b2e 55%, #7d4a12);
+  border: 2px solid #5a3c10; box-shadow: 0 0 14px rgba(232,182,77,.5), 0 3px 6px rgba(0,0,0,.6);
+  display: flex; align-items: center; justify-content: center;
+}
+.battle-screen > .cb-orb b { font-size: 24px; font-weight: 800; color: #2e1e05; text-shadow: 0 1px 1px rgba(255,240,200,.6); }
+.battle-screen > .cb-orb.empty { filter: grayscale(.8) brightness(.6); box-shadow: none; }
+.battle-screen > .cb-pile {
+  position: absolute; bottom: 10px; z-index: 42;
+  width: 44px; height: 58px; border-radius: 7px;
+  background: linear-gradient(160deg, #4a1f1a, #2a120f);
+  border: 2px solid #7d3a2e; box-shadow: 2px 2px 0 #1c0c0a, 4px 4px 0 #14080788, 0 4px 8px rgba(0,0,0,.6);
+  display: flex; align-items: center; justify-content: center;
+}
+.battle-screen > .cb-pile::before {
+  content: ''; position: absolute; inset: 5px; border-radius: 4px;
+  border: 1px solid rgba(232,182,77,.35);
+  background: radial-gradient(circle, rgba(232,182,77,.14) 0%, transparent 70%);
+}
+.battle-screen > .cb-pile.deck { left: 12px; }
+.battle-screen > .cb-pile.disc { right: 12px; transform: rotate(4deg); filter: brightness(.75); }
+.battle-screen > .cb-pile b {
+  position: absolute; right: -7px; bottom: -7px; min-width: 21px; height: 21px; border-radius: 11px;
+  background: #241f18; border: 1.5px solid #8d8064; color: #f0e2c0;
+  font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 4px;
 }
 
 /* 안내·확대·전리품 */
