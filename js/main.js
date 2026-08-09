@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.32'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.33'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -135,7 +135,8 @@ function showTitle() {
 
 // v0.65: 로컬에서만 열리는 테스트 훅 — 보스 전리품처럼 손으로 도달하기 어려운 화면 검증용
 if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-  window.__dev = { showBossReward: (cb) => showBossReward(cb || (() => showMap())), get run() { return run; } };
+  window.__dev = { showBossReward: (cb) => showBossReward(cb || (() => showMap())), get run() { return run; },
+    get battle() { return battle; }, redraw: () => renderBattle(), DB };
 }
 
 // v0.81: 배경 층 — 화면 위쪽 띠에만 그린다.
@@ -497,6 +498,33 @@ function showFinalEnd(turns) {
 }
 
 // ---------- 아이콘 아트 (v0.24): 이모지 자리 → 그림 아이콘 ----------
+/* ---------- 표식(badge) — v1.33 -------------------------------------------
+ * 화면에 뜨는 '아이콘 + 값' 은 전부 이 하나를 통과한다. 결(tone)은 셋뿐:
+ *   good  내게 유리한 것  (내 버프 · 적에게 걸린 디버프)
+ *   bad   내게 불리한 것  (내가 물린 지속 피해 · 적이 두른 것)
+ *   rule  규칙·제약       (정예/보스 기믹)
+ * 아이콘은 그림이 있으면 그림, 없으면 글자 — 담는 틀은 어느 쪽이든 같다.
+ * ------------------------------------------------------------------------ */
+const ICON_ASSET = new Set(['status_bleed', 'status_block', 'status_confuse', 'status_focus',
+  'status_regen', 'status_strength', 'status_vulnerable', 'status_weak',
+  'intent_attack', 'intent_defend', 'intent_confuse', 'intent_empower', 'intent_heal']);
+function badgeIcon(icon) {
+  return ICON_ASSET.has(icon)
+    ? `<img class="bdg-ico" src="assets/icons/${icon}.png" alt="" draggable="false">`
+    : `<span class="bdg-ico glyph">${icon}</span>`;
+}
+function badge(tone, icon, value, opt = {}) {
+  return `<span class="badge t-${tone}${opt.cls ? ' ' + opt.cls : ''}"${opt.title ? ` title="${esc(opt.title)}"` : ''}>`
+    + badgeIcon(icon)
+    + (value !== '' && value != null ? `<span class="bdg-val">${value}</span>` : '')
+    + (opt.sub ? `<span class="bdg-sub">${opt.sub}</span>` : '')
+    + '</span>';
+}
+const badgeRow = (cls, list) => {
+  const inner = list.filter(Boolean).join('');
+  return inner ? `<span class="${cls}">${inner}</span>` : '';
+};
+
 function ico(name, cls = '') {
   return `<img class="ico ${cls}" src="assets/icons/${name}.png" alt="" draggable="false">`;
 }
@@ -778,6 +806,12 @@ function renderBattle(opts = {}) {
             ${/* v0.52: 정보(의도·이름·체력바)는 머리 위, 그림은 크게 아래 */ ''}
             <span class="target-pin">▼</span>
             <span class="intent ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.chained ? 'chained' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
+            ${badgeRow('rule-row', [
+              e.wardLeft > 0 ? badge('rule', '🪨', e.ward, { title: `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다` }) : '',
+              e.capLeft > 0 ? badge('rule', '⛓', e.cap, { title: `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다` }) : '',
+              e.demand ? badge('rule', '📜', DEMAND_KO[e.demand.kind || e.demand.category] || '요구',
+                { sub: e.demand.left, cls: 'urgent', title: `${e.demand.left}턴 안에 확정하지 않으면 ${e.demand.damage} 피해` }) : '',
+            ])}
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
               // 적 방어도 LoL식: HP 구간 끝에 회백색 실드 세그먼트
@@ -788,16 +822,14 @@ function renderBattle(opts = {}) {
             })()}
             <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${(() => {
               const d = e.debuffs || {};
-              const gim = [
-                e.wardLeft > 0 ? `<span class="gim ward">🪨${e.ward}</span>` : '',
-                e.capLeft > 0 ? `<span class="gim cap">⛓${e.cap}</span>` : '',
-                e.demand ? `<span class="gim demand">📜${DEMAND_KO[e.demand.kind || e.demand.category] || '요구'} ${e.demand.left}</span>` : '',
-              ].filter(Boolean).join('');
-              const chips = [
-                e.block > 0 ? `${ico('intent_defend')}${e.block}` : '', e.power > 0 ? `${ico('intent_empower')}+${e.power}` : '',
-                d.weak > 0 ? `${ico('status_weak')}${d.weak}` : '', d.bleed > 0 ? `${ico('status_bleed')}${d.bleed}` : '', d.vulnerable > 0 ? `${ico('status_vulnerable')}${d.vulnerable}` : '',
-              ].filter(Boolean).join(' ');
-              return (chips || gim) ? ` <span class="enemy-buffs">${gim}${chips}</span>` : '';
+              return ' ' + badgeRow('enemy-buffs', [
+                e.block > 0 ? badge('bad', 'intent_defend', e.block, { title: '적 방어도' }) : '',
+                e.power > 0 ? badge('bad', 'intent_empower', '+' + e.power, { title: '적 강화' }) : '',
+                // 적에게 불리한 것 = 내게 유리한 것
+                d.weak > 0 ? badge('good', 'status_weak', d.weak, { title: '약화' }) : '',
+                d.bleed > 0 ? badge('good', 'status_bleed', d.bleed, { title: '출혈' }) : '',
+                d.vulnerable > 0 ? badge('good', 'status_vulnerable', d.vulnerable, { title: '취약' }) : '',
+              ]);
             })()}</span>
             ${enemyArtHtml(e)}
           </button>`).join('')}
@@ -821,7 +853,7 @@ function renderBattle(opts = {}) {
               ? '<span class="pip-art empty"></span>'
               : `<img class="pip-art" src="${dieFaceSrc(def.id, d.face)}" alt="${d.face}" draggable="false">`}
             ${st ? `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>${st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''}` : ''}
-            ${pinned ? '<span class="pin-mark">📌</span>' : ''}
+            ${pinned && !st ? '<span class="st-tint"></span><span class="st-rim"></span>' : ''}
             <small>${st ? esc(st.name) : marked ? '다시' : pinned ? '새김' : ''}</small>
           </button>`;
         }).join('')}
@@ -839,7 +871,7 @@ function renderBattle(opts = {}) {
             ${COMBO_PLATE_READY.has(variant.id) ? `style="border-image-source: url('assets/ui/paper_${variant.id}.png'); border-width: 11px ${plateEdge(variant.id)}px"` : ''}>
             ${COMBO_PLATE_READY.has(variant.id) ? '' : rowIcon(comboIcon(cat, variant))}
             <span class="row-body">
-              <span class="sheet-name">${burst ? '<b class="bolt">⚡</b>' : ''}${esc(variant.name)}</span>
+              <span class="sheet-name">${esc(variant.name)}${burst ? '<small class="cat-tag t-burst">⚡일격</small>' : ''}</span>
               <small class="cat-tag">${esc(cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
             </span>
             <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? bd.total : '—') : '—'}</span>
@@ -848,12 +880,16 @@ function renderBattle(opts = {}) {
       ${(() => {
         // 내 버프 칩 — 체력바 위, 길게 눌러 상세 (v0.19)
         const b = battle.buffs;
-        const chips = [
-          battle.whet > 0 ? `<span class="whet-chip" title="⚡일격 족보로만 쓸 수 있다">🔥벼름 ${battle.whet} <b>⚡×${whetMultOf(battle.whet).toFixed(1)}</b></span>` : '',
-          b.strength > 0 ? `${ico('status_strength')}${b.strength}` : '', b.focus > 0 ? `${ico('status_focus')}+${b.focus}` : '', b.regen > 0 ? `${ico('status_regen')}+${b.regen}` : '',
-          battle.player.dot > 0 ? `${ico('status_bleed')}${DOT_KO[battle.player.dotKind] || '독'} ${battle.player.dot}` : '',
-        ].filter(Boolean);
-        return chips.length ? `<div class="buff-strip" id="buff-strip">${chips.map(c => `<span class="buff-chip">${c}</span>`).join('')}</div>` : '';
+        const row = badgeRow('badge-row', [
+          battle.whet > 0 ? badge('good', '🔥', battle.whet,
+            { sub: '×' + whetMultOf(battle.whet).toFixed(1), cls: 'whet', title: '벼름 — ⚡일격 족보로만 터뜨린다' }) : '',
+          b.strength > 0 ? badge('good', 'status_strength', b.strength, { title: '힘 — 확정마다 피해 +' }) : '',
+          b.focus > 0 ? badge('good', 'status_focus', '+' + b.focus, { title: '집중 — 리롤 +' }) : '',
+          b.regen > 0 ? badge('good', 'status_regen', '+' + b.regen, { title: '재생 — 턴마다 회복' }) : '',
+          battle.player.dot > 0 ? badge('bad', 'status_bleed', battle.player.dot,
+            { title: (DOT_KO[battle.player.dotKind] || '독') + ' — 내 행동 뒤에 피해' }) : '',
+        ]);
+        return row ? `<div class="buff-strip" id="buff-strip">${row}</div>` : '';
       })()}
       <div class="player-bar ${opts.playerHit ? 'hurt' : ''}">
         <span class="pb-side"></span>
