@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.29 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.30 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -289,7 +289,11 @@ function cell(tr, node, ro){ const td=document.createElement('td'); if(ro) td.cl
   if(node instanceof Node) td.appendChild(node); else td.innerHTML = node==null?'':node; tr.appendChild(td); return td; }
 
 /* ---------- 공통 도우미 ---------- */
-const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['status','상태이상 부여'],['confuse','혼란(구)'],['heal','회복'],['rest','휴식'],['poison','독(🌀)'],['bleed','출혈(🌀)'],['selfDamage','자해(❓)']];
+const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['status','상태이상 부여'],['confuse','혼란(구)'],['heal','회복'],['rest','휴식'],['poison','독(🌀)'],['bleed','출혈(🌀)'],['selfDamage','자해(❓)'],
+  ['ward','🪨 문턱 — 이 값 이하 단발은 무시'],['cap','⛓ 상한 — 단발 피해를 이 값으로'],
+  ['demand','📜 요구 — 정한 족보를 안 내면 벌'],['drainWhet','🌀 벼름 흡수'],['unpin','💨 새김 흩기']];
+const DEMAND_TARGETS=[['ofKind','같은 눈 (원페어·트리플·포카드·야찌)'],['straight','스트레이트 (스몰·라지)'],
+  ['fullHouse','풀하우스'],['twoPair','투페어'],['chance','노페어']];
 const ST_OPS=(DB.statuses.list||[]).map(s=>[s.id,s.name]);
 const DB_statusById={}; (DB.statuses.list||[]).forEach(s=>DB_statusById[s.id]=s); DB.statusById2=DB_statusById;
 const NO_POWER=new Set(['onUseFaceDamage','onUseFaceCoin','noReroll','zeroValue','hideFace','needReroll','linked','spread','faceLow','faceHigh','rerollCost']); // 세기를 적 행동에서 정하는 건 부패뿐
@@ -325,7 +329,7 @@ function listEditor(path, label, options, arr){
     mark(path, `${label}에 추가`); redraw(); }));
   return box;
 }
-const NO_AMOUNT=new Set(['rest']);   // 수치가 없는 효과
+const NO_AMOUNT=new Set(['rest','unpin']);   // 수치가 없는 효과
 const ABILITY_OPS=[['strength','힘'],['focus','집중'],['regen','재생'],['block','방어'],['heal','회복'],
   ['weakEnemy','적 약화'],['bleed','출혈'],['vulnerable','취약'],['stun','기절'],['dodge','회피'],
   ['rerollNext','다음 턴 리롤'],['buffNext','다음 족보 강화'],['cleanse','정화'],['selfDamage','자해'],
@@ -339,7 +343,7 @@ const DIE_OPS_ED={
   contribute:[['selfDamage','자해'],['heal','회복'],['block','방어'],['split','쪼개기 — 같은 눈 족보에서 두 번']],
   idle:[['whet','벼름']],
 };
-const OPN={rest:'휴식',selfDamage:'자해',whet:'벼름',per:'간격',ratio:'비율',poison:'독',bleed:'출혈',damage:'피해',block:'방어',empower:'힘',confuse:'혼란',heal:'회복',weaken:'약화',
+const OPN={rest:'휴식',selfDamage:'자해',whet:'벼름',per:'간격',ratio:'비율',ward:'문턱',cap:'상한',demand:'요구 벌 피해',drainWhet:'벼름 흡수',unpin:'새김 흩기',poison:'독',bleed:'출혈',damage:'피해',block:'방어',empower:'힘',confuse:'혼란',heal:'회복',weaken:'약화',
   vulnerable:'취약',bleed:'출혈',regen:'재생',focus:'집중',strength:'힘',weakEnemy:'적 약화',
   loseHp:'HP 감소',gainRelic:'유물 획득',drain:'흡혈'};
 const EN = {}; DB.enemies.forEach((e,i)=>EN[e.id]={e,i});
@@ -507,9 +511,30 @@ function tabMoves(v){
         row.appendChild(select(`${base}.effects.${k}.op`, e.name+' '+m.name+' 효과'+(k+1), ENEMY_OPS, {after:(v)=>{
           // 상태이상으로 바꾸면 종류를 채워 넣는다 — 비워두면 데이터가 반쪽이 된다
           if(v==='status' && !x.kind){ writeP(`${base}.effects.${k}.kind`, ST_OPS[0][0]); mark(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 상태이상 종류'); }
-          if(v!=='status'){ if(x.kind!==undefined) removeP(`${base}.effects.${k}.kind`); if(x.power!==undefined) removeP(`${base}.effects.${k}.power`); }
+          if(v!=='status' && v!=='demand'){ if(x.kind!==undefined) removeP(`${base}.effects.${k}.kind`); }
+          if(v!=='status'){ if(x.power!==undefined) removeP(`${base}.effects.${k}.power`); }
+          if(v!=='demand'){ if(x.category!==undefined) removeP(`${base}.effects.${k}.category`); }
+          if(v==='demand' && !x.kind && !x.category){ writeP(`${base}.effects.${k}.kind`, DEMAND_TARGETS[0][0]); mark(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 요구 족보'); }
+          if((v==='ward'||v==='cap'||v==='demand') && x.turns===undefined){ writeP(`${base}.effects.${k}.turns`, v==='demand'?2:3); mark(`${base}.effects.${k}.turns`, e.name+' '+m.name+' 지속 턴'); }
+          if(v!=='ward'&&v!=='cap'&&v!=='demand'){ if(x.turns!==undefined) removeP(`${base}.effects.${k}.turns`); }
           redraw();
         }}));
+        // 요구 — 어떤 족보를 내야 하는가 + 몇 턴 안에
+        if(x.op==='demand'){
+          row.appendChild(select(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 요구 족보',
+            [...DEMAND_TARGETS, ...DB.scoring.categories.map(c=>['cat:'+c.id, c.name+' (딱 이것만)'])],
+            {def:DEMAND_TARGETS[0][0], after:(v)=>{
+              if(v.startsWith('cat:')){ writeP(`${base}.effects.${k}.category`, v.slice(4)); removeP(`${base}.effects.${k}.kind`); }
+              else { writeP(`${base}.effects.${k}.kind`, v); if(x.category!==undefined) removeP(`${base}.effects.${k}.category`); }
+              redraw();
+            }}));
+        }
+        // 문턱·상한·요구는 몇 턴 가는지가 따로 있다
+        if(x.op==='ward'||x.op==='cap'||x.op==='demand'){
+          const l=document.createElement('span'); l.className='sub'; l.textContent='턴';
+          const tf=field(`${base}.effects.${k}.turns`, e.name+' '+m.name+' 지속 턴', {num:true, def:x.op==='demand'?2:3});
+          tf.style.maxWidth='44px'; row.appendChild(l); row.appendChild(tf);
+        }
         if(x.op==='status'){
           row.appendChild(select(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 상태이상 종류', ST_OPS, {def:ST_OPS[0][0], after:(v)=>{
             // 폭발 칸을 쓰지 않는 종류로 바꿨으면 남아 있던 값을 지운다

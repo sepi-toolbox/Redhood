@@ -2,9 +2,10 @@
 import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall } from './engine.js';
 import { whetMultOf } from './yahtzee.js';
+import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.29'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.30'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -787,11 +788,16 @@ function renderBattle(opts = {}) {
             })()}
             <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${(() => {
               const d = e.debuffs || {};
+              const gim = [
+                e.wardLeft > 0 ? `<span class="gim ward">🪨${e.ward}</span>` : '',
+                e.capLeft > 0 ? `<span class="gim cap">⛓${e.cap}</span>` : '',
+                e.demand ? `<span class="gim demand">📜${DEMAND_KO[e.demand.kind || e.demand.category] || '요구'} ${e.demand.left}</span>` : '',
+              ].filter(Boolean).join('');
               const chips = [
                 e.block > 0 ? `${ico('intent_defend')}${e.block}` : '', e.power > 0 ? `${ico('intent_empower')}+${e.power}` : '',
                 d.weak > 0 ? `${ico('status_weak')}${d.weak}` : '', d.bleed > 0 ? `${ico('status_bleed')}${d.bleed}` : '', d.vulnerable > 0 ? `${ico('status_vulnerable')}${d.vulnerable}` : '',
               ].filter(Boolean).join(' ');
-              return chips ? ` <span class="enemy-buffs">${chips}</span>` : '';
+              return (chips || gim) ? ` <span class="enemy-buffs">${gim}${chips}</span>` : '';
             })()}</span>
             ${enemyArtHtml(e)}
           </button>`).join('')}
@@ -1032,6 +1038,9 @@ function showEnemyInfo(uid) {
     d.weak > 0 ? `<li>${ico('status_weak')} 약화 ${d.weak} — 공격력 -${d.weak} · 매 턴 1 소멸</li>` : '',
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
     d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable} · 매 턴 1 소멸</li>` : '',
+    e.wardLeft > 0 ? `<li>🪨 문턱 ${e.ward} — 한 번에 ${e.ward} 이하로 때리면 아예 안 통한다 (${e.wardLeft}턴)</li>` : '',
+    e.capLeft > 0 ? `<li>⛓ 상한 ${e.cap} — 한 번에 ${e.cap}을 넘겨 줄 수 없다 (${e.capLeft}턴)</li>` : '',
+    e.demand ? `<li>📜 요구 — ${e.demand.left}턴 안에 <b>${DEMAND_KO[e.demand.kind || e.demand.category] || '지정 족보'}</b>를 확정하지 않으면 ${e.demand.damage} 피해</li>` : '',
     e.stunned ? '<li>💫 다음 행동 취소됨</li>' : '',
   ].filter(Boolean).join('');
   app.append(h(`

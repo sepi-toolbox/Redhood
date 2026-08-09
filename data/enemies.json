@@ -5,8 +5,8 @@
     "tier": "normal",
     "art": "🐦‍⬛",
     "hp": [
-      33,
-      37
+      35,
+      39
     ],
     "moves": {
       "peck": {
@@ -85,8 +85,8 @@
     "tier": "normal",
     "art": "🔥",
     "hp": [
-      30,
-      34
+      31,
+      36
     ],
     "moves": {
       "scorch": {
@@ -201,8 +201,8 @@
     "tier": "normal",
     "art": "🕷️",
     "hp": [
-      36,
-      40
+      38,
+      42
     ],
     "moves": {
       "bite": {
@@ -288,8 +288,8 @@
     "tier": "normal",
     "art": "🐕",
     "hp": [
-      40,
-      44
+      42,
+      46
     ],
     "moves": {
       "bite": {
@@ -369,8 +369,8 @@
     "tier": "normal",
     "art": "🥀",
     "hp": [
-      43,
-      47
+      45,
+      49
     ],
     "moves": {
       "scratch": {
@@ -451,8 +451,8 @@
     "tier": "normal",
     "art": "🌳",
     "hp": [
-      50,
-      55
+      53,
+      58
     ],
     "moves": {
       "slam": {
@@ -542,8 +542,8 @@
     "tier": "normal",
     "art": "💧",
     "hp": [
-      32,
-      36
+      33,
+      38
     ],
     "moves": {
       "splash": {
@@ -650,8 +650,8 @@
     "tier": "normal",
     "art": "🪱",
     "hp": [
-      28,
-      32
+      30,
+      33
     ],
     "moves": {
       "suck": {
@@ -771,8 +771,8 @@
     "tier": "normal",
     "art": "🐀",
     "hp": [
-      30,
-      34
+      31,
+      36
     ],
     "moves": {
       "gnaw": {
@@ -845,8 +845,8 @@
     "tier": "normal",
     "art": "🧹",
     "hp": [
-      34,
-      38
+      36,
+      40
     ],
     "moves": {
       "sweep": {
@@ -921,8 +921,8 @@
     "tier": "elite",
     "art": "🦮",
     "hp": [
-      70,
-      70
+      75,
+      75
     ],
     "moves": {
       "bite": {
@@ -930,7 +930,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 10
+            "amount": 11
           }
         ],
         "cooldown": 1
@@ -986,6 +986,19 @@
         ],
         "minTurn": 4,
         "cooldown": 1
+      },
+      "pack_rule": {
+        "name": "무리의 규칙",
+        "effects": [
+          {
+            "op": "demand",
+            "turns": 2,
+            "amount": 16,
+            "category": "twoPair"
+          }
+        ],
+        "cooldown": 3,
+        "minTurn": 2
       }
     },
     "enlightenedMove": {
@@ -993,7 +1006,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 18
+          "amount": 19
         },
         {
           "op": "empower",
@@ -1033,7 +1046,8 @@
             "bite": 2,
             "howl": 1,
             "frenzy": 0,
-            "surge": 3
+            "surge": 3,
+            "pack_rule": 2
           }
         }
       },
@@ -1045,7 +1059,8 @@
             "bite": 2,
             "howl": 1,
             "frenzy": 0,
-            "surge": 3
+            "surge": 3,
+            "pack_rule": 2
           }
         },
         "enter": "unique2"
@@ -1058,8 +1073,8 @@
     "tier": "elite",
     "art": "🐟",
     "hp": [
-      72,
-      72
+      78,
+      78
     ],
     "moves": {
       "snap": {
@@ -1067,7 +1082,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           }
         ],
         "cooldown": 1
@@ -1083,7 +1098,7 @@
         "hidden": true,
         "cooldown": 1,
         "break": {
-          "damage": 10,
+          "damage": 11,
           "move": "unique1"
         },
         "followUp": {
@@ -1106,6 +1121,18 @@
         ],
         "minTurn": 6,
         "cooldown": 3
+      },
+      "slick": {
+        "name": "미끄러운 비늘",
+        "effects": [
+          {
+            "op": "cap",
+            "amount": 22,
+            "turns": 3
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "pattern": {
@@ -1113,7 +1140,8 @@
       "weights": {
         "snap": 1,
         "dive": 1,
-        "thrash": 1
+        "thrash": 1,
+        "slick": 2
       }
     },
     "enlightenedMove": {
@@ -1121,7 +1149,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 20
+          "amount": 21
         }
       ]
     },
@@ -1131,7 +1159,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 20
+            "amount": 21
           }
         ]
       }
@@ -1143,8 +1171,8 @@
     "tier": "elite",
     "art": "👤",
     "hp": [
-      74,
-      74
+      80,
+      80
     ],
     "moves": {
       "scratch": {
@@ -1152,7 +1180,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 10
+            "amount": 11
           }
         ],
         "cooldown": 2
@@ -1177,7 +1205,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 16
           }
         ],
         "minTurn": 6,
@@ -1193,6 +1221,21 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "devour_edge": {
+        "name": "어둠이 삼킨다",
+        "effects": [
+          {
+            "op": "drainWhet",
+            "amount": 0
+          },
+          {
+            "op": "empower",
+            "amount": 4
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "pattern": {
@@ -1201,7 +1244,8 @@
         "scratch": 1,
         "lurk": 1,
         "pounce": 0,
-        "surge": 3
+        "surge": 3,
+        "devour_edge": 2
       }
     },
     "enlightenedMove": {
@@ -1209,7 +1253,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 18
+          "amount": 19
         },
         {
           "op": "confuse",
@@ -1224,8 +1268,8 @@
     "tier": "boss",
     "art": "🐺",
     "hp": [
-      115,
-      115
+      130,
+      130
     ],
     "moves": {
       "bite": {
@@ -1238,7 +1282,7 @@
         ],
         "cooldown": 0,
         "break": {
-          "damage": 20,
+          "damage": 22,
           "move": "unique1"
         },
         "followUp": {
@@ -1251,7 +1295,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 17
           }
         ],
         "minTurn": 0,
@@ -1282,6 +1326,19 @@
           }
         ],
         "cooldown": 1
+      },
+      "match_fang": {
+        "name": "송곳니를 맞춰라",
+        "effects": [
+          {
+            "op": "demand",
+            "turns": 2,
+            "amount": 22,
+            "category": "fourKind"
+          }
+        ],
+        "cooldown": 3,
+        "minTurn": 2
       }
     },
     "phases": [
@@ -1293,7 +1350,8 @@
             "bite": 1,
             "pounce": 0,
             "move1": 0,
-            "move2": 0
+            "move2": 0,
+            "match_fang": 2
           }
         }
       },
@@ -1305,7 +1363,8 @@
             "bite": 0,
             "pounce": 0,
             "move1": 1,
-            "move2": 1
+            "move2": 1,
+            "match_fang": 2
           },
           "noRepeat": 2
         },
@@ -1317,7 +1376,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 17
+          "amount": 19
         },
         {
           "op": "empower",
@@ -1356,8 +1415,8 @@
     "tier": "boss",
     "art": "🗿",
     "hp": [
-      110,
-      110
+      126,
+      126
     ],
     "moves": {
       "grasp": {
@@ -1383,7 +1442,7 @@
         "minTurn": 1,
         "cooldown": 1,
         "break": {
-          "damage": 30,
+          "damage": 33,
           "move": "unique1"
         },
         "followUp": {
@@ -1411,7 +1470,7 @@
           }
         ],
         "break": {
-          "damage": 20,
+          "damage": 22,
           "move": "unique1"
         },
         "followUp": {
@@ -1424,7 +1483,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 20
+            "amount": 22
           }
         ]
       },
@@ -1448,7 +1507,7 @@
           }
         ],
         "break": {
-          "damage": 35,
+          "damage": 39,
           "move": "unique1"
         },
         "followUp": {
@@ -1470,7 +1529,7 @@
           "chance": 1
         },
         "break": {
-          "damage": 25,
+          "damage": 27,
           "move": "unique1"
         }
       },
@@ -1495,7 +1554,7 @@
         ],
         "cooldown": 1,
         "break": {
-          "damage": 40,
+          "damage": 44,
           "move": "unique1"
         },
         "followUp": {
@@ -1516,9 +1575,21 @@
           "chance": 1
         },
         "break": {
-          "damage": 30,
+          "damage": 33,
           "move": "unique1"
         }
+      },
+      "stone_hide": {
+        "name": "바위 가죽",
+        "effects": [
+          {
+            "op": "ward",
+            "amount": 46,
+            "turns": 3
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "phases": [
@@ -1537,7 +1608,8 @@
             "move5": 0,
             "move6": 0,
             "move7": 0,
-            "move8": 0
+            "move8": 0,
+            "stone_hide": 2
           }
         }
       },
@@ -1556,7 +1628,8 @@
             "move5": 0,
             "move6": 0,
             "move7": 0,
-            "move8": 0
+            "move8": 0,
+            "stone_hide": 2
           },
           "noRepeat": 2
         },
@@ -1577,7 +1650,8 @@
             "move5": 0,
             "move6": 1,
             "move7": 1,
-            "move8": 0
+            "move8": 0,
+            "stone_hide": 2
           },
           "noRepeat": 2
         },
@@ -1589,7 +1663,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 14
+          "amount": 15
         },
         {
           "op": "confuse",
@@ -1641,8 +1715,8 @@
     "tier": "boss",
     "art": "🧸",
     "hp": [
-      112,
-      112
+      128,
+      128
     ],
     "moves": {
       "hug": {
@@ -1650,7 +1724,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           }
         ],
         "cooldown": 2
@@ -1680,7 +1754,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 17
+            "amount": 19
           }
         ],
         "minTurn": 6,
@@ -1709,6 +1783,22 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "pull_stuffing": {
+        "name": "솜을 뽑는다",
+        "effects": [
+          {
+            "op": "drainWhet",
+            "amount": 0
+          },
+          {
+            "op": "status",
+            "kind": "curse",
+            "amount": 1
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "phases": [
@@ -1720,7 +1810,9 @@
             "hug": 1,
             "button_eye": 1,
             "rip": 0,
-            "surge": 1.5
+            "surge": 1.5,
+            "stuff": 0,
+            "pull_stuffing": 2
           }
         }
       },
@@ -1732,7 +1824,9 @@
             "hug": 2,
             "rip": 3,
             "stuff": 2,
-            "surge": 1.5
+            "surge": 1.5,
+            "button_eye": 0,
+            "pull_stuffing": 2
           },
           "noRepeat": 2
         }
@@ -1743,7 +1837,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 14
+          "amount": 15
         },
         {
           "op": "empower",
@@ -1758,8 +1852,8 @@
     "tier": "normal",
     "art": "🐸",
     "hp": [
-      36,
-      40
+      38,
+      42
     ],
     "moves": {
       "tongue": {
@@ -1838,8 +1932,8 @@
     "tier": "normal",
     "art": "🦟",
     "hp": [
-      26,
-      30
+      27,
+      31
     ],
     "moves": {
       "drain": {
@@ -1920,8 +2014,8 @@
     "tier": "normal",
     "art": "👻",
     "hp": [
-      33,
-      37
+      35,
+      39
     ],
     "moves": {
       "chill": {
@@ -2005,8 +2099,8 @@
     "tier": "normal",
     "art": "🦌",
     "hp": [
-      38,
-      42
+      40,
+      44
     ],
     "moves": {
       "gore": {
@@ -2080,8 +2174,8 @@
     "tier": "normal",
     "art": "☠️",
     "hp": [
-      36,
-      40
+      38,
+      42
     ],
     "moves": {
       "slash": {
@@ -2160,8 +2254,8 @@
     "tier": "normal",
     "art": "🐛",
     "hp": [
-      31,
-      35
+      33,
+      37
     ],
     "moves": {
       "bite": {
@@ -2241,8 +2335,8 @@
     "tier": "elite",
     "art": "🗿",
     "hp": [
-      78,
-      78
+      85,
+      85
     ],
     "moves": {
       "slam": {
@@ -2250,7 +2344,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           }
         ],
         "cooldown": 2
@@ -2279,7 +2373,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 14
+            "amount": 15
           },
           {
             "op": "confuse",
@@ -2299,6 +2393,18 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "mud_plate": {
+        "name": "진흙 갑주",
+        "effects": [
+          {
+            "op": "ward",
+            "amount": 24,
+            "turns": 3
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "pattern": {
@@ -2307,7 +2413,8 @@
         "slam": 1,
         "harden": 1,
         "quake": 0,
-        "surge": 3
+        "surge": 3,
+        "mud_plate": 2
       }
     },
     "enlightenedMove": {
@@ -2315,7 +2422,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 19
+          "amount": 20
         },
         {
           "op": "confuse",
@@ -2330,8 +2437,8 @@
     "tier": "elite",
     "art": "🏇",
     "hp": [
-      74,
-      74
+      80,
+      80
     ],
     "moves": {
       "lance": {
@@ -2367,7 +2474,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 16
+            "amount": 17
           }
         ],
         "minTurn": 6,
@@ -2383,6 +2490,19 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "open_road": {
+        "name": "길을 열어라",
+        "effects": [
+          {
+            "op": "demand",
+            "kind": "straight",
+            "turns": 2,
+            "amount": 18
+          }
+        ],
+        "cooldown": 3,
+        "minTurn": 2
       }
     },
     "pattern": {
@@ -2391,7 +2511,8 @@
         "lance": 1,
         "charge_up": 1,
         "cleave": 0,
-        "surge": 3
+        "surge": 3,
+        "open_road": 2
       }
     },
     "enlightenedMove": {
@@ -2399,7 +2520,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 22
+          "amount": 23
         }
       ]
     }
@@ -2410,8 +2531,8 @@
     "tier": "elite",
     "art": "⚰️",
     "hp": [
-      76,
-      76
+      83,
+      83
     ],
     "moves": {
       "shovel": {
@@ -2419,7 +2540,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           }
         ],
         "cooldown": 2
@@ -2443,7 +2564,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 16
           },
           {
             "op": "status",
@@ -2465,6 +2586,18 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "cover_soil": {
+        "name": "흙을 덮는다",
+        "effects": [
+          {
+            "op": "ward",
+            "amount": 22,
+            "turns": 3
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "pattern": {
@@ -2473,7 +2606,8 @@
         "shovel": 1,
         "toll": 1,
         "inter": 0,
-        "surge": 3
+        "surge": 3,
+        "cover_soil": 2
       }
     },
     "enlightenedMove": {
@@ -2481,7 +2615,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 17
+          "amount": 18
         },
         {
           "op": "empower",
@@ -2496,8 +2630,8 @@
     "tier": "boss",
     "art": "🐊",
     "hp": [
-      118,
-      118
+      134,
+      134
     ],
     "moves": {
       "chomp": {
@@ -2505,7 +2639,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 12
+            "amount": 13
           }
         ],
         "cooldown": 2
@@ -2535,7 +2669,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 18
+            "amount": 20
           }
         ],
         "minTurn": 6,
@@ -2560,6 +2694,19 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "cross_bog": {
+        "name": "늪을 건너라",
+        "effects": [
+          {
+            "op": "demand",
+            "kind": "straight",
+            "turns": 2,
+            "amount": 24
+          }
+        ],
+        "cooldown": 3,
+        "minTurn": 2
       }
     },
     "phases": [
@@ -2571,7 +2718,9 @@
             "chomp": 1,
             "submerge": 1,
             "death_roll": 0,
-            "surge": 1.5
+            "surge": 1.5,
+            "regrow": 0,
+            "cross_bog": 2
           }
         }
       },
@@ -2583,7 +2732,9 @@
             "chomp": 2,
             "death_roll": 3,
             "regrow": 2,
-            "surge": 1.5
+            "surge": 1.5,
+            "submerge": 0,
+            "cross_bog": 2
           },
           "noRepeat": 2
         }
@@ -2594,7 +2745,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 16
+          "amount": 17
         },
         {
           "op": "heal",
@@ -2609,8 +2760,8 @@
     "tier": "boss",
     "art": "🌫️",
     "hp": [
-      114,
-      114
+      130,
+      130
     ],
     "moves": {
       "caress": {
@@ -2618,7 +2769,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           },
           {
             "op": "status",
@@ -2647,7 +2798,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 17
+            "amount": 19
           }
         ],
         "minTurn": 6,
@@ -2677,6 +2828,21 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "erase": {
+        "name": "안개가 지운다",
+        "effects": [
+          {
+            "op": "unpin"
+          },
+          {
+            "op": "status",
+            "kind": "confuse",
+            "amount": 2
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "phases": [
@@ -2688,7 +2854,9 @@
             "caress": 1,
             "veil": 1,
             "smother": 0,
-            "surge": 1.5
+            "surge": 1.5,
+            "lullaby": 0,
+            "erase": 2
           }
         }
       },
@@ -2700,7 +2868,9 @@
             "caress": 2,
             "smother": 3,
             "lullaby": 2,
-            "surge": 1.5
+            "surge": 1.5,
+            "veil": 0,
+            "erase": 2
           },
           "noRepeat": 2
         }
@@ -2711,7 +2881,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 14
+          "amount": 15
         },
         {
           "op": "confuse",
@@ -2726,8 +2896,8 @@
     "tier": "boss",
     "art": "🧟",
     "hp": [
-      120,
-      120
+      137,
+      137
     ],
     "moves": {
       "claw": {
@@ -2735,7 +2905,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 12
+            "amount": 13
           }
         ],
         "cooldown": 2
@@ -2763,7 +2933,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 16
+            "amount": 17
           }
         ],
         "minTurn": 6,
@@ -2793,6 +2963,18 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "under_soil": {
+        "name": "흙 아래",
+        "effects": [
+          {
+            "op": "ward",
+            "amount": 48,
+            "turns": 3
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "phases": [
@@ -2804,7 +2986,9 @@
             "claw": 1,
             "rise": 1,
             "grave_call": 0,
-            "surge": 1.5
+            "surge": 1.5,
+            "rot": 0,
+            "under_soil": 2
           }
         }
       },
@@ -2816,7 +3000,9 @@
             "claw": 2,
             "grave_call": 3,
             "rot": 2,
-            "surge": 1.5
+            "surge": 1.5,
+            "rise": 0,
+            "under_soil": 2
           },
           "noRepeat": 2
         }
@@ -2827,7 +3013,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 15
+          "amount": 17
         },
         {
           "op": "empower",
@@ -2842,8 +3028,8 @@
     "tier": "normal",
     "art": "🐇",
     "hp": [
-      34,
-      38
+      36,
+      40
     ],
     "moves": {
       "nibble": {
@@ -2920,8 +3106,8 @@
     "tier": "normal",
     "art": "👁️",
     "hp": [
-      30,
-      34
+      31,
+      36
     ],
     "moves": {
       "gaze": {
@@ -3001,8 +3187,8 @@
     "tier": "normal",
     "art": "🦋",
     "hp": [
-      32,
-      36
+      33,
+      38
     ],
     "moves": {
       "dust": {
@@ -3083,8 +3269,8 @@
     "tier": "normal",
     "art": "🦠",
     "hp": [
-      36,
-      40
+      38,
+      42
     ],
     "moves": {
       "whisper": {
@@ -3171,8 +3357,8 @@
     "tier": "normal",
     "art": "🕯️",
     "hp": [
-      34,
-      38
+      36,
+      40
     ],
     "moves": {
       "dagger": {
@@ -3250,8 +3436,8 @@
     "tier": "normal",
     "art": "🪨",
     "hp": [
-      42,
-      46
+      44,
+      48
     ],
     "moves": {
       "scream": {
@@ -3334,8 +3520,8 @@
     "tier": "elite",
     "art": "⏳",
     "hp": [
-      76,
-      76
+      83,
+      83
     ],
     "moves": {
       "sand": {
@@ -3353,7 +3539,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 14
           },
           {
             "op": "status",
@@ -3382,7 +3568,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 17
+            "amount": 18
           }
         ],
         "minTurn": 6,
@@ -3398,6 +3584,20 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "scatter": {
+        "name": "모래로 흩어진다",
+        "effects": [
+          {
+            "op": "unpin"
+          },
+          {
+            "op": "confuse",
+            "amount": 2
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "pattern": {
@@ -3407,7 +3607,8 @@
         "grip": 1,
         "hourglass": 1,
         "collapse": 0,
-        "surge": 3
+        "surge": 3,
+        "scatter": 2
       }
     },
     "enlightenedMove": {
@@ -3415,7 +3616,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 20
+          "amount": 21
         },
         {
           "op": "confuse",
@@ -3430,8 +3631,8 @@
     "tier": "elite",
     "art": "🦑",
     "hp": [
-      80,
-      80
+      86,
+      86
     ],
     "moves": {
       "slap": {
@@ -3449,7 +3650,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 8
+            "amount": 9
           },
           {
             "op": "confuse",
@@ -3481,7 +3682,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 18
+            "amount": 19
           }
         ],
         "minTurn": 6,
@@ -3497,6 +3698,19 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "take_form": {
+        "name": "형태를 갖춰라",
+        "effects": [
+          {
+            "op": "demand",
+            "kind": "fullHouse",
+            "turns": 2,
+            "amount": 20
+          }
+        ],
+        "cooldown": 3,
+        "minTurn": 2
       }
     },
     "pattern": {
@@ -3506,7 +3720,8 @@
         "coil": 1,
         "rise": 1,
         "smash": 0,
-        "surge": 3
+        "surge": 3,
+        "take_form": 2
       }
     },
     "enlightenedMove": {
@@ -3514,7 +3729,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 22
+          "amount": 23
         }
       ]
     }
@@ -3525,8 +3740,8 @@
     "tier": "elite",
     "art": "🔔",
     "hp": [
-      74,
-      74
+      80,
+      80
     ],
     "moves": {
       "toll": {
@@ -3534,7 +3749,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 12
           },
           {
             "op": "confuse",
@@ -3568,7 +3783,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 17
+            "amount": 18
           }
         ],
         "minTurn": 6,
@@ -3584,6 +3799,18 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "toll_cage": {
+        "name": "종소리가 가둔다",
+        "effects": [
+          {
+            "op": "cap",
+            "amount": 20,
+            "turns": 3
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "pattern": {
@@ -3592,7 +3819,8 @@
         "toll": 1,
         "silence": 1,
         "peal": 0,
-        "surge": 3
+        "surge": 3,
+        "toll_cage": 2
       }
     },
     "enlightenedMove": {
@@ -3600,7 +3828,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 21
+          "amount": 22
         },
         {
           "op": "confuse",
@@ -3615,8 +3843,8 @@
     "tier": "boss",
     "art": "🌙",
     "hp": [
-      122,
-      122
+      140,
+      140
     ],
     "moves": {
       "dream_blade": {
@@ -3624,7 +3852,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 14
           }
         ],
         "cooldown": 2
@@ -3653,7 +3881,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 19
+            "amount": 21
           }
         ],
         "minTurn": 6,
@@ -3683,6 +3911,19 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "whole_dream": {
+        "name": "완전한 꿈",
+        "effects": [
+          {
+            "op": "demand",
+            "category": "fullHouse",
+            "turns": 2,
+            "amount": 24
+          }
+        ],
+        "cooldown": 3,
+        "minTurn": 2
       }
     },
     "phases": [
@@ -3694,7 +3935,9 @@
             "dream_blade": 1,
             "rewrite": 1,
             "nightmare": 0,
-            "surge": 1.5
+            "surge": 1.5,
+            "wake_false": 0,
+            "whole_dream": 2
           }
         }
       },
@@ -3706,7 +3949,9 @@
             "dream_blade": 2,
             "nightmare": 3,
             "wake_false": 2,
-            "surge": 1.5
+            "surge": 1.5,
+            "rewrite": 0,
+            "whole_dream": 2
           },
           "noRepeat": 2
         }
@@ -3717,7 +3962,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 17
+          "amount": 19
         },
         {
           "op": "confuse",
@@ -3732,8 +3977,8 @@
     "tier": "boss",
     "art": "🕳️",
     "hp": [
-      126,
-      126
+      143,
+      143
     ],
     "moves": {
       "gnash": {
@@ -3741,7 +3986,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 14
           }
         ],
         "cooldown": 2
@@ -3779,7 +4024,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 21
+            "amount": 23
           }
         ],
         "minTurn": 6,
@@ -3795,6 +4040,18 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "not_one_bite": {
+        "name": "한 입에 삼킬 수 없다",
+        "effects": [
+          {
+            "op": "cap",
+            "amount": 38,
+            "turns": 3
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "phases": [
@@ -3806,7 +4063,9 @@
             "gnash": 1,
             "abyss_call": 1,
             "crush": 0,
-            "surge": 1.5
+            "surge": 1.5,
+            "swallow_light": 0,
+            "not_one_bite": 2
           }
         }
       },
@@ -3818,7 +4077,9 @@
             "gnash": 2,
             "crush": 3,
             "swallow_light": 2,
-            "surge": 1.5
+            "surge": 1.5,
+            "abyss_call": 0,
+            "not_one_bite": 2
           },
           "noRepeat": 2
         }
@@ -3829,7 +4090,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 18
+          "amount": 20
         },
         {
           "op": "empower",
@@ -3844,8 +4105,8 @@
     "tier": "boss",
     "art": "😇",
     "hp": [
-      120,
-      120
+      137,
+      137
     ],
     "moves": {
       "hymn": {
@@ -3868,7 +4129,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 14
+            "amount": 15
           }
         ],
         "cooldown": 2,
@@ -3899,7 +4160,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 20
+            "amount": 22
           }
         ],
         "minTurn": 6,
@@ -3915,6 +4176,22 @@
         ],
         "minTurn": 4,
         "cooldown": 3
+      },
+      "force_humility": {
+        "name": "겸손을 강요한다",
+        "effects": [
+          {
+            "op": "drainWhet",
+            "amount": 0
+          },
+          {
+            "op": "status",
+            "kind": "blessing",
+            "amount": 1
+          }
+        ],
+        "cooldown": 2,
+        "minTurn": 2
       }
     },
     "phases": [
@@ -3926,7 +4203,9 @@
             "hymn": 1,
             "smite": 1,
             "judgment": 0,
-            "surge": 1.5
+            "surge": 1.5,
+            "absolve": 0,
+            "force_humility": 2
           }
         }
       },
@@ -3938,7 +4217,9 @@
             "smite": 2,
             "judgment": 3,
             "absolve": 2,
-            "surge": 1.5
+            "surge": 1.5,
+            "hymn": 0,
+            "force_humility": 2
           },
           "noRepeat": 2
         }
@@ -3949,7 +4230,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 16
+          "amount": 17
         },
         {
           "op": "heal",
@@ -4054,8 +4335,8 @@
     "tier": "normal",
     "art": "🧎",
     "hp": [
-      36,
-      40
+      38,
+      42
     ],
     "moves": {
       "sermon": {
@@ -4138,8 +4419,8 @@
     "tier": "normal",
     "art": "👥",
     "hp": [
-      32,
-      36
+      33,
+      38
     ],
     "moves": {
       "hymn": {
@@ -4217,8 +4498,8 @@
     "tier": "normal",
     "art": "🎇",
     "hp": [
-      30,
-      34
+      31,
+      36
     ],
     "moves": {
       "singe": {

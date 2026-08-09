@@ -12,6 +12,19 @@ DB.statusById=Object.fromEntries(DB.statuses.list.map(s=>[s.id,s]));
 const eng=await import('../js/engine.js');
 const {previewAll,createBattle,initialRoll,reroll,confirmCategory,enemyPhase,aliveEnemies,toggleHold}=eng;
 
+
+// 기믹을 읽는 플레이 — 요구를 지키고, 문턱 아래로는 헛방을 안 치고, 상한 위는 낭비로 친다
+function gimAdjust(battle, p, v) {
+  for (const e of aliveEnemies(battle)) {
+    if (e.demand) {
+      const ok = e.demand.category ? p.cat.id === e.demand.category : p.cat.kind === e.demand.kind;
+      if (ok) v += e.demand.damage * 1.5;
+    }
+    if (e.wardLeft > 0 && p.bd.total > 0 && p.bd.total <= e.ward) v -= p.bd.total;
+    if (e.capLeft > 0 && p.bd.total > e.cap) v -= (p.bd.total - e.cap);
+  }
+  return v;
+}
 function scoreChoice(battle,p){
   const ab=p.variant.ability, ops=ab?(Array.isArray(ab)?ab:[ab]):[]; const p_=battle.player;
   const danger=1-p_.hp/p_.maxHp;
@@ -24,7 +37,7 @@ function scoreChoice(battle,p){
     else if(o.op==='regen') v+=amt*turnsLeft*(0.6+danger); else if(o.op==='weakEnemy') v+=amt*turnsLeft*0.7;
     else if(o.op==='bleed') v+=amt*2.2; else if(o.op==='vulnerable') v+=amt*turnsLeft*0.5;
     else if(o.op==='whet') v+=amt*0.5*Math.max(12,p.bd.total)*(turnsLeft>1?1:0); }
-  return v;
+  return gimAdjust(battle,p,v);
 }
 // 진행도: 유물(평타 +N)과 족보 수로 흉내낸다
 const CATS = {chance:['instinct'],onePair:['clasped_hands'],twoPair:['twin_sisters'],

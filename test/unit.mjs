@@ -930,5 +930,80 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
 }
 
+
+// ---------------------------------------------------------------
+// v1.30 정예·보스 기믹 — 문턱 · 상한 · 요구 · 벼름 흡수 · 새김 흩기
+// ---------------------------------------------------------------
+{
+  const { DB } = await import('../js/data.js');
+  const eng = await import('../js/engine.js');
+  const mkB = (dice = ['normal','normal','normal','normal','normal'], relics = [], cats = { onePair: ['clasped_hands'] }) =>
+    eng.createBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics, dice, categories: cats }, ['crow'], 'battle');
+
+  // 문턱 — 그 값 이하의 단발은 아예 안 닿는다
+  {
+    const b = mkB(); const e = b.enemies[0];
+    e.ward = 20; e.wardLeft = 2; const hp0 = e.hp;
+    b.lastResult = { bonusHits: [] };
+    eng.__test_deal(b, e, 15);
+    eq('문턱: 20 이하는 안 통한다', e.hp, hp0);
+    eng.__test_deal(b, e, 25);
+    eq('문턱: 넘기면 통째로 들어간다', e.hp, hp0 - 25);
+  }
+  // 상한 — 한 번에 그 이상은 못 준다
+  {
+    const b = mkB(); const e = b.enemies[0];
+    e.cap = 10; e.capLeft = 2; const hp0 = e.hp;
+    b.lastResult = { bonusHits: [] };
+    eng.__test_deal(b, e, 40);
+    eq('상한: 40을 줘도 10만 들어간다', e.hp, hp0 - 10);
+  }
+  // 요구 — 지키면 벌이 없고, 못 지키면 맞는다
+  {
+    const b = mkB(); const e = b.enemies[0];
+    e.demand = { kind: 'ofKind', left: 1, damage: 20, met: false };
+    eng.rng.next = () => 0.5;
+    eng.initialRoll(b);
+    eng.confirmCategory(b, 'onePair', 'clasped_hands', e.uid);   // 원페어 = ofKind
+    eq('요구를 지켰다고 표시된다', e.demand.met, true);
+    const hp0 = b.player.hp;
+    e.nextMove = { id: 'x', name: '가만히', effects: [{ op: 'rest' }] };   // 벌 말고는 아플 일이 없게
+    eng.enemyPhase(b);
+    eq('지켰으면 벌이 없다', b.player.hp, hp0);
+    eq('지킨 요구는 사라진다', e.demand, null);
+    eng.rng.next = Math.random;
+  }
+  {
+    const b = mkB(); const e = b.enemies[0];
+    e.demand = { kind: 'straight', left: 1, damage: 20, met: false };
+    b.player.block = 0;
+    const hp0 = b.player.hp;
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('못 지키면 벌을 받는다', hp0 - b.player.hp >= 20, true);
+  }
+  // 벼름 흡수 · 새김 흩기
+  {
+    const b = mkB(['nail','normal','normal','normal','normal']);
+    b.whet = 5; b.dice[0].pinned = true;
+    const e = b.enemies[0];
+    e.nextMove = { id: 'x', name: '시험', effects: [{ op: 'drainWhet', amount: 0 }, { op: 'unpin' }] };
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('벼름을 통째로 빼앗긴다', b.whet, 0);
+    eq('새김이 풀린다', b.dice[0].pinned, false);
+  }
+  // 데이터: 정예·보스는 전부 기믹을 하나씩 가진다
+  {
+    const GIM = new Set(['ward', 'cap', 'demand', 'drainWhet', 'unpin']);
+    const missing = DB.enemies.filter(e => !e.final && (e.tier === 'elite' || e.tier === 'boss'))
+      .filter(e => !Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
+      .map(e => e.name);
+    eq('정예·보스는 모두 기믹을 하나씩 가진다', missing, []);
+    const normalsWithGim = DB.enemies.filter(e => e.tier === 'normal')
+      .filter(e => Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
+      .map(e => e.name);
+    eq('일반 적에는 기믹을 안 붙인다', normalsWithGim, []);
+  }
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);

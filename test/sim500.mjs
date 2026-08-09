@@ -36,6 +36,19 @@ function takeReward(run, card) {
 
 
 // 사람처럼 판단: 피해 + 방어가치 + 버프가치. 위험할수록 방어 가중치가 커진다
+
+// 기믹을 읽는 플레이 — 요구를 지키고, 문턱 아래로는 헛방을 안 치고, 상한 위는 낭비로 친다
+function gimAdjust(battle, p, v) {
+  for (const e of aliveEnemies(battle)) {
+    if (e.demand) {
+      const ok = e.demand.category ? p.cat.id === e.demand.category : p.cat.kind === e.demand.kind;
+      if (ok) v += e.demand.damage * 1.5;
+    }
+    if (e.wardLeft > 0 && p.bd.total > 0 && p.bd.total <= e.ward) v -= p.bd.total;
+    if (e.capLeft > 0 && p.bd.total > e.cap) v -= (p.bd.total - e.cap);
+  }
+  return v;
+}
 function scoreChoice(battle, p) {
   const ab = p.variant.ability;
   const ops = ab ? (Array.isArray(ab) ? ab : [ab]) : [];
@@ -58,7 +71,7 @@ function scoreChoice(battle, p) {
     // v1.29 벼름: 다음 한 방이 amt*0.5 배만큼 커진다
     else if (o.op === 'whet') v += amt * 0.5 * Math.max(12, p.bd.total) * (turnsLeft > 1 ? 1 : 0);
   }
-  return v;
+  return gimAdjust(battle, p, v);
 }
 
 function playBattle(run, nodeType) {
