@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.36 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.37 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -201,7 +201,7 @@ function labelFor(path, fallback){
       return SN[ks[0]]||('족보 설정 '+ks[0]); }
     if(f==='scoring'&&ks[0]==='categories'){
       const c=(DB.scoring.categories||[])[Number(ks[1])]; if(!c) return fallback;
-      const CN={name:'족보 이름',ruleText:'족보 설명',mult:'배수',kind:'판정',score:'점수 방식'};
+      const CN={name:'족보 이름',short:'짧은 이름',ruleText:'족보 설명',mult:'배수',kind:'판정',score:'점수 방식'};
       if(ks[2]==='variants'){
         const vr=(c.variants||[])[Number(ks[3])]; if(!vr) return fallback;
         const t=tailOf(4), VN={name:'이름',tier:'등급',abilityText:'부가 설명',burst:'일격 여부'};
@@ -645,12 +645,13 @@ function tabMoves(v){
   });
 }
 function tabScore(v){
-  const tb=table(v,['족보','판정','점수','배수','변형','등급','⚡일격','부가 능력','수치','부가 설명','족보 설명']);
+  const tb=table(v,['족보','짧은 이름','판정','점수','배수','변형','등급','⚡일격','부가 능력','수치','부가 설명','족보 설명']);
   DB.scoring.categories.forEach((c,ci)=>{
     c.variants.forEach((vr,vi)=>{
       const tr=document.createElement('tr'); tr.className='t-'+(vr.tier||'common');
       tr.dataset.k=(c.id+' '+c.name+' '+vr.id+' '+vr.name).toLowerCase();
       cell(tr, vi===0 ? field(`scoring:categories.${ci}.name`, c.id+' 족보 이름') : c.name+'<br><span class="sub">'+c.id+'</span>', vi!==0);
+      cell(tr, vi===0 ? field(`scoring:categories.${ci}.short`, c.name+' 짧은 이름') : '', vi!==0);
       cell(tr, vi===0 ? select(`scoring:categories.${ci}.kind`, c.name+' 판정', CAT_KINDS, {after:redraw}) : '', vi!==0);
       cell(tr, vi===0 && typeof c.score==='string'
         ? select(`scoring:categories.${ci}.score`, c.name+' 점수 방식', CAT_SCORES, {after:redraw})
@@ -985,6 +986,13 @@ function validateDB(){
     chk(t.normals,'normal','일반 적'); chk(t.elites,'elite','정예'); chk([t.boss],'boss','보스');
     if(!(t.normals||[]).length) bad.push(`${t.name}: 일반 적이 하나도 없음`);
     for(const id of (t.events||[])) if(!DB.events.events.some(x=>x.id===id)) bad.push(`${t.name}: "${id}" 라는 만남이 없음`);
+  }
+  // 이름이 길면 전투 화면에서 잘린다 — 6자가 한계다
+  for(const c of (DB.scoring.categories||[])){
+    if([...(c.short||c.name)].length>6) bad.push(`${c.name}: 짧은 이름이 6자를 넘음 ("${c.short||c.name}")`);
+    if(!c.short) bad.push(`${c.name}: 짧은 이름(short)이 없음`);
+    for(const v of (c.variants||[])) if([...v.name].length>6)
+      bad.push(`${v.name}: 변형 이름이 6자를 넘음 (${[...v.name].length}자) — 족보판에서 잘린다`);
   }
   // 족보 판정에 필요한 값이 빠졌는지
   for(const c of (DB.scoring.categories||[])){

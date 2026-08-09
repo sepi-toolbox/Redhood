@@ -1081,5 +1081,19 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
 }
 
+// v1.37 이름은 절대 잘리지 않는다 — 가장 좁은 화면(360px)에서 세 자리 숫자와
+// 함께 놓아도 들어가는 한계가 7자. 여유를 두고 6자로 못 박는다.
+{
+  const { DB } = await import('../js/data.js');
+  const LIMIT = 6;
+  const longV = DB.scoring.categories.flatMap(c => (c.variants || []))
+    .filter(v => [...v.name].length > LIMIT).map(v => `${v.name}(${[...v.name].length}자)`);
+  eq('족보 변형 이름은 6자 이하', longV, []);
+  const longC = DB.scoring.categories
+    .filter(c => [...(c.short || c.name)].length > LIMIT).map(c => c.short || c.name);
+  eq('족보 짧은 이름도 6자 이하', longC, []);
+  eq('모든 족보에 짧은 이름이 있다', DB.scoring.categories.every(c => !!c.short), true);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);

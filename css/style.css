@@ -657,7 +657,7 @@ span.enemy-art {
 .combo-row {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
   column-gap: 6px; row-gap: 0; padding: 0 1px; font-size: 13px;
-  border-width: 10px 16px; min-width: 0; min-height: 0; text-align: left;
+  border-width: 9px 12px; min-width: 0; min-height: 0; text-align: left;
 }
 .combo-row .row-icon { display: none; }        /* 칸이 좁아 메달은 뺀다 — 능력은 길게 눌러 본다 */
 /* row-body 를 투명하게 만들어 이름·꼬리표·숫자를 한 격자 안에 놓는다
@@ -665,13 +665,13 @@ span.enemy-art {
    [족보     ][    ]  */
 .combo-row .row-body { display: contents; }
 .combo-row .sheet-name {
-  grid-column: 1; grid-row: 1; min-width: 0;
+  grid-column: 1; grid-row: 1; min-width: 0; display: block;
   font-size: 13px; line-height: 16px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .combo-row .sheet-preview {
   grid-column: 2; grid-row: 1 / span 2; align-self: center;
-  font-size: 18px; line-height: 18px; min-width: 0; padding-right: 0;
+  font-size: 18px; line-height: 18px; min-width: 34px; padding-right: 0;
 }
 .combo-row .cat-tag {
   grid-column: 1; grid-row: 2; min-width: 0;
@@ -681,10 +681,7 @@ span.enemy-art {
 /* 일격은 이름 옆이 아니라 아래 꼬리표 줄에 — 칸이 좁아 이름이 잘리면 안 된다 */
 .combo-row .cat-tag .burst-mark { color: #8a5a12; font-weight: 800; }
 .combo-row .cat-tag.t-slot { background: none; border: none; color: #8b7b66; }
-.combo-row .row-body { flex-direction: row; align-items: baseline; gap: 5px; }
-.combo-row .sheet-name { flex: none; max-width: 62%; }
-.combo-row .cat-tag { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.combo-row .sheet-preview { font-size: 18px; min-width: 36px; }
+
 
 /* ---------- 보상: 상자 ---------- */
 @keyframes chestDrop {
