@@ -1311,11 +1311,13 @@ span.enemy-art {
   filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
 }
 .cdie.art .cnum {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-size: calc(var(--cb-diceSize, 58px) * .46); font-weight: 800; color: #2a2018;
-  text-shadow: 0 1px 0 rgba(255,245,220,.5); pointer-events: none;
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -55%);
+  width: calc(var(--cb-diceSize, 58px) * .58); height: calc(var(--cb-diceSize, 58px) * .58);
+  display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  background: rgba(22, 14, 9, .55);                     /* 어떤 스킨 위에서도 읽히는 어두운 원판 */
+  font-size: calc(var(--cb-diceSize, 58px) * .38); font-weight: 800; color: #ffe9c8;
+  text-shadow: 0 1px 2px #000; pointer-events: none;
 }
-.cdie.art .cnum { padding-bottom: 6%; } /* 받침 그림자만큼 살짝 위로 */
 .cdie.art.dead { background-image: url('../assets/ui/die_pad.png'); filter: grayscale(.9) brightness(.55); }
 .cdie.art.sel { filter: drop-shadow(0 0 10px rgba(232,182,77,.85)); }
 .cdie.art.pickable { filter: drop-shadow(0 0 10px rgba(143,208,138,.85)); }
@@ -1330,10 +1332,7 @@ span.enemy-art {
   position: absolute; top: -7px; right: -5px; font-size: 10px; background: #5a4a2e; color: #e8dcae;
   border-radius: 8px; padding: 0 4px; font-weight: 600;
 }
-.battle-screen > .cb-help {
-  position: absolute; left: 0; right: 0; bottom: var(--cb-helpBot, 198px); z-index: 6;
-  text-align: center; font-size: 10px; color: #7d7258; padding: 0 8px;
-}
+
 
 /* 손패 — 부채꼴, 화면 아래 걸침 */
 .battle-screen > .cb-handzone { position: absolute; inset: 0; z-index: 48; pointer-events: none; }
@@ -1408,6 +1407,27 @@ span.enemy-art {
   background: #241f18; border: 1.5px solid #8d8064; color: #f0e2c0;
   font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 4px;
 }
+
+/* 조준 모드: 화면을 낮추고 선택지만 밝힌다 */
+.card-battle.aiming .bg-layer { filter: brightness(.45) saturate(.75); }
+.card-battle.aiming .enemy-art-img, .card-battle.aiming span.enemy-art { filter: brightness(.35); }
+.card-battle.aiming .enemy-name, .card-battle.aiming .enemy .bar, .card-battle.aiming .enemy-hp,
+.card-battle.aiming .target-pin, .card-battle.aiming .cb-hud, .card-battle.aiming .cb-hand,
+.card-battle.aiming .cb-orb, .card-battle.aiming .cb-pile, .card-battle.aiming .cb-end { opacity: .28; transition: opacity .18s; }
+.card-battle.aiming .cdie:not(.sel) { opacity: .3; transition: opacity .18s; }
+.card-battle.aiming .cdie.sel { opacity: 1; }
+.card-battle.aiming .fdie:not(.dead) { opacity: 1; }
+.enemy-name, .enemy .bar, .enemy-hp, .target-pin, .cb-hud, .cb-hand, .cb-orb, .cb-pile, .cb-end, .cdie { transition: opacity .18s; }
+/* 투사체·굴림·게이지 */
+.battle-screen > .cb-proj {
+  position: absolute; z-index: 70; width: 14px; height: 14px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe9b0, #e8b64d 60%, #a8752a);
+  box-shadow: 0 0 10px rgba(232, 182, 77, .9), 0 0 22px rgba(232, 182, 77, .5);
+  pointer-events: none;
+}
+.cdie.rolling, .fdie.rolling { animation: cbTumble .14s linear infinite; }
+@keyframes cbTumble { 0% { transform: rotate(-6deg) translateY(-1px); } 50% { transform: rotate(5deg) translateY(1px); } 100% { transform: rotate(-6deg) translateY(-1px); } }
+.card-battle .enemy .bar i { transition: width .35s; }
 
 /* 안내·확대·전리품 */
 .battle-screen > .cb-banner {

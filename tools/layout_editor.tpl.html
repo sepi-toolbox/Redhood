@@ -92,7 +92,6 @@
       </div>
       <div class="cb-preview">턴 종료 → 내 공격 <b class="atk">14</b> (🎯굶주린 까마귀) · 예상 피격 <b class="dmg">9</b></div>
       <div class="cb-dice" id="dice"></div>
-      <div class="cb-help">주사위: 내 것 탭 → 적 것 탭 = 부딪치기 · 카드: 꾹=상세, 위로 끌면 발동 · 적 탭 = 🎯</div>
       <div class="cb-handzone"><div class="cb-hand" id="hand"></div></div>
       <div class="cb-orb"><b>3</b></div>
       <div class="cb-pile deck"><b>5</b></div>
@@ -230,8 +229,6 @@ const ITEMS = [
     resize: (dx, dy) => { L.hpH = clampL(L.hpH + dy, 20, 64); } },
   { id: 'pv', label: '미리보기 줄 (위아래)', keys: ['pvBot'], find: () => $('.cb-preview'),
     move: (dx, dy) => { L.pvBot -= dy; } },
-  { id: 'help', label: '도움말 줄 (위아래)', keys: ['helpBot'], find: () => $('.cb-help'),
-    move: (dx, dy) => { L.helpBot -= dy; } },
   { id: 'pin', label: '타게팅 화살표 ▼ (⤡=크기 · 값은 모든 적 공용)', keys: ['pinX', 'pinY', 'pinSize'],
     findAll: () => [...document.querySelectorAll('.enemy .target-pin')],
     move: (dx, dy) => { L.pinX += dx; L.pinY += dy; },
