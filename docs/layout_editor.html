@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REDHOOD 배치 편집기 — v2.13 기준</title>
+<title>REDHOOD 배치 편집기 — v2.14 기준</title>
 <link rel="stylesheet" href="https://sepi-toolbox.github.io/Redhood/assets/fonts/song-myung/index.css">
 <style id="game-css">
 /* REDHOOD v0.2 — 다크 페어리테일 · 주사위판 · 모바일 세로 전용 */
@@ -1505,7 +1505,7 @@ span.enemy-art {
 </head>
 <body>
 <header class="ed-top">
-  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.13 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
+  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.14 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
   <div class="ed-btns">
     <button id="tg-multi">적 2마리</button>
     <button id="tg-loot">전리품 화면</button>
@@ -1565,7 +1565,7 @@ span.enemy-art {
 <script>
 'use strict';
 const SITE = 'https://sepi-toolbox.github.io/Redhood';
-const DEFAULTS = {"enemyH": 460, "artH": 288, "artHMulti": 238, "fdiceY": 64, "fdieSize": 38, "diceSize": 58, "diceGap": 10, "orbX": 69, "orbY": 99, "orbSize": 33, "deckX": 19, "deckY": 99, "discX": 18, "discY": 91, "endX": 122, "endY": 125, "cardW": 118, "cardH": 162, "handBottom": -74, "handMargin": 96, "handMaxGap": 58, "lootTop": 430, "hpSide": 7, "hpH": 36, "endW": 141, "endH": 40, "pileW": 35, "pileH": 43, "enemyY": 84, "hpBot": 305, "pvBot": 286, "diceBot": 220, "helpBot": 198, "pinX": 0, "pinY": -23, "pinSize": 21, "cnX": 25.0, "cnY": 4.5, "cnW": 59.0, "cnH": 8.0, "ccX": 4.0, "ccY": 3.6, "ccW": 18.5, "ccH": 12.5, "caX": 6.0, "caY": 9.0, "caW": 88.0, "caH": 62.0, "cdX": 13.0, "cdY": 72.5, "cdW": 74.0, "cdH": 14.5};
+const DEFAULTS = {"enemyH": 460, "artH": 288, "artHMulti": 238, "fdiceY": 64, "fdieSize": 38, "diceSize": 58, "diceGap": 10, "orbX": 69, "orbY": 99, "orbSize": 33, "deckX": 19, "deckY": 99, "discX": 18, "discY": 91, "endX": 122, "endY": 125, "cardW": 118, "cardH": 162, "handBottom": -74, "handMargin": 96, "handMaxGap": 58, "lootTop": 430, "hpSide": 7, "hpH": 36, "endW": 141, "endH": 40, "pileW": 35, "pileH": 43, "enemyY": 84, "hpBot": 305, "pvBot": 286, "diceBot": 220, "helpBot": 198, "pinX": 0, "pinY": -23, "pinSize": 21, "cnX": 23.8, "cnY": 5.4, "cnW": 59, "cnH": 8, "ccX": 5.2, "ccY": 4.8, "ccW": 18.5, "ccH": 12.5, "caX": 6, "caY": 9, "caW": 88, "caH": 62, "cdX": 13, "cdY": 72.5, "cdW": 75.6, "cdH": 17.5};
 let L = { ...DEFAULTS };
 const $ = (s) => document.querySelector(s);
 const scr = $('#scr');
