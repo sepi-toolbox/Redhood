@@ -1391,35 +1391,4 @@ span.enemy-art {
 .card-battle.loot-mode .cb-preview, .card-battle.loot-mode .cb-help, .card-battle.loot-mode .fdice { display: none; }
 .card-battle.loot-mode .cb-hintline { position: absolute; top: calc(var(--cb-lootTop, 430px) - 28px); width: 100%; text-align: center; z-index: 45; }
 
-/* ---------- 📐 배치 편집 모드 (v2.03) ---------- */
-.battle-screen > .le-layer { position: absolute; inset: 0; z-index: 80; touch-action: none; }
-.battle-screen > .le-box {
-  position: absolute; border: 1.5px dashed #e8b64d; border-radius: 6px;
-  background: rgba(232, 182, 77, .08); pointer-events: none; z-index: 81;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.5);
-}
-.le-box .le-tag {
-  position: absolute; top: -22px; left: 0; font-size: 11px; font-weight: 700;
-  color: #241c07; background: #e8b64d; border-radius: 4px; padding: 1px 6px; white-space: nowrap;
-}
-.le-box .le-grip {
-  position: absolute; right: -14px; bottom: -14px; width: 30px; height: 30px; border-radius: 8px;
-  background: #e8b64d; color: #241c07; font-size: 15px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center; pointer-events: auto;
-  box-shadow: 0 2px 5px rgba(0,0,0,.6);
-}
-.battle-screen > .le-bar {
-  position: absolute; top: 34px; left: 6px; right: 6px; z-index: 95;
-  display: flex; align-items: center; gap: 6px; padding: 6px 8px;
-  background: rgba(14, 12, 10, .92); border: 1px solid #4a4238; border-radius: 10px;
-  font-size: 11.5px; color: #cfc3a8;
-}
-.le-bar .le-info { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.le-bar button {
-  flex: none; padding: 6px 9px; font-size: 11.5px; border-radius: 7px;
-  background: #2a241e; border: 1px solid #5a4c3e; color: #e8dcc8;
-}
-.le-bar button.prime { background: #5a281f; border-color: #a8543f; font-weight: 700; }
-.topbar .le-toggle {
-  background: none; border: none; font-size: 16px; padding: 0 4px; color: #e8dcc8;
-}
+
