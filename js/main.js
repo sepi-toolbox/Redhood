@@ -1,11 +1,11 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
-import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall } from './engine.js';
+import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf } from './engine.js';
 import { whetMultOf } from './yahtzee.js';
 import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.33'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.34'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -687,13 +687,14 @@ function showBagModal() {
     const d = DB.diceById[id];
     return `<li><b>${esc(d.name)}</b> <span class="modal-text">[${d.faces.join(',')}] ${esc(d.desc)}</span></li>`;
   }).join('');
-  const catItems = DB.scoring.categories
-    .filter(c => (run.categories[c.id] || []).length > 0)
-    .map(c => (run.categories[c.id] || []).map(vid => {
-      const v = (c.variants || []).find(x => x.id === vid) || {};
-      return `<li><b>${esc(v.name || c.name)}</b> <small class="cat-tag">${esc(c.name)}</small>${isAoE(c) ? ' <small class="aoe-tag">전체</small>' : ''} <span class="modal-text">${esc(v.abilityText || '')}</span></li>`;
-    }).join(''))
-    .join('');
+  // 아홉 자리를 전부 보여준다 — 빈 자리는 기본 족보
+  const catItems = DB.scoring.categories.map(c => {
+    const v = variantOf(c, run.categories[c.id]);
+    return `<li${v.base ? ' class="slot-empty"' : ''}><b>${esc(v.name)}</b> <small class="cat-tag${v.base ? ' t-slot' : ''}">${v.base ? '빈 자리' : esc(c.name)}</small>`
+      + `${v.burst ? ' <small class="cat-tag t-burst">⚡일격</small>' : ''}`
+      + `${isAoE(c) ? ' <small class="aoe-tag">전체</small>' : ''} `
+      + `<span class="modal-text">${esc(v.abilityText || '')}</span></li>`;
+  }).join('');
   const relicItems = run.relics.length
     ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${r.icon} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
     : '<li class="modal-text">유물 없음</li>';
@@ -872,7 +873,7 @@ function renderBattle(opts = {}) {
             ${COMBO_PLATE_READY.has(variant.id) ? '' : rowIcon(comboIcon(cat, variant))}
             <span class="row-body">
               <span class="sheet-name">${esc(variant.name)}${burst ? '<small class="cat-tag t-burst">⚡일격</small>' : ''}</span>
-              <small class="cat-tag">${esc(cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
+              <small class="cat-tag${variant.base ? ' t-slot' : ''}">${variant.base ? '빈 자리' : esc(cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
             </span>
             <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? bd.total : '—') : '—'}</span>
           </button>`).join('')}
@@ -1589,12 +1590,12 @@ function showLootModal(gi) {
             const name = isCat ? c.item.variant.name : c.item.name;
             const sub = c.kind === 'die' ? `[${c.item.faces.join(',')}] ${c.item.desc || ''}`
               : c.kind === 'relic' ? (c.item.desc || '')
-              : `${isNew ? '새 족보' : `${c.item.cat.name} 변형`} · ${c.item.variant.abilityText || '부가 없음'}`;
+              : `${c.item.cat.name} 자리 · ${c.item.replaces ? `${c.item.replaces.name} 을(를) 대신한다` : '지금은 기본'} · ${c.item.variant.abilityText || '부가 없음'}`;
             return `
               <button class="sheet-row choice-row loot-choice t-${c.item.tier}" data-idx="${i}">
                 ${rowIcon(`<span class="row-ico-emoji">${LOOT_META[c.kind].icon}</span>`)}
                 <span class="row-body">
-                  <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(TIER_KO[c.item.tier] || '')}</small></span>
+                  <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(TIER_KO[c.item.tier] || '')}</small>${isCat && c.item.variant.burst ? '<small class="cat-tag t-burst">⚡일격</small>' : ''}</span>
                   <span class="choice-sub">${esc(sub)}</span>
                 </span>
               </button>`;
@@ -1611,7 +1612,7 @@ function showLootModal(gi) {
       const c = g.choices[parseInt(el.dataset.idx, 10)];
       if (c.kind === 'relic') { applyRelicPickup(run, c.item); take(); }
       else if (c.kind === 'category') {
-        (run.categories[c.item.cat.id] = run.categories[c.item.cat.id] || []).push(c.item.variant.id);
+        run.categories[c.item.cat.id] = c.item.variant.id;   // 그 자리에 끼운다 (있던 건 밀려난다)
         take();
       } else {
         // 주사위는 교체 대상 선택이 한 단계 더 필요하다 (모달 위에 모달)
