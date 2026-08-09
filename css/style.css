@@ -1148,3 +1148,12 @@ span.enemy-art {
 .die.art .pin-mark{position:absolute;top:-4px;right:-3px;font-size:12px;line-height:1;
   filter:drop-shadow(0 1px 1px #000);pointer-events:none;animation:pinBob 2.2s ease-in-out infinite}
 @keyframes pinBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-1.5px) rotate(-8deg)}}
+
+/* ---------- v1.30 정예·보스 기믹 표시 ---------- */
+.enemy-buffs .gim{display:inline-block;padding:0 5px;margin-right:3px;border-radius:7px;
+  font-weight:700;font-size:11px;line-height:16px;border:1px solid rgba(0,0,0,.45);
+  text-shadow:0 1px 0 rgba(0,0,0,.5)}
+.enemy-buffs .gim.ward{background:#4b4136;color:#e6d3ad;border-color:#8a7550}
+.enemy-buffs .gim.cap{background:#2f3a4b;color:#bcd2ee;border-color:#5c7ba6}
+.enemy-buffs .gim.demand{background:#4a2f4b;color:#f0c8f0;border-color:#9a5f9c;animation:gimBlink 1.4s ease-in-out infinite}
+@keyframes gimBlink{0%,100%{opacity:1}50%{opacity:.6}}

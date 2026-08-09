@@ -82,6 +82,10 @@ function spawnEnemy(id, idx, scale) {
     patternState: { index: 0, recent: [], count: 0 }, phaseIndex: 0, nextMove: null,
     cooldown: {},                         // v1.01: 행동 id → 다시 쓸 수 있게 되는 턴. moves.*.cooldown 이 없으면 0(제한 없음)
     breakTaken: 0,                        // v1.08: 지금 예고된 행동을 건 뒤 HP로 받은 피해 누적 (파쇄 판정용)
+    // v1.30 정예·보스 기믹 — 머리를 써서 풀라고 거는 조건들
+    ward: 0, wardLeft: 0,                 // 문턱: 이 값 이하의 단발 피해는 통째로 무시
+    cap: 0, capLeft: 0,                   // 상한: 단발 피해가 이 값을 넘으면 이 값으로 깎인다
+    demand: null,                         // 요구: {kind|category, left, damage, met}
   };
 }
 
@@ -510,7 +514,18 @@ function applyAbility(battle, variant, bd, targets) {
 
 // 적에게 피해 — 취약(받는 피해 +N) 가산 후 방어(block)가 흡수 (v0.19)
 function dealToEnemy(battle, t, amount) {
-  const total = amount + (t.debuffs ? t.debuffs.vulnerable : 0);
+  let total = amount + (t.debuffs ? t.debuffs.vulnerable : 0);
+  // 문턱 — 얕은 타격은 아예 안 닿는다. 한 방을 크게 만들어야 뚫린다.
+  if (t.wardLeft > 0 && total > 0 && total <= t.ward) {
+    battle.lastHits.push({ uid: t.uid, amount: 0, warded: true });
+    if (battle.lastResult) battle.lastResult.bonusHits.push(`🪨문턱 ${t.ward} — 안 통했다`);
+    return 0;
+  }
+  // 상한 — 한 번에 이 이상은 못 준다. 크게 벼려도 소용없으니 꾸준히 쳐야 한다.
+  if (t.capLeft > 0 && total > t.cap) {
+    if (battle.lastResult) battle.lastResult.bonusHits.push(`⛓상한 ${t.cap}`);
+    total = t.cap;
+  }
   const absorbed = Math.min(t.block || 0, total);
   t.block -= absorbed;
   const dealt = total - absorbed;
@@ -597,6 +612,12 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   applyDiceEffects(battle, bd);
   applyStatusCost(battle, bd);
   applyConfirmRelics(battle, cat, faces, bd);
+  // 요구를 지켰는지 — 살아 있는 모든 적의 요구를 본다 (표적이 아니어도 인정)
+  for (const e of aliveEnemies(battle)) {
+    if (!e.demand) continue;
+    const ok = e.demand.category ? cat.id === e.demand.category : cat.kind === e.demand.kind;
+    if (ok) { e.demand.met = true; battle.lastResult.bonusHits.push('📜 요구를 지켰다'); }
+  }
   if (battle.over && battle.result === 'defeat') return battle.lastResult; // 저주 주사위 등으로 자멸
 
   // 늑대 가죽: 처치한 적 수만큼 회복
@@ -734,6 +755,23 @@ export function enemyPhase(battle) {
       e.debuffs.bleed -= 1;
       if (e.hp <= 0) continue; // 출혈사 — 행동 없이 쓰러진다
     }
+    // 요구 — 기한이 끝났는데 못 지켰으면 벌을 받는다
+    if (e.demand) {
+      e.demand.left -= 1;
+      if (e.demand.met) e.demand = null;
+      else if (e.demand.left <= 0) {
+        const dmg = e.demand.damage;
+        e.demand = null;
+        if (dmg > 0) {
+          const ab = Math.min(battle.player.block, dmg);
+          battle.player.block -= ab;
+          battle.player.hp -= (dmg - ab);
+          if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; return; }
+        }
+      }
+    }
+    if (e.wardLeft > 0) { e.wardLeft -= 1; if (e.wardLeft <= 0) e.ward = 0; }
+    if (e.capLeft > 0) { e.capLeft -= 1; if (e.capLeft <= 0) e.cap = 0; }
     if (e.stunned) { e.stunned = false; chooseMove(e, battle.turn + 1); continue; }
     // v1.06 연타(hits): 피해 효과에만 적용된다. 다른 효과에서는 무시되므로 0이나 1을 적어두면 된다.
     //   강화(power)와 약화(weak)가 '한 대마다' 적용되고 방어도 한 대씩 갉히기 때문에,
@@ -783,6 +821,23 @@ export function enemyPhase(battle) {
           break;
         case 'selfDamage':                                 // ❓ 자해 — 제 HP를 깎는다 (방어도 무시, 죽을 수도 있다)
           e.hp -= ef.amount;                                //   예고로는 무슨 행동인지 알 수 없다
+          break;
+        // ---- v1.30 정예·보스 기믹 ----
+        case 'ward':                                       // 🪨 문턱 — amount 이하의 단발 피해를 무시한다
+          e.ward = ef.amount; e.wardLeft = Math.max(1, ef.turns || 2);
+          break;
+        case 'cap':                                        // ⛓ 상한 — 단발 피해를 amount 로 깎는다
+          e.cap = ef.amount; e.capLeft = Math.max(1, ef.turns || 2);
+          break;
+        case 'demand':                                     // 📜 요구 — 정한 족보를 내지 않으면 벌을 받는다
+          e.demand = { kind: ef.kind || null, category: ef.category || null,
+                       left: Math.max(1, ef.turns || 2), damage: ef.amount || 0, met: false };
+          break;
+        case 'drainWhet':                                  // 🌀 벼름 흡수 — 쌓아둔 벼름을 빼앗는다
+          battle.whet = ef.amount > 0 ? Math.max(0, battle.whet - ef.amount) : 0;
+          break;
+        case 'unpin':                                      // 💨 흩기 — 새겨둔 눈을 전부 푼다
+          battle.dice.forEach(d => { d.pinned = false; });
           break;
       }
     }
@@ -928,6 +983,9 @@ export function hitDamage(enemy, ef) {
 }
 export const hitCount = (ef) => Math.max(1, Math.floor(ef.hits || 1));
 
+export const DEMAND_KO = { ofKind: '같은 눈', straight: '스트레이트', fullHouse: '풀하우스', twoPair: '투페어',
+  chance: '노페어', onePair: '원페어', threeKind: '트리플', fourKind: '포카드', yahtzee: '야찌',
+  smallStraight: '스몰', largeStraight: '라지' };
 // 의도 표기 (v0.11): ⚔️공격 / 🛡방어 / 🌀혼란 / 💪강화 / 💚치료 / ❓의문 — 혼합은 병기
 export function intentOf(enemy) {
   const mv = enemy.nextMove;
@@ -952,6 +1010,11 @@ export function intentOf(enemy) {
     }
     else if (ef.op === 'empower') parts.push('💪');
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
+    else if (ef.op === 'ward') parts.push(`🪨${ef.amount}`);
+    else if (ef.op === 'cap') parts.push(`⛓${ef.amount}`);
+    else if (ef.op === 'demand') parts.push(`📜${DEMAND_KO[ef.kind || ef.category] || '요구'}`);
+    else if (ef.op === 'drainWhet') parts.push('🌀벼름');
+    else if (ef.op === 'unpin') parts.push('💨새김');
   }
   // 파쇄 기준치(🔨N)는 예고에 내보내지 않는다 — 적을 길게 눌러 여는 치트 창에서만 보인다
   return parts.join(' ') || '💤';

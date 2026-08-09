@@ -60,13 +60,21 @@ function validate() {
     }
   }
   // 적 행동 효과 검증 (v1.08: 휴식 추가, 유니크 행동·기본 행동·파쇄 대상까지 함께 본다)
-  const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal', 'rest', 'selfDamage', 'poison', 'bleed', 'status']);
+  const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal', 'rest', 'selfDamage', 'poison', 'bleed', 'status',
+  'ward', 'cap', 'demand', 'drainWhet', 'unpin']);
   for (const e of DB.enemies) {
     const all = { ...e.moves, ...(e.uniqueMoves || {}) };
     for (const [mid, mv] of Object.entries(all)) {
       for (const ef of mv.effects) {
         if (!ENEMY_OPS.has(ef.op)) throw new Error(`enemies.json: ${e.id}.${mid} 미지원 효과 "${ef.op}"`);
-        if (ef.op === 'status') {
+        if (ef.op === 'demand') {
+      const KINDS = new Set(DB.scoring.categories.map(c => c.kind));
+      const IDS = new Set(DB.scoring.categories.map(c => c.id));
+      if (!ef.kind && !ef.category) throw new Error(`enemies.json: ${e.id}/${mid} 요구에 대상 족보가 없습니다`);
+      if (ef.kind && !KINDS.has(ef.kind)) throw new Error(`enemies.json: ${e.id}/${mid} 없는 족보군 "${ef.kind}"`);
+      if (ef.category && !IDS.has(ef.category)) throw new Error(`enemies.json: ${e.id}/${mid} 없는 족보 "${ef.category}"`);
+    }
+    if (ef.op === 'status') {
           if (!DB.statusById[ef.kind]) throw new Error(`enemies.json: ${e.id}.${mid} 없는 상태이상 "${ef.kind}"`);
           if (ef.power < 0) throw new Error(`enemies.json: ${e.id}.${mid} 상태이상 수치가 음수입니다`);
           if (ef.turns !== undefined) throw new Error(`enemies.json: ${e.id}.${mid} 지속 턴은 statuses.json 에서만 정합니다`);
