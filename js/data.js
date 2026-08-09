@@ -123,7 +123,12 @@ function validate() {
     }
   }
   // 주사위 효과 검증
-  const DIE_OPS = { contribute: ['selfDamage', 'heal', 'block'], confirm: ['heal', 'block'], passive: ['extraReroll', 'turnBlock'] };
+  const DIE_OPS = {
+    contribute: ['selfDamage', 'heal', 'block', 'split'],
+    confirm: ['heal', 'block', 'whet'],
+    idle: ['whet'],                                            // v1.29 기여하지 않았을 때
+    passive: ['extraReroll', 'turnBlock', 'whet', 'pin', 'nudge', 'mirror', 'ladder'],
+  };
   for (const d of DB.dice) {
     if (!d.effect) continue;
     const ops = DIE_OPS[d.effect.when];

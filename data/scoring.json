@@ -36,6 +36,18 @@
           ],
           "abilityText": "🎲 집중 +1 (스택마다 리롤 +1, 매 턴 1씩 소멸)",
           "tier": "uncommon"
+        },
+        {
+          "id": "catch_breath",
+          "name": "숨 고르기",
+          "ability": [
+            {
+              "op": "whet",
+              "amount": 1
+            }
+          ],
+          "abilityText": "🔥 벼름 +1 — 약하게 흘리고 다음 한 방을 벼린다",
+          "tier": "common"
         }
       ]
     },
@@ -68,9 +80,13 @@
             {
               "op": "block",
               "amount": 3
+            },
+            {
+              "op": "whet",
+              "amount": 1
             }
           ],
-          "abilityText": "❤️ 재생 +1 + 방어도 3",
+          "abilityText": "❤️ 재생 1 · 🛡 방어 3 · 🔥 벼름 +1",
           "tier": "common"
         },
         {
@@ -168,6 +184,22 @@
           ],
           "abilityText": "🔻 맞은 적 약화 +2 (공격력 -2)",
           "tier": "uncommon"
+        },
+        {
+          "id": "chopping",
+          "name": "장작 패기",
+          "ability": [
+            {
+              "op": "whet",
+              "amount": 1
+            },
+            {
+              "op": "strength",
+              "amount": 1
+            }
+          ],
+          "abilityText": "🔥 벼름 +1 · 🗡️ 힘 +1",
+          "tier": "uncommon"
         }
       ],
       "mult": 1.5
@@ -211,6 +243,18 @@
           ],
           "abilityText": "🗡️ 힘 +3",
           "tier": "uncommon"
+        },
+        {
+          "id": "hunger",
+          "name": "굶주림",
+          "ability": [
+            {
+              "op": "whet",
+              "amount": 2
+            }
+          ],
+          "abilityText": "🔥 벼름 +2 — 크게 벼려 다음을 노린다",
+          "tier": "rare"
         }
       ],
       "mult": 3
@@ -284,10 +328,14 @@
           "ability": [
             {
               "op": "weakEnemy",
-              "amount": 3
+              "amount": 2
+            },
+            {
+              "op": "whet",
+              "amount": 1
             }
           ],
-          "abilityText": "🔻 맞은 모든 적 약화 +3",
+          "abilityText": "🔻 적 약화 2 · 🔥 벼름 +1",
           "tier": "uncommon"
         },
         {

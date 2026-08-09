@@ -1137,3 +1137,14 @@ span.enemy-art {
   animation: stSpin 7s linear infinite; }
 @keyframes stSpin { to { transform: rotate(360deg) } }
 .roll-btn .cost { font-size: 11px; color: #ffb1a2; }
+
+/* ---------- v1.29 벼름 · 새김 ---------- */
+.whet-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:9px;
+  background:linear-gradient(180deg,#5a2410,#3a1408);border:1px solid #b5642a;color:#ffcf94;
+  font-weight:700;text-shadow:0 1px 0 #2a0d04;animation:whetPulse 1.6s ease-in-out infinite}
+.whet-chip b{color:#ffe9b8;font-size:1.05em}
+@keyframes whetPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,150,60,.0)}50%{box-shadow:0 0 8px 1px rgba(255,150,60,.45)}}
+.die.art.pinned{box-shadow:0 0 0 2px #d9a05a inset, 0 0 7px rgba(217,160,90,.5)}
+.die.art .pin-mark{position:absolute;top:-4px;right:-3px;font-size:12px;line-height:1;
+  filter:drop-shadow(0 1px 1px #000);pointer-events:none;animation:pinBob 2.2s ease-in-out infinite}
+@keyframes pinBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-1.5px) rotate(-8deg)}}

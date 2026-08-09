@@ -97,17 +97,28 @@ export function evalCategory(cat, faces, zeroed = null) {
 // 최종 피해 = (기본 + 금박 기여) × Π(categoryMult) + Σ(categoryBonus) + Σ(flatDamage)
 // (v0.8: 족보 레벨 폐지 — 성장은 변형 교체·주사위·유물로)
 // 기본+금박이 0이면 성립 실패 — total 0 (선택 불가 처리 대상)
-export function computeDamage(cat, faces, diceDefs, relics, zeroed = null) {
+// v1.29 벼름(whet) — 전투 중에 쌓았다가 족보로 터뜨리는 곱연산 자원.
+//   배수 = 1 + 벼름 × WHET_STEP. 확정하면 0으로 돌아간다 (턴마다 깎이지 않는다).
+export const WHET_STEP = 0.5;
+export const WHET_CAP = 10;
+export const whetMultOf = (whet) => 1 + Math.min(whet || 0, WHET_CAP) * WHET_STEP;
+
+export function computeDamage(cat, faces, diceDefs, relics, zeroed = null, opts = {}) {
   const ev = evalCategory(cat, faces, zeroed);
-  let gold = 0;
+  let gold = 0, split = 0;
   for (const i of ev.contributing) {
-    if (diceDefs[i] && diceDefs[i].gold) gold += faces[i];
+    const def = diceDefs[i];
+    if (!def) continue;
+    if (def.gold) gold += faces[i];
+    // 쪼개기 — 같은 눈 족보에서만 자기 눈을 한 번 더 센다
+    if (def.effect && def.effect.op === 'split' && cat.kind === 'ofKind') split += faces[i];
   }
-  const core = ev.base + gold;
+  const core = ev.base + gold + split;
   if (!ev.valid || core === 0) {
-    return { valid: ev.valid, base: ev.base, gold: 0, mult: 1, bonus: 0, flat: 0, total: 0, isZero: true };
+    return { valid: ev.valid, base: ev.base, gold: 0, split: 0, mult: 1, whetMult: 1, bonus: 0, flat: 0, total: 0, isZero: true };
   }
   let mult = 1, bonus = 0, flat = 0;
+  const hpRatio = opts.hpRatio != null ? opts.hpRatio : 1;
   for (const r of relics) {
     const h = r.hook;
     if (h.type === 'categoryMult' && h.category === cat.id) mult *= h.mult;
@@ -115,9 +126,12 @@ export function computeDamage(cat, faces, diceDefs, relics, zeroed = null) {
     if (h.type === 'kindBonus' && h.kind === cat.kind) bonus += h.bonus;      // 족보군 보너스
     if (h.type === 'aoeBonus' && cat.target === 'allEnemies') bonus += h.bonus; // 전체 공격 보너스
     if (h.type === 'flatDamage') flat += h.amount;
+    // 말라붙은 심장 — HP가 낮으면 통째로 배수
+    if (h.type === 'lowHpMult' && hpRatio <= (h.ratio != null ? h.ratio : 0.34)) mult *= h.mult;
   }
-  const total = Math.floor(core * mult) + bonus + flat;
-  return { valid: true, base: ev.base, gold, mult, bonus, flat, total, isZero: false, contributing: ev.contributing };
+  const whetMult = whetMultOf(opts.whet);
+  const total = Math.floor(core * mult * whetMult) + bonus + flat;
+  return { valid: true, base: ev.base, gold, split, mult, whetMult, bonus, flat, total, isZero: false, contributing: ev.contributing };
 }
 
 export function rollFace(dieDef, rngf) {

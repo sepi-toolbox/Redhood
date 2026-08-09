@@ -55,6 +55,8 @@ function scoreChoice(battle, p) {
     else if (o.op === 'weakEnemy') v += amt * turnsLeft * 0.7;
     else if (o.op === 'bleed') v += amt * 2.2;
     else if (o.op === 'vulnerable') v += amt * turnsLeft * 0.5;
+    // v1.29 벼름: 다음 한 방이 amt*0.5 배만큼 커진다
+    else if (o.op === 'whet') v += amt * 0.5 * Math.max(12, p.bd.total) * (turnsLeft > 1 ? 1 : 0);
   }
   return v;
 }

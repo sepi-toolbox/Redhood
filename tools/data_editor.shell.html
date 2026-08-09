@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.28 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.29 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -190,9 +190,12 @@ function labelFor(path, fallback){
     }
     if(f==='dice'){ const d=DB.dice[Number(ks[0])]; if(!d) return fallback;
       if(ks[1]==='faces') return `${d.name} ${Number(ks[2])+1}번 면`;
-      return `${d.name} ${F_LABEL[tailOf(1)]||tailOf(1)}`; }
+      const DN={'effect.when':'효과 시점','effect.op':'효과','effect.amount':'효과 수치',gold:'금박'};
+      return `${d.name} ${DN[tailOf(1)]||F_LABEL[tailOf(1)]||tailOf(1)}`; }
     if(f==='relics'){ const r=DB.relics[Number(ks[0])]; if(!r) return fallback;
-      if(tailOf(1)==='hook.amount') return `${r.name} 수치`;
+      const RN={'hook.amount':'수치','hook.type':'효과 유형','hook.mult':'배수','hook.bonus':'가산',
+        'hook.ratio':'비율','hook.per':'간격','hook.count':'개수','hook.whet':'벼름','hook.category':'대상 족보','hook.kind':'대상 족보군'};
+      if(RN[tailOf(1)]) return `${r.name} ${RN[tailOf(1)]}`;
       return `${r.name} ${F_LABEL[tailOf(1)]||tailOf(1)}`; }
     if(f==='scoring'&&ks[0]==='categories'){
       const c=(DB.scoring.categories||[])[Number(ks[1])]; if(!c) return fallback;
@@ -301,7 +304,9 @@ const RELIC_HOOKS=[['flatDamage','평타 +N'],['categoryMult','특정 족보 배
   ['kindBonus','특정 눈 가산'],['aoeBonus','전체공격 가산'],['lowHpDamage','저체력 추가피해'],
   ['maxHp','최대 HP'],['turnHeal','턴마다 회복'],['turnBlock','턴마다 방어'],['healOnKill','처치 시 회복'],
   ['healOnVictory','승리 시 회복'],['blockKeep','방어 유지'],['extraReroll','리롤 +N'],['luck','행운'],
-  ['coinBonus','코인 보너스'],['shopDiscount','상점 할인'],['confuseImmune','혼란 면역']];
+  ['coinBonus','코인 보너스'],['shopDiscount','상점 할인'],['confuseImmune','혼란 면역'],
+  ['turnWhet','턴마다 벼름'],['whetOnKind','같은 눈 N개면 벼름'],['rerollOnCategory','특정 족보군 확정 시 리롤·벼름'],
+  ['blockScaleDamage','방어도 비례 피해'],['lowHpMult','저체력 배수'],['whetOnSelfDamage','자해할 때 벼름']];
 const EVENT_OPS=[['gainCoins','코인 획득'],['loseCoins','코인 잃음'],['heal','회복'],['loseHp','HP 잃음'],
   ['maxHp','최대 HP 증가'],['maxHpLoss','최대 HP 감소'],['gainDie','주사위 획득'],
   ['gainRelic','유물 획득'],['gainRelicElite','정예 유물 획득'],['gainVariant','족보 획득']];
@@ -323,8 +328,18 @@ function listEditor(path, label, options, arr){
 const NO_AMOUNT=new Set(['rest']);   // 수치가 없는 효과
 const ABILITY_OPS=[['strength','힘'],['focus','집중'],['regen','재생'],['block','방어'],['heal','회복'],
   ['weakEnemy','적 약화'],['bleed','출혈'],['vulnerable','취약'],['stun','기절'],['dodge','회피'],
-  ['rerollNext','다음 턴 리롤'],['buffNext','다음 족보 강화'],['cleanse','정화'],['selfDamage','자해']];
-const OPN={rest:'휴식',selfDamage:'자해',poison:'독',bleed:'출혈',damage:'피해',block:'방어',empower:'힘',confuse:'혼란',heal:'회복',weaken:'약화',
+  ['rerollNext','다음 턴 리롤'],['buffNext','다음 족보 강화'],['cleanse','정화'],['selfDamage','자해'],
+  ['whet','벼름(🔥 다음 한 방 배수)']];
+const DIE_WHEN=[['passive','보유만으로'],['confirm','확정할 때'],['contribute','기여했을 때'],['idle','기여 안 했을 때']];
+const DIE_OPS_ED={
+  passive:[['extraReroll','리롤 +N'],['turnBlock','턴마다 방어'],['whet','턴마다 벼름'],
+    ['pin','새김 — 눈이 다음 턴까지 남는다'],['nudge','밀기 — 다시 굴리면 눈 +1'],
+    ['mirror','되비침 — 최빈 눈으로'],['ladder','이음 — 안 겹치는 눈으로']],
+  confirm:[['heal','회복'],['block','방어'],['whet','벼름']],
+  contribute:[['selfDamage','자해'],['heal','회복'],['block','방어'],['split','쪼개기 — 같은 눈 족보에서 두 번']],
+  idle:[['whet','벼름']],
+};
+const OPN={rest:'휴식',selfDamage:'자해',whet:'벼름',per:'간격',ratio:'비율',poison:'독',bleed:'출혈',damage:'피해',block:'방어',empower:'힘',confuse:'혼란',heal:'회복',weaken:'약화',
   vulnerable:'취약',bleed:'출혈',regen:'재생',focus:'집중',strength:'힘',weakEnemy:'적 약화',
   loseHp:'HP 감소',gainRelic:'유물 획득',drain:'흡혈'};
 const EN = {}; DB.enemies.forEach((e,i)=>EN[e.id]={e,i});
@@ -631,13 +646,25 @@ function tabScore(v){
   });
 }
 function tabDice(v){
-  const tb=table(v,['id','이름','등급','1','2','3','4','5','6','설명','']);
+  const tb=table(v,['id','이름','등급','1','2','3','4','5','6','효과 시점','효과','수치','금박','설명','']);
   DB.dice.forEach((d,i)=>{
     const tr=document.createElement('tr'); tr.className='t-'+(d.tier||'common');
     tr.dataset.k=(d.id+' '+d.name).toLowerCase();
     cell(tr,d.id,1); cell(tr, field(`dice:${i}.name`,d.id+' 이름'));
     cell(tr, select(`dice:${i}.tier`, d.name+' 등급', TIER_OPS, {def:'common', after:redraw}));
     d.faces.forEach((f,k)=> cell(tr, field(`dice:${i}.faces.${k}`, d.name+' '+(k+1)+'번 면')));
+    // 효과 — 시점·종류·수치. 시점을 '— 없음 —' 으로 두면 효과가 통째로 빠진다
+    cell(tr, select(`dice:${i}.effect.when`, d.name+' 효과 시점',
+      [['','— 없음 —'], ...DIE_WHEN], {removable:true, removePath:`dice:${i}.effect`,
+       onCreate:(val)=>{ d.effect={when:val, op:(DIE_OPS_ED[val]||[['heal']])[0][0]}; }}));
+    const ops=d.effect ? (DIE_OPS_ED[d.effect.when]||[]) : [];
+    cell(tr, d.effect && ops.length ? select(`dice:${i}.effect.op`, d.name+' 효과', ops, {after:redraw}) : '—', !d.effect);
+    const NOAMT=new Set(['pin','mirror','ladder','split']);
+    cell(tr, d.effect && !NOAMT.has(d.effect.op)
+      ? field(`dice:${i}.effect.amount`, d.name+' 효과 수치', {num:true, def:1}) : '—',
+      !(d.effect && !NOAMT.has(d.effect.op)));
+    cell(tr, select(`dice:${i}.gold`, d.name+' 금박', [['','아니오'],['true','예 — 기여하면 눈만큼 추가 피해']],
+      {removable:true, removePath:`dice:${i}.gold`, onCreate:()=>{ d.gold=true; }}));
     cell(tr, field(`dice:${i}.desc`, d.id+' 설명'));
     const box=document.createElement('div');
     box.appendChild(miniBtn('행 삭제','이 주사위를 지운다',()=>{
@@ -647,7 +674,7 @@ function tabDice(v){
     cell(tr, box);
     tb.appendChild(tr);
   });
-  addRow(tb, 11, '주사위 추가', ()=>{
+  addRow(tb, 16, '주사위 추가', ()=>{
     const ids=new Set(DB.dice.map(x=>x.id));
     DB.dice.push({ id:freshId(ids,'die'), name:'새 주사위', faces:[1,2,3,4,5,6], tier:'common', desc:'설명' });
     mark('dice','주사위 추가'); redraw(); });
@@ -660,7 +687,12 @@ function tabRelic(v){
     cell(tr,(r.icon||'')+' '+r.id,1); cell(tr, field(`relics:${i}.name`,r.id+' 이름'));
     cell(tr, select(`relics:${i}.tier`, r.name+' 등급', RELIC_TIER_OPS, {def:'normal', after:redraw}));
     cell(tr, r.hook ? select(`relics:${i}.hook.type`, r.name+' 효과 유형', RELIC_HOOKS, {after:redraw}) : '—', !r.hook);
-    cell(tr, r.hook&&r.hook.amount!=null? field(`relics:${i}.hook.amount`,r.name+' 수치') : '—', !(r.hook&&r.hook.amount!=null));
+    const hb=document.createElement('div'); hb.style.cssText='display:flex;gap:4px;flex-wrap:wrap';
+    if(r.hook) for(const k of ['amount','bonus','mult','ratio','per','count','whet'])
+      if(r.hook[k]!=null){ const w=document.createElement('label'); w.className='sub'; w.style.cssText='display:flex;gap:3px;align-items:center';
+        w.append(k==='amount'?'수치':k==='bonus'?'가산':k==='mult'?'배수':k==='ratio'?'비율':k==='per'?'간격':k==='count'?'개수':'벼름');
+        w.appendChild(field(`relics:${i}.hook.${k}`, r.name+' '+k, {num:true})); hb.appendChild(w); }
+    cell(tr, hb.children.length? hb : '—', !hb.children.length);
     cell(tr, field(`relics:${i}.desc`,r.name+' 설명'));
     const box=document.createElement('div'); box.style.cssText='display:flex;gap:6px';
     box.appendChild(miniBtn('행 삭제','이 유물을 지운다',()=>{

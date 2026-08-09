@@ -1,6 +1,6 @@
 // engine.js — 전투 상태 머신 v0.5: 다중 적, 단일/전체 공격, 굴림 페이즈 분리
 import { DB } from './data.js';
-import { computeDamage, rollFace, relicValue } from './yahtzee.js';
+import { computeDamage, rollFace, relicValue, whetMultOf, WHET_CAP } from './yahtzee.js';
 
 export const rng = { next: Math.random };
 
@@ -43,6 +43,8 @@ export function createBattle(run, encounterIds) {
     pendingConfuse: 0,                    // 적 혼란 예약 — 다음 턴 시작 시 주사위 잠금 수
     dodgeActive: false,
     buffs: { strength: 0, focus: 0, regen: 0 }, // v0.19: 전투 내 지속 버프 (스택)
+    whet: 0,                              // v1.29 벼름 — 쌓았다가 족보로 터뜨리는 곱연산 자원 (턴마다 안 깎인다)
+    whetGained: 0,                        // 이번 턴에 벌어들인 양 (연출용)
     enemies: encounterIds.map((id, i) => spawnEnemy(id, i, scale)),
     lastResult: null,
     coinsLost: 0,                         // v1.17 약탈 — 전투가 끝나면 run에서 깎는다
@@ -153,6 +155,61 @@ function allowedFaces(die, d) {
 const rollWith = (die, d) => { const f = allowedFaces(die, d); return f[Math.floor(rng.next() * f.length)]; };
 
 // 턴이 시작될 때: 부패 심지가 타고, 지속 턴이 줄고, 잠식이 다 찼는지 본다
+// ---------- 벼름(whet) ----------
+export function addWhet(battle, n, tag) {
+  if (!(n > 0)) return 0;
+  const before = battle.whet;
+  battle.whet = Math.min(WHET_CAP, battle.whet + n);
+  const got = battle.whet - before;
+  if (got > 0) battle.whetGained += got;
+  if (got > 0 && battle.lastResult) battle.lastResult.bonusHits.push(`🔥벼름 +${got}${tag ? ' ' + tag : ''}`);
+  return got;
+}
+export const whetMult = (battle) => whetMultOf(battle.whet);
+
+// ---------- 주사위 눈 조작 (v1.29) ----------
+// pin   보유만으로 — 확정한 뒤에도 이 칸의 눈이 다음 턴까지 남는다
+// nudge 다시 굴릴 때 무작위 대신 눈을 amount 만큼 올린다 (6을 넘으면 1부터)
+// mirror 굴린 직후 그 판에서 가장 많이 나온 눈으로 바뀐다
+// split 같은 눈 족보에서 자기 눈을 한 번 더 센다 (computeDamage 쪽)
+const dieOp = (battle, i) => {
+  const def = battle.diceDefs[i];
+  return def && def.effect ? def.effect.op : null;
+};
+export const isPinned = (battle, i) => dieOp(battle, i) === 'pin' && battle.dice[i].pinned;
+function nudgeFace(battle, i) {
+  const def = battle.diceDefs[i], step = (def.effect && def.effect.amount) || 1;
+  const faces = def.faces, cur = battle.dice[i].face;
+  const sorted = [...new Set(faces)].sort((a, b) => a - b);
+  const at = sorted.indexOf(cur);
+  battle.dice[i].face = at < 0 ? sorted[0] : sorted[(at + step) % sorted.length];
+}
+// 이음 — 굴린 직후, 다른 눈과 겹치지 않고 이어지기 좋은 눈으로 바뀐다 (되비침의 반대)
+function applyLadder(battle, rolled) {
+  const targets = rolled.filter(i => dieOp(battle, i) === 'ladder');
+  if (!targets.length) return;
+  for (const i of targets) {
+    const others = new Set(battle.dice.map((d, k) => (k === i ? -1 : d.face)).filter(f => f > 0));
+    const cand = [...new Set(battle.diceDefs[i].faces)];
+    let best = battle.dice[i].face, bestScore = -1;
+    for (const f of cand) {
+      let sc = others.has(f) ? 0 : 2;                       // 안 겹치면 좋다
+      if (others.has(f - 1) || others.has(f + 1)) sc += 1;  // 옆에 붙으면 더 좋다
+      if (sc > bestScore) { bestScore = sc; best = f; }
+    }
+    battle.dice[i].face = best;
+  }
+}
+function applyMirror(battle, rolled) {
+  const targets = rolled.filter(i => dieOp(battle, i) === 'mirror');
+  if (!targets.length) return;
+  const count = {};
+  battle.dice.forEach((d, i) => { if (d.face > 0 && dieOp(battle, i) !== 'mirror') count[d.face] = (count[d.face] || 0) + 1; });
+  const top = Object.entries(count).sort((a, b) => b[1] - a[1] || b[0] - a[0])[0];
+  if (!top) return;
+  for (const i of targets) battle.dice[i].face = Number(top[0]);
+}
+
 function statusTurn(battle) {
   battle.stEvents = [];
   battle.dice.forEach((d) => {
@@ -189,7 +246,8 @@ function startTurn(battle, first = false) {
     }
   }
   // 방어: 기본은 초기화. 문지기의 빗장(blockKeep)이 있으면 유지 + 턴 시작 방어 가산
-  const kept = hasRelic(battle.relics, 'blockKeep') ? battle.player.block : 0;
+  const keepR = battle.relics.find(r => r.hook.type === 'blockKeep');
+  const kept = keepR ? Math.floor(battle.player.block * (keepR.hook.ratio != null ? keepR.hook.ratio : 0.5)) : 0;
   battle.player.block = kept + dicePassive(battle, 'turnBlock') + sumRelic(battle.relics, 'turnBlock');
   // 따뜻한 우유·재생 버프: 턴 시작 회복
   const th = sumRelic(battle.relics, 'turnHeal') + battle.buffs.regen;
@@ -199,7 +257,14 @@ function startTurn(battle, first = false) {
     + dicePassive(battle, 'extraReroll') + battle.buffs.focus + battle.nextTurnRerolls;
   battle.nextTurnRerolls = 0;
   battle.rolled = false;
-  for (const d of battle.dice) { d.held = false; d.face = 0; d.confused = false; }
+  // 못 주사위(pin): 확정 때 새겨둔 눈을 지우지 않고 그대로 가지고 간다
+  battle.dice.forEach((d, i) => {
+    const keep = dieOp(battle, i) === 'pin' && d.pinned && d.face > 0;
+    d.held = false; d.confused = false;
+    if (!keep) { d.face = 0; d.pinned = false; }
+  });
+  battle.whetGained = 0;
+  addWhet(battle, sumRelic(battle.relics, 'turnWhet') + dicePassive(battle, 'whet'));  // 숫돌 등
   statusTurn(battle);
   if (hasRelic(battle.relics, 'confuseImmune')) battle.pendingConfuse = 0; // 수지 양초: 혼란 면역
   // 혼란(🌀): 무작위 주사위 N개가 뒤틀림 — 이번 턴 다시 굴릴 수 없다
@@ -217,7 +282,13 @@ function startTurn(battle, first = false) {
 
 export function initialRoll(battle) {
   if (battle.over || battle.rolled || battle.await) return false;
-  battle.dice.forEach((d, i) => { d.face = rollWith(battle.diceDefs[i], d); d.held = true; });
+  const rolled = [];
+  battle.dice.forEach((d, i) => {
+    if (dieOp(battle, i) === 'pin' && d.pinned && d.face > 0) { d.held = true; return; }  // 새겨둔 눈은 그대로
+    d.face = rollWith(battle.diceDefs[i], d); d.held = true; rolled.push(i);
+  });
+  applyMirror(battle, battle.dice.map((_, i) => i));
+  applyLadder(battle, battle.dice.map((_, i) => i));
   battle.rolled = true;
   return true;
 }
@@ -236,10 +307,18 @@ export function reroll(battle) {
   const cost = rerollCost(battle);
   if (battle.rollsLeft < cost) return false;
   battle.rollsLeft -= cost;
+  const rolled = [];
   battle.dice.forEach((d, i) => {
-    if (!d.held) { d.face = rollWith(battle.diceDefs[i], d); if (d.st) d.st.opened = true; }
+    if (!d.held) {
+      if (dieOp(battle, i) === 'nudge' && d.face > 0) nudgeFace(battle, i);   // 길잡이 — 굴리지 않고 한 칸 올린다
+      else { d.face = rollWith(battle.diceDefs[i], d); rolled.push(i); }
+      d.pinned = false;                                   // 다시 굴리면 새김이 풀린다
+      if (d.st) d.st.opened = true;
+    }
     d.held = true; // 선택 초기화
   });
+  applyMirror(battle, rolled);
+  applyLadder(battle, rolled);
   return true;
 }
 
@@ -270,9 +349,12 @@ function situationalFlat(battle) {
   for (const r of battle.relics) {
     const h = r.hook;
     if (h.type === 'lowHpDamage' && battle.player.hp <= battle.player.maxHp * h.ratio) v += h.amount;
+    // 곰의 등 — 지금 두른 방어도 per 마다 amount
+    if (h.type === 'blockScaleDamage') v += Math.floor(battle.player.block / (h.per || 10)) * h.amount;
   }
   return v;
 }
+const dmgOpts = (battle) => ({ whet: battle.whet, hpRatio: battle.player.hp / Math.max(1, battle.player.maxHp) });
 
 // ---------- 미리보기 ----------
 // v0.9: 족보당 변형을 여러 개 보유(누적) — 같은 족보의 변형은 목록에서 이웃하게 정렬됨
@@ -294,8 +376,8 @@ export function previewAll(battle) {
     const ownedList = battle.categories[cat.id];
     if (!ownedList || ownedList.length === 0) continue;
     const bd0 = battle.rolled
-      ? computeDamage(cat, faces, battle.diceDefs, battle.relics, zero)
-      : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 };
+      ? computeDamage(cat, faces, battle.diceDefs, battle.relics, zero, dmgOpts(battle))
+      : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, whetMult: 1, bonus: 0, flat: 0 };
     const total = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ + battle.buffs.strength : bd0.total;
     const seal = battle.sealed[cat.id] || 0;
     // 성립하지 않는(또는 0점) 족보는 선택 불가
@@ -322,12 +404,20 @@ function applyDiceEffects(battle, bd) {
   battle.diceDefs.forEach((def, i) => {
     const ef = def.effect;
     if (!ef) return;
-    const active = ef.when === 'confirm' || (ef.when === 'contribute' && contributing.has(i));
+    const active = ef.when === 'confirm'
+      || (ef.when === 'contribute' && contributing.has(i))
+      || (ef.when === 'idle' && !contributing.has(i));       // v1.29 불티 — 안 쓴 칸이 벼름을 만든다
     if (!active) return;
     switch (ef.op) {
+      case 'whet':
+        addWhet(battle, ef.amount, '🎲');
+        break;
       case 'selfDamage':
         battle.player.hp -= ef.amount;
         battle.lastResult.bonusHits.push(`🎲🩸-${ef.amount}`);
+        // 거머리 반지 — 자해한 만큼 벼름이 오른다
+        addWhet(battle, sumRelic(battle.relics, 'whetOnSelfDamage') > 0
+          ? sumRelic(battle.relics, 'whetOnSelfDamage') : 0, '🩸');
         if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; }
         break;
       case 'heal':
@@ -396,6 +486,10 @@ function applyAbility(battle, variant, bd, targets) {
       case 'regen':
         battle.buffs.regen += ab.amount;
         battle.lastResult.bonusHits.push(`❤️+${ab.amount}`);
+        break;
+      // v1.29 벼름 — 다음에 터뜨릴 족보의 배수를 올린다
+      case 'whet':
+        addWhet(battle, ab.amount);
         break;
       // ---- v0.19 적 디버프 (피해 준 대상에게) ----
       case 'weakEnemy':
@@ -476,7 +570,7 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   }
 
   const faces = facesOf(battle);
-  const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics, zeroedOf(battle));
+  const bd = computeDamage(cat, faces, battle.diceDefs, battle.relics, zeroedOf(battle), dmgOpts(battle));
   if (bd.total === 0) return null; // 성립 불가 족보는 확정 불가 (0점 버리기 폐지)
   if (bd.total > 0) {
     const situ = situationalFlat(battle); // 독사과 등 조건부 가산 + 힘 버프
@@ -493,9 +587,16 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
     for (const t of targets) dealToEnemy(battle, t, bd.total);
   }
 
+  // 벼름은 터뜨리는 순간 전부 쓰인다 — 다음 계산 전에 비운다
+  const spentWhet = battle.whet;
+  battle.whet = 0;
+  battle.lastResult.spentWhet = spentWhet;
+  // 못 주사위: 이번에 굴러 나온 눈을 그대로 새겨 다음 턴까지 들고 간다
+  battle.dice.forEach((d, i) => { if (dieOp(battle, i) === 'pin' && d.face > 0) d.pinned = true; });
   applyAbility(battle, variant, bd, targets);
   applyDiceEffects(battle, bd);
   applyStatusCost(battle, bd);
+  applyConfirmRelics(battle, cat, faces, bd);
   if (battle.over && battle.result === 'defeat') return battle.lastResult; // 저주 주사위 등으로 자멸
 
   // 늑대 가죽: 처치한 적 수만큼 회복
@@ -517,6 +618,26 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   if (battle.over) return battle.lastResult;
   battle.await = 'enemy';
   return battle.lastResult;
+}
+
+// 확정하는 순간 켜지는 유물들 (v1.29)
+function applyConfirmRelics(battle, cat, faces, bd) {
+  const count = {};
+  for (const f of faces) if (f > 0) count[f] = (count[f] || 0) + 1;
+  const most = Math.max(0, ...Object.values(count));
+  for (const r of battle.relics) {
+    const h = r.hook;
+    // 사냥꾼의 눈 — 같은 눈이 N개 이상 나온 판이면 벼름
+    if (h.type === 'whetOnKind' && most >= (h.count || 3)) addWhet(battle, h.amount || 1, '🔍');
+    // 길표 — 이 족보군을 확정하면 다음 턴 리롤
+    if (h.type === 'rerollOnCategory' && (h.kind ? cat.kind === h.kind : cat.id === h.category)) {
+      if (h.amount > 0) {
+        battle.nextTurnRerolls += h.amount;
+        battle.lastResult.bonusHits.push(`다음 턴 리롤 +${h.amount}`);
+      }
+      addWhet(battle, h.whet || 0, '🪧');
+    }
+  }
 }
 
 // 족보에 쓴 주사위가 물리는 대가 — 출혈·독은 피해, 약탈은 코인, 부패는 해제, 잠식은 번짐

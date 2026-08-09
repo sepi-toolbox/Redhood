@@ -211,5 +211,115 @@
       "amount": 2
     },
     "desc": "품고만 있어도 가시가 돋는다 — 매 턴 시작 시 방어 2."
+  },
+  {
+    "id": "nail",
+    "name": "못 주사위",
+    "faces": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "tier": "rare",
+    "desc": "족보를 확정하면 이 눈이 그대로 새겨져 다음 턴까지 남는다. 다시 굴리면 풀린다.",
+    "effect": {
+      "when": "passive",
+      "op": "pin"
+    }
+  },
+  {
+    "id": "guide",
+    "name": "길잡이 주사위",
+    "faces": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "tier": "rare",
+    "desc": "다시 굴리면 무작위가 아니라 눈이 한 칸 올라간다 (6 다음은 1).",
+    "effect": {
+      "when": "passive",
+      "op": "nudge",
+      "amount": 1
+    }
+  },
+  {
+    "id": "mirror",
+    "name": "되비침 주사위",
+    "faces": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "tier": "epic",
+    "desc": "굴린 직후 그 판에서 가장 많이 나온 눈으로 바뀐다.",
+    "effect": {
+      "when": "passive",
+      "op": "mirror"
+    }
+  },
+  {
+    "id": "spark",
+    "name": "불티 주사위",
+    "faces": [
+      1,
+      1,
+      2,
+      2,
+      3,
+      3
+    ],
+    "tier": "uncommon",
+    "desc": "눈은 낮지만, 족보에 안 쓰이면 🔥벼름 +1.",
+    "effect": {
+      "when": "idle",
+      "op": "whet",
+      "amount": 1
+    }
+  },
+  {
+    "id": "twin",
+    "name": "쌍눈 주사위",
+    "faces": [
+      2,
+      3,
+      3,
+      4,
+      4,
+      5
+    ],
+    "tier": "epic",
+    "desc": "같은 눈 족보(원페어·트리플·포카드·야찌)에서 자기 눈을 두 번 센다.",
+    "effect": {
+      "when": "contribute",
+      "op": "split"
+    }
+  },
+  {
+    "id": "chainlink",
+    "name": "이음 주사위",
+    "faces": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "tier": "epic",
+    "desc": "굴린 직후 다른 눈과 겹치지 않고 이어지기 좋은 눈으로 바뀐다.",
+    "effect": {
+      "when": "passive",
+      "op": "ladder"
+    }
   }
 ]

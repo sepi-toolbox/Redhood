@@ -783,5 +783,152 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
       'hideFace','needReroll','fuse','linked','rerollCost','onUseFaceCoin','spread'].includes(s.rule)), true);
 }
 
+
+// ---------------------------------------------------------------
+// v1.29 벼름(whet) · 눈 조작 주사위
+// ---------------------------------------------------------------
+{
+  const { DB } = await import('../js/data.js');
+  const eng = await import('../js/engine.js');
+  const { computeDamage, whetMultOf } = await import('../js/yahtzee.js');
+  const mk = (dice, relics = [], cats = { onePair: ['clasped_hands'] }) =>
+    eng.createBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics,
+      dice, categories: cats }, ['crow'], 'battle');
+
+  eq('벼름 0이면 배수 1', whetMultOf(0), 1);
+  eq('벼름 2면 배수 2', whetMultOf(2), 2);
+  eq('벼름은 10에서 멈춘다', whetMultOf(99), 6);
+
+  // 공식에 곱연산으로 들어간다: 원페어 [5,5] = 10 → 벼름 2면 20
+  const five = [5, 5, 1, 2, 3], N5 = Array(5).fill({ faces: [1,2,3,4,5,6] });
+  const C = DB.scoring.categories.find(c => c.id === 'onePair');
+  eq('벼름 없이 원페어 [5,5]', computeDamage(C, five, N5, []).total, 10);
+  eq('벼름 2면 두 배', computeDamage(C, five, N5, [], null, { whet: 2 }).total, 20);
+  eq('벼름 4면 세 배', computeDamage(C, five, N5, [], null, { whet: 4 }).total, 30);
+
+  // 숫돌 — 매 턴 시작 벼름 +1
+  {
+    const b = mk(['normal','normal','normal','normal','normal'], ['whetstone']);
+    eq('숫돌: 첫 턴에 벼름 1', b.whet, 1);
+    eng.initialRoll(b); b.await = 'enemy'; eng.enemyPhase(b);
+    eq('숫돌: 다음 턴에 벼름 2', b.whet, 2);
+  }
+  // 확정하면 벼름이 0으로 돌아간다
+  {
+    const b = mk(['normal','normal','normal','normal','normal'], ['whetstone'], { onePair: ['red_shoes'] });
+    eng.rng.next = () => 0.5;                       // 항상 4가 나온다 → 원페어 성립
+    eng.initialRoll(b);
+    const before = b.whet;
+    const r = eng.confirmCategory(b, 'onePair', 'red_shoes', b.enemies[0].uid);
+    eq('확정 전 벼름이 있었다', before > 0, true);
+    eq('확정하면 벼름 0', b.whet, 0);
+    eq('쓴 벼름을 기록한다', r.spentWhet, before);
+    // 벼름을 주는 변형이면 확정 직후 다시 쌓이기 시작한다
+    const b2 = mk(['normal','normal','normal','normal','normal'], [], { onePair: ['clasped_hands'] });
+    eng.initialRoll(b2);
+    eng.confirmCategory(b2, 'onePair', 'clasped_hands', b2.enemies[0].uid);
+    eq('맞잡은 손은 쓰면서 다음 벼름을 남긴다', b2.whet, 1);
+    eng.rng.next = Math.random;
+  }
+  // 숨 고르기 — 약한 족보로 벼름을 번다
+  {
+    const b = mk(['normal','normal','normal','normal','normal'], [], { chance: ['catch_breath'] });
+    eng.rng.next = () => 0.5;
+    eng.initialRoll(b);
+    eq('숨 고르기 전 벼름 0', b.whet, 0);
+    eng.confirmCategory(b, 'chance', 'catch_breath', b.enemies[0].uid);
+    eq('숨 고르기로 벼름 1', b.whet, 1);
+    eng.rng.next = Math.random;
+  }
+  // 못 주사위 — 확정한 눈이 다음 턴까지 남는다
+  {
+    const b = mk(['nail','normal','normal','normal','normal']);
+    eng.rng.next = () => 0.5;
+    eng.initialRoll(b);
+    const kept = b.dice[0].face;
+    eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
+    eq('확정하면 새겨진다', b.dice[0].pinned, true);
+    b.await = 'enemy'; eng.rng.next = Math.random; eng.enemyPhase(b);
+    eq('턴이 넘어가도 눈이 남는다', b.dice[0].face, kept);
+    eq('새김은 유지된다', b.dice[0].pinned, true);
+    eng.initialRoll(b);
+    eq('다시 굴려도 새긴 칸은 그대로', b.dice[0].face, kept);
+    b.dice[0].held = false; eng.reroll(b);
+    eq('일부러 굴리면 새김이 풀린다', b.dice[0].pinned, false);
+  }
+  // 길잡이 주사위 — 다시 굴리면 눈이 한 칸 올라간다
+  {
+    const b = mk(['guide','normal','normal','normal','normal']);
+    eng.initialRoll(b);
+    const f0 = b.dice[0].face;
+    b.dice[0].held = false; eng.reroll(b);
+    eq('길잡이: 한 칸 올라간다', b.dice[0].face, f0 === 6 ? 1 : f0 + 1);
+    const f1 = b.dice[0].face;
+    b.dice[0].held = false; eng.reroll(b);
+    eq('길잡이: 또 한 칸', b.dice[0].face, f1 === 6 ? 1 : f1 + 1);
+  }
+  // 되비침 주사위 — 가장 많이 나온 눈으로 바뀐다
+  {
+    const b = mk(['mirror','normal','normal','normal','normal']);
+    eng.rng.next = () => 0.5;                       // 나머지 넷이 전부 4
+    eng.initialRoll(b);
+    eq('되비침: 최빈 눈을 따라간다', b.dice[0].face, b.dice[1].face);
+    eng.rng.next = Math.random;
+  }
+  // 불티 주사위 — 족보에 안 쓰이면 벼름
+  {
+    const b = mk(['spark','normal','normal','normal','normal'], [], { chance: ['instinct'] });
+    eng.rng.next = () => 0.99;                      // 전부 최대 눈 → 불티는 3, 나머지 6
+    eng.initialRoll(b);
+    eng.confirmCategory(b, 'chance', 'instinct', b.enemies[0].uid);
+    eq('불티: 안 쓰였으면 벼름 1', b.whet, 1);
+    eng.rng.next = Math.random;
+  }
+  // 쌍눈 주사위 — 같은 눈 족보에서 두 번 센다
+  {
+    const TWIN = DB.diceById['twin'], NRM = DB.diceById['normal'];
+    const defs = [TWIN, NRM, NRM, NRM, NRM];
+    eq('쌍눈: 원페어 [4,4] 는 8 대신 12',
+      computeDamage(C, [4, 4, 1, 2, 3], defs, []).total, 12);
+    const CH = DB.scoring.categories.find(c => c.id === 'chance');
+    eq('쌍눈: 같은 눈 족보가 아니면 안 센다',
+      computeDamage(CH, [4, 4, 1, 2, 3], defs, []).total, 4);
+  }
+  // 말라붙은 심장 — HP가 낮으면 통째로 배수
+  {
+    const HEART = [DB.relicById['dried_heart']];
+    eq('심장: 만피면 안 켜진다', computeDamage(C, five, N5, HEART, null, { hpRatio: 1 }).total, 10);
+    eq('심장: 3분의 1 이하면 1.5배', computeDamage(C, five, N5, HEART, null, { hpRatio: 0.3 }).total, 15);
+  }
+  // 곰의 등 — 방어도 10마다 +3
+  {
+    const b = mk(['normal','normal','normal','normal','normal'], ['bears_back']);
+    b.player.block = 25;
+    eng.rng.next = () => 0.5;
+    eng.initialRoll(b);
+    const pv = eng.previewAll(b).find(x => x.cat.id === 'onePair');
+    eq('곰의 등: 방어 25면 +6', pv.bd.total, 20 + 6);  // 4 다섯 개 매칭합 20 + 방어 25/10×3
+    eng.rng.next = Math.random;
+  }
+  // 사냥꾼의 눈 — 같은 눈 3개 이상이면 벼름
+  {
+    const b = mk(['normal','normal','normal','normal','normal'], ['hunters_eye']);
+    eng.rng.next = () => 0.5;                       // 다섯 개 전부 같은 눈
+    eng.initialRoll(b);
+    eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
+    eq('사냥꾼의 눈(1) + 맞잡은 손(1) = 벼름 2', b.whet, 2);
+    eng.rng.next = Math.random;
+  }
+  // 길표 — 스트레이트를 확정하면 다음 턴 리롤
+  {
+    const b = mk(['normal','normal','normal','normal','normal'], ['waymark'],
+      { smallStraight: ['hunt_drive'] });
+    eng.initialRoll(b);
+    b.dice[0].face = 1; b.dice[1].face = 2; b.dice[2].face = 3; b.dice[3].face = 4; b.dice[4].face = 6;
+    eng.confirmCategory(b, 'smallStraight', 'hunt_drive', b.enemies[0].uid);
+    eq('길표: 다음 턴 리롤 예약 2', b.nextTurnRerolls, 2);
+  }
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
