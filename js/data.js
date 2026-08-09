@@ -8,7 +8,7 @@ export const DB = {
 };
 
 export async function loadAll() {
-  const [dice, relics, scoring, enemies, act1, events, acts, statuses, cards] = await Promise.all([
+  const [dice, relics, scoring, enemies, act1, events, acts, statuses, cards, layout] = await Promise.all([
     fetchJson('./data/dice.json'),
     fetchJson('./data/relics.json'),
     fetchJson('./data/scoring.json'),
@@ -18,10 +18,11 @@ export async function loadAll() {
     fetchJson('./data/acts.json'),
     fetchJson('./data/statuses.json'),
     fetchJson('./data/cards.json'),
+    fetchJson('./data/layout.json'),
   ]);
   DB.dice = dice; DB.relics = relics; DB.scoring = scoring;
   DB.enemies = enemies; DB.act1 = act1; DB.events = events; DB.acts = acts;
-  DB.statuses = statuses; DB.cards = cards;
+  DB.statuses = statuses; DB.cards = cards; DB.layout = layout;
   DB.cardById = {}; for (const c of cards.list) DB.cardById[c.id] = c;
   DB.statusById = {}; for (const st of statuses.list) DB.statusById[st.id] = st;
   DB.diceById = {}; for (const d of dice) DB.diceById[d.id] = d;

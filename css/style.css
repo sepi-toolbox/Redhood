@@ -1233,22 +1233,22 @@ span.enemy-art {
  * ========================================================================== */
 .card-battle { display: flex; flex-direction: column; overflow: hidden; }
 .card-battle .bg-layer { height: 100%; }   /* v2.01: 족보판이 사라졌으니 배경이 화면 전체를 덮는다 */
-/* v2.02: 몬스터가 화면 가운데를 채운다 — 더 크게, 더 아래로 */
-.card-battle .enemy-zone { height: 306px; }
-.card-battle .enemy-art-img { height: 288px; }
+/* v2.02: 몬스터가 화면 가운데를 채운다 — v2.03부터 배치는 data/layout.json + 📐 배치 모드로 조정 */
+.card-battle .enemy-zone { height: var(--cb-enemyH, 306px); }
+.card-battle .enemy-art-img { height: var(--cb-artH, 288px); }
 .card-battle span.enemy-art { font-size: 170px; height: 250px; line-height: 250px; }
-.card-battle .enemy-zone.multi .enemy-art-img { height: 238px; margin-bottom: -34px; }
+.card-battle .enemy-zone.multi .enemy-art-img { height: var(--cb-artHMulti, 238px); margin-bottom: -34px; }
 .card-battle .enemy-zone.multi span.enemy-art { height: 210px; line-height: 210px; font-size: 136px; margin-bottom: -34px; }
-.card-battle .enemy-zone.multi .enemy.t-elite .enemy-art-img { height: 252px; margin-bottom: -46px; }
-.card-battle .enemy-zone.multi .enemy.t-boss .enemy-art-img { height: 266px; margin-bottom: -58px; }
+.card-battle .enemy-zone.multi .enemy.t-elite .enemy-art-img { height: calc(var(--cb-artHMulti, 238px) + 14px); margin-bottom: -46px; }
+.card-battle .enemy-zone.multi .enemy.t-boss .enemy-art-img { height: calc(var(--cb-artHMulti, 238px) + 28px); margin-bottom: -58px; }
 /* 적 주사위 — 그림 아래 붉은 칩 (몬스터 영역 높이는 그대로) */
 .card-battle .enemy .fdice {
-  position: absolute; left: 50%; bottom: -46px; transform: translateX(-50%);
+  position: absolute; left: 50%; bottom: calc(-1 * var(--cb-fdiceY, 46px)); transform: translateX(-50%);
   display: flex; gap: 5px; z-index: 3;
 }
-.card-battle .enemy-zone { margin-bottom: 46px !important; } /* 칩이 내려앉을 자리 */
+.card-battle .enemy-zone { margin-bottom: var(--cb-fdiceY, 46px) !important; } /* 칩이 내려앉을 자리 */
 .fdie {
-  width: 38px; height: 38px; border-radius: 8px; background: transparent; border: none; padding: 0;
+  width: var(--cb-fdieSize, 38px); height: var(--cb-fdieSize, 38px); border-radius: 8px; background: transparent; border: none; padding: 0;
   display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800;
   color: #f4c9ae; font-style: normal;
   transition: transform .3s, opacity .3s;
@@ -1274,9 +1274,9 @@ span.enemy-art {
 .cb-preview b.atk { color: #f0c05a; } .cb-preview b.dmg { color: #e88a72; } .cb-preview b.kill { color: #8fd08a; }
 
 /* 내 주사위 */
-.cb-dice { flex: none; display: flex; justify-content: center; gap: 10px; padding: 6px 8px 2px; }
+.cb-dice { flex: none; display: flex; justify-content: center; gap: var(--cb-diceGap, 10px); padding: 6px 8px 2px; }
 .cdie {
-  width: 58px; height: 62px; border-radius: 12px; background: #efe6d0; color: #26201a;
+  width: var(--cb-diceSize, 58px); height: calc(var(--cb-diceSize, 58px) + 4px); border-radius: 12px; background: #efe6d0; color: #26201a;
   border: 2px solid #b9a67f; display: flex; align-items: center; justify-content: center;
   font-size: 26px; font-weight: 800; box-shadow: 0 3px 6px rgba(0,0,0,.55);
   position: relative; transition: transform .15s; font-family: inherit;
@@ -1286,7 +1286,7 @@ span.enemy-art {
   border-color: transparent; box-shadow: none;
 }
 .cdie.art .pip-art {
-  width: 44px; height: 44px; object-fit: contain; pointer-events: none;
+  width: calc(var(--cb-diceSize, 58px) - 14px); height: calc(var(--cb-diceSize, 58px) - 14px); object-fit: contain; pointer-events: none;
   filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
 }
 .cdie.art .cval {
@@ -1311,9 +1311,9 @@ span.enemy-art {
 
 /* 손패 — 부채꼴, 화면 아래 걸침 */
 .cb-handzone { position: relative; flex: 1; min-height: 0; }
-.cb-hand { position: absolute; bottom: -22px; left: 0; width: 100%; height: 224px; }
+.cb-hand { position: absolute; bottom: var(--cb-handBottom, -22px); left: 0; width: 100%; height: 224px; }
 .cb-card {
-  position: absolute; left: 50%; bottom: 0; width: 118px; height: 162px; margin-left: -59px;
+  position: absolute; left: 50%; bottom: 0; width: var(--cb-cardW, 118px); height: var(--cb-cardH, 162px); margin-left: calc(var(--cb-cardW, 118px) / -2);
   border-radius: 10px; background: linear-gradient(180deg, #f2e7cd, #e3d3ab); border: 3px solid #a8352e;
   box-shadow: 0 4px 10px rgba(0,0,0,.7); transform-origin: 50% 120%; transition: transform .22s;
   display: flex; flex-direction: column; overflow: hidden; touch-action: none;
@@ -1330,17 +1330,17 @@ span.enemy-art {
 .cb-card .cnm { flex: none; text-align: center; font-size: 12.5px; font-weight: 700; color: #3d2413;
   padding: 4px 2px 5px; background: linear-gradient(180deg, #e8d8b2, #d8c69a); border-top: 2px solid #a8352e; white-space: nowrap; }
 .battle-screen > .cb-end {
-  position: absolute; right: 60px; bottom: 216px; z-index: 42;
+  position: absolute; right: var(--cb-endX, 60px); bottom: var(--cb-endY, 216px); z-index: 42;
   display: inline-block; width: auto; padding: 10px 12px; font-size: 13.5px;
 }
 .battle-screen > .cb-orb {
-  position: absolute; left: 10px; bottom: 212px; z-index: 42;
-  width: 50px; height: 50px; border-radius: 50%;
+  position: absolute; left: var(--cb-orbX, 10px); bottom: var(--cb-orbY, 212px); z-index: 42;
+  width: var(--cb-orbSize, 50px); height: var(--cb-orbSize, 50px); border-radius: 50%;
   background: radial-gradient(circle at 36% 30%, #ffdf9a, #d89b2e 55%, #7d4a12);
   border: 2px solid #5a3c10; box-shadow: 0 0 14px rgba(232,182,77,.5), 0 3px 6px rgba(0,0,0,.6);
   display: flex; align-items: center; justify-content: center;
 }
-.battle-screen > .cb-orb b { font-size: 24px; font-weight: 800; color: #2e1e05; text-shadow: 0 1px 1px rgba(255,240,200,.6); }
+.battle-screen > .cb-orb b { font-size: calc(var(--cb-orbSize, 50px) * .48); font-weight: 800; color: #2e1e05; text-shadow: 0 1px 1px rgba(255,240,200,.6); }
 .battle-screen > .cb-orb.empty { filter: grayscale(.8) brightness(.6); box-shadow: none; }
 .battle-screen > .cb-pile {
   position: absolute; bottom: 10px; z-index: 42;
@@ -1354,8 +1354,8 @@ span.enemy-art {
   border: 1px solid rgba(232,182,77,.35);
   background: radial-gradient(circle, rgba(232,182,77,.14) 0%, transparent 70%);
 }
-.battle-screen > .cb-pile.deck { left: 66px; bottom: 210px; }
-.battle-screen > .cb-pile.disc { right: 10px; bottom: 210px; transform: rotate(4deg); filter: brightness(.75); }
+.battle-screen > .cb-pile.deck { left: var(--cb-deckX, 66px); bottom: var(--cb-deckY, 210px); }
+.battle-screen > .cb-pile.disc { right: var(--cb-discX, 10px); bottom: var(--cb-discY, 210px); transform: rotate(4deg); filter: brightness(.75); }
 .battle-screen > .cb-pile b {
   position: absolute; right: -7px; bottom: -7px; min-width: 21px; height: 21px; border-radius: 11px;
   background: #241f18; border: 1.5px solid #8d8064; color: #f0e2c0;
@@ -1386,7 +1386,40 @@ span.enemy-art {
 /* 전투 중에는 전리품 판·힌트 줄을 감춘다 → 승리 후 loot-mode에서 켠다 */
 .card-battle .cb-hintline, .card-battle .sheet-zone.cb-loot { display: none; }
 .card-battle.loot-mode .cb-hintline { display: block; }
-.card-battle.loot-mode .sheet-zone.cb-loot { display: flex; position: absolute; left: 0; right: 0; bottom: 0; top: 430px; z-index: 45; }
+.card-battle.loot-mode .sheet-zone.cb-loot { display: flex; position: absolute; left: 0; right: 0; bottom: 0; top: var(--cb-lootTop, 430px); z-index: 45; }
 .card-battle.loot-mode .cb-hand, .card-battle.loot-mode .cb-end, .card-battle.loot-mode .cb-dice,
 .card-battle.loot-mode .cb-preview, .card-battle.loot-mode .cb-help, .card-battle.loot-mode .fdice { display: none; }
-.card-battle.loot-mode .cb-hintline { position: absolute; top: 402px; width: 100%; text-align: center; z-index: 45; }
+.card-battle.loot-mode .cb-hintline { position: absolute; top: calc(var(--cb-lootTop, 430px) - 28px); width: 100%; text-align: center; z-index: 45; }
+
+/* ---------- 📐 배치 편집 모드 (v2.03) ---------- */
+.battle-screen > .le-layer { position: absolute; inset: 0; z-index: 80; touch-action: none; }
+.battle-screen > .le-box {
+  position: absolute; border: 1.5px dashed #e8b64d; border-radius: 6px;
+  background: rgba(232, 182, 77, .08); pointer-events: none; z-index: 81;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.5);
+}
+.le-box .le-tag {
+  position: absolute; top: -22px; left: 0; font-size: 11px; font-weight: 700;
+  color: #241c07; background: #e8b64d; border-radius: 4px; padding: 1px 6px; white-space: nowrap;
+}
+.le-box .le-grip {
+  position: absolute; right: -14px; bottom: -14px; width: 30px; height: 30px; border-radius: 8px;
+  background: #e8b64d; color: #241c07; font-size: 15px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; pointer-events: auto;
+  box-shadow: 0 2px 5px rgba(0,0,0,.6);
+}
+.battle-screen > .le-bar {
+  position: absolute; top: 34px; left: 6px; right: 6px; z-index: 95;
+  display: flex; align-items: center; gap: 6px; padding: 6px 8px;
+  background: rgba(14, 12, 10, .92); border: 1px solid #4a4238; border-radius: 10px;
+  font-size: 11.5px; color: #cfc3a8;
+}
+.le-bar .le-info { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.le-bar button {
+  flex: none; padding: 6px 9px; font-size: 11.5px; border-radius: 7px;
+  background: #2a241e; border: 1px solid #5a4c3e; color: #e8dcc8;
+}
+.le-bar button.prime { background: #5a281f; border-color: #a8543f; font-weight: 700; }
+.topbar .le-toggle {
+  background: none; border: none; font-size: 16px; padding: 0 4px; color: #e8dcc8;
+}

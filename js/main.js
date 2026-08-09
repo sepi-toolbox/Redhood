@@ -6,7 +6,7 @@ import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind } from './cardbattle.js';
 
-export const VERSION = 'v2.02'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v2.03'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -118,8 +118,22 @@ function showTitle() {
       <button class="btn ghost hidden" id="install-btn">📲 홈 화면에 설치</button>
       <button class="btn ghost" id="mute-btn">${isMuted() ? '🔇 소리 꺼짐' : '🔊 소리 켜짐'}</button>
       <p class="hint notice">이 앱은 AI를 이용해 제작되었습니다</p>
-      <p class="hint">${VERSION}</p>
+      <p class="hint" id="ver-hint">${VERSION}${layoutModeOn() ? ' · 📐' : ''}</p>
     </div>`));
+  // 📐 배치 편집 모드: 버전 글자를 다섯 번 연달아 탭하면 켜지고/꺼진다
+  let verTaps = 0, verTimer = null;
+  document.getElementById('ver-hint').addEventListener('click', () => {
+    verTaps++;
+    clearTimeout(verTimer);
+    verTimer = setTimeout(() => { verTaps = 0; }, 1500);
+    if (verTaps >= 5) {
+      verTaps = 0;
+      const on = localStorage.getItem(LAYOUT_ON_KEY) === '1';
+      try { localStorage.setItem(LAYOUT_ON_KEY, on ? '0' : '1'); } catch (e) {}
+      document.getElementById('ver-hint').textContent = VERSION + (on ? '' : ' · 📐');
+      alert(on ? '배치 편집 모드 꺼짐' : '배치 편집 모드 켜짐 — 전투 화면 오른쪽 위 📐 를 누르세요');
+    }
+  });
   document.getElementById('start-btn').addEventListener('click', () => { run = newRun(); showIntro(); });
   document.getElementById('enlight-btn').addEventListener('click', showEnlightModal);
   bindMute('mute-btn', (m) => (m ? '🔇 소리 꺼짐' : '🔊 소리 켜짐'));
@@ -1665,6 +1679,27 @@ function showReplaceDie(newDie, onDone = null, onCancel = null) {
 let cbSel = -1;          // 선택된 내 주사위
 let cbPicking = null;    // 대상 선택 중인 카드 { hi, kind }
 
+/* ---------- 📐 배치 (v2.03) ----------
+ * 기본값은 data/layout.json. 배치 편집 모드에서 만진 값은 이 기기(localStorage)에
+ * 바로 적용되고, '내보내기'로 뽑은 JSON을 layout.json에 넣으면 전체 적용된다. */
+const LAYOUT_KEY = 'redhood_layout_v1';
+const LAYOUT_ON_KEY = 'redhood_layout_on';
+function layoutOf() {
+  const base = { ...((DB.layout && DB.layout.battle) || {}) };
+  try { const o = JSON.parse(localStorage.getItem(LAYOUT_KEY)); if (o) Object.assign(base, o); } catch (e) {}
+  return base;
+}
+function applyLayout(el) {
+  const L = layoutOf();
+  for (const [k, v] of Object.entries(L)) el.style.setProperty('--cb-' + k, v + 'px');
+  return L;
+}
+function layoutModeOn() {
+  try {
+    return new URLSearchParams(location.search).has('layout') || localStorage.getItem(LAYOUT_ON_KEY) === '1';
+  } catch (e) { return false; }
+}
+
 function renderCardBattle() {
   setScene('battle', {
     act: run.act,
@@ -1680,7 +1715,7 @@ function renderCardBattle() {
       <header class="topbar">
         <span id="cb-top">${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
-        <span class="coin-slot">🪙${run.coins} <span class="hp">❤️</span></span>
+        <span class="coin-slot">${layoutModeOn() ? '<button class="le-toggle" id="le-toggle">📐</button>' : ''}🪙${run.coins} <span class="hp">❤️</span></span>
       </header>
       <div class="enemy-zone ${multi ? 'multi' : ''}">
         ${battle.enemies.filter(e => e.hp > 0).map(e => `
@@ -1712,7 +1747,10 @@ function renderCardBattle() {
       <div class="cb-banner" id="cb-banner"></div>
       <div class="cb-zoom" id="cb-zoom"></div>
     </div>`));
+  applyLayout(app.querySelector('.card-battle'));
   cbUpdate();
+  const leBtn = document.getElementById('le-toggle');
+  if (leBtn) leBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleLayoutEditor(); });
   // 적: 탭 = 표적, 길게 = 정보
   app.querySelectorAll('.enemy').forEach(el => {
     addLongPress(el, () => cbFoeInfo(el.dataset.uid));
@@ -1828,7 +1866,8 @@ function cbRenderHand() {
     const off = hi - (n - 1) / 2;
     // 좌우 여백을 지키고, 카드가 늘면 같은 폭 안에서 더 겹친다 (양옆 더미·버튼 자리 확보)
     const W = hand.clientWidth || 390;
-    const spacing = n > 1 ? Math.min(58, Math.max(18, (W - 100 - 118) / (n - 1))) : 0;
+    const L = layoutOf();
+    const spacing = n > 1 ? Math.min(L.handMaxGap ?? 58, Math.max(18, (W - (L.handMargin ?? 100) - (L.cardW ?? 118)) / (n - 1))) : 0;
     const el = document.createElement('div');
     el.className = 'cb-card' + (battle.res < c.cost ? ' broke' : '');
     el.dataset.hi = hi;
@@ -2036,6 +2075,179 @@ function showCardReward() {
     onExit: () => { saveRun(run); showMap(); },
   };
   renderLoot();
+}
+
+/* ---------- 📐 배치 편집기 — 엔진식 직접 조작 ----------
+ * 요소를 탭해 선택 → 끌어서 이동 → 모서리 ⤡ 핸들로 크기.
+ * 값은 만지는 즉시 이 기기에 저장되고, '내보내기'가 layout.json 내용을 준다. */
+let leState = null;   // { sel, layer, bar, box, boxFor, drag }
+
+// 편집 대상 정의: find=DOM, move/resize=레이아웃 키 반영. dx/dy는 화면 픽셀.
+const LE_ITEMS = [
+  { id: 'orb', label: '자원 구슬', find: () => app.querySelector('.cb-orb'),
+    move: (L, dx, dy) => { L.orbX += dx; L.orbY -= dy; }, resize: (L, dw) => { L.orbSize = clampL(L.orbSize + dw, 30, 90); } },
+  { id: 'deck', label: '덱 더미', find: () => app.querySelector('.cb-pile.deck'),
+    move: (L, dx, dy) => { L.deckX += dx; L.deckY -= dy; } },
+  { id: 'disc', label: '버림 더미', find: () => app.querySelector('.cb-pile.disc'),
+    move: (L, dx, dy) => { L.discX -= dx; L.discY -= dy; } },
+  { id: 'end', label: '턴 종료 버튼', find: () => app.querySelector('.cb-end'),
+    move: (L, dx, dy) => { L.endX -= dx; L.endY -= dy; } },
+  { id: 'fdice', label: '적 주사위 (위아래로)', find: () => app.querySelector('.fdice'),
+    move: (L, dx, dy) => { L.fdiceY = clampL(L.fdiceY + dy, 0, 120); },
+    resize: (L, dw) => { L.fdieSize = clampL(L.fdieSize + dw, 22, 64); } },
+  { id: 'mydice', label: '내 주사위 (좌우로 끌면 간격)', find: () => app.querySelector('.cb-dice'),
+    move: (L, dx, dy) => { L.diceGap = clampL(L.diceGap + dx / 3, 0, 30); },
+    resize: (L, dw) => { L.diceSize = clampL(L.diceSize + dw, 40, 90); } },
+  { id: 'hand', label: '손패 (위아래=높이, 좌우=펼침)', find: () => app.querySelector('.cb-hand'),
+    move: (L, dx, dy) => { L.handBottom -= dy; L.handMargin = clampL(L.handMargin - dx, 0, 260); },
+    resize: (L, dw) => { L.cardW = clampL(L.cardW + dw, 70, 190); L.cardH = Math.round(L.cardW * 162 / 118); },
+    after: () => cbRenderHand() },
+  { id: 'loot', label: '전리품 목록', find: () => app.querySelector('.card-battle.loot-mode .sheet-zone.cb-loot'),
+    move: (L, dx, dy) => { L.lootTop = clampL(L.lootTop + dy, 200, 700); } },
+  { id: 'enemy', label: '몬스터 (위아래로 끌면 영역)', find: () => app.querySelector('.enemy-zone'),
+    move: (L, dx, dy) => { L.enemyH = clampL(L.enemyH + dy, 160, 460); },
+    resize: (L, dw) => {
+      if (app.querySelector('.enemy-zone.multi')) L.artHMulti = clampL(L.artHMulti + dw, 120, 360);
+      else L.artH = clampL(L.artH + dw, 140, 420);
+    } },
+];
+const clampL = (v, a, b) => Math.max(a, Math.min(b, Math.round(v)));
+
+function leSave(L) {
+  try { localStorage.setItem(LAYOUT_KEY, JSON.stringify(L)); } catch (e) {}
+}
+function leApplyLive(L) {
+  const scr = app.querySelector('.card-battle');
+  if (scr) for (const [k, v] of Object.entries(L)) scr.style.setProperty('--cb-' + k, v + 'px');
+}
+
+// 진행 중인 드래그 한 걸음 처리 (레이어·⤡ 핸들 공용)
+function leMove(e) {
+  const d = leState && leState.drag;
+  if (!d) return;
+  const dx = e.clientX - d.x, dy = e.clientY - d.y;
+  if (dx === 0 && dy === 0) return;
+  d.x = e.clientX; d.y = e.clientY;
+  if (d.mode === 'resize' && d.item.resize) d.item.resize(d.L, Math.abs(dx) >= Math.abs(dy) ? dx : dy);
+  else if (d.mode === 'move' && d.item.move) d.item.move(d.L, dx, dy);
+  leApplyLive(d.L);
+  if (d.item.after) d.item.after();
+  leSync(d.L);
+}
+function leEnd() {
+  const d = leState && leState.drag;
+  if (d) { leSave(d.L); leState.drag = null; leSync(); }
+}
+
+function toggleLayoutEditor() {
+  if (leState) { closeLayoutEditor(); return; }
+  const scr = app.querySelector('.card-battle');
+  if (!scr) return;
+  const layer = document.createElement('div');
+  layer.className = 'le-layer';
+  const bar = document.createElement('div');
+  bar.className = 'le-bar';
+  bar.innerHTML = `<span class="le-info">요소를 탭해 선택 → 끌어서 이동 · ⤡ = 크기</span>
+    <button id="le-export" class="prime">내보내기</button><button id="le-reset">기본값</button><button id="le-close">닫기</button>`;
+  scr.appendChild(layer); scr.appendChild(bar);
+  leState = { sel: null, layer, bar, box: null, boxFor: null, drag: null };
+  bar.querySelector('#le-close').addEventListener('click', closeLayoutEditor);
+  bar.querySelector('#le-reset').addEventListener('click', () => {
+    localStorage.removeItem(LAYOUT_KEY);
+    leApplyLive(layoutOf()); cbRenderHand(); leSync();
+    leInfo('기본값(layout.json)으로 되돌림');
+  });
+  bar.querySelector('#le-export').addEventListener('click', () => {
+    const json = JSON.stringify({ battle: layoutOf() }, null, 2);
+    const doDownload = () => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+      a.download = 'layout.json'; a.click();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(json).then(() => leInfo('복사됨! 이 JSON을 보내주면 전체 적용'), doDownload);
+    } else doDownload();
+  });
+
+  layer.addEventListener('pointerdown', (e) => {
+    // 선택: 화면에 있는 것 중 좁은 것부터 히트테스트
+    const hit = LE_ITEMS
+      .map(it => ({ it, el: it.find() }))
+      .filter(x => x.el)
+      .map(x => ({ ...x, r: x.el.getBoundingClientRect() }))
+      .filter(x => e.clientX >= x.r.left - 6 && e.clientX <= x.r.right + 6 && e.clientY >= x.r.top - 6 && e.clientY <= x.r.bottom + 6)
+      .sort((a, b) => a.r.width * a.r.height - b.r.width * b.r.height)[0];
+    if (hit) {
+      leState.sel = hit.it;
+      leState.drag = { item: hit.it, mode: 'move', x: e.clientX, y: e.clientY, L: layoutOf() };
+      try { layer.setPointerCapture(e.pointerId); } catch (_) {}
+    } else { leState.sel = null; }
+    leSync();
+  });
+  layer.addEventListener('pointermove', leMove);
+  layer.addEventListener('pointerup', leEnd);
+  layer.addEventListener('pointercancel', leEnd);
+  leSync();
+}
+
+function closeLayoutEditor() {
+  if (!leState) return;
+  leState.layer.remove(); leState.bar.remove();
+  if (leState.box) leState.box.remove();
+  leState = null;
+}
+
+function leInfo(t) {
+  if (leState) leState.bar.querySelector('.le-info').textContent = t;
+}
+
+// 선택 상자·라벨·수치 갱신 — 드래그 중에는 상자를 다시 만들지 않는다 (⤡ 캡처 유지)
+function leSync(L) {
+  if (!leState) return;
+  const it = leState.sel;
+  if (!it) {
+    if (leState.box) { leState.box.remove(); leState.box = null; leState.boxFor = null; }
+    leInfo('요소를 탭해 선택 → 끌어서 이동 · ⤡ = 크기');
+    return;
+  }
+  const el = it.find();
+  if (!el) {
+    if (leState.box) { leState.box.remove(); leState.box = null; leState.boxFor = null; }
+    leInfo(it.label + ' — 지금 화면에 없음');
+    return;
+  }
+  const scr = app.querySelector('.card-battle');
+  const sr = scr.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  if (!leState.box || leState.boxFor !== it) {
+    if (leState.box) leState.box.remove();
+    const box = document.createElement('div');
+    box.className = 'le-box';
+    box.innerHTML = `<span class="le-tag">${it.label}</span>${it.resize ? '<span class="le-grip">⤡</span>' : ''}`;
+    scr.appendChild(box);
+    leState.box = box; leState.boxFor = it;
+    const grip = box.querySelector('.le-grip');
+    if (grip) {
+      grip.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        leState.drag = { item: it, mode: 'resize', x: e.clientX, y: e.clientY, L: layoutOf() };
+        try { grip.setPointerCapture(e.pointerId); } catch (_) {}
+      });
+      grip.addEventListener('pointermove', leMove);
+      grip.addEventListener('pointerup', leEnd);
+      grip.addEventListener('pointercancel', leEnd);
+    }
+  }
+  const box = leState.box;
+  box.style.left = `${r.left - sr.left}px`;
+  box.style.top = `${r.top - sr.top}px`;
+  box.style.width = `${r.width}px`;
+  box.style.height = `${r.height}px`;
+  const v = L || layoutOf();
+  const KEYS = { orb: ['orbX', 'orbY', 'orbSize'], deck: ['deckX', 'deckY'], disc: ['discX', 'discY'], end: ['endX', 'endY'],
+    fdice: ['fdiceY', 'fdieSize'], mydice: ['diceSize', 'diceGap'], hand: ['cardW', 'cardH', 'handBottom', 'handMargin'],
+    enemy: ['enemyH', 'artH', 'artHMulti'], loot: ['lootTop'] };
+  leInfo(`${it.label} — ` + (KEYS[it.id] || []).map(k => `${k}:${v[k]}`).join(' '));
 }
 
 function cbFoeInfo(uid) {
