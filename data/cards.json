@@ -32,7 +32,24 @@
     },
     "finalExtraEvery": 2,
     "finalExtraMax": 4,
-    "victoryHeal": 5
+    "victoryHeal": 6,
+    "rage": {
+      "_comment": "격앙 — start턴부터 every턴마다 적 주사위 +amount (max 한도). 최종보스 제외. 적별 오버라이드: enemies.json rage:{start,every,amount}",
+      "amount": 1,
+      "max": 5,
+      "normal": {
+        "start": 6,
+        "every": 2
+      },
+      "elite": {
+        "start": 6,
+        "every": 2
+      },
+      "boss": {
+        "start": 8,
+        "every": 2
+      }
+    }
   },
   "starterDeck": [
     "courage",

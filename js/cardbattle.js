@@ -73,6 +73,7 @@ function spawnFoe(id, idx, hpScale, packSize = 1) {
     move: null,        // 이번 턴 예고 — {id,name,op,amount,mult,flat}
     lastMoveId: null,
     power: 0,          // empower 로 쌓인 다음 턴 주사위 보정
+    rage: 0,           // 격앙 — 이번 턴 주사위에 실린 시간 보정
     block: 0,          // armor 행동으로 얻는 방어도 — 내 다음 공격을 깎는다
     dice: [],
   };
@@ -80,6 +81,21 @@ function spawnFoe(id, idx, hpScale, packSize = 1) {
 
 export const aliveFoes = (b) => b.enemies.filter(e => e.hp > 0);
 export const aliveVal = (ds) => ds.filter(d => !d.dead).reduce((s, d) => s + d.v, 0);
+
+// ---------- 격앙: 시간의 비용 (v2.18) ----------
+// 일정 턴부터 적 주사위가 점점 커진다 — 마냥 안전하게 갈아버리는 터틀에 시계를 단다.
+// 등급별 기본값은 cards.json config.rage, 적별 오버라이드는 enemies.json rage:{start,every,amount}.
+// 최종 보스는 제외 — 주사위 개수 증식이 이미 그 역할을 한다.
+export function rageBonus(b, e, turn = b.turn) {
+  if (e.final) return 0;
+  const cfg = (cfgOf().rage || {});
+  const def = DB.enemyById[e.defId] || {};
+  const r = { ...(cfg[e.tier] || {}), ...(def.rage || {}) };
+  if (!r.start) return 0;
+  if (turn < r.start) return 0;
+  const level = Math.floor((turn - r.start) / Math.max(1, r.every ?? 1)) + 1;
+  return Math.min(cfg.max ?? 6, level * (r.amount ?? cfg.amount ?? 1));
+}
 
 // 예고된 행동의 현재 위력 — 남은 주사위 합 기준 (UI가 매 클래시마다 다시 부른다)
 export function movePower(e) {
@@ -107,9 +123,10 @@ function rollFoe(b, e) {
   // 최종 보스: 죽지 않는 대신 주사위가 점점 는다 — 버틸 수 있는 만큼 버텨라
   const extra = e.final ? Math.min(cfg.finalExtraMax ?? 4, Math.floor((b.turn - 1) / (cfg.finalExtraEvery ?? 2))) : 0;
   const n = Math.max(1, Math.round((e.diceN + extra) * e.packScale));
+  e.rage = rageBonus(b, e);          // 격앙 — 오래 끌수록 커진다 (UI 표시용으로도 보관)
   e.dice = Array.from({ length: n }, () => {
     const base = e.faces ? e.faces[Math.floor(rng.next() * e.faces.length)] : ri(e.dmin, e.dmax);
-    const v = base + b.actBonus + e.power;
+    const v = base + b.actBonus + e.power + e.rage;
     return { v, orig: v, dead: false };
   });
   e.power = 0;                       // 강화는 한 턴만

@@ -1281,6 +1281,7 @@ span.enemy-art {
 .cb-hud .hp-gauge { flex: 1; position: relative; }
 .cb-bleedbadge { flex: none; font-size: 13px; font-weight: 800; color: #ff9a84; text-shadow: 0 1px 2px #000; min-width: 0; }
 .enemy-hp .fshield { font-style: normal; font-size: 11px; color: #cfd8e8; text-shadow: 0 1px 2px #000; }
+.frage { font-style: normal; font-size: 11px; color: #ffb37e; text-shadow: 0 1px 2px #000; }
 
 /* v2.17 적 행동 예고 — 위력은 남은 주사위 합이라 깎을 때마다 즉시 줄어든다 */
 .cb-intent {
