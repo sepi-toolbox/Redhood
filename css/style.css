@@ -1235,6 +1235,7 @@ span.enemy-art {
 .card-battle .bg-layer { height: 100%; }   /* v2.01: 족보판이 사라졌으니 배경이 화면 전체를 덮는다 */
 /* v2.02: 몬스터가 화면 가운데를 채운다 — v2.03부터 배치는 data/layout.json + 📐 배치 모드로 조정 */
 .card-battle .enemy-zone { height: var(--cb-enemyH, 306px); }
+.card-battle .enemy { transform: translateY(var(--cb-enemyY, 0px)); }
 .card-battle .enemy-art-img { height: var(--cb-artH, 288px); }
 .card-battle span.enemy-art { font-size: 170px; height: 250px; line-height: 250px; }
 .card-battle .enemy-zone.multi .enemy-art-img { height: var(--cb-artHMulti, 238px); margin-bottom: -34px; }
