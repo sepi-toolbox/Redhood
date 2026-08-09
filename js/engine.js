@@ -356,7 +356,7 @@ export function isAoE(cat) { return cat.target === 'allEnemies'; }
 //   기본 족보는 배수만 있고 부가 능력이 없다. 얻은 변형을 그 자리에 끼우면 기본을 대신한다.
 export const baseIdOf = (catId) => `${catId}__base`;
 export function baseVariantOf(cat) {
-  return { id: baseIdOf(cat.id), name: cat.name, ability: [], base: true, tier: 'common',
+  return { id: baseIdOf(cat.id), name: cat.short || cat.name, ability: [], base: true, tier: 'common',
            abilityText: '기본 — 부가 능력 없음' };
 }
 // 이 자리에 끼워진 변형 정의 (빈 자리면 기본 족보)

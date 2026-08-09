@@ -606,8 +606,9 @@ span.enemy-art {
 
 /* ---------- 전투: 족보 시트 ---------- */
 .sheet-zone {
-  flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column;
-  gap: 4px; padding: 6px 13px; /* v0.63: 좌우 여백 대칭 — 메달은 종이 밖으로 살짝만 걸친다 */
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(0, 1fr);
+  gap: 5px; padding: 8px 12px; /* v0.63: 좌우 여백 대칭 */
   background: #171210 url('../assets/ui/tex_wood.jpg') center / cover; /* v0.26: 나무 탁자 */
   border-top: 1px solid #2c221c;
 }
@@ -651,30 +652,35 @@ span.enemy-art {
 .sheet-row.selected { filter: brightness(1.12) saturate(1.06); } /* v0.59: 발광 제거, 배경만 밝게 */
 .sheet-row.used { opacity: .32; filter: grayscale(.6); }
 .sheet-row.used .sheet-preview { color: #6f6353; }
-/* v0.62: 전투 족보 줄만 v0.53 높이로 원복.
-   아이콘을 absolute로 빼서 줄 높이에 관여하지 못하게 하고, 이름·종류를 한 줄로 합친다.
-   (이벤트/상점 choice-row는 2줄이 필요하므로 영향 없음)
-   v1.35: 아홉 자리가 스크롤 없이 한 화면에 들어가야 한다 — 줄을 45 → 32px 로 낮췄다.
-   테두리(종이 그림)와 메달 크기가 곧 줄 높이라 그 둘만 줄이면 배치는 그대로다. */
+/* v1.36 족보판 = 두 칸 격자. 아홉 자리가 다섯 줄에 들어가서 스크롤이 없고,
+   위쪽 몬스터 칸은 한 픽셀도 건드리지 않는다. 칸은 남는 높이를 고르게 나눠 갖는다. */
 .combo-row {
-  gap: 6px; padding-left: 13px; font-size: 13.5px;
-  border-width: 8px 14px; padding-top: 0; padding-bottom: 0; min-height: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  column-gap: 6px; row-gap: 0; padding: 0 1px; font-size: 13px;
+  border-width: 10px 16px; min-width: 0; min-height: 0; text-align: left;
 }
-/* v0.88: 전용 판을 쓰는 줄은 메달을 감추고 판 전체를 쓴다 (아이콘이 판 그림에 녹아 있다) */
-.combo-row.has-plate { padding-left: 4px; }
-.combo-row.has-plate .row-icon { display: none; } /* 메달이 종이 왼쪽을 물고 있으므로 글자를 그만큼 밀어준다 */
-.combo-row .row-icon {
-  position: absolute; left: -13px; top: 50%; margin: -13px 0 0 0;
-  width: 26px; height: 26px; border-width: 1.5px;
+.combo-row .row-icon { display: none; }        /* 칸이 좁아 메달은 뺀다 — 능력은 길게 눌러 본다 */
+/* row-body 를 투명하게 만들어 이름·꼬리표·숫자를 한 격자 안에 놓는다
+   [이름     ][숫자]
+   [족보     ][    ]  */
+.combo-row .row-body { display: contents; }
+.combo-row .sheet-name {
+  grid-column: 1; grid-row: 1; min-width: 0;
+  font-size: 13px; line-height: 16px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.combo-row .row-icon .row-ico-tmp { font-size: 15px; }
-.combo-row .sheet-preview { font-size: 16px; min-width: 32px; line-height: 16px; }
-/* 줄 높이는 테두리(8+8) + 글줄 하나로 딱 떨어지게 고정한다 — 꼬리표가 늘려놓지 못하게 */
-.combo-row .row-body { line-height: 16px; }
-.combo-row .sheet-name, .combo-row .cat-tag { line-height: 16px; }
-.combo-row .sheet-name .cat-tag.t-burst { line-height: 13px; }
-.combo-row .cat-tag { font-size: 10px; }
-.combo-row .sheet-name .cat-tag.t-burst { font-size: 9.5px; padding: 0 3px; }
+.combo-row .sheet-preview {
+  grid-column: 2; grid-row: 1 / span 2; align-self: center;
+  font-size: 18px; line-height: 18px; min-width: 0; padding-right: 0;
+}
+.combo-row .cat-tag {
+  grid-column: 1; grid-row: 2; min-width: 0;
+  display: block; font-size: 10px; line-height: 13px; border: none; background: none;
+  padding: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* 일격은 이름 옆이 아니라 아래 꼬리표 줄에 — 칸이 좁아 이름이 잘리면 안 된다 */
+.combo-row .cat-tag .burst-mark { color: #8a5a12; font-weight: 800; }
+.combo-row .cat-tag.t-slot { background: none; border: none; color: #8b7b66; }
 .combo-row .row-body { flex-direction: row; align-items: baseline; gap: 5px; }
 .combo-row .sheet-name { flex: none; max-width: 62%; }
 .combo-row .cat-tag { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1151,17 +1157,9 @@ span.enemy-art {
 @keyframes stSpin { to { transform: rotate(360deg) } }
 .roll-btn .cost { font-size: 11px; color: #ffb1a2; }
 
-/* ---------- v1.29 벼름 · 새김 ---------- */
-50%{box-shadow:0 0 8px 1px rgba(255,150,60,.45)}}
-50%{transform:translateY(-1.5px) rotate(-8deg)}}
-
-/* ---------- v1.30 정예·보스 기믹 표시 ---------- */
-50%{opacity:.6}}
-
 /* ---------- v1.31 일격(⚡) 족보 ---------- */
 .sheet-row.combo-row.burst{position:relative}
-45%{opacity:.55}}
-.sheet-row.combo-row.burst:not(.used) .sheet-preview{color:#ffd98a;text-shadow:0 0 6px rgba(255,170,60,.45)}
+.sheet-row.combo-row.burst:not(.used) .sheet-preview{color:#b06a12;text-shadow:0 1px 0 rgba(255,244,218,.5)}
 
 /* ==========================================================================
    표식(badge) — v1.33: 화면의 '아이콘 + 값' 은 전부 이 하나로 그린다
@@ -1212,29 +1210,3 @@ span.enemy-art {
 .deck-list li.slot-empty { opacity: .62; }
 .cat-tag.t-slot { color: #8e8172; border-color: #4a4038; background: #221d19; font-style: italic; }
 .sheet-row.combo-row .cat-tag.t-slot { opacity: .85; }
-
-/* ==========================================================================
-   v1.35 족보판은 스크롤하지 않는다 — 아홉 자리가 언제나 한 화면에
-   줄은 남는 만큼 고르게 나눠 갖고(최대 33px), 화면이 짧으면 위쪽을 줄여 자리를 만든다
-   ========================================================================== */
-.sheet-zone .combo-row { flex: 1 1 0; min-height: 26px; max-height: 33px; }
-
-@media (max-height: 800px) {
-  .enemy-zone { height: 140px; }
-  .enemy .enemy-art, .enemy .art-img { max-height: 96px; }
-  .dice-zone { padding: 4px 12px 2px; }
-  .roll-bar { padding-top: 3px; padding-bottom: 3px; }
-  .roll-bar .roll-btn { padding-top: 7px; padding-bottom: 7px; font-size: 15px; }
-  .hint-line { display: none; }
-  .sheet-zone { padding: 5px 13px; gap: 3px; }
-  .sheet-zone .combo-row { min-height: 24px; }
-}
-@media (max-height: 700px) {
-  .enemy-zone { height: 118px; }
-  .enemy .enemy-art, .enemy .art-img { max-height: 78px; }
-  .mid-line { display: none; }
-  .sheet-zone .combo-row { min-height: 22px; font-size: 12.5px; }
-  .sheet-zone .combo-row .row-body,
-  .sheet-zone .combo-row .sheet-name,
-  .sheet-zone .combo-row .cat-tag { line-height: 14px; }
-}
