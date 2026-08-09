@@ -1,0 +1,90 @@
+{
+  "_comment": "v2.0 감정 카드 전투 — config 는 전투 상수, list 는 카드 정의. 족보(scoring.json)는 휴면 — 이후 카드의 발동 조건으로 되살린다.",
+  "config": {
+    "handSize": 5,
+    "resPerTurn": 3,
+    "playerDice": 5,
+    "floorHpScale": 0.02,
+    "tiers": {
+      "normal": {
+        "dice": 2,
+        "min": 1,
+        "max": 6,
+        "hpMult": 0.85
+      },
+      "elite": {
+        "dice": 4,
+        "min": 2,
+        "max": 6,
+        "hpMult": 0.6
+      },
+      "boss": {
+        "dice": 5,
+        "min": 2,
+        "max": 6,
+        "hpMult": 0.45
+      }
+    },
+    "acts": {
+      "2": {
+        "minBonus": 1
+      },
+      "3": {
+        "minBonus": 2
+      }
+    },
+    "finalExtraEvery": 2,
+    "finalExtraMax": 4
+  },
+  "starterDeck": [
+    "courage",
+    "stalk",
+    "elate",
+    "elate",
+    "elate",
+    "elate",
+    "repair",
+    "repair",
+    "repair",
+    "repair"
+  ],
+  "list": [
+    {
+      "id": "courage",
+      "name": "용기",
+      "cost": 2,
+      "icon": "🦁",
+      "target": null,
+      "weight": 1,
+      "desc": "가장 눈이 낮은 주사위의 값을 2배로 만든다. 같은 최저값이 여럿이면 모두."
+    },
+    {
+      "id": "stalk",
+      "name": "어둠 속의 추적",
+      "cost": 2,
+      "icon": "🌘",
+      "target": "active",
+      "weight": 1,
+      "desc": "내 주사위 하나를 골라 6으로 바꾼다."
+    },
+    {
+      "id": "elate",
+      "name": "고양",
+      "cost": 1,
+      "icon": "🔥",
+      "target": null,
+      "weight": 3,
+      "desc": "내 주사위 하나가 무작위로 +1."
+    },
+    {
+      "id": "repair",
+      "name": "복구",
+      "cost": 1,
+      "icon": "🧵",
+      "target": "dead",
+      "amount": 2,
+      "weight": 3,
+      "desc": "부서진 주사위 하나를 골라 2 수리한다. 원래 굴림값 이상으로는 돌아오지 않는다."
+    }
+  ]
+}

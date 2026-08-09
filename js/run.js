@@ -53,6 +53,7 @@ export function newRun() {
   return {
     hp, maxHp,
     dice,
+    cards: DB.cards.starterDeck.slice(),  // v2.0 감정 카드 덱 — 전투의 손패가 여기서 나온다
     relics: [],
     weapon: null,        // 무기 id (인트로에서 선택)
     categories: {},      // v1.34 족보 id -> 그 자리에 끼운 변형 id (null = 기본 족보)
@@ -492,6 +493,25 @@ export function rollShopStock(run) {
   return stock;
 }
 
+// ---------- v2.0 감정 카드 보상: 전투 승리 → 3장 중 1장을 덱에 추가 ----------
+export function rollCardRewards(run, nodeType) {
+  const pool = DB.cards.list.map(c => ({ c, w: (c.weight || 1) * (nodeType === 'elite' && (c.weight || 1) <= 1 ? 3 : 1) }));
+  const out = [];
+  const used = new Set();
+  let guard = 0;
+  while (out.length < 3 && guard++ < 50) {
+    const cand = pool.filter(p => !used.has(p.c.id));
+    if (cand.length === 0) break;
+    const total = cand.reduce((s, p) => s + p.w, 0);
+    let roll = rng.next() * total;
+    for (const p of cand) {
+      roll -= p.w;
+      if (roll <= 0) { used.add(p.c.id); out.push({ kind: 'card', item: p.c }); break; }
+    }
+  }
+  return out;
+}
+
 // 전투 승리 코인 (계몽 13: -25%)
 export function coinReward(run, nodeType) {
   const cr = DB.act1.coins[nodeType === 'elite' ? 'elite' : 'battle'];
@@ -553,6 +573,10 @@ export function loadRun() {
     // v1.34 이전 저장본: 변형 배열 -> 첫 칸을 끼운 것으로 옮긴다
     for (const [cid, v] of Object.entries(s.categories)) if (Array.isArray(v)) s.categories[cid] = v[0] || null;
     for (const c of DB.scoring.categories) if (!(c.id in s.categories)) s.categories[c.id] = null;
+    // v2.0: 감정 카드 덱 — 없거나 깨진 저장본은 시작 덱으로
+    if (!Array.isArray(s.cards) || s.cards.length === 0 || !s.cards.every(id => DB.cardById[id])) {
+      s.cards = DB.cards.starterDeck.slice();
+    }
     if (!Array.isArray(s.seenEvents)) s.seenEvents = [];
     if (typeof s.coins !== 'number') s.coins = 0;
     if (typeof s.enlight !== 'number') s.enlight = 0;

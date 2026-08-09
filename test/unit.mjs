@@ -1095,5 +1095,86 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('모든 족보에 짧은 이름이 있다', DB.scoring.categories.every(c => !!c.short), true);
 }
 
+// ========== v2.0 카드 전투 ==========
+{
+  const { DB } = await import('../js/data.js');
+  if (!DB.cards) DB.cards = JSON.parse((await import('fs')).readFileSync(new URL('../data/cards.json', import.meta.url), 'utf8'));
+  DB.cardById = {}; for (const c of DB.cards.list) DB.cardById[c.id] = c;
+  const CB = await import('../js/cardbattle.js');
+  const run = { hp: 60, maxHp: 60, act: 1, floor: 3, cards: DB.cards.starterDeck.slice() };
+  const b = CB.createCardBattle(run, ['wolf']);
+  eq('카드 전투: 손패 5장', b.hand.length, 5);
+  eq('카드 전투: 자원 3', b.res, 3);
+  eq('카드 전투: 내 주사위 5개', b.myDice.length, 5);
+  eq('카드 전투: 보스 주사위 수 = 설정값', b.enemies[0].dice.length, DB.cards.config.tiers.boss.dice);
+  eq('카드 전투: 리롤 없음(rollsLeft 개념 없음)', b.rollsLeft === undefined, true);
+
+  // 대결: 상호 차감 — 큰 쪽이 차액만큼 잔존
+  b.myDice = [6, 5, 3, 2, 1].map(v => ({ v, orig: v, dead: false }));
+  b.enemies[0].dice = [6, 3, 6].map(v => ({ v, orig: v, dead: false }));
+  const uid = b.enemies[0].uid;
+  let r = CB.clashDice(b, 1, uid, 1);   // 내 5 vs 적 3
+  eq('대결: 5 vs 3 → 적 파괴', r.foeDead, true);
+  eq('대결: 내 주사위 2 잔존', b.myDice[1].v, 2);
+  eq('대결: 잔존 주사위는 살아있다', b.myDice[1].dead, false);
+  r = CB.clashDice(b, 0, uid, 0);       // 내 6 vs 적 6
+  eq('대결: 동점 → 서로 파괴', r.myDead && r.foeDead, true);
+  r = CB.clashDice(b, 4, uid, 2);       // 내 1 vs 적 6
+  eq('대결: 1 vs 6 → 적 주사위 5 잔존', b.enemies[0].dice[2].v, 5);
+  eq('대결: 내 주사위 파괴', b.myDice[4].dead, true);
+  eq('대결: 죽은 주사위 재사용 불가', CB.clashDice(b, 4, uid, 2), null);
+
+  // 카드: 복구는 원래 굴림값 한도
+  b.res = 3;
+  b.hand = ['repair', 'repair', 'elate', 'stalk', 'courage'];
+  const dead1 = b.myDice.findIndex(d => d.dead && d.orig === 1);   // 1이었던 주사위
+  let pc = CB.playCard(b, 0, dead1);
+  eq('복구: 발동', !!pc, true);
+  eq('복구: 원래 1이었으면 1로만 (2 아님)', b.myDice[dead1].v, 1);
+  eq('복구: 되살아남', b.myDice[dead1].dead, false);
+  eq('복구: 자원 1 소모', b.res, 2);
+  // 추적: 지정 6
+  pc = CB.playCard(b, 2, dead1);        // hand: repair,elate,stalk,courage → stalk는 idx 2
+  eq('추적: 지정 주사위 6', b.myDice[dead1].v, 6);
+  eq('추적: 자원 0', b.res, 0);
+  eq('자원 부족이면 발동 불가', CB.playCard(b, 0, 0), null);
+
+  // 용기: 최저 동률 모두 2배
+  const b2 = CB.createCardBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, cards: ['courage'] }, ['crow']);
+  b2.myDice = [2, 2, 5, 6, 4].map(v => ({ v, orig: v, dead: false }));
+  b2.hand = ['courage']; b2.res = 3;
+  CB.playCard(b2, 0);
+  eq('용기: 최저 동률 모두 ×2', b2.myDice.map(d => d.v).join(','), '4,4,5,6,4');
+
+  // 턴 종료: 내 공격 먼저 — 처치하면 그 적의 공격은 불발
+  const b3 = CB.createCardBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, cards: DB.cards.starterDeck.slice() }, ['crow', 'crow']);
+  const [c1, c2] = b3.enemies;
+  c1.hp = 10;
+  b3.myDice = [6, 6, 6, 6, 6].map(v => ({ v, orig: v, dead: false }));   // 합 30 ≥ 10 → 처치
+  c1.dice = [6, 6].map(v => ({ v, orig: v, dead: false }));
+  c2.dice = [3, 2].map(v => ({ v, orig: v, dead: false }));
+  b3.target = c1.uid;
+  const sc = CB.endCardTurn(b3);
+  eq('턴 종료: 대상 처치', sc.killed, true);
+  eq('턴 종료: 처치된 적 공격 불발 (c2의 5만 맞음)', 60 - b3.player.hp, 5);
+  eq('턴 종료: 다음 턴 시작 (턴 2)', b3.turn, 2);
+  eq('턴 종료: 손패 다시 5장', b3.hand.length, 5);
+  eq('턴 종료: 자원 리필', b3.res, 3);
+  eq('턴 종료: 죽은 적은 주사위를 안 굴린다', b3.enemies.filter(e => e.hp <= 0).every(e => true), true);
+
+  // 전멸 → 승리
+  const b4 = CB.createCardBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, cards: DB.cards.starterDeck.slice() }, ['crow']);
+  b4.enemies[0].hp = 5;
+  b4.myDice = [6, 6, 6, 6, 6].map(v => ({ v, orig: v, dead: false }));
+  CB.endCardTurn(b4);
+  eq('전멸 → 승리', b4.result, 'victory');
+  // 전멸 패배
+  const b5 = CB.createCardBattle({ hp: 3, maxHp: 60, act: 1, floor: 1, cards: DB.cards.starterDeck.slice() }, ['wolf']);
+  b5.myDice = [1, 1, 1, 1, 1].map(v => ({ v, orig: v, dead: true }));
+  b5.enemies[0].dice = [6, 6, 6, 6].map(v => ({ v, orig: v, dead: false }));
+  CB.endCardTurn(b5);
+  eq('맞아 죽으면 패배', b5.result, 'defeat');
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
