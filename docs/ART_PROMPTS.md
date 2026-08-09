@@ -38,6 +38,7 @@ v6 개정: 진행 현황을 v0.97 기준으로 갱신, 족보 판 18종 작업�
 | 보물상자 0/3종 | ⬜ `docs/CHEST_PROMPTS.md` |
 | 보스 낙서 0/9종 | ⬜ `docs/BOSS_ICON_PROMPTS.md` |
 | 유물 0/26종 | ⬜ [7] |
+| **감정 카드 0/6종 (프레임·뒷면·일러 4)** | ⬜ `docs/CARD_PROMPTS.md` |
 | 앱 아이콘 | ⬜ [8] |
 | ~~줄 UI 원형 아이콘 18종~~ | ❌ 폐기 — 족보 판에 통합됨 |
 | 배경음 20/21곡 | 🔶 `bgm_title`만 대기 — `docs/BGM_PROMPTS.md` |

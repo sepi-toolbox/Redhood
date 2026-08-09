@@ -103,6 +103,15 @@ function drawTo(b, n) {
     }
     b.hand.push(b.deck.pop());
   }
+  recycle(b);
+}
+
+// 덱이 바닥나면 그 자리에서 버림 더미를 섞어 되돌린다 (덱 0 상태를 남기지 않는다)
+function recycle(b) {
+  if (b.deck.length === 0 && b.discard.length > 0) {
+    b.deck = shuffle(b.discard);
+    b.discard = [];
+  }
 }
 
 // ---------- 대결: 즉시 판정 ----------
@@ -152,8 +161,9 @@ export function playCard(b, hi, dieIdx = -1) {
     const idxs = b.myDice.map((d, i) => (d.dead ? -1 : i)).filter(i => i >= 0);
     if (!idxs.length) return null;
     const i = idxs[Math.floor(rng.next() * idxs.length)];
-    b.myDice[i].v += 1;
-    fx.push({ i, txt: '+1' });
+    const amt = c.amount ?? 1;
+    b.myDice[i].v += amt;
+    fx.push({ i, txt: `+${amt}` });
   } else if (key === 'repair') {
     const d = b.myDice[dieIdx];
     if (!d || !d.dead) return null;
@@ -164,6 +174,7 @@ export function playCard(b, hi, dieIdx = -1) {
   } else return null;
   b.res -= c.cost;
   b.discard.push(b.hand.splice(hi, 1)[0]);
+  recycle(b);
   return { key, fx };
 }
 
