@@ -1,4 +1,4 @@
-# REDHOOD 감정 카드 아트 프롬프트 — v1 (v2.01 기준)
+# REDHOOD 감정 카드 아트 프롬프트 — v2 (v2.07 기준)
 
 > 카드 전투(v2.0)의 감정 카드 리소스. **공용 2종(프레임·뒷면) + 일러스트 4종** = 6장.
 > 생성 방식은 `docs/ART_PROMPTS.md`와 같다: 프롬프트 블록 복사 → **`keyart_stilllife` 첨부** → 생성 → 대화에 업로드.
@@ -22,7 +22,11 @@
 
 ## ⚠ 주사위 눈(pip) 규칙 — AI가 가장 자주 틀리는 부분
 
-이미지 모델은 **개수를 못 센다.** "주사위" 라고만 쓰면 눈이 7개 박히거나, 엉뚱한 배치가 나오거나, 면 바깥에 눈이 떠다니는 그림이 절반쯤 나온다. 그래서 주사위가 들어가는 모든 프롬프트는 아래 규칙을 따른다 (아래 일러스트 4종 프롬프트에는 이미 반영돼 있다).
+> **v2 방침: 카드 일러스트에서 주사위를 뺐다.** 눈 오류를 보강해도 모델이 주사위 자체를 잘 못 그려서,
+> 카드는 **감정 + 어두운 동화**에 집중하고 주사위는 화면의 실제 주사위 아트가 담당한다.
+> 아래 규칙은 앞으로 주사위가 꼭 들어가야 하는 다른 아트(유물 등)를 만들 때를 위해 남겨둔다.
+
+이미지 모델은 **개수를 못 센다.** "주사위" 라고만 쓰면 눈이 7개 박히거나, 엉뚱한 배치가 나오거나, 면 바깥에 눈이 떠다니는 그림이 절반쯤 나온다. 그래서 주사위가 들어가는 모든 프롬프트는 아래 규칙을 따른다.
 
 **대책 1 — 진짜 주사위 그림을 참조로 첨부한다 (가장 강력).**
 키아트와 함께 **게임의 실제 주사위 시트**(`assets/dice/normal1.png` ~ `normal6.png` 중 그 카드가 쓰는 눈)를 같이 첨부하고, 프롬프트의 "matching the attached reference die exactly" 가 그걸 가리키게 한다.
@@ -47,11 +51,12 @@
 | 5 | 네 모서리 + 중앙 |
 | 6 | 세로 3 + 3 두 줄 |
 
-## 감정이라는 주제
+## 감정이라는 주제 (v2 — 주사위 없이)
 
-이 카드들은 장비나 마법이 아니라 **빨간 두건의 감정**이다. 물건을 그리더라도
-그 물건이 감정을 대신 말하게 한다 — 용기는 정면을 보고, 추적은 어둠 속에서 빛나고,
-고양은 위로 타오르고, 복구는 손끝에서 아문다.
+이 카드들은 장비나 마법이 아니라 **빨간 두건의 감정**이다. 그래서 일러스트는 규칙 설명이 아니라
+**그 감정을 겪는 순간의 장면**을 그린다 — 용기는 거대한 것 앞에 버티고 선 등, 추적은 어둠에 남은 흔적을 짚는 손,
+고양은 치솟는 불티와 나부끼는 망토, 복구는 찢긴 것을 꿰매는 할머니의 손끝.
+소녀가 나오는 카드는 **뒷모습이나 실루엣**으로 — 얼굴을 그리면 카드마다 다른 사람이 된다.
 
 ---
 
@@ -82,58 +87,53 @@ No text, no letters, no numbers, no watermark.
 
 ## 3) 용기 — `card_courage.png` (자원 2 · 가장 낮은 눈 ×2)
 
-가장 약한 주사위가 가장 세지는 카드 — "작은 것이 일어선다".
+가장 약한 것이 가장 세지는 카드 — "작은 것이 일어선다".
 
-> 첨부: `keyart_stilllife` + `assets/dice/normal1.png` (참조 주사위)
+> 첨부: `keyart_redhood` + `keyart_wolf`
 
 ```
 Dark fairytale storybook illustration, painterly style matching the attached
-still-life key art: a single small ivory die standing upright in a shaft of
-warm golden light, casting a LONG shadow shaped like a rearing lion across
-dark forest ground. The die shows only its top face, with EXACTLY ONE large
-round dark pip in the very center of that face — a one, the weakest roll,
-matching the attached reference die exactly. Other faces fall into deep
-shadow, unreadable. Embers drift upward. The die is small but defiant,
-centered, occupying most of the frame. Warm gold against near black, high
-contrast, simple composition readable at thumbnail size.
-Pips must match a real casino die. No stray pips, no pips off the die faces,
-no seven-pip faces. No text, no letters, no numbers, no watermark.
+key art: a small girl in a bright red hooded cloak, seen FROM BEHIND, tiny
+fists clenched, standing her ground on a dark forest path before an enormous
+looming wolf-shaped shadow that fills the trees ahead. She is small at the
+bottom of the frame; the shadow towers over her. Her red cloak is the only
+strong color, glowing like a flame against the near-black forest. Warm ember
+light rises around her feet. Single clear focal point, high contrast, simple
+composition readable at thumbnail size.
+No text, no letters, no numbers, no watermark.
 ```
 
 ## 4) 어둠 속의 추적 — `card_stalk.png` (자원 2 · 주사위 하나를 6으로)
 
 어둠 속에서 원하는 것을 정확히 찾아내는 카드.
 
-> 첨부: `keyart_stilllife` + `assets/dice/normal6.png` (참조 주사위)
+> 첨부: `keyart_redhood`
 
 ```
 Dark fairytale storybook illustration, painterly style matching the attached
-still-life key art: a moonlit forest floor at night, nearly black, with a
-trail of faintly glowing pawprints leading to a single ivory die showing only
-one face. On that face: EXACTLY SIX pips arranged as two straight vertical
-columns of three pips each — a real die six, matching the attached reference
-die exactly — each pip glowing cold silver-blue like an eye in the dark.
-No other faces readable. A crescent moon sliver above. One clear focal point,
-centered, deep blacks with icy highlights, readable at thumbnail size.
-Pips must match a real casino die. No stray pips, no pips off the die faces,
-no seven-pip faces. No text, no letters, no numbers, no watermark.
+key art: a red-hooded figure crouching low in a pitch-black moonlit forest,
+seen from the side as a near-silhouette, one hand reaching down to touch a
+faintly glowing pawprint on the forest floor. A trail of glowing pawprints
+leads away into the darkness between the trees. A thin sliver of crescent
+moon above. Cold silver-blue palette, deep blacks, the red hood the only
+warm color. One clear focal point, simple composition readable at thumbnail
+size. No text, no letters, no numbers, no watermark.
 ```
 
 ## 5) 고양 — `card_elate.png` (자원 1 · 무작위 주사위 +2)
 
 속에서 치솟는 불길 — 값이 싸고 방향은 제멋대로다.
 
-> 첨부: `keyart_stilllife` (주사위 눈은 일부러 안 보이게 — 참조 주사위 불필요)
+> 첨부: `keyart_redhood`
 
 ```
 Dark fairytale storybook illustration, painterly style matching the attached
-still-life key art: a small campfire flame flaring suddenly upward into a
-bright column of orange-gold fire, sparks scattering in RANDOM directions,
-one ivory die tumbling upward inside the rising flame, spinning fast — its
-faces blurred by motion and firelight so no pips are readable, only hot
-glowing edges. Dark forest night behind. Strong vertical motion, warm orange
-against black, single focal point, readable at thumbnail size.
-Any visible pips must match a real casino die. No stray pips.
+key art: a girl in a red hooded cloak leaping upward through a dark forest
+night, seen from below as a dynamic silhouette, her cloak billowing UP like
+a rising flame, a spiral of orange-gold embers and sparks swirling around her
+in random directions. Strong vertical motion, warm firelight from beneath,
+deep black forest behind. The red cloak and embers are the only bright
+colors. Single focal point, simple composition readable at thumbnail size.
 No text, no letters, no numbers, no watermark.
 ```
 
@@ -141,20 +141,18 @@ No text, no letters, no numbers, no watermark.
 
 부서진 것을 손으로 꿰매 되살리는 카드 — 할머니의 바느질.
 
-> 첨부: `keyart_stilllife` + `assets/dice/normal3.png` (참조 주사위 — 3 수리와 맞춘 3눈)
+> 첨부: `keyart_stilllife` + `keyart_peddler` (손·정물)
 
 ```
 Dark fairytale storybook illustration, painterly style matching the attached
-still-life key art: a cracked ivory die held together by visible red thread
-stitches, a small sewing needle still piercing through mid-stitch, warm
-lantern light from the side, loose red thread coiling below on dark wood.
-The die shows only one face: EXACTLY THREE pips in a straight diagonal line
-from one corner to the opposite corner — a real die three, matching the
-attached reference die exactly. Other faces in shadow, unreadable. The mended
-crack glows faintly warm gold. Single object centered, occupying most of the
-frame, tender and quiet mood, readable at thumbnail size.
-Pips must match a real casino die. No stray pips, no pips off the die faces,
-no seven-pip faces. No text, no letters, no numbers, no watermark.
+key art: a close-up of weathered old hands mending a torn bright-red hooded
+cloak with a small sewing needle and vivid red thread, mid-stitch, by warm
+lantern light on a dark wooden table. The mended tear glows faintly warm
+gold along the stitches. Loose red thread coils below. Tender and quiet
+mood, deep shadows around the pool of lantern light, the red cloth the only
+strong color. Single subject centered, occupying most of the frame,
+readable at thumbnail size.
+No text, no letters, no numbers, no watermark.
 ```
 
 ---
