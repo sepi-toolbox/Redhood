@@ -30,6 +30,8 @@
     "diceY": 448,
     "helpY": 516,
     "endW": 150,
-    "endH": 46
+    "endH": 46,
+    "pileW": 44,
+    "pileH": 58
   }
 }
