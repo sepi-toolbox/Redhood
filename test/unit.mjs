@@ -1281,6 +1281,17 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eq('2막 내 주사위 = 2~7 (rng 0.5 → 5)', b.myDice.every(d => d.v === 5), true);
     eq('2막 적 눈 +1 (들개 5 → 6)', e.dice.every(d => d.v === 6), true);
   }
+  // 격앙: 시간이 갈수록 주사위가 커진다 (터틀의 시계)
+  {
+    const rb = (turn, tier, final = false) => CB.rageBonus({ turn }, { tier, final, defId: 'crow' }, turn);
+    eq('격앙: 일반 5턴엔 없음', rb(5, 'normal'), 0);
+    eq('격앙: 일반 6턴 +1', rb(6, 'normal'), 1);
+    eq('격앙: 일반 8턴 +2', rb(8, 'normal'), 2);
+    eq('격앙: 상한 5', rb(40, 'normal'), 5);
+    eq('격앙: 보스는 8턴부터 2턴마다 (9턴 +1)', rb(9, 'boss'), 1);
+    eq('격앙: 보스 10턴 +2', rb(10, 'boss'), 2);
+    eq('격앙: 최종보스 제외', rb(20, 'boss', true), 0);
+  }
   // 미리보기: 피해 없는 예고는 예상 피격에 안 잡힌다
   {
     const [b, e] = mk();

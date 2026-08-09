@@ -80,7 +80,12 @@ function playTurn(b) {
   const hpFear = b.player.hp <= b.player.maxHp * 0.4 ? 1.5 : 1.0;
   const reserve = killable[0] ? tgt.hp + (tgt.block || 0) : 0;   // 처치용으로 남겨둘 값
   const incoming = foes.reduce((s, e) => s + (killable[0] && e.uid === tgt.uid ? 0 : foeThreat(e)), 0);
-  const wantBlock = Math.min(Math.max(0, myVal() - reserve), Math.ceil(incoming * (hpFear - 0.4)));
+  let wantBlock = Math.min(Math.max(0, myVal() - reserve), Math.ceil(incoming * (hpFear - 0.4)));
+  // 격앙이 돌기 시작하면 레이스 전환 — 빈사만 면할 만큼만 막고 최대한 때린다
+  if (foes.some(e => (e.rage || 0) > 0)) {
+    const allow = Math.max(0, b.player.hp - b.player.maxHp * 0.3);
+    wantBlock = Math.min(wantBlock, Math.max(0, Math.ceil(incoming - allow)));
+  }
   let blocked = 0;
   g = 0;
   while (blocked < wantBlock && g++ < 40) {
