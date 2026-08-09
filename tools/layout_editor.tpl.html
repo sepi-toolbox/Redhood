@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REDHOOD 배치 편집기 — %%VERSION%% 기준</title>
+<link rel="stylesheet" href="%%SITE%%/assets/fonts/song-myung/index.css">
+<style id="game-css">
+%%GAMECSS%%
+</style>
+<style>
+  /* ---------- 편집기 전용 (게임 CSS 뒤에 얹힘) ---------- */
+  html, body { height: auto; }
+  body { display: block; background: #17130f; padding: 0; overflow: auto; }
+  .ed-top {
+    position: sticky; top: 0; z-index: 200; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 10px 14px; background: #221c15; border-bottom: 2px solid #4a3b2c; color: #e8dcc8;
+  }
+  .ed-top b { font-size: 15px; }
+  .ed-top .sub { font-size: 11px; color: #8d8064; }
+  .ed-btns { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+  .ed-btns button {
+    padding: 7px 11px; font-size: 12.5px; border-radius: 8px; cursor: pointer;
+    background: #2a241e; border: 1px solid #5a4c3e; color: #e8dcc8;
+  }
+  .ed-btns button.prime { background: #5a281f; border-color: #a8543f; font-weight: 700; }
+  .ed-btns button.on { background: #4a3b2c; border-color: #8d7452; }
+  .ed-main { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; align-items: flex-start; justify-content: center; }
+  #app {
+    flex: none; width: 390px; height: 844px; position: relative; overflow: hidden;
+    display: flex; border: 1px solid #4a3b2c; border-radius: 18px; background: #141210;
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+  }
+  .ed-panel { flex: 1 1 320px; max-width: 430px; color: #cfc3a8; font-size: 12.5px; }
+  .ed-hint { line-height: 1.7; margin-bottom: 10px; color: #b3a685; }
+  .ed-panel table { width: 100%; border-collapse: collapse; }
+  .ed-panel th { text-align: left; font-size: 11px; color: #8d8064; padding: 8px 4px 3px; }
+  .ed-panel td { padding: 2px 4px; border-bottom: 1px solid #2a241e; }
+  .ed-panel td.k { color: #e8dcc8; white-space: nowrap; }
+  .ed-panel td.d { color: #6b6152; font-size: 11px; }
+  .ed-panel input {
+    width: 64px; padding: 3px 6px; font-size: 13px; text-align: right;
+    background: #17130f; border: 1px solid #4a3b2c; border-radius: 5px; color: #f0e2c0;
+  }
+  .ed-panel input.changed { border-color: #e8b64d; color: #ffd98a; }
+  /* 선택 상자·핸들 (게임에서 뺀 것 — 편집기 전용) */
+  .battle-screen > .le-layer { position: absolute; inset: 0; z-index: 80; touch-action: none; }
+  .battle-screen > .le-box {
+    position: absolute; border: 1.5px dashed #e8b64d; border-radius: 6px;
+    background: rgba(232, 182, 77, .08); pointer-events: none; z-index: 81;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.5);
+  }
+  .le-box .le-tag {
+    position: absolute; top: -22px; left: 0; font-size: 11px; font-weight: 700;
+    color: #241c07; background: #e8b64d; border-radius: 4px; padding: 1px 6px; white-space: nowrap;
+  }
+  .le-box .le-grip {
+    position: absolute; right: -14px; bottom: -14px; width: 30px; height: 30px; border-radius: 8px;
+    background: #e8b64d; color: #241c07; font-size: 15px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; pointer-events: auto;
+    box-shadow: 0 2px 5px rgba(0,0,0,.6);
+  }
+  .ed-io { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.72); display: none; align-items: center; justify-content: center; }
+  .ed-io.on { display: flex; }
+  .ed-io .box { width: min(560px, 92vw); background: #221c15; border: 1px solid #5a4c3e; border-radius: 12px; padding: 14px; }
+  .ed-io textarea { width: 100%; height: 260px; background: #17130f; color: #e8dcc8; border: 1px solid #4a3b2c; border-radius: 8px; font-size: 12px; padding: 8px; box-sizing: border-box; }
+  .ed-io .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+</style>
+</head>
+<body>
+<header class="ed-top">
+  <b>📐 REDHOOD 배치 편집기</b><span class="sub">%%VERSION%% 기준 · %%DATE%% · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
+  <div class="ed-btns">
+    <button id="tg-multi">적 2마리</button>
+    <button id="tg-loot">전리품 화면</button>
+    <button id="btn-import">가져오기</button>
+    <button id="btn-copy" class="prime">내보내기 (복사)</button>
+    <button id="btn-dl">파일 저장</button>
+    <button id="btn-reset">기본값</button>
+  </div>
+</header>
+<div class="ed-main">
+  <div id="app">
+    <div class="screen battle-screen card-battle" id="scr">
+      <div class="bg-layer" style="background-image: linear-gradient(rgba(16,12,10,.08), rgba(16,12,10,.24) 60%, #0f0c0b 98%), url('%%SITE%%/assets/bg/bg_forest.jpg')"></div>
+      <header class="topbar"><span>⚔ 3층 · 2턴</span><span class="relic-bar">🩸</span><span class="coin-slot">🪙12 <span class="hp">❤️</span></span></header>
+      <div class="enemy-zone" id="ez"></div>
+      <div class="cb-hud">
+        <div class="hp-gauge"><div class="hp-fill" style="width:85%"></div><span class="hp-text">51 / 60</span></div>
+      </div>
+      <div class="cb-preview">턴 종료 → 내 공격 <b class="atk">14</b> (🎯굶주린 까마귀) · 예상 피격 <b class="dmg">9</b></div>
+      <div class="cb-dice" id="dice"></div>
+      <div class="cb-help">주사위: 내 것 탭 → 적 것 탭 = 부딪치기 · 카드: 꾹=상세, 위로 끌면 발동 · 적 탭 = 🎯</div>
+      <div class="cb-handzone"><div class="cb-hand" id="hand"></div></div>
+      <div class="cb-orb"><b>3</b></div>
+      <div class="cb-pile deck"><b>5</b></div>
+      <div class="cb-pile disc"><b>2</b></div>
+      <button class="btn primary cb-end">턴 종료</button>
+      <div class="hint-line cb-hintline">승리!</div>
+      <div class="sheet-zone combo-grid cb-loot" id="loot"></div>
+    </div>
+  </div>
+  <aside class="ed-panel">
+    <p class="ed-hint">
+      <b>화면에서 직접:</b> 요소를 탭해 선택 → 끌어서 이동 · 모서리 <b>⤡</b>로 크기.<br>
+      몬스터·손패처럼 흐름에 묶인 것은 라벨에 적힌 방향으로만 움직인다.<br>
+      <b>표에서:</b> 숫자를 고치면 화면에 바로 반영. 노란 값 = 기본값에서 바뀐 것.<br>
+      끝나면 <b>내보내기</b> — 복사된 JSON을 그대로 보내주면 게임(layout.json)에 반영된다.
+    </p>
+    <table id="val-table"></table>
+  </aside>
+</div>
+<div class="ed-io" id="io">
+  <div class="box">
+    <p style="color:#e8dcc8; margin-bottom:8px" id="io-title">layout.json 붙여넣기</p>
+    <textarea id="io-text"></textarea>
+    <div class="row">
+      <button id="io-cancel">닫기</button>
+      <button id="io-apply" class="prime">적용</button>
+    </div>
+  </div>
+</div>
+<script>
+'use strict';
+const SITE = '%%SITE%%';
+const DEFAULTS = %%LAYOUT%%;
+let L = { ...DEFAULTS };
+const $ = (s) => document.querySelector(s);
+const scr = $('#scr');
+
+/* ---------- 표본 화면 ---------- */
+const FOES = {
+  single: [{ id: 'crow', name: '굶주린 까마귀', hp: '14/34', pct: 41, dice: [3, 6] }],
+  multi: [
+    { id: 'crow', name: '굶주린 까마귀', hp: '14/34', pct: 41, dice: [3, 6] },
+    { id: 'forest_spider', name: '숲거미', hp: '22/28', pct: 78, dice: [2, 5, 4] },
+  ],
+};
+let multi = false, lootView = false;
+function renderFoes() {
+  const list = multi ? FOES.multi : FOES.single;
+  $('#ez').classList.toggle('multi', multi);
+  $('#ez').innerHTML = list.map((f, i) => `
+    <button class="enemy t-normal ${i === 0 ? 'targeted' : ''}">
+      <span class="target-pin">▼</span>
+      <span class="enemy-name">${f.name}</span>
+      <span class="bar t-normal"><i style="width:${f.pct}%"></i></span>
+      <span class="enemy-hp">${f.hp}</span>
+      <img class="enemy-art enemy-art-img" src="${SITE}/assets/enemies/${f.id}.png" alt="" draggable="false">
+      <span class="fdice">${f.dice.map(v => `<b class="fdie"><img src="${SITE}/assets/dice/normal${v}.png" draggable="false"></b>`).join('')}</span>
+    </button>`).join('');
+}
+function renderDice() {
+  const vals = [{ v: 1 }, { v: 5 }, { v: 3 }, { v: 1, dead: true }, { v: 4 }];
+  $('#dice').innerHTML = vals.map(d => `
+    <button class="cdie art ${d.dead ? 'dead' : ''}">
+      ${d.dead ? '' : `<img class="pip-art" src="${SITE}/assets/dice/normal${d.v}.png" draggable="false">`}
+    </button>`).join('');
+}
+const CARDS = [['🦁', '용기', 2], ['🌘', '어둠 속의 추적', 2], ['🔥', '고양', 1], ['🧵', '복구', 1], ['🔥', '고양', 1]];
+function renderHand() {
+  const hand = $('#hand');
+  const n = CARDS.length;
+  const W = hand.clientWidth || 390;
+  const gap = n > 1 ? Math.min(L.handMaxGap, Math.max(18, (W - L.handMargin - L.cardW) / (n - 1))) : 0;
+  hand.innerHTML = CARDS.map(([ico, nm, cost], i) => {
+    const off = i - (n - 1) / 2;
+    return `<div class="cb-card" style="transform: translateX(${off * gap}px) rotate(${off * 5}deg) translateY(${Math.abs(off) * 8}px)">
+      <span class="ccost">${cost}</span><span class="cart">${ico}</span><span class="cnm">${nm}</span></div>`;
+  }).join('');
+}
+function renderLoot() {
+  $('#loot').classList.add('loot-list');
+  $('#loot').innerHTML = [
+    ['🪙', '재화', '+12'], ['🃏', '감정 카드', '3개 중 하나를 고른다'], ['🚪', '나가기', ''],
+  ].map(([ico, nm, sub]) => `
+    <button class="sheet-row choice-row loot-row">
+      <span class="row-icon"><span class="row-ico-emoji">${ico}</span></span>
+      <span class="row-body"><span class="choice-main">${nm}</span>${sub ? `<span class="choice-sub">${sub}</span>` : ''}</span>
+    </button>`).join('');
+}
+
+/* ---------- 배치 적용 ---------- */
+function apply() {
+  for (const [k, v] of Object.entries(L)) scr.style.setProperty('--cb-' + k, v + 'px');
+  renderHand();
+  syncTable();
+  leSync();
+}
+
+/* ---------- 편집 대상 ---------- */
+const clampL = (v, a, b) => Math.max(a, Math.min(b, Math.round(v)));
+const ITEMS = [
+  { id: 'orb', label: '자원 구슬', keys: ['orbX', 'orbY', 'orbSize'], find: () => $('.cb-orb'),
+    move: (dx, dy) => { L.orbX += dx; L.orbY -= dy; }, resize: (dw) => { L.orbSize = clampL(L.orbSize + dw, 30, 90); } },
+  { id: 'deck', label: '덱 더미', keys: ['deckX', 'deckY'], find: () => $('.cb-pile.deck'),
+    move: (dx, dy) => { L.deckX += dx; L.deckY -= dy; } },
+  { id: 'disc', label: '버림 더미', keys: ['discX', 'discY'], find: () => $('.cb-pile.disc'),
+    move: (dx, dy) => { L.discX -= dx; L.discY -= dy; } },
+  { id: 'end', label: '턴 종료 버튼', keys: ['endX', 'endY'], find: () => $('.cb-end'),
+    move: (dx, dy) => { L.endX -= dx; L.endY -= dy; } },
+  { id: 'fdice', label: '적 주사위 (위아래로)', keys: ['fdiceY', 'fdieSize'], find: () => $('.fdice'),
+    move: (dx, dy) => { L.fdiceY = clampL(L.fdiceY + dy, 0, 120); }, resize: (dw) => { L.fdieSize = clampL(L.fdieSize + dw, 22, 64); } },
+  { id: 'mydice', label: '내 주사위 (좌우=간격)', keys: ['diceSize', 'diceGap'], find: () => $('.cb-dice'),
+    move: (dx, dy) => { L.diceGap = clampL(L.diceGap + dx / 3, 0, 30); }, resize: (dw) => { L.diceSize = clampL(L.diceSize + dw, 40, 90); } },
+  { id: 'hand', label: '손패 (위아래=높이, 좌우=펼침)', keys: ['cardW', 'cardH', 'handBottom', 'handMargin'], find: () => $('.cb-hand'),
+    move: (dx, dy) => { L.handBottom -= dy; L.handMargin = clampL(L.handMargin - dx, 0, 260); },
+    resize: (dw) => { L.cardW = clampL(L.cardW + dw, 70, 190); L.cardH = Math.round(L.cardW * 162 / 118); } },
+  { id: 'loot', label: '전리품 목록', keys: ['lootTop'], find: () => lootView ? $('.cb-loot') : null,
+    move: (dx, dy) => { L.lootTop = clampL(L.lootTop + dy, 200, 700); } },
+  { id: 'enemy', label: '몬스터 (위아래=영역, ⤡=크기)', keys: ['enemyH', 'artH', 'artHMulti'], find: () => $('.enemy-zone'),
+    move: (dx, dy) => { L.enemyH = clampL(L.enemyH + dy, 160, 460); },
+    resize: (dw) => { if (multi) L.artHMulti = clampL(L.artHMulti + dw, 120, 360); else L.artH = clampL(L.artH + dw, 140, 420); } },
+];
+
+/* ---------- 선택·드래그 ---------- */
+let sel = null, box = null, boxFor = null, drag = null;
+const layer = document.createElement('div');
+layer.className = 'le-layer';
+scr.appendChild(layer);
+
+function leMove(e) {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (!dx && !dy) return;
+  drag.x = e.clientX; drag.y = e.clientY;
+  if (drag.mode === 'resize' && drag.item.resize) drag.item.resize(Math.abs(dx) >= Math.abs(dy) ? dx : dy);
+  else if (drag.item.move) drag.item.move(dx, dy);
+  apply();
+}
+const leEnd = () => { drag = null; };
+layer.addEventListener('pointerdown', (e) => {
+  const hit = ITEMS.map(it => ({ it, el: it.find() })).filter(x => x.el)
+    .map(x => ({ ...x, r: x.el.getBoundingClientRect() }))
+    .filter(x => e.clientX >= x.r.left - 6 && e.clientX <= x.r.right + 6 && e.clientY >= x.r.top - 6 && e.clientY <= x.r.bottom + 6)
+    .sort((a, b) => a.r.width * a.r.height - b.r.width * b.r.height)[0];
+  if (hit) {
+    sel = hit.it;
+    drag = { item: hit.it, mode: 'move', x: e.clientX, y: e.clientY };
+    try { layer.setPointerCapture(e.pointerId); } catch (_) {}
+  } else sel = null;
+  leSync();
+});
+layer.addEventListener('pointermove', leMove);
+layer.addEventListener('pointerup', leEnd);
+layer.addEventListener('pointercancel', leEnd);
+
+function leSync() {
+  if (!sel || !sel.find()) {
+    if (box) { box.remove(); box = null; boxFor = null; }
+    return;
+  }
+  const el = sel.find();
+  const sr = scr.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  if (!box || boxFor !== sel) {
+    if (box) box.remove();
+    box = document.createElement('div');
+    box.className = 'le-box';
+    box.innerHTML = `<span class="le-tag">${sel.label}</span>${sel.resize ? '<span class="le-grip">⤡</span>' : ''}`;
+    scr.appendChild(box);
+    boxFor = sel;
+    const grip = box.querySelector('.le-grip');
+    if (grip) {
+      grip.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        drag = { item: sel, mode: 'resize', x: e.clientX, y: e.clientY };
+        try { grip.setPointerCapture(e.pointerId); } catch (_) {}
+      });
+      grip.addEventListener('pointermove', leMove);
+      grip.addEventListener('pointerup', leEnd);
+      grip.addEventListener('pointercancel', leEnd);
+    }
+  }
+  box.style.left = `${r.left - sr.left}px`;
+  box.style.top = `${r.top - sr.top}px`;
+  box.style.width = `${r.width}px`;
+  box.style.height = `${r.height}px`;
+}
+
+/* ---------- 값 표 ---------- */
+const KEY_DESC = {
+  enemyH: '적 영역 높이', artH: '몬스터 크기(1마리)', artHMulti: '몬스터 크기(여럿)', fdiceY: '적 주사위 내림', fdieSize: '적 주사위 크기',
+  diceSize: '내 주사위 크기', diceGap: '내 주사위 간격',
+  orbX: '자원 구슬 왼쪽', orbY: '자원 구슬 아래', orbSize: '자원 구슬 크기',
+  deckX: '덱 더미 왼쪽', deckY: '덱 더미 아래', discX: '버림 더미 오른쪽', discY: '버림 더미 아래',
+  endX: '턴 종료 오른쪽', endY: '턴 종료 아래',
+  cardW: '카드 폭', cardH: '카드 높이', handBottom: '손패 내림(음수=아래로)', handMargin: '손패 좌우 여백', handMaxGap: '카드 간격 최대',
+  lootTop: '전리품 시작 높이',
+};
+function buildTable() {
+  $('#val-table').innerHTML = '<tr><th>키</th><th>설명</th><th>값</th></tr>' + Object.keys(DEFAULTS).map(k => `
+    <tr><td class="k">${k}</td><td class="d">${KEY_DESC[k] || ''}</td>
+    <td><input type="number" data-k="${k}" value="${L[k]}"></td></tr>`).join('');
+  $('#val-table').querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const v = parseInt(inp.value, 10);
+      if (Number.isFinite(v)) { L[inp.dataset.k] = v; apply(); }
+    });
+  });
+}
+function syncTable() {
+  $('#val-table').querySelectorAll('input').forEach(inp => {
+    const k = inp.dataset.k;
+    if (document.activeElement !== inp) inp.value = L[k];
+    inp.classList.toggle('changed', L[k] !== DEFAULTS[k]);
+  });
+}
+
+/* ---------- 도구 단추 ---------- */
+$('#tg-multi').addEventListener('click', () => {
+  multi = !multi;
+  $('#tg-multi').classList.toggle('on', multi);
+  $('#tg-multi').textContent = multi ? '적 1마리' : '적 2마리';
+  renderFoes(); apply();
+});
+$('#tg-loot').addEventListener('click', () => {
+  lootView = !lootView;
+  $('#tg-loot').classList.toggle('on', lootView);
+  $('#tg-loot').textContent = lootView ? '전투 화면' : '전리품 화면';
+  scr.classList.toggle('loot-mode', lootView);
+  sel = null; leSync();
+});
+const jsonNow = () => JSON.stringify({ battle: L }, null, 2);
+$('#btn-copy').addEventListener('click', () => {
+  const openBox = () => { $('#io-title').textContent = '이 JSON을 복사해서 보내주세요'; $('#io-text').value = jsonNow(); $('#io').classList.add('on'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(jsonNow()).then(() => { $('#btn-copy').textContent = '복사됨!'; setTimeout(() => { $('#btn-copy').textContent = '내보내기 (복사)'; }, 1600); }, openBox);
+  } else openBox();
+});
+$('#btn-dl').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([jsonNow()], { type: 'application/json' }));
+  a.download = 'layout.json'; a.click();
+});
+$('#btn-reset').addEventListener('click', () => { L = { ...DEFAULTS }; apply(); });
+$('#btn-import').addEventListener('click', () => { $('#io-title').textContent = 'layout.json 붙여넣기'; $('#io-text').value = ''; $('#io').classList.add('on'); });
+$('#io-cancel').addEventListener('click', () => $('#io').classList.remove('on'));
+$('#io-apply').addEventListener('click', () => {
+  try {
+    const o = JSON.parse($('#io-text').value);
+    Object.assign(L, o.battle || o);
+    $('#io').classList.remove('on');
+    apply();
+  } catch (e) { alert('JSON을 읽지 못했어요: ' + e.message); }
+});
+
+renderFoes(); renderDice(); renderLoot(); buildTable(); apply();
+</script>
+</body>
+</html>
