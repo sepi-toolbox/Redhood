@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REDHOOD 배치 편집기 — v2.04 기준</title>
+<title>REDHOOD 배치 편집기 — v2.05 기준</title>
 <link rel="stylesheet" href="https://sepi-toolbox.github.io/Redhood/assets/fonts/song-myung/index.css">
 <style id="game-css">
 /* REDHOOD v0.2 — 다크 페어리테일 · 주사위판 · 모바일 세로 전용 */
@@ -1272,17 +1272,27 @@ span.enemy-art {
 @keyframes cb-pulse { 50% { box-shadow: 0 0 16px rgba(232,182,77,.8); } }
 
 /* HUD: 내 체력 + 자원 */
-.cb-hud { flex: none; display: flex; align-items: center; gap: 8px; padding: 2px 12px 0; }
+.battle-screen > .cb-hud {
+  position: absolute; left: var(--cb-hpSide, 12px); right: var(--cb-hpSide, 12px);
+  top: var(--cb-hpY, 386px); z-index: 6; display: flex; align-items: center; gap: 8px; padding: 0;
+}
+.card-battle .cb-hud .hp-gauge { height: var(--cb-hpH, 36px); max-width: none; }
 .cb-hud .hp-gauge { flex: 1; position: relative; }
 .cb-res { display: flex; align-items: center; gap: 4px; }
 .cb-res i { width: 13px; height: 13px; border-radius: 50%; background: #e8b64d; box-shadow: 0 0 6px rgba(232,182,77,.6); }
 .cb-res i.off { background: #3a3226; box-shadow: none; }
 .cb-res small { font-size: 9.5px; color: #8d8064; margin-left: 3px; }
-.cb-preview { flex: none; text-align: center; font-size: 12px; color: #b3a685; padding: 3px 10px 0; min-height: 19px; }
+.battle-screen > .cb-preview {
+  position: absolute; left: 0; right: 0; top: var(--cb-pvY, 424px); z-index: 6;
+  text-align: center; font-size: 12px; color: #b3a685; padding: 0 10px; min-height: 19px;
+}
 .cb-preview b.atk { color: #f0c05a; } .cb-preview b.dmg { color: #e88a72; } .cb-preview b.kill { color: #8fd08a; }
 
 /* 내 주사위 */
-.cb-dice { flex: none; display: flex; justify-content: center; gap: var(--cb-diceGap, 10px); padding: 6px 8px 2px; }
+.battle-screen > .cb-dice {
+  position: absolute; left: 0; right: 0; top: var(--cb-diceY, 448px); z-index: 7;
+  display: flex; justify-content: center; gap: var(--cb-diceGap, 10px); padding: 0 8px;
+}
 .cdie {
   width: var(--cb-diceSize, 58px); height: calc(var(--cb-diceSize, 58px) + 4px); border-radius: 12px; background: #efe6d0; color: #26201a;
   border: 2px solid #b9a67f; display: flex; align-items: center; justify-content: center;
@@ -1315,7 +1325,10 @@ span.enemy-art {
   position: absolute; top: -7px; right: -5px; font-size: 10px; background: #5a4a2e; color: #e8dcae;
   border-radius: 8px; padding: 0 4px; font-weight: 600;
 }
-.cb-help { flex: none; text-align: center; font-size: 10px; color: #7d7258; padding: 2px 8px 0; }
+.battle-screen > .cb-help {
+  position: absolute; left: 0; right: 0; top: var(--cb-helpY, 516px); z-index: 6;
+  text-align: center; font-size: 10px; color: #7d7258; padding: 0 8px;
+}
 
 /* 손패 — 부채꼴, 화면 아래 걸침 */
 .cb-handzone { position: relative; flex: 1; min-height: 0; }
@@ -1339,7 +1352,8 @@ span.enemy-art {
   padding: 4px 2px 5px; background: linear-gradient(180deg, #e8d8b2, #d8c69a); border-top: 2px solid #a8352e; white-space: nowrap; }
 .battle-screen > .cb-end {
   position: absolute; right: var(--cb-endX, 60px); bottom: var(--cb-endY, 216px); z-index: 42;
-  display: inline-block; width: auto; padding: 10px 12px; font-size: 13.5px;
+  width: var(--cb-endW, 150px); height: var(--cb-endH, 46px); box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center; padding: 0 2px; font-size: 15px;
 }
 .battle-screen > .cb-orb {
   position: absolute; left: var(--cb-orbX, 10px); bottom: var(--cb-orbY, 212px); z-index: 42;
@@ -1463,7 +1477,7 @@ span.enemy-art {
 </head>
 <body>
 <header class="ed-top">
-  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.04 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
+  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.05 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
   <div class="ed-btns">
     <button id="tg-multi">적 2마리</button>
     <button id="tg-loot">전리품 화면</button>
@@ -1517,7 +1531,7 @@ span.enemy-art {
 <script>
 'use strict';
 const SITE = 'https://sepi-toolbox.github.io/Redhood';
-const DEFAULTS = {"enemyH": 306, "artH": 288, "artHMulti": 238, "fdiceY": 46, "fdieSize": 38, "diceSize": 58, "diceGap": 10, "orbX": 10, "orbY": 212, "orbSize": 50, "deckX": 66, "deckY": 210, "discX": 10, "discY": 210, "endX": 60, "endY": 216, "cardW": 118, "cardH": 162, "handBottom": -22, "handMargin": 100, "handMaxGap": 58, "lootTop": 430};
+const DEFAULTS = {"enemyH": 306, "artH": 288, "artHMulti": 238, "fdiceY": 46, "fdieSize": 38, "diceSize": 58, "diceGap": 10, "orbX": 10, "orbY": 212, "orbSize": 50, "deckX": 66, "deckY": 210, "discX": 10, "discY": 210, "endX": 60, "endY": 216, "cardW": 118, "cardH": 162, "handBottom": -22, "handMargin": 100, "handMaxGap": 58, "lootTop": 430, "hpY": 386, "hpSide": 12, "hpH": 36, "pvY": 424, "diceY": 448, "helpY": 516, "endW": 150, "endH": 46};
 let L = { ...DEFAULTS };
 const $ = (s) => document.querySelector(s);
 const scr = $('#scr');
@@ -1586,25 +1600,33 @@ function apply() {
 const clampL = (v, a, b) => Math.max(a, Math.min(b, Math.round(v)));
 const ITEMS = [
   { id: 'orb', label: '자원 구슬', keys: ['orbX', 'orbY', 'orbSize'], find: () => $('.cb-orb'),
-    move: (dx, dy) => { L.orbX += dx; L.orbY -= dy; }, resize: (dw) => { L.orbSize = clampL(L.orbSize + dw, 30, 90); } },
+    move: (dx, dy) => { L.orbX += dx; L.orbY -= dy; }, resize: (dx, dy) => { L.orbSize = clampL(L.orbSize + dx, 30, 90); } },
   { id: 'deck', label: '덱 더미', keys: ['deckX', 'deckY'], find: () => $('.cb-pile.deck'),
     move: (dx, dy) => { L.deckX += dx; L.deckY -= dy; } },
   { id: 'disc', label: '버림 더미', keys: ['discX', 'discY'], find: () => $('.cb-pile.disc'),
     move: (dx, dy) => { L.discX -= dx; L.discY -= dy; } },
-  { id: 'end', label: '턴 종료 버튼', keys: ['endX', 'endY'], find: () => $('.cb-end'),
-    move: (dx, dy) => { L.endX -= dx; L.endY -= dy; } },
+  { id: 'end', label: '턴 종료 버튼 (⤡=크기)', keys: ['endX', 'endY', 'endW', 'endH'], find: () => $('.cb-end'),
+    move: (dx, dy) => { L.endX -= dx; L.endY -= dy; },
+    resize: (dx, dy) => { L.endW = clampL(L.endW + dx, 80, 260); L.endH = clampL(L.endH + dy, 30, 80); } },
+  { id: 'hp', label: '체력바 (좌우=여백, ⤡=높이)', keys: ['hpY', 'hpSide', 'hpH'], find: () => $('.cb-hud'),
+    move: (dx, dy) => { L.hpY += dy; L.hpSide = clampL(L.hpSide + dx, 0, 90); },
+    resize: (dx, dy) => { L.hpH = clampL(L.hpH + dy, 20, 64); } },
+  { id: 'pv', label: '미리보기 줄 (위아래)', keys: ['pvY'], find: () => $('.cb-preview'),
+    move: (dx, dy) => { L.pvY += dy; } },
+  { id: 'help', label: '도움말 줄 (위아래)', keys: ['helpY'], find: () => $('.cb-help'),
+    move: (dx, dy) => { L.helpY += dy; } },
   { id: 'fdice', label: '적 주사위 (위아래로)', keys: ['fdiceY', 'fdieSize'], find: () => $('.fdice'),
-    move: (dx, dy) => { L.fdiceY = clampL(L.fdiceY + dy, 0, 120); }, resize: (dw) => { L.fdieSize = clampL(L.fdieSize + dw, 22, 64); } },
-  { id: 'mydice', label: '내 주사위 (좌우=간격)', keys: ['diceSize', 'diceGap'], find: () => $('.cb-dice'),
-    move: (dx, dy) => { L.diceGap = clampL(L.diceGap + dx / 3, 0, 30); }, resize: (dw) => { L.diceSize = clampL(L.diceSize + dw, 40, 90); } },
+    move: (dx, dy) => { L.fdiceY = clampL(L.fdiceY + dy, 0, 120); }, resize: (dx, dy) => { L.fdieSize = clampL(L.fdieSize + dx, 22, 64); } },
+  { id: 'mydice', label: '내 주사위 (위아래=위치, 좌우=간격)', keys: ['diceY', 'diceSize', 'diceGap'], find: () => $('.cb-dice'),
+    move: (dx, dy) => { L.diceY += dy; L.diceGap = clampL(L.diceGap + dx / 3, 0, 30); }, resize: (dx, dy) => { L.diceSize = clampL(L.diceSize + dx, 40, 90); } },
   { id: 'hand', label: '손패 (위아래=높이, 좌우=펼침)', keys: ['cardW', 'cardH', 'handBottom', 'handMargin'], find: () => $('.cb-hand'),
     move: (dx, dy) => { L.handBottom -= dy; L.handMargin = clampL(L.handMargin - dx, 0, 260); },
-    resize: (dw) => { L.cardW = clampL(L.cardW + dw, 70, 190); L.cardH = Math.round(L.cardW * 162 / 118); } },
+    resize: (dx, dy) => { L.cardW = clampL(L.cardW + dx, 70, 190); L.cardH = Math.round(L.cardW * 162 / 118); } },
   { id: 'loot', label: '전리품 목록', keys: ['lootTop'], find: () => lootView ? $('.cb-loot') : null,
     move: (dx, dy) => { L.lootTop = clampL(L.lootTop + dy, 200, 700); } },
   { id: 'enemy', label: '몬스터 (위아래=영역, ⤡=크기)', keys: ['enemyH', 'artH', 'artHMulti'], find: () => $('.enemy-zone'),
     move: (dx, dy) => { L.enemyH = clampL(L.enemyH + dy, 160, 460); },
-    resize: (dw) => { if (multi) L.artHMulti = clampL(L.artHMulti + dw, 120, 360); else L.artH = clampL(L.artH + dw, 140, 420); } },
+    resize: (dx, dy) => { if (multi) L.artHMulti = clampL(L.artHMulti + dy, 120, 360); else L.artH = clampL(L.artH + dy, 140, 420); } },
 ];
 
 /* ---------- 선택·드래그 ---------- */
@@ -1618,7 +1640,7 @@ function leMove(e) {
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (!dx && !dy) return;
   drag.x = e.clientX; drag.y = e.clientY;
-  if (drag.mode === 'resize' && drag.item.resize) drag.item.resize(Math.abs(dx) >= Math.abs(dy) ? dx : dy);
+  if (drag.mode === 'resize' && drag.item.resize) drag.item.resize(dx, dy);
   else if (drag.item.move) drag.item.move(dx, dy);
   apply();
 }
@@ -1681,6 +1703,9 @@ const KEY_DESC = {
   endX: '턴 종료 오른쪽', endY: '턴 종료 아래',
   cardW: '카드 폭', cardH: '카드 높이', handBottom: '손패 내림(음수=아래로)', handMargin: '손패 좌우 여백', handMaxGap: '카드 간격 최대',
   lootTop: '전리품 시작 높이',
+  hpY: '체력바 위(위에서부터)', hpSide: '체력바 좌우 여백', hpH: '체력바 높이',
+  pvY: '미리보기 줄 위', diceY: '내 주사위 줄 위', helpY: '도움말 줄 위',
+  endW: '턴 종료 폭', endH: '턴 종료 높이',
 };
 function buildTable() {
   $('#val-table').innerHTML = '<tr><th>키</th><th>설명</th><th>값</th></tr>' + Object.keys(DEFAULTS).map(k => `

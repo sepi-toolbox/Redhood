@@ -22,6 +22,14 @@
     "handBottom": -22,
     "handMargin": 100,
     "handMaxGap": 58,
-    "lootTop": 430
+    "lootTop": 430,
+    "hpY": 386,
+    "hpSide": 12,
+    "hpH": 36,
+    "pvY": 424,
+    "diceY": 448,
+    "helpY": 516,
+    "endW": 150,
+    "endH": 46
   }
 }

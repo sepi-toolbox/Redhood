@@ -6,7 +6,7 @@ import json, datetime, re
 
 ROOT = '/home/claude/redhood'
 SITE = 'https://sepi-toolbox.github.io/Redhood'
-VERSION = 'v2.04'
+VERSION = 'v2.05'
 
 css = open(f'{ROOT}/css/style.css').read()
 css = css.replace("url('../assets/", f"url('{SITE}/assets/")
