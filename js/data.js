@@ -52,19 +52,26 @@ function validate() {
   for (const id of DB.act1.player.startDice) {
     if (!DB.diceById[id]) throw new Error(`act1.json: startDice에 없는 주사위 id "${id}"`);
   }
-  // v2.15 적 주사위: 눈 목록·눈별 능력
-  const FACE_OPS = new Set(['damage', 'bleed', 'armor', 'lifesteal', 'heal']);
+  // v2.17 적 주사위(눈 목록·개수)와 예고 행동(battleMoves) — 위력 = 남은 주사위 합
+  const MOVE_OPS = new Set(['damage', 'bleed', 'armor', 'lifesteal', 'heal', 'empower']);
   for (const e of DB.enemies) {
     const bd = e.battleDice;
     if (bd && bd.faces) {
-      if (!Array.isArray(bd.faces) || !bd.faces.every(f => Number.isInteger(f) && f >= 1 && f <= 9)) {
-        throw new Error(`enemies.json: ${e.id} battleDice.faces 는 1~9 정수 목록이어야 합니다`);
+      if (!Array.isArray(bd.faces) || !bd.faces.every(f => Number.isInteger(f) && f >= 1 && f <= 20)) {
+        throw new Error(`enemies.json: ${e.id} battleDice.faces 는 1~20 정수 목록이어야 합니다`);
       }
     }
-    for (const [f, a] of Object.entries(e.faceAbilities || {})) {
-      if (!FACE_OPS.has(a.op)) throw new Error(`enemies.json: ${e.id} 눈 ${f} 미지원 능력 "${a.op}"`);
-      if (bd && bd.faces && !bd.faces.includes(parseInt(f, 10))) {
-        throw new Error(`enemies.json: ${e.id} 눈 ${f} 능력이 있지만 faces 목록에 그 눈이 없습니다`);
+    if (e.faceAbilities) throw new Error(`enemies.json: ${e.id} faceAbilities 는 v2.17에서 폐기 — battleMoves 로 옮기세요`);
+    if (e.battleMoves) {
+      if (!Array.isArray(e.battleMoves) || !e.battleMoves.length) throw new Error(`enemies.json: ${e.id} battleMoves 는 비어있지 않은 목록이어야 합니다`);
+      const seen = new Set();
+      for (const m of e.battleMoves) {
+        if (!m.id || seen.has(m.id)) throw new Error(`enemies.json: ${e.id} battleMoves id 누락/중복 "${m.id || '?'}"`);
+        seen.add(m.id);
+        if (!m.name) throw new Error(`enemies.json: ${e.id}.${m.id} 행동 이름이 없습니다`);
+        if (!MOVE_OPS.has(m.op)) throw new Error(`enemies.json: ${e.id}.${m.id} 미지원 행동 "${m.op}"`);
+        if (m.weight !== undefined && !(m.weight > 0)) throw new Error(`enemies.json: ${e.id}.${m.id} weight 는 양수`);
+        if (m.mult !== undefined && !(m.mult > 0)) throw new Error(`enemies.json: ${e.id}.${m.id} mult 는 양수`);
       }
     }
   }

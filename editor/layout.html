@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REDHOOD 배치 편집기 — v2.17 기준</title>
+<link rel="stylesheet" href="https://sepi-toolbox.github.io/Redhood/assets/fonts/song-myung/index.css">
+<style id="game-css">
+/* REDHOOD v0.2 — 다크 페어리테일 · 주사위판 · 모바일 세로 전용 */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: #14100f url('https://sepi-toolbox.github.io/Redhood/assets/ui/tex_cloth.jpg') center / cover no-repeat; /* v0.26: 낡은 천 */
+  color: #e8dcc8;
+  font-family: 'Song Myung', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, serif; /* v0.31: 송명 — 고전 활판 명조 */
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* v0.82: 세로 전용 게임이므로 넓은 화면(태블릿·가로 모드)에서도 세로 기둥으로 잡아둔다.
+   폰에서는 그대로 100%, 넓어지면 520px 또는 화면 높이의 62%(폰 비율) 중 작은 쪽으로 묶인다.
+   양옆은 배경 천이 그대로 보인다. */
+#app {
+  height: 100dvh;
+  width: min(100%, 520px, 62dvh);
+  margin: 0 auto;
+  display: flex; flex-direction: column;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0, 0, 0, .7);
+}
+
+.screen {
+  flex: 1; display: flex; flex-direction: column;
+  /* v0.38: 안전영역은 topbar/bottombar가 처리 — 이중 적용으로 생기던 위아래 레터박스 제거 */
+  padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  min-height: 0;
+}
+.screen.center {
+  align-items: center; justify-content: center; gap: 14px; text-align: center;
+  padding: calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+}
+.hidden { display: none !important; }
+.error { color: #e05c4b; padding: 20px; }
+.loading { color: #9c8f7a; }
+
+/* ---------- 공용 ---------- */
+/* v0.25: 버튼 텍스쳐 — 어두운 나무판(기본)·붉은 옻칠판(주요), 9-슬라이스 */
+.btn {
+  border: solid transparent; border-width: 14px 26px; border-radius: 0;
+  border-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/btn_ghost.png') 85 150 fill stretch;
+  background: none; color: #e8dcc8;
+  font-size: 16px; padding: 0 2px; cursor: pointer;
+}
+.btn:active { filter: brightness(1.18); }
+.btn.primary {
+  border-image-source: url('https://sepi-toolbox.github.io/Redhood/assets/ui/btn_primary.png');
+  font-weight: 700; color: #f2e4c8; text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+}
+.btn.primary[disabled] { opacity: .4; }
+.btn.ghost { border-width: 11px 20px; color: #b8a98e; font-size: 14px; }
+
+.topbar, .bottombar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: rgba(16, 11, 9, .5); font-size: 14px; flex: none; /* v0.38: 천에 녹아드는 반투명 */
+}
+.topbar { padding-top: calc(8px + env(safe-area-inset-top)); }
+.bottombar { padding-bottom: calc(8px + env(safe-area-inset-bottom)); gap: 8px; }
+.hp { color: #e05c4b; font-weight: 700; }
+.relic-bar { font-size: 16px; letter-spacing: 2px; }
+
+/* ---------- 타이틀 ---------- */
+.title-screen { align-items: center; justify-content: center; gap: 12px; padding: 24px; position: relative; }
+/* v0.99: 로비 배경 — 전투 배경과 달리 화면 전체를 덮는다.
+   그림 아래쪽에 등불을 든 아이가 있어서 바닥을 살려야 하므로 세로 하단을 기준으로 맞춘다.
+   글자가 등불빛 위에 올라가 안 읽히는 걸 막으려고 위아래에 어두운 겹을 한 장 깐다. */
+.title-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(16,12,10,.72) 0%, rgba(16,12,10,.34) 34%, rgba(16,12,10,.30) 58%, rgba(16,12,10,.80) 88%, rgba(16,12,10,.92) 100%),
+    url('https://sepi-toolbox.github.io/Redhood/assets/bg/bg_title.jpg');
+  background-size: 100% 100%, cover;
+  background-position: center, center bottom;
+  filter: brightness(1.18);
+}
+.title-screen > *:not(.title-bg) { position: relative; z-index: 1; }
+.title-art { font-size: 40px; }
+.logo { width: min(330px, 86%); filter: drop-shadow(0 0 26px rgba(201, 48, 47, .28)); } /* v0.28 로고 아트 */
+.title-screen h1 { font-size: 42px; letter-spacing: 6px; color: #c9302f; text-shadow: 0 0 24px rgba(201, 48, 47, .35); }
+.subtitle { color: #b3a48b; margin-bottom: 10px; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.hint { font-size: 11.5px; color: #8a7c68; text-shadow: 0 1px 3px rgba(0,0,0,.85); }
+.hint.notice { margin-top: 6px; color: #7b6f5d; letter-spacing: .2px; } /* v0.76: 로비 AI 제작 안내 */
+
+/* ---------- 맵: 양피지 ---------- */
+.map-scroll { flex: 1; overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; }
+/* v0.29: 양피지가 내용과 함께 스크롤되는 긴 두루마리 — 배경을 캔버스에 부착 */
+.map-scroll.parchment {
+  margin: 10px 12px; border-radius: 6px; padding: 0;
+  background: transparent;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .55);
+  color: #d9c8a6;
+  overflow-x: hidden; /* 좌우 스크롤 금지 — 상하 전용 */
+}
+.map-row { display: flex; align-items: center; gap: 10px; opacity: .3; position: relative; }
+.map-row.next { opacity: 1; }
+.map-row.done { opacity: .62; }
+.floor-num { width: 24px; text-align: right; color: #7a5c38; font-size: 12.5px; font-weight: 700; flex: none; font-style: italic; }
+/* v0.25: 노드 = 조각 나무 팻말 (위 오목 원반 = 메달 아이콘 자리, 아래 띠 = 라벨) */
+.map-node {
+  flex: 1; max-width: 190px; margin: 0 auto; position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/node_plate.png') center / 100% 100% no-repeat;
+  border: none; border-radius: 0; box-shadow: none;
+  aspect-ratio: 520 / 318;
+  color: #ead9b0; font-size: 21px; padding: 4% 8% 26%; /* 아이콘은 위 오목 원반 중심으로 */
+}
+.map-node small {
+  position: absolute; bottom: 20%; left: 0; right: 0; /* 라벨은 아래 나무 띠 안으로 */
+  font-size: 10.5px; color: #e2cfa4; font-weight: 700; text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
+}
+.map-row.next .map-node { cursor: pointer; filter: drop-shadow(0 0 7px rgba(190, 60, 45, .75)) brightness(1.07); }
+.map-row.next .map-node:active { filter: brightness(1.22); }
+.map-row.done .map-node, .map-row.future .map-node { pointer-events: none; }
+.map-row.done .map-node { filter: grayscale(.5) brightness(.85); }
+
+/* 잉크 길 — 지나온 길은 진하게, 다음 길은 그려지는 중, 그 너머는 흐릿한 밑그림 */
+.trail {
+  width: 4px; height: 24px; margin: 2px auto; flex: none;
+  background-image: repeating-linear-gradient(180deg, #5a3f28 0 5px, transparent 5px 11px);
+}
+.trail.t-done { opacity: .8; }
+.trail.t-future { opacity: .14; }
+@keyframes inkDraw {
+  0% { clip-path: inset(100% 0 0 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+.trail.t-drawing { opacity: .8; animation: inkDraw .8s ease-out .15s backwards; }
+
+/* ---------- v0.70: 표(그리드) 기반 분기 지도 — 좌표를 직접 찍지 않는다 ---------- */
+.map-grid {
+  position: relative; /* 링크 SVG의 기준 */
+  display: flex; flex-direction: column; flex: none; /* 내용만큼 늘어나고 위에서부터 스크롤된다 */
+  padding: 20px 10px 10px;
+  background: #1a130e url('https://sepi-toolbox.github.io/Redhood/assets/bg/bg_map.jpg') center / cover no-repeat;
+  border-radius: 6px;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, .5);
+  min-height: 100%;
+}
+.map-row2 {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  align-items: center; justify-items: center;
+  height: 82px; flex: none;
+}
+.map-links { position: absolute; left: 0; top: 0; pointer-events: none; }
+.map-links .ink {
+  fill: none; stroke: #d9c8a6; stroke-width: 2.6; stroke-linecap: round;
+  stroke-dasharray: .5 8; opacity: .45;
+}
+.map-links .ink-done { opacity: .8; stroke: #e8dcc8; }
+/* 다음 길 강조 — 붉은 잉크가 흐르며 빛난다 */
+.map-links .ink-next {
+  opacity: 1; stroke: #ff6b52; stroke-width: 3.2;
+  filter: drop-shadow(0 0 4px rgba(224, 92, 75, .9));
+  animation: inkFlow 1.1s linear infinite;
+}
+@keyframes inkFlow { to { stroke-dashoffset: -17; } }
+.map-node2 {
+  position: relative; /* 그리드 칸 안에 그대로 놓인다 — absolute 좌표 없음 */
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; padding: 0;
+  width: 46px; height: 46px;
+  color: #6a4c33; cursor: default;
+}
+.map-node2.boss-node { width: 60px; height: 60px; }
+/* 낙서 아이콘 가독성 — 어두운 후광으로 양피지에서 분리 */
+.map-node2::before {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 58px; height: 58px;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(circle, rgba(10, 6, 4, .5) 0%, rgba(10, 6, 4, .28) 55%, transparent 72%);
+  pointer-events: none;
+}
+.map-node2 .ico-node { width: 42px; height: 42px; display: block; position: relative; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .7)); }
+.map-node2.boss-node .ico-node { width: 56px; height: 56px; }
+.map-node2.reachable { cursor: pointer; filter: drop-shadow(0 0 6px rgba(190, 60, 45, .55)); }
+.map-node2.reachable:active { filter: brightness(1.25); }
+.map-node2.trodden { opacity: .85; filter: sepia(.25); }
+.map-node2.missed { opacity: .28; filter: grayscale(.7); }
+.map-node2.ahead { opacity: .85; }
+
+/* v0.86: 지도 상·하단 — 헤더는 [런 포기][유물][코인], 하단은 [가방][체력바 중앙] */
+.topbar.map-top { gap: 10px; }
+.btn.tiny { border-width: 9px 13px; font-size: 12.5px; }
+/* v0.90: 지도 헤더의 작은 음소거 토글 */
+.mute-mini {
+  background: none; border: none; padding: 2px 4px; font-size: 16px;
+  color: #b8a98e; cursor: pointer; line-height: 1; flex: none;
+}
+.mute-mini:active { filter: brightness(1.3); }
+.player-bar.map-foot {
+  justify-content: flex-start; padding-left: 10px; padding-right: 10px;
+}
+/* 체력바는 버튼 폭과 무관하게 화면 정중앙에 고정 */
+.player-bar.map-foot .hp-gauge {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  width: min(214px, 54%); flex: none; max-width: none;
+}
+
+.you-marker {
+  flex: none; font-size: 19px;
+  filter: drop-shadow(1px 2px 2px rgba(60, 35, 15, .5));
+  animation: youBob 1.6s ease-in-out infinite alternate;
+}
+@keyframes youBob { 0% { transform: translateY(0); } 100% { transform: translateY(-3px); } }
+.start-row { opacity: .85; justify-content: flex-start; padding: 4px 0 2px; }
+.start-label { font-size: 12.5px; color: #6a4c33; font-weight: 700; font-style: italic; }
+
+/* ---------- 전투: 적 (다중) — 컴팩트 (족보·체력 영역 우선) ---------- */
+/* v0.55: 적 그림은 크게 유지하되 레이아웃 공간은 최소 — 그림이 주사위 쪽으로 넘쳐 겹친다 */
+.enemy-zone {
+  flex: none; display: flex; justify-content: center; align-items: flex-start; gap: 10px;
+  padding: 4px 8px 0; height: 221px; position: relative; overflow: visible; z-index: 0; /* v0.68: 고정 높이 — 아트 유무·마리 수와 무관하게 아래 영역이 절대 변하지 않는다 */
+  background: radial-gradient(ellipse at 50% 0%, rgba(34, 26, 21, .8) 0%, rgba(20, 16, 15, 0) 75%);
+}
+.enemy {
+  position: relative; overflow: visible;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: transparent; border: none; border-radius: 12px;
+  color: #e8dcc8; padding: 4px 4px 0; max-width: 100%; flex: 0 1 auto;
+}
+.enemy.targeted::after { /* 표적 강조 — 그림 뒤 붉은 후광 */
+  content: ''; position: absolute; left: 50%; bottom: 4px; width: 78%; height: 60%;
+  transform: translateX(-50%); border-radius: 50%; pointer-events: none; z-index: -1;
+  background: radial-gradient(ellipse, rgba(201, 48, 47, .3) 0%, transparent 70%);
+}
+.enemy.targeted .enemy-name { color: #f0d9b5; }
+.target-pin {
+  position: absolute; top: -2px; left: 50%;
+  color: #c9302f; font-size: 13px; text-shadow: 0 1px 2px #000;
+  margin-left: calc(var(--cb-pinX, 0px) - 6px); margin-top: var(--cb-pinY, 0px);
+  animation: youBob 1.2s ease-in-out infinite alternate;
+  opacity: 0; transition: opacity .15s; /* v0.58: 표시 전환을 재렌더 없이 */
+}
+.enemy.targeted .target-pin { opacity: 1; }
+.intent { font-size: 15px; font-weight: 700; color: #e8b64b; }
+.intent small { color: #9c8f7a; font-weight: 400; font-size: 11px; }
+.enemy-art { filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .6)); }
+/* v0.68: 아트가 없는 몬스터의 이모지 대체 — 그림과 똑같은 상자를 차지해야 아래 영역이 흔들리지 않는다.
+   (span으로 한정: img에도 .enemy-art 클래스가 붙어 있어 범위를 좁히지 않으면 그림까지 망가진다) */
+span.enemy-art {
+  display: block; text-align: center;
+  height: 216px; line-height: 216px; font-size: 146px;
+  margin-bottom: -78px;
+}
+/* v0.30: 몬스터 전신 아트 — 이모지 자리 대체 (v0.35: 배경 위에서 도드라지게 그림자 강화) */
+.enemy-art-img {
+  height: 216px; width: auto; max-width: 100%; object-fit: contain; /* 크기 유지 */
+  margin-bottom: -78px;  /* v0.55: 레이아웃은 138px만 차지, 나머지는 아래로 넘침 */
+  filter: drop-shadow(0 6px 11px rgba(0, 0, 0, .9)) drop-shadow(0 0 15px rgba(0, 0, 0, .55));
+  pointer-events: none;
+}
+/* v0.69: 여러 마리일 때만 폭을 반으로 — 한 마리면 가로로 넓은 그림도 잘리거나 줄어들지 않는다 */
+.enemy-zone.multi .enemy { max-width: 50%; }
+.enemy-zone.multi .enemy-art-img { height: 186px; margin-bottom: -62px; }
+/* v0.69: 격에 따라 그림만 키운다 — 레이아웃이 차지하는 높이(138px)는 그대로라 아래 영역은 불변 */
+.enemy.t-elite .enemy-art-img { height: 234px; margin-bottom: -96px; }
+.enemy.t-boss .enemy-art-img { height: 254px; margin-bottom: -116px; }
+.enemy-zone.multi .enemy.t-elite .enemy-art-img { height: 202px; margin-bottom: -78px; }
+.enemy-zone.multi .enemy.t-boss .enemy-art-img { height: 218px; margin-bottom: -94px; }
+.enemy-zone.multi span.enemy-art { height: 186px; line-height: 186px; font-size: 124px; margin-bottom: -62px; }
+.enemy-zone.multi .enemy-name { font-size: 11.5px; }
+/* v0.74: 힘을 끌어올리는 턴은 예고가 붉게 달아오른다 */
+/* v1.08: 국면 전환은 붉게 번쩍이고, 파쇄로 무너진 예고는 흐리게 — 왜 바뀌었는지 한눈에 보여야 한다 */
+.enemy .intent.phase-shift { color: #ff5f4a; text-shadow: 0 0 12px rgba(224, 60, 45, .9); font-weight: 700; }
+.enemy .intent.broken { color: #8fa5c4; text-shadow: 0 0 8px rgba(120, 150, 190, .6); }
+/* v1.03: 강화 행동은 이제 평범한 행동 하나지만, 예고에서만큼은 눈에 띄어야 한다 */
+.enemy .intent.surging { color: #ff8a6b; text-shadow: 0 0 8px rgba(224, 92, 75, .7); }
+/* v0.75: 연계로 확정된 다음 수 — 피할 수 없다는 걸 색으로 알린다 */
+.enemy .intent.chained { color: #e8b64b; text-shadow: 0 0 8px rgba(232, 182, 75, .6); }
+/* v0.81: 배경은 화면 위쪽 띠에만 그린다.
+   전체에 깔면 그림의 아래쪽(바닥·물가·마룻바닥)이 족보 영역에 통째로 가려져 하늘만 보였다.
+   띠 안에서 cover로 채우고 세로 55% 지점을 잡아, 위 비네트와 아래 검정을 잘라내고 알맹이만 보여준다.
+   폭이 다른 기기에서도 자동으로 맞는다. */
+.battle-screen { background-color: #14100f; }
+.bg-layer {
+  position: absolute; left: 0; right: 0; top: 0; height: 470px; z-index: 0;
+  background-size: 100% 100%, cover;
+  background-position: center, center 55%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  /* v0.83: 그림 자체가 어둡게 그려져 있어서, 누르는 오버레이를 옅게 하고 밝기를 들어올린다.
+     아래 끝을 #0f0c0b로 두면 밝기 보정 후 정확히 #14100f가 되어 이음매가 안 보인다. */
+  filter: brightness(1.34) saturate(1.06);
+}
+/* 층 순서를 명시해 둔다 — 적 그림이 아래로 넘쳐도 주사위·굴림 버튼·족보는 항상 그 위 */
+.battle-screen > *:not(.bg-layer) { position: relative; z-index: 1; }
+.battle-screen > .enemy-zone { z-index: 1; }
+.battle-screen > .mid-line,
+.battle-screen > .dice-zone,
+.battle-screen > .roll-bar,
+.battle-screen > .hint-line,
+.battle-screen > .sheet-zone,
+.battle-screen > .player-bar { z-index: 2; }
+
+/* 적 공격 연출 — 움찔(윈드업) 후 플레이어 쪽으로 내려찍기 */
+@keyframes enemyAttack {
+  0%   { transform: translateY(0) scale(1); }
+  28%  { transform: translateY(-12px) scale(.95); }
+  46%  { transform: translateY(-12px) scale(.97); }
+  60%  { transform: translateY(34px) scale(1.24); filter: brightness(1.35); }
+  74%  { transform: translateY(28px) scale(1.18); }
+  100% { transform: translateY(0) scale(1); filter: brightness(1); }
+}
+.enemy.attacking { animation: enemyAttack .72s cubic-bezier(.45, 0, .3, 1); z-index: 5; }
+/* 준비 행동 — 은은한 충전 발광 */
+@keyframes enemyCharge {
+  0%, 100% { filter: brightness(1); transform: scale(1); }
+  50% { filter: brightness(1.5) drop-shadow(0 0 10px rgba(232,182,75,.7)); transform: scale(1.07); }
+}
+.enemy.charging { animation: enemyCharge .72s ease-in-out; }
+.enemy-name { font-size: 13px; color: #cbbfa8; }
+/* v0.39: 티어별 몬스터 체력바 틀 — 일반(나무)/정예(무쇠 가시)/보스(흑금 해골) */
+.enemy .bar { position: relative; width: 128px; height: 7px; background: #33241d; border-radius: 3px; overflow: hidden; }
+.enemy .bar i {
+  display: block; height: 100%; transition: width .25s;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/gauge_red.jpg') left center / auto 100% repeat-x; /* v0.41 */
+}
+.enemy .bar.t-normal, .enemy .bar.t-elite, .enemy .bar.t-boss {
+  background: none; border-radius: 0; overflow: visible; border: solid transparent;
+}
+.enemy .bar.t-normal::before, .enemy .bar.t-elite::before, .enemy .bar.t-boss::before {
+  content: ''; position: absolute; inset: 0; background: #2a1d17; z-index: -1;
+}
+.enemy .bar.t-normal { width: 128px; height: 18px; border-width: 6px 5px 5px 5px; border-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/hpbar_normal.png') 33 29 31 29 stretch; }
+.enemy .bar.t-elite { width: 136px; height: 22px; border-width: 8px 9px 8px 9px; border-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/hpbar_elite.png') 58 65 58 65 stretch; }
+.enemy .bar.t-boss { width: 154px; height: 22px; border-width: 7px 11px 7px 18px; border-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/hpbar_boss.png') 49 77 49 132 stretch; }
+.enemy-hp { font-size: 11.5px; color: #9c8f7a; }
+.mid-line { flex: none; min-height: 18px; text-align: center; padding: 0 12px; position: relative; z-index: 2; }
+.last-result { font-size: 12px; color: #e8b64b; }
+.last-result b { font-size: 14px; }
+
+/* 피격 연출 */
+@keyframes enemyShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px) rotate(-2deg); }
+  45% { transform: translateX(4px) rotate(1.5deg); }
+  70% { transform: translateX(-3px); }
+}
+.enemy.hit { animation: enemyShake .38s ease-out; }
+@keyframes slashSweep {
+  0% { transform: rotate(var(--sl, -32deg)) translateX(-130%); opacity: 0; }
+  15% { opacity: 1; }
+  60% { transform: rotate(var(--sl, -32deg)) translateX(130%); opacity: 1; }
+  100% { transform: rotate(var(--sl, -32deg)) translateX(130%); opacity: 0; }
+}
+.slash {
+  position: absolute; left: -10%; top: var(--fx-y, 45%); width: 120%; height: 3px;
+  background: linear-gradient(90deg, transparent, #fff 30%, #ff6b5e 55%, transparent);
+  border-radius: 2px; pointer-events: none;
+  animation: slashSweep .42s ease-out forwards;
+}
+.slash.rev { --sl: 32deg; }
+.slash.wide { height: 7px; filter: blur(.4px); background: linear-gradient(90deg, transparent, #ffe9b0 30%, #ff8a5e 55%, transparent); }
+
+/* 명중 파문 (포카드·풀하우스·야찌) */
+@keyframes ringOut {
+  0%   { transform: translate(-50%, -50%) scale(.25); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
+}
+.impact-ring {
+  position: absolute; left: var(--fx-x, 50%); top: var(--fx-y, 50%); width: 86px; height: 86px;
+  border-radius: 50%; pointer-events: none;
+  animation: ringOut .5s ease-out forwards;
+}
+.impact-ring.gold { border: 3px solid rgba(232, 182, 75, .9); box-shadow: 0 0 14px rgba(232, 182, 75, .6); }
+.impact-ring.red { border: 4px solid rgba(201, 48, 47, .9); box-shadow: 0 0 14px rgba(201, 48, 47, .6); }
+
+/* 적진을 가로지르는 파도 (스트레이트 전체 공격) */
+@keyframes shockSweep {
+  0%   { transform: translateX(-110%) skewX(-14deg); opacity: 0; }
+  18%  { opacity: 1; }
+  100% { transform: translateX(110%) skewX(-14deg); opacity: 0; }
+}
+.shockwave {
+  position: absolute; left: 0; top: 18%; width: 100%; height: 64%;
+  pointer-events: none; z-index: 28;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 234, 170, .28) 35%, rgba(255, 244, 210, .75) 50%, rgba(255, 150, 90, .3) 65%, transparent 100%);
+  animation: shockSweep .5s ease-out forwards;
+}
+.shockwave.big { top: 8%; height: 84%; animation-duration: .55s; }
+
+/* 화면 섬광 (야찌·라지 스트레이트) */
+@keyframes flashVeil {
+  0% { opacity: 0; } 22% { opacity: 1; } 100% { opacity: 0; }
+}
+.flash-veil {
+  position: absolute; inset: 0; z-index: 45; pointer-events: none;
+  background: rgba(255, 248, 225, .82);
+  animation: flashVeil .36s ease-out forwards;
+}
+.dmg-float.big { font-size: 27px; color: #ffd257; }
+@keyframes dmgFloat {
+  0% { transform: translateY(4px) scale(.8); opacity: 0; }
+  25% { transform: translateY(-4px) scale(1.15); opacity: 1; }
+  100% { transform: translateY(-26px) scale(1); opacity: 0; }
+}
+.dmg-float {
+  position: absolute; top: calc(var(--fx-y, 34%) - 46px); left: var(--fx-x, 50%); margin-left: -18px;
+  font-size: 19px; font-weight: 800; color: #ff6b5e;
+  text-shadow: 0 1px 3px #000; pointer-events: none;
+  animation: dmgFloat .65s ease-out forwards;
+}
+
+/* 처치 연출 — 베인 뒤 무너져 내리며 잿빛으로 스러짐 */
+@keyframes enemyDie {
+  0%   { transform: translateY(0) rotate(0); opacity: 1; filter: grayscale(0); }
+  30%  { transform: translateY(2px) rotate(6deg); opacity: .9; filter: grayscale(.6); }
+  100% { transform: translateY(26px) rotate(14deg); opacity: 0; filter: grayscale(1); }
+}
+.enemy.dying { animation: enemyDie .6s ease-in .05s forwards; pointer-events: none; }
+
+/* ---------- 공격 시퀀스: 주사위 전체 발광 → 타격 ---------- */
+.battle-screen { position: relative; overflow: hidden; }
+/* v0.40: 발광 — 백금 섬광 대신 잿불처럼 은은히 달아오르는 톤 (받침 회전 없음) */
+@keyframes dieFlare {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.28) sepia(.12) drop-shadow(0 0 5px rgba(214, 106, 56, .5)); }
+}
+.die.flare { animation: dieFlare .22s ease-in-out 2 alternate; }
+/* 중급 (트리플·포카드·풀하우스·스몰) */
+@keyframes dieFlareMid {
+  0%, 100% { filter: brightness(1.04); transform: scale(1); }
+  50% { filter: brightness(1.45) sepia(.16) drop-shadow(0 0 9px rgba(224, 122, 58, .65)); transform: scale(1.04); }
+}
+.die.flare.mid { animation: dieFlareMid .2s ease-in-out 3 alternate; }
+/* 최상급 (라지·야찌) */
+@keyframes dieFlareHigh {
+  0% { filter: brightness(1.08); transform: scale(1); }
+  45% { filter: brightness(1.65) sepia(.2) drop-shadow(0 0 13px rgba(232, 140, 66, .8)); transform: scale(1.07); }
+  100% { filter: brightness(1.2); transform: scale(1.02); }
+}
+.die.flare.high { animation: dieFlareHigh .19s ease-in-out 4 alternate; }
+@keyframes explode {
+  0%   { transform: translate(-50%, -50%) scale(.25); opacity: 1; }
+  60%  { transform: translate(-50%, -50%) scale(1.55); opacity: .85; }
+  100% { transform: translate(-50%, -50%) scale(2.1); opacity: 0; }
+}
+.explosion {
+  position: absolute; z-index: 29; width: 110px; height: 110px; pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 240, 190, .95) 0%, rgba(232, 150, 60, .7) 38%, rgba(201, 48, 47, .45) 62%, transparent 78%);
+  animation: explode .46s ease-out forwards;
+}
+@keyframes microShake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-3px, 2px); }
+  55% { transform: translate(3px, -2px); }
+  80% { transform: translate(-2px, -1px); }
+}
+.micro-shake { animation: microShake .3s linear; }
+
+/* ---------- 피격: 화면 흔들림 + 붉은 블러 + 피해 수치 ---------- */
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  12% { transform: translate(-6px, 3px); }
+  30% { transform: translate(5px, -4px); }
+  48% { transform: translate(-4px, -2px); }
+  66% { transform: translate(3px, 3px); }
+  84% { transform: translate(-2px, 1px); }
+}
+.battle-screen.screen-shake { animation: screenShake .5s linear; }
+@keyframes hurtVeil {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.hurt-veil {
+  position: absolute; inset: 0; z-index: 40; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 55%, transparent 38%, rgba(180, 30, 22, .38) 78%, rgba(150, 18, 12, .55) 100%);
+  backdrop-filter: blur(1.2px);
+  -webkit-backdrop-filter: blur(1.2px);
+  animation: hurtVeil .62s ease-out forwards;
+}
+@keyframes pdmgFloat {
+  0% { transform: translate(-50%, 8px) scale(.85); opacity: 0; }
+  14% { transform: translate(-50%, -4px) scale(1.18); opacity: 1; }
+  70% { transform: translate(-50%, -26px) scale(1); opacity: .95; }
+  100% { transform: translate(-50%, -44px) scale(.98); opacity: 0; }
+}
+.player-bar { position: relative; }
+.pdmg-float {
+  position: absolute; left: 50%; top: -16px; z-index: 41;
+  font-size: 22px; font-weight: 800; color: #ff5546;
+  text-shadow: 0 1px 4px #000; pointer-events: none;
+  animation: pdmgFloat 2s ease-out forwards;
+}
+
+/* 플레이어 사망 — 붉은 장막 */
+@keyframes deathVeil {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.death-veil {
+  position: fixed; inset: 0; z-index: 60; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 85%, rgba(155, 20, 15, .85) 0%, rgba(20, 5, 4, .95) 75%);
+  animation: deathVeil .9s ease-in forwards;
+}
+
+/* ---------- 전투: 주사위 ---------- */
+.dice-zone {
+  flex: none; display: flex; justify-content: center; gap: 8px; padding: 8px 12px 4px;
+  position: relative; z-index: 2; /* v0.55: 넘쳐 내려온 적 그림 위로 */
+}
+.die {
+  width: 62px; height: 70px; border-radius: 13px;
+  background: #efe6d5; color: #1b1512; border: 2px solid #4a3b30;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+}
+.die .pip { font-size: 42px; line-height: 1; }
+.die small { /* v0.40: 라벨은 오버레이 — 주사위가 받침 정중앙에 오도록 */
+  position: absolute; bottom: 1px; left: 0; right: 0; text-align: center;
+  font-size: 10px; font-weight: 700; color: #ff8d7a; height: auto; letter-spacing: -.2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .7);
+}
+/* 다시 굴릴 주사위로 표시된 상태 */
+.die.mark-reroll {
+  border-color: #c9302f; border-style: dashed;
+  box-shadow: 0 0 0 2px rgba(201, 48, 47, .35);
+  opacity: .92;
+}
+.die.mark-reroll .pip-art { transform: translateY(-4px) rotate(var(--tilt, 0deg)); } /* 그림만 살짝 들림 */
+/* v0.42: 선택한 족보의 구성 주사위 — 은은한 금빛 기운 */
+.die.combo-hint { filter: brightness(1.14); } /* v0.59: 발광 없이 받침 밝기만 */
+.die.gold { background: #f5d97a; border-color: #b08948; }
+.die.special { background: #d9d2e8; }
+.die.blank { background: #241c18; border-style: dashed; border-color: #3c2f26; }
+
+/* 굴림 연출 — 낙하하며 구르는 텀블링 (개별 delay/duration은 JS가 부여) */
+@keyframes diceTumble {
+  0%   { transform: translateY(-16px) rotate(-16deg) scale(1.07); }
+  22%  { transform: translateY(3px)  rotate(9deg)  scale(.96, .9); }
+  40%  { transform: translateY(-12px) rotate(21deg) scale(1.05); }
+  58%  { transform: translateY(1px)  rotate(-7deg) scale(.97, .93); }
+  76%  { transform: translateY(-7px) rotate(-18deg) scale(1.03); }
+  100% { transform: translateY(-15px) rotate(12deg) scale(1.06); }
+}
+.die.spinning .pip-art { animation: diceTumble .4s linear infinite alternate; }
+.die.spinning .pip { opacity: .5; filter: blur(0.6px); }
+
+/* 착지 — 떨어져 눌렸다가(스쿼시) 튀어오르고 기울어진 채 멈춤 */
+@keyframes diceLand {
+  0%   { transform: translateY(-20px) rotate(var(--tilt, 0deg)) scale(1.16); }
+  38%  { transform: translateY(3px)   rotate(var(--tilt, 0deg)) scale(1.1, .82); }
+  62%  { transform: translateY(-7px)  rotate(var(--tilt, 0deg)) scale(.96, 1.05); }
+  82%  { transform: translateY(1px)   rotate(var(--tilt, 0deg)) scale(1.02, .97); }
+  100% { transform: translateY(0)     rotate(var(--tilt, 0deg)) scale(1); }
+}
+.die.landed .pip-art { animation: diceLand .32s cubic-bezier(.34, 1.2, .64, 1); }
+
+.roll-bar { flex: none; display: flex; justify-content: center; padding: 4px 14px 0; position: relative; z-index: 2; } /* v0.81: 넘쳐 내려온 적 그림 위로 */
+.roll-btn { min-width: 170px; font-size: 17px; }
+.hint-line { flex: none; text-align: center; font-size: 11.5px; color: #b08948; min-height: 17px; padding: 3px 12px 4px; position: relative; z-index: 2; }
+/* v0.64: 족보 선택 시 뜨는 설명 — 설명은 밝게, 확정 안내는 눌러서 */
+.hint-desc { color: #e8b64b; font-weight: 700; }
+.hint-confirm { color: #7e6a4c; font-size: 10.5px; }
+.upper-meter { font-size: 12px; color: #e8b64b; flex: none; }
+.aoe-tag { color: #c9302f; font-size: 10px; font-weight: 700; }
+
+/* ---------- 하단 중앙 플레이어 HP 게이지 ---------- */
+.player-bar {
+  flex: none; display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 8px 14px calc(10px + env(safe-area-inset-bottom));
+  background: #1b1512; border-top: 1px solid #2c221c;
+}
+.pb-side { width: 52px; text-align: center; font-size: 13px; color: #e8b64b; flex: none; }
+/* v0.39: 플레이어 체력바 — 하트·해골 나무틀 (9-슬라이스, 중앙은 게임이 채움) */
+.hp-gauge {
+  position: relative; flex: 1; max-width: 300px; height: 36px;
+  background: none; border-radius: 0; overflow: visible;
+  border: solid transparent; border-width: 13px 25px 12px 26px; /* v0.41.1: 창 실측 정합 */
+  border-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/hpbar_player.png') 54 107 51 113 stretch;
+}
+.hp-gauge::before { /* 창 안 어두운 바닥 */
+  content: ''; position: absolute; inset: 0; background: #2a1d17; z-index: -1;
+}
+.hp-fill {
+  height: 100%; transition: width .3s;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/gauge_red.jpg') left center / auto 100% repeat-x; /* v0.41: 핏빛 물감 텍스쳐 — 줄면 오른쪽부터 잘림 */
+}
+/* v1.14 독·출혈: 체력 끝자락에 '곧 빠질 몫'을 초록으로 겹친다 — 방어도와 반대쪽으로 붙는다 */
+.hp-dot {
+  position: absolute; top: 0; bottom: 0; z-index: 1;
+  background: linear-gradient(#5f9b46, #3d6b2c);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, .35);
+  border-right: 1px solid rgba(0, 0, 0, .35);
+  transition: width .3s, left .3s;
+}
+.hp-text .dot-num { color: #a8dc8c; font-size: 11.5px; }
+/* LoL식 방어도: HP 구간 끝에 회백색 실드 세그먼트가 겹쳐 붙는다 */
+.hp-shield {
+  position: absolute; top: 0; bottom: 0;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/gauge_shield.jpg') left center / auto 100% repeat-x; /* v0.41: 잿빛 물감 실드 */
+  border-left: 1px solid rgba(0, 0, 0, .35);
+  transition: width .3s, left .3s;
+}
+.hp-text {
+  position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: 12.5px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px #000;
+}
+.shield-num { font-size: 11px; color: #efece4; }
+@keyframes hurtFlash {
+  0%, 100% { background: #1b1512; }
+  30% { background: #4a1512; }
+}
+.player-bar.hurt { animation: hurtFlash .5s ease-out; }
+
+/* ---------- 전투: 족보 시트 ---------- */
+.sheet-zone {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column;
+  gap: 6px; padding: 10px 14px; /* v0.63: 좌우 여백 대칭 — 메달은 종이 밖으로 살짝만 걸친다 */
+  background: #171210 url('https://sepi-toolbox.github.io/Redhood/assets/ui/tex_wood.jpg') center / cover; /* v0.26: 나무 탁자 */
+  border-top: 1px solid #2c221c;
+}
+.sheet-zone.dim { opacity: .45; }
+/* v0.57: 줄 UI — [원형 아이콘][이름/종류][값]. 아이콘이 종이 왼쪽으로 튀어나온다 */
+.sheet-row {
+  flex: none; display: flex; align-items: center; gap: 10px;
+  border: solid transparent; border-width: 11px 17px; border-radius: 0;
+  border-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/paper_row.png') 55 92 fill stretch;
+  background: none; position: relative;
+  color: #3a2a1c; padding: 1px 0; cursor: pointer; font-size: 14.5px;
+}
+.row-icon {
+  margin-left: -20px; position: relative; z-index: 1;
+  width: 44px; height: 44px; flex: none; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #3b2c22, #1c1512 70%);
+  border: 2px solid #6b4f38;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .55), inset 0 1px 3px rgba(255, 236, 200, .12);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.row-icon .row-ico-img { width: 76%; height: 76%; object-fit: contain; }
+.row-icon .row-ico-tmp { font-size: 21px; font-weight: 700; color: #d8c39b; line-height: 1; }
+.row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; text-align: left; }
+.sheet-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-row .sheet-preview { flex: none; min-width: 40px; text-align: right; font-weight: 700; color: #8f2a20; font-size: 20px; padding-right: 2px; }
+.sheet-row .lv { color: #8a6516; font-size: 11px; }
+.cat-tag { color: #8a7d68; font-size: 10.5px; font-weight: 400; }
+.sheet-row .cat-tag { color: #7a6850; }
+/* 등급 4체계 — 종이 위 이름색: common 갈색 / uncommon 청색 / rare 보라 / epic 금색 */
+.sheet-row.t-uncommon .sheet-name { color: #2e5876; }
+.sheet-row.t-rare .sheet-name { color: #5d3f86; }
+.sheet-row.t-epic .sheet-name { color: #8a6516; }
+/* v0.89: 족보 줄은 등급을 '판 그림'이 말한다 — 글자색은 통일해 어떤 판 위에서도 같게 읽힌다 */
+.sheet-row.combo-row .sheet-name { color: #3a2a1c; }
+/* v0.94: 판마다 바탕 밝기가 달라 어떤 판에서는 짙은 글자가 묻힌다.
+   글자 아래에 밝은 1px 양각을 깔아 중간 톤 판(가죽·벨벳·점판암)에서도 획이 떠 보이게 한다. */
+.sheet-row.combo-row.has-plate .sheet-name,
+.sheet-row.combo-row.has-plate .cat-tag { text-shadow: 0 1px 0 rgba(255, 244, 218, .5); }
+/* 종류 꼬리표는 #7a6850이라 밝은 판 위에서 대비가 2.4:1까지 떨어졌다. 한 단계 낮춰 3.7:1로 올린다. */
+.sheet-row.combo-row.has-plate .cat-tag { color: #5f5140; }
+.sheet-row.selected { filter: brightness(1.12) saturate(1.06); } /* v0.59: 발광 제거, 배경만 밝게 */
+.sheet-row.used { opacity: .32; filter: grayscale(.6); }
+.sheet-row.used .sheet-preview { color: #6f6353; }
+/* ==========================================================================
+   v1.41 족보판 — 여덟 자리를 두 칸 × 네 줄로
+   한 줄씩(A)은 8개로도 줄 높이가 39px(844) · 31px(780) 밖에 안 나와 손가락이
+   못 짚는다. 두 칸으로 접으면 칸 높이를 터치 기준(44px) 위로 올릴 수 있다.
+   몬스터 칸은 어느 크기에서도 건드리지 않는다.
+   ========================================================================== */
+.sheet-zone.combo-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  grid-auto-rows: minmax(44px, 1fr);          /* 손가락이 짚을 수 있는 최소 높이 */
+  gap: 6px; padding: 8px 12px;
+}
+/* 전리품은 같은 자리를 빌려 쓴다 — 그때는 예전 그대로 한 줄씩 */
+.sheet-zone.combo-grid.loot-list {
+  display: flex; flex-direction: column; gap: 6px; padding: 10px 14px;
+}
+
+.combo-grid .combo-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  column-gap: 6px; row-gap: 0; padding: 0 1px; font-size: 13.5px;
+  border-width: 10px 13px; min-width: 0; min-height: 0; text-align: left;
+}
+.combo-grid .combo-row .row-icon { display: none; }   /* 칸이 좁아 메달은 뺀다 — 능력은 길게 눌러 본다 */
+/* row-body 를 투명하게 만들어 이름·꼬리표·숫자를 한 격자 안에 놓는다
+   [이름     ][숫자]
+   [족보     ][    ]  */
+.combo-grid .combo-row .row-body { display: contents; }
+.combo-grid .combo-row .sheet-name {
+  grid-column: 1; grid-row: 1; min-width: 0; display: block;
+  font-size: 13.5px; line-height: 17px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.combo-grid .combo-row .sheet-preview {
+  grid-column: 2; grid-row: 1 / span 2; align-self: center;
+  font-size: 19px; line-height: 19px; min-width: 34px; padding-right: 0;
+}
+.combo-grid .combo-row .cat-tag {
+  grid-column: 1; grid-row: 2; min-width: 0;
+  display: block; font-size: 10.5px; line-height: 14px; border: none; background: none;
+  padding: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.combo-grid .combo-row .cat-tag .burst-mark { color: #8a5a12; font-weight: 800; }
+.combo-grid .combo-row .cat-tag.t-slot { background: none; border: none; color: #8b7b66; }
+
+/* 세로가 아주 짧으면(iPhone SE 667 등) 40px 까지만 양보한다 — 그래도 스크롤은 없다 */
+@media (max-height: 700px) {
+  .sheet-zone.combo-grid { grid-auto-rows: minmax(40px, 1fr); gap: 3px; padding: 4px 12px; }
+  .combo-grid .combo-row { border-width: 8px 12px; font-size: 12.5px; }
+  .combo-grid .combo-row .sheet-name { font-size: 12.5px; line-height: 15px; }
+  .combo-grid .combo-row .cat-tag { font-size: 9.5px; line-height: 12px; }
+  .combo-grid .combo-row .sheet-preview { font-size: 17px; line-height: 17px; }
+}
+
+/* ---------- 보상: 상자 ---------- */
+@keyframes chestDrop {
+  0% { transform: translateY(-70px) rotate(-5deg); opacity: 0; }
+  55% { transform: translateY(6px) rotate(2deg); opacity: 1; }
+  75% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+.chest {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: #241c18; border: 2px solid #b08948; border-radius: 18px;
+  color: #e8dcc8; padding: 26px 40px; cursor: pointer;
+  animation: chestDrop .55s cubic-bezier(.34, 1.3, .64, 1);
+  box-shadow: 0 10px 24px rgba(0,0,0,.5);
+}
+.chest-icon { font-size: 64px; }
+.chest-name { font-size: 16px; font-weight: 700; }
+@keyframes chestOpen {
+  0% { transform: rotate(0) scale(1); }
+  20% { transform: rotate(-6deg) scale(1.04); }
+  40% { transform: rotate(6deg) scale(1.08); }
+  60% { transform: rotate(-4deg) scale(1.12); }
+  80% { transform: rotate(3deg) scale(1.2); opacity: 1; }
+  100% { transform: rotate(0) scale(1.5); opacity: 0; }
+}
+.chest.opening { animation: chestOpen .48s ease-in forwards; }
+
+/* 상자에서 카드가 한 장씩 튀어나옴 */
+@keyframes cardPop {
+  0% { transform: translateY(44px) scale(.55) rotate(-6deg); opacity: 0; }
+  60% { transform: translateY(-8px) scale(1.06) rotate(2deg); opacity: 1; }
+  100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+}
+.pop-in { opacity: 0; animation: cardPop .42s cubic-bezier(.34, 1.2, .64, 1) forwards; animation-delay: var(--d, 0s); }
+
+/* ---------- 희귀 보상 광휘 연출 ---------- */
+@keyframes glowPulse {
+  0%   { box-shadow: 0 0 6px 1px rgba(232, 182, 75, .35); }
+  100% { box-shadow: 0 0 18px 5px rgba(232, 182, 75, .65); }
+}
+@keyframes flareIn {
+  0%   { opacity: 0; transform: scale(.4); }
+  35%  { opacity: 1; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+@keyframes shineSweep {
+  0%   { transform: translateX(-130%) rotate(0); }
+  55%  { transform: translateX(130%) rotate(0); }
+  100% { transform: translateX(130%) rotate(0); }
+}
+/* 에픽(금) — 가장 화려한 광휘 */
+.card.shiny-epic {
+  position: relative; overflow: hidden;
+  border-color: #e8b64b;
+  animation:
+    cardPop .42s cubic-bezier(.34, 1.2, .64, 1) forwards,
+    glowPulse 1.6s ease-in-out calc(var(--d, 0s) + .45s) infinite alternate;
+  animation-delay: var(--d, 0s), calc(var(--d, 0s) + .45s);
+}
+.card.shiny-epic::before {
+  content: ''; position: absolute; inset: -30%;
+  background: radial-gradient(circle, rgba(255, 226, 140, .55) 0%, transparent 62%);
+  opacity: 0; pointer-events: none;
+  animation: flareIn .7s ease-out calc(var(--d, 0s) + .28s) forwards;
+}
+.card.shiny-epic::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 240, 190, .5) 50%, transparent 68%);
+  transform: translateX(-130%); pointer-events: none;
+  animation: shineSweep 2.6s ease-in-out calc(var(--d, 0s) + .6s) infinite;
+}
+/* 레어(보라) — 은은한 보랏빛 광휘 */
+.card.shiny-rare {
+  position: relative; overflow: hidden;
+  border-color: #9a6fd0;
+  animation:
+    cardPop .42s cubic-bezier(.34, 1.2, .64, 1) forwards,
+    glowPulseVi 1.8s ease-in-out calc(var(--d, 0s) + .45s) infinite alternate;
+  animation-delay: var(--d, 0s), calc(var(--d, 0s) + .45s);
+}
+@keyframes glowPulseVi {
+  from { box-shadow: 0 0 6px rgba(160, 115, 220, .25); }
+  to   { box-shadow: 0 0 16px rgba(180, 135, 240, .55); }
+}
+.card.shiny-rare::before {
+  content: ''; position: absolute; inset: -30%;
+  background: radial-gradient(circle, rgba(195, 155, 255, .45) 0%, transparent 62%);
+  opacity: 0; pointer-events: none;
+  animation: flareIn .7s ease-out calc(var(--d, 0s) + .28s) forwards;
+}
+.card.shiny-rare::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 32%, rgba(225, 200, 255, .45) 50%, transparent 68%);
+  transform: translateX(-130%); pointer-events: none;
+  animation: shineSweep 2.6s ease-in-out calc(var(--d, 0s) + .6s) infinite;
+}
+.card.shiny-un {
+  position: relative; overflow: hidden;
+}
+.card.shiny-un::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(180, 205, 235, .35) 50%, transparent 65%);
+  transform: translateX(-130%); pointer-events: none;
+  animation: shineSweep 1.2s ease-out calc(var(--d, 0s) + .5s) 1;
+}
+
+/* 미보유 족보 — 붉은 인장이 쾅 찍힘 */
+.card.new-cat { position: relative; }
+.card.new-cat:not(.shiny-rare):not(.shiny-epic) { border-color: #c9302f; }
+@keyframes stampIn {
+  0%   { opacity: 0; transform: rotate(-14deg) scale(2.4); }
+  55%  { opacity: 1; transform: rotate(-11deg) scale(.92); }
+  75%  { transform: rotate(-12deg) scale(1.08); }
+  100% { opacity: 1; transform: rotate(-12deg) scale(1); }
+}
+.new-badge {
+  position: absolute; top: 3px; right: 3px; z-index: 2;
+  background: #a02c25; color: #f5e9d0;
+  font-size: 10.5px; font-weight: 800; letter-spacing: 1px;
+  padding: 3px 8px; border-radius: 4px;
+  border: 1.5px solid #7e1f1f;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
+  opacity: 0;
+  animation: stampIn .38s cubic-bezier(.34, 1.3, .64, 1) calc(var(--d, 0s) + .42s) forwards;
+}
+
+/* ---------- v0.67: 전리품 — 전투 프레임 유지, 족보 목록 영역 안에서만 교체 ---------- */
+/* v0.87: 쓰러진 자리의 보물상자 — 적 영역을 그대로 쓰므로 아래 영역은 변하지 않는다 */
+/* 몬스터가 서 있던 자리를 그대로 물려받는다 — 크기·위치·넘침 모두 몬스터와 동일 */
+.enemy-zone.chest-zone { justify-content: center; align-items: flex-start; padding-top: 83px; }
+.chest-art {
+  height: 216px; width: auto; max-width: 100%; object-fit: contain;
+  margin-bottom: -78px; pointer-events: none;
+  filter: drop-shadow(0 6px 11px rgba(0, 0, 0, .9)) drop-shadow(0 0 15px rgba(0, 0, 0, .55));
+  animation: chestDrop .42s cubic-bezier(.2, 1.3, .4, 1) both;
+}
+.chest-art.t-elite { height: 234px; margin-bottom: -96px; }
+.chest-art.t-boss { height: 254px; margin-bottom: -116px; }
+.chest-art.opened { animation: chestOpen .3s ease-out both; }
+@keyframes chestOpen { from { opacity: .4; transform: scale(.97); } to { opacity: 1; transform: scale(1); } }
+/* 전리품 중에는 굴림·주사위·적 탭이 먹지 않는다 (전투는 이미 끝났다) */
+.loot-mode .roll-bar, .loot-mode .dice-zone, .loot-mode .enemy-zone { pointer-events: none; }
+.loot-mode .roll-bar { opacity: .35; }
+.loot-mode .hint-line { color: #e8b64b; font-weight: 700; font-size: 13px; }
+.loot-row .choice-sub { color: #7a5a2e; }
+/* 전리품 모달 — 가로로 긴 선택지 줄이 세로로 쌓인다 */
+.loot-modal-box { width: min(88vw, 460px); }
+.loot-choices { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding: 2px 0 2px 12px; }
+.loot-choice { width: 100%; }
+.loot-choice .choice-sub { white-space: normal; line-height: 1.4; }
+.loot-choice.t-uncommon .choice-main { color: #2e5876; }
+.loot-choice.t-rare .choice-main { color: #5d3f86; }
+.loot-choice.t-epic .choice-main { color: #8a6516; }
+.row-ico-emoji { font-size: 21px; line-height: 1; }
+
+/* ---------- 보상/휴식/엔딩 ---------- */
+.reward-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.card {
+  width: 128px; min-height: 150px; display: flex; flex-direction: column; gap: 5px;
+  background: #221a15; border: 1.5px solid #4a3b30; border-radius: 10px;
+  color: #e8dcc8; padding: 10px; text-align: left; cursor: pointer;
+}
+.card .cost { font-size: 12px; font-weight: 700; color: #e8b64b; }
+.card-name { font-size: 14px; font-weight: 700; }
+.card-text { font-size: 11px; color: #9c8f7a; line-height: 1.45; }
+.card-rarity { font-size: 10px; color: #6f6353; margin-top: auto; }
+.card.r-uncommon { border-color: #4a6d8c; }
+.card.r-rare { border-color: #7d5ba6; }
+.card.r-epic { border-color: #b08948; }
+.rest-art { font-size: 56px; }
+
+/* ---------- 모달 ---------- */
+.modal-back {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
+}
+/* v0.25: 모달 = 조각 나무 액자 9-슬라이스 */
+.modal {
+  border: solid transparent; border-width: 24px; border-radius: 0;
+  border-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/frame_modal.jpg') 105 fill stretch;
+  background: none;
+  max-width: min(88vw, 460px); max-height: 76dvh; padding: 6px; /* v0.82: 태블릿에서 과하게 넓어지지 않게 */ display: flex; flex-direction: column; gap: 10px;
+  overflow-y: auto;
+}
+.deck-list { overflow-y: auto; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; }
+.modal-text { color: #9c8f7a; font-size: 12px; }
+.info-rule { font-size: 14px; line-height: 1.6; }
+.info-ability { font-size: 13.5px; color: #e8b64b; }
+.replace-btn { width: 100%; text-align: left; font-size: 13.5px; padding: 10px 12px; }
+
+/* ---------- 가로 회전 가드 ---------- */
+#rotate-overlay {
+  position: fixed; inset: 0; background: #14100f; z-index: 100;
+  display: none; align-items: center; justify-content: center; font-size: 20px;
+}
+@media (orientation: landscape) and (max-height: 430px) {
+  #rotate-overlay { display: flex; }
+}
+
+/* ---------- 대화 이벤트 (v0.10) ---------- */
+.event-screen .npc-zone { justify-content: center; align-items: center; }
+/* v0.30.1: NPC 무대 — 아트가 대사 영역까지 꽉 차고, 이름·대사는 그 위에 오버레이 */
+.npc-stage {
+  position: relative; flex: none; height: clamp(300px, 44dvh, 440px); overflow: hidden; /* v0.33: 프레임 고정 — 선택지 수와 무관 */
+  display: flex; align-items: flex-start; justify-content: center;
+}
+/* v0.56: 무대를 꽉 채우고 위쪽 기준으로 크롭 — 인물 얼굴이 위로, 상단 여백 제거 */
+.npc-stage .npc-art-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; max-width: none;
+  object-fit: cover; object-position: center 12%;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, .55));
+}
+/* 사물·정물은 잘리면 형태가 상하므로 전체를 보여주되 아래 기준 정렬 */
+.npc-stage .npc-art-img.obj {
+  object-fit: contain; object-position: center bottom;
+  height: 94%; top: 3%; bottom: auto;
+}
+.npc-stage span.npc-art { /* 이모지 폴백 전용 — img에 적용되지 않도록 선택자 한정 (v0.56 버그 수정) */
+  position: absolute; top: 16%; left: 0; right: 0; text-align: center;
+  font-size: 110px; filter: drop-shadow(0 6px 16px rgba(0, 0, 0, .6));
+}
+.npc-overlay {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 30px 14px 10px;
+  background: linear-gradient(180deg, transparent 0%, rgba(8, 5, 4, .38) 36%, rgba(8, 5, 4, .66) 100%); /* v0.31: 아트 비치게 반투명 */
+  display: flex; flex-direction: column; gap: 6px;
+}
+/* v0.36: 이름표 리본 — 9-슬라이스, 이름 길이에 맞춰 늘어남 */
+.npc-overlay .npc-name {
+  align-self: center; text-align: center;
+  border: solid transparent; border-width: 13px 62px; border-radius: 0;
+  border-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/nameplate.png') 42 300 fill stretch;
+  padding: 0 2px; min-width: 96px;
+  font-weight: 800; color: #e8dcc8; letter-spacing: 1px; font-size: 14.5px;
+  text-shadow: 0 1px 3px #000, 0 0 8px rgba(0, 0, 0, .8);
+}
+.npc-overlay .npc-line { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0, 0, 0, .85); }
+.npc-overlay .dialogue-panel { margin: 0; padding: 0; min-height: 0; background: none; border-radius: 0; }
+.npc { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0; }
+.npc-art {
+  font-size: 62px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .6));
+  animation: npcSway 3.4s ease-in-out infinite alternate;
+}
+@keyframes npcSway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+/* v0.30: NPC 흉상/사물 아트 */
+.npc-art-img { height: 148px; width: auto; max-width: 78vw; object-fit: contain; }
+.npc-name { font-weight: 800; color: #e8dcc8; letter-spacing: 1px; font-size: 15px; }
+/* 주사위 자리: 검은 그라데이션 백판 위 대사 */
+.dialogue-panel {
+  flex: none; min-height: 104px;
+  margin: 4px 10px 6px; padding: 14px 16px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .9) 0%, rgba(8, 6, 5, .74) 55%, rgba(20, 16, 15, .12) 100%);
+  border-radius: 12px;
+  display: flex; flex-direction: column; gap: 8px; justify-content: center;
+}
+.npc-line { margin: 0; color: #e8dcc8; font-size: 14.5px; line-height: 1.62; }
+.event-effect { margin: 0; color: #e8b64b; font-weight: 700; font-size: 13.5px; }
+.choice-zone { gap: 8px; padding-top: 6px; justify-content: flex-start; }
+.choice-row { flex-direction: row; align-items: center; gap: 10px; }
+.choice-main { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* v0.37: 획득 표시 — 선택지 영역의 종이 띠 */
+.gain-box {
+  flex: none; border: solid transparent; border-width: 11px 17px; border-radius: 0;
+  border-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/paper_row.png') 55 92 fill stretch;
+  padding: 1px 0; font-size: 13px; line-height: 1.5; text-align: left;
+}
+.gain-box .event-effect { color: #6b3d17; font-weight: 700; }
+.choice-sub { font-size: 12px; color: #7a5a2e; }
+.choice-cats { font-size: 11px; color: #6b5842; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- 적 행동 6유형 (v0.11) ---------- */
+.enemy-buffs { color: #cbbfa8; font-weight: 700; }
+/* 혼란(🌀) 주사위 — 뒤틀려서 다시 굴릴 수 없음 */
+.die.confused {
+  border-color: #7d5ba6;
+  box-shadow: inset 0 0 10px rgba(125, 91, 166, .45);
+  animation: confuseWobble 1.6s ease-in-out infinite;
+}
+.die.confused small { color: #c8aae8; }
+@keyframes confuseWobble {
+  0%, 100% { transform: rotate(var(--tilt, 0deg)); }
+  25% { transform: rotate(calc(var(--tilt, 0deg) - 2.4deg)); }
+  75% { transform: rotate(calc(var(--tilt, 0deg) + 2.4deg)); }
+}
+.dmg-float.blocked { color: #cfcabe; font-size: 15px; }
+
+/* ---------- 상점·코인·보스 전리품 (v0.13) ---------- */
+.shop-price { margin-left: auto; font-weight: 800; color: #e8b64b; font-size: 14px; padding-left: 8px; }
+.shop-item .choice-main { display: flex; align-items: center; width: 100%; }
+.shop-item.used { opacity: .4; }
+.coin-gain { font-size: 17px; font-weight: 800; color: #e8b64b; }
+.card.r-elite { border-color: #b08948; }
+.card.r-normal { border-color: #4a3b30; }
+
+/* ---------- 계몽 (v0.14) ---------- */
+.enlight-ctl { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 10px 0; }
+.enlight-num { font-size: 28px; font-weight: 800; color: #c8aae8; min-width: 44px; text-align: center; }
+.enlight-list { max-height: 38vh; overflow-y: auto; font-size: 12.5px; }
+.enlight-list li { color: #6f6353; padding: 2px 0; }
+.enlight-list li.on { color: #c8aae8; font-weight: 700; }
+
+/* ---------- 버프/디버프 (v0.19) ---------- */
+.buff-strip {
+  flex: none; display: flex; gap: 6px; justify-content: center; align-items: center;
+  padding: 3px 12px 1px; min-height: 20px;
+}
+.buff-chip {
+  font-size: 12px; font-weight: 800; color: #e8dcc8;
+  background: #241c18; border: 1px solid #4a3b30; border-radius: 9px;
+  padding: 1px 8px;
+}
+/* 적 방어도 — LoL식 실드 세그먼트 (적 체력바) */
+.enemy .bar { position: relative; }
+.enemy .bar b {
+  position: absolute; top: 0; bottom: 0;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/gauge_shield.jpg') left center / auto 100% repeat-x; /* v0.41 */
+  border-left: 1px solid rgba(0, 0, 0, .4);
+  transition: width .25s, left .25s;
+}
+
+/* ---------- 주사위 아트 렌더링 (v0.20) ---------- */
+/* 아트 주사위: 그림 자체가 몸통 — v0.36: 나무 받침(die_pad) 위에 앉음 */
+.die.art {
+  background: transparent url('https://sepi-toolbox.github.io/Redhood/assets/ui/die_pad.png') center / contain no-repeat;
+  border-color: transparent;
+}
+.die.art .pip-art {
+  width: 46px; height: 46px; object-fit: contain; pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
+  transform: rotate(var(--tilt, 0deg)); /* v0.40: 기울기는 그림에만 — 받침은 고정 */
+}
+.die.art .pip-art.empty { display: block; width: 46px; height: 46px; } /* 빈 슬롯 = 받침만 */
+.die.art.blank, .die.art.gold, .die.art.special { border-color: transparent; }
+.die.art.gold { box-shadow: none; filter: drop-shadow(0 0 7px rgba(232, 182, 75, .5)); }
+.die.art.special { filter: drop-shadow(0 0 7px rgba(200, 170, 232, .45)); }
+/* v0.85: 세 가지 강조를 색으로 확실히 구분하고 세기를 올린다
+   붉은빛 = 다시 굴릴 것 / 금빛 = 지금 고른 족보를 이루는 것 / 보랏빛 = 혼란으로 잠긴 것 */
+.die.art.mark-reroll {
+  box-shadow: none;
+  filter: drop-shadow(0 0 3px rgba(255, 80, 62, .95)) drop-shadow(0 0 11px rgba(201, 48, 47, .9))
+          brightness(.84) saturate(.72);
+}
+.die.art.mark-reroll .pip-art { opacity: .82; }
+.die.art.combo-hint {
+  box-shadow: none;
+  filter: drop-shadow(0 0 4px rgba(255, 219, 132, 1)) drop-shadow(0 0 15px rgba(232, 182, 75, .95))
+          brightness(1.24) saturate(1.18);
+}
+/* 둘 다 해당되면 금빛을 살리되 붉은 기운을 겹쳐 구분한다 */
+.die.art.combo-hint.mark-reroll {
+  filter: drop-shadow(0 0 4px rgba(255, 219, 132, 1)) drop-shadow(0 0 13px rgba(201, 48, 47, .95))
+          brightness(1.12) saturate(1);
+}
+.die.art.combo-hint.mark-reroll .pip-art { opacity: 1; }
+.die.art.confused {
+  box-shadow: none;
+  filter: drop-shadow(0 0 4px rgba(198, 140, 255, 1)) drop-shadow(0 0 15px rgba(125, 91, 166, .95)) saturate(1.15);
+}
+.die.art.spinning .pip-art { opacity: .75; filter: blur(0.7px) drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); }
+
+/* ---------- v0.24 아이콘 아트 (이모지 → 그림) ---------- */
+.ico { width: 17px; height: 17px; object-fit: contain; vertical-align: -3px; }
+.intent .ico-intent { width: 19px; height: 19px; vertical-align: -4px; }
+.map-node .ico-node { width: 30px; height: 30px; display: block; margin: 0 auto 2px; }
+.topbar .ico-node { width: 16px; height: 16px; vertical-align: -3px; }
+.ico-weapon { width: 36px; height: 36px; vertical-align: -12px; margin-right: 2px; }
+.rest-art .ico-big { width: 86px; height: 86px; }
+.enemy-buffs .ico, .buff-chip .ico, .shield-num .ico { width: 13px; height: 13px; vertical-align: -2px; }
+.die small .ico { width: 11px; height: 11px; vertical-align: -2px; }
+.deck-list .ico { width: 16px; height: 16px; vertical-align: -3px; }
+
+/* ==================== v1.17 주사위 상태이상 ====================
+   네 겹으로 얹는다 — 물듦(아래) · 그림 · 안쪽 발광 · 이름표.
+   그림은 눈을 가리지 않게 그려져 있고, 움직임만 상태마다 다르다. */
+.die.art.st .st-tint, .die.art.pinned .st-tint,
+.die.art.st .st-rim, .die.art.pinned .st-rim { position: absolute; left: 8px; right: 8px; top: 12px; bottom: 12px;
+  border-radius: 6px; pointer-events: none; animation: stPulse 2.4s ease-in-out infinite; }
+.die.art.st .st-tint, .die.art.pinned .st-tint { mix-blend-mode: multiply; z-index: 2; }
+.die.art.st .st-rim, .die.art.pinned .st-rim { z-index: 4; }
+.die.art.st .st-art { position: absolute; left: 8px; top: 12px; width: 46px; height: 46px;
+  object-fit: contain; z-index: 3; pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .75)); animation: 2.4s ease-in-out infinite; }
+.die.art.st small, .die.art.pinned small { color: #e8dcc8; z-index: 6; }
+@keyframes stPulse { 0%, 100% { opacity: .76 } 50% { opacity: 1 } }
+
+/* 상태이상이 걸린 주사위는 다시굴림을 붉은 발광 대신 점선으로 표시한다 (색이 겹치지 않게) */
+.die.art.st.mark-reroll { filter: brightness(.86) saturate(.8); box-shadow: none; }
+.die.art.st.mark-reroll::before { content: ''; position: absolute; inset: 3px; border-radius: 11px;
+  border: 2px dashed rgba(255, 140, 122, .95); pointer-events: none; z-index: 7; }
+
+/* 상태별 물듦 · 발광 · 그림 움직임 */
+.t-bleed    .st-tint { background: radial-gradient(ellipse at 50% -15%, rgba(176,20,18,.72) 0%, rgba(120,14,12,.42) 55%, rgba(70,8,8,.16) 100%) }
+.t-bleed    .st-rim  { box-shadow: inset 0 8px 10px -5px rgba(255,45,36,.7) }
+.t-bleed    .st-art  { animation-name: stOoze; transform-origin: top center }
+.t-bleed    small    { color: #ff5a4a }
+.t-poison   .st-tint { background: radial-gradient(ellipse at 50% 118%, rgba(96,150,20,.7) 0%, rgba(66,110,16,.42) 55%, rgba(34,58,10,.16) 100%) }
+.t-poison   .st-rim  { box-shadow: inset 0 -9px 11px -5px rgba(180,230,60,.7) }
+.t-poison   .st-art  { animation-name: stBoil; transform-origin: bottom center }
+.t-poison   small    { color: #b8e04a }
+.t-bind     .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(24,52,30,.24) 0%, rgba(28,58,32,.5) 62%, rgba(14,32,18,.7) 100%) }
+.t-bind     .st-rim  { box-shadow: inset 0 0 11px 3px rgba(20,44,24,.8) }
+.t-bind     .st-art  { animation-name: stSqueeze }
+.t-bind     small    { color: #7fbf8a }
+.t-stun     .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(120,130,145,.3) 0%, rgba(78,86,100,.44) 60%, rgba(46,52,62,.56) 100%) }
+.t-stun     .st-rim  { box-shadow: inset 0 0 10px 2px rgba(215,232,255,.5) }
+.t-stun     .st-art  { animation-name: stJitter }
+.t-stun     small    { color: #dfe6ee }
+.t-curse    .st-tint { background: radial-gradient(ellipse at 45% 118%, rgba(46,14,72,.86) 0%, rgba(34,10,54,.5) 52%, rgba(18,6,28,.2) 100%) }
+.t-curse    .st-rim  { box-shadow: inset 0 -8px 13px -3px rgba(150,70,220,.65) }
+.t-curse    .st-art  { animation-name: stCreep; transform-origin: bottom center }
+.t-curse    small    { color: #c78cff }
+.t-blessing .st-tint { background: radial-gradient(ellipse at 50% 12%, rgba(240,236,225,.4) 0%, rgba(190,188,182,.28) 55%, rgba(120,120,118,.2) 100%) }
+.t-blessing .st-rim  { box-shadow: inset 0 8px 13px -4px rgba(255,253,245,.85) }
+.t-blessing .st-art  { animation-name: stHover }
+.t-blessing small    { color: #f3ecdd }
+.t-confuse  .st-tint, .t-confuse .st-rim { background: none; box-shadow: none }
+.t-confuse  .st-art  { animation-name: stMist }
+.t-confuse  small    { color: #c68cff }
+.t-seal     .st-tint, .t-seal .st-rim { background: none; box-shadow: none }
+.t-seal     .st-art  { animation-name: stWax }
+.t-seal     small    { color: #8fa8e0 }
+.t-rot      .st-tint { background: radial-gradient(ellipse at 50% 112%, rgba(120,30,86,.6) 0%, rgba(78,26,60,.42) 52%, rgba(44,20,34,.2) 100%) }
+.t-rot      .st-rim  { box-shadow: inset 0 -8px 11px -4px rgba(230,120,190,.6) }
+.t-rot      .st-art  { animation-name: stBulge; transform-origin: bottom center }
+.t-rot      small    { color: #d98cc0 }
+.t-chain    .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(40,54,68,.26) 0%, rgba(30,42,56,.46) 60%, rgba(18,26,36,.6) 100%) }
+.t-chain    .st-rim  { box-shadow: inset 0 0 10px 2px rgba(170,205,235,.45) }
+.t-chain    .st-art  { animation-name: stTaut }
+.t-chain    small    { color: #a8c2d8 }
+.t-numb     .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(60,120,190,.5) 0%, rgba(30,70,130,.4) 60%, rgba(14,34,70,.26) 100%) }
+.t-numb     .st-rim  { box-shadow: inset 0 0 9px 1px rgba(150,220,255,.7) }
+.t-numb     .st-art  { animation-name: stZap }
+.t-numb     small    { color: #8fd4ff }
+.t-plunder  .st-tint { background: radial-gradient(ellipse at 55% 112%, rgba(120,74,26,.64) 0%, rgba(84,54,22,.44) 52%, rgba(46,32,16,.2) 100%) }
+.t-plunder  .st-rim  { box-shadow: inset 0 -8px 10px -4px rgba(215,150,70,.6) }
+.t-plunder  .st-art  { animation-name: stGrab; transform-origin: bottom center }
+.t-plunder  small    { color: #d9a05a }
+.t-devour   .st-tint { background: radial-gradient(ellipse at 50% 115%, rgba(2,6,12,.92) 0%, rgba(6,14,24,.6) 48%, rgba(10,20,32,.2) 100%) }
+.t-devour   .st-rim  { box-shadow: inset 0 -9px 13px -4px rgba(140,215,250,.7) }
+.t-devour   .st-art  { animation-name: stRise; transform-origin: bottom center }
+.t-devour   small    { color: #9fd8f0 }
+
+@keyframes stOoze    { 0%, 100% { transform: scaleY(.94) } 50% { transform: scaleY(1.08) } }
+@keyframes stBoil    { 0%, 100% { transform: scaleY(.95) } 50% { transform: scaleY(1.07) } }
+@keyframes stSqueeze { 0%, 100% { transform: scale(1) } 50% { transform: scale(.93) } }
+@keyframes stJitter  { 0%, 88%, 100% { transform: translate(0, 0) }
+  90% { transform: translate(.8px, -.6px); filter: drop-shadow(0 0 5px rgba(220,240,255,.95)) }
+  93% { transform: translate(-.7px, .5px) } 96% { transform: translate(.4px, 0) } }
+@keyframes stCreep   { 0%, 100% { transform: scaleY(.93); opacity: .85 } 50% { transform: scaleY(1.07); opacity: 1 } }
+@keyframes stHover   { 0%, 100% { transform: translateY(1.2px) } 50% { transform: translateY(-1.6px) } }
+@keyframes stMist    { 0%, 100% { filter: drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(.94) saturate(.95) }
+  50% { filter: drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(1.1) saturate(1.12) } }
+@keyframes stWax     { 0%, 100% { filter: drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(.9) }
+  50% { filter: drop-shadow(0 1px 2px rgba(0,0,0,.75)) brightness(1.06) } }
+@keyframes stBulge   { 0%, 100% { transform: scale(.94) } 55% { transform: scale(1.09) } }
+@keyframes stTaut    { 0%, 100% { transform: scaleX(1) } 50% { transform: scaleX(1.05) } }
+@keyframes stZap     { 0%, 100% { opacity: .25 } 4% { opacity: 1 } 10% { opacity: .3 } 16% { opacity: 1 }
+  22% { opacity: .2 } 46% { opacity: .9 } 52% { opacity: .25 } 70% { opacity: 1 } 76% { opacity: .3 } }
+@keyframes stGrab    { 0%, 100% { transform: translate(1px, 1.5px) rotate(1.6deg) } 50% { transform: translate(-.8px, -1px) rotate(-1.6deg) } }
+@keyframes stRise    { 0%, 100% { transform: translateY(1.4px) scaleY(.94) } 50% { transform: translateY(-1.4px) scaleY(1.07) } }
+
+/* 혼란만 사각 윤곽을 고정하고 안쪽 안개를 돌린다 (사각형을 통째로 돌리면 모서리가 삐져나온다) */
+.st-swirlbox { position: absolute; left: 8px; top: 12px; width: 46px; height: 46px;
+  border-radius: 7px; overflow: hidden; z-index: 3; pointer-events: none; }
+.st-swirl { position: absolute; left: 50%; top: 50%; width: 150%; height: 150%;
+  margin-left: -75%; margin-top: -75%; opacity: .62; filter: blur(.4px);
+  animation: stSpin 7s linear infinite; }
+@keyframes stSpin { to { transform: rotate(360deg) } }
+.roll-btn .cost { font-size: 11px; color: #ffb1a2; }
+
+/* ---------- v1.31 일격(⚡) 족보 ---------- */
+.sheet-row.combo-row.burst{position:relative}
+.sheet-row.combo-row.burst:not(.used) .sheet-preview{color:#b06a12;text-shadow:0 1px 0 rgba(255,244,218,.5)}
+
+/* ==========================================================================
+   표식(badge) — v1.33: 화면의 '아이콘 + 값' 은 전부 이 하나로 그린다
+   결(tone)은 셋: good(내게 유리) / bad(내게 불리) / rule(규칙·제약)
+   ========================================================================== */
+.badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 1px 7px 1px 5px; border-radius: 9px;
+  font-size: 12px; font-weight: 800; line-height: 16px;
+  border: 1px solid; text-shadow: 0 1px 0 rgba(0, 0, 0, .55);
+  vertical-align: middle;
+}
+.badge .bdg-ico { width: 13px; height: 13px; display: inline-block; }
+.badge .bdg-ico.glyph { font-size: 11px; line-height: 13px; text-align: center; font-weight: 400; }
+.badge .bdg-val { letter-spacing: .2px; }
+.badge .bdg-sub {
+  margin-left: 1px; padding-left: 4px; font-size: 11px; opacity: .92;
+  border-left: 1px solid rgba(255, 255, 255, .22);
+}
+.badge.t-good { background: #1e2a20; border-color: #4a7a52; color: #cdeccf; }
+.badge.t-bad  { background: #2a1c19; border-color: #7d4438; color: #f0c5b4; }
+.badge.t-rule { background: #241f2e; border-color: #6b5a8e; color: #ddcaf2; }
+.badge.whet   { background: linear-gradient(180deg, #4a2410, #2c1408); border-color: #b5642a; color: #ffcf94; }
+.badge.whet .bdg-sub { color: #ffe9b8; border-left-color: rgba(255, 210, 140, .35); }
+.badge.urgent { animation: badgePulse 1.4s ease-in-out infinite; }
+@keyframes badgePulse { 0%, 100% { opacity: 1 } 50% { opacity: .62 } }
+
+.badge-row { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.buff-strip .badge-row { justify-content: center; }
+.enemy-buffs { display: inline-flex; align-items: center; gap: 3px; flex-wrap: wrap; }
+
+/* 족보 행의 꼬리표 — 족보 이름표와 같은 형식, 결만 다르다 */
+.cat-tag.t-burst { color: #ffd98a; border-color: #b5822a; background: #2e2210; margin-left: 4px; }
+.sheet-row.combo-row.burst:not(.used) .sheet-preview { color: #ffd98a; text-shadow: 0 0 6px rgba(255, 170, 60, .45); }
+
+/* 주사위 낙인 — 새김도 상태이상과 같은 형식(틴트+테두리+이름표)으로 */
+.die.art.pinned .st-tint { background: linear-gradient(180deg, rgba(217, 160, 90, .30), rgba(217, 160, 90, .10)); }
+.die.art.pinned .st-rim { box-shadow: inset 0 0 0 2px rgba(217, 160, 90, .85); }
+/* 규칙 표식은 예고 바로 아래, 자기 줄에 — 상태 표식과 섞지 않는다 */
+.rule-row { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; margin: 1px 0 2px; }
+.enemy-buffs .badge, .rule-row .badge { padding: 0 6px 0 4px; font-size: 11px; line-height: 15px; }
+.enemy-buffs .badge .bdg-ico, .rule-row .badge .bdg-ico { width: 12px; height: 12px; }
+.sheet-name .cat-tag.t-burst { margin-left: 5px; vertical-align: 1px; }
+/* 새김 — 상태이상 낙인과 같은 두께로 또렷하게 */
+.die.art.pinned .st-tint { background: radial-gradient(ellipse at 50% -15%, rgba(226,168,74,.62) 0%, rgba(180,124,48,.34) 55%, rgba(120,80,28,.12) 100%); }
+.die.art.pinned .st-rim { box-shadow: inset 0 0 0 2px rgba(245, 190, 105, .95), 0 0 8px rgba(230, 170, 80, .45); }
+/* 아직 안 채운 족보 자리 — 기본 족보 */
+.deck-list li.slot-empty { opacity: .62; }
+.cat-tag.t-slot { color: #8e8172; border-color: #4a4038; background: #221d19; font-style: italic; }
+.sheet-row.combo-grid .combo-row .cat-tag.t-slot { opacity: .85; }
+
+/* ==========================================================================
+ * v2.0 카드 전투 — 상호 차감 배정 + 감정 카드
+ * ========================================================================== */
+.card-battle { display: flex; flex-direction: column; overflow: hidden; }
+.card-battle .bg-layer { height: 100%; }   /* v2.01: 족보판이 사라졌으니 배경이 화면 전체를 덮는다 */
+/* v2.02: 몬스터가 화면 가운데를 채운다 — v2.03부터 배치는 data/layout.json + 📐 배치 모드로 조정 */
+.card-battle .enemy-zone { height: var(--cb-enemyH, 306px); }
+.card-battle .enemy { margin-top: var(--cb-enemyY, 0px); }
+.card-battle .target-pin { font-size: var(--cb-pinSize, 13px); }
+.card-battle .enemy-art-img { height: var(--cb-artH, 288px); }
+.card-battle span.enemy-art { font-size: 170px; height: 250px; line-height: 250px; }
+.card-battle .enemy-zone.multi .enemy-art-img { height: var(--cb-artHMulti, 238px); margin-bottom: -34px; }
+.card-battle .enemy-zone.multi span.enemy-art { height: 210px; line-height: 210px; font-size: 136px; margin-bottom: -34px; }
+.card-battle .enemy-zone.multi .enemy.t-elite .enemy-art-img { height: calc(var(--cb-artHMulti, 238px) + 14px); margin-bottom: -46px; }
+.card-battle .enemy-zone.multi .enemy.t-boss .enemy-art-img { height: calc(var(--cb-artHMulti, 238px) + 28px); margin-bottom: -58px; }
+/* 적 주사위 — 그림 아래 붉은 칩 (몬스터 영역 높이는 그대로) */
+.card-battle .enemy .fdice {
+  position: absolute; left: 50%; bottom: calc(-1 * var(--cb-fdiceY, 46px)); transform: translateX(-50%);
+  display: flex; gap: 5px; z-index: 3;
+}
+.card-battle .enemy-zone { margin-bottom: var(--cb-fdiceY, 46px) !important; } /* 칩이 내려앉을 자리 */
+.fdie {
+  position: relative;
+  width: var(--cb-fdieSize, 38px); height: var(--cb-fdieSize, 38px); border-radius: 8px; background: transparent; border: none; padding: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800;
+  color: #f4c9ae; font-style: normal;
+  transition: transform .3s, opacity .3s;
+}
+.fdie img {
+  width: 100%; height: 100%; object-fit: contain; pointer-events: none;
+  filter: sepia(1) hue-rotate(-28deg) saturate(2.6) brightness(.72) drop-shadow(0 2px 3px rgba(0,0,0,.65));
+}
+.fdie .fnum {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--cb-fdieSize, 38px) * .5); font-weight: 800; color: #ffe2c8;
+  text-shadow: 0 1px 2px #000, 0 0 4px rgba(0,0,0,.8); pointer-events: none;
+}
+.fdie.dead { opacity: 0; transform: scale(.2) rotate(40deg); pointer-events: none; }
+.fdie.pickable img { filter: sepia(1) hue-rotate(-28deg) saturate(2.6) brightness(.85) drop-shadow(0 0 7px rgba(232,182,77,.9)); }
+.fdie.pickable { animation: cb-pulse-t 1s infinite; }
+@keyframes cb-pulse-t { 50% { transform: translateY(-2px); } }
+@keyframes cb-pulse { 50% { box-shadow: 0 0 16px rgba(232,182,77,.8); } }
+
+/* HUD: 내 체력 + 자원 */
+.battle-screen > .cb-hud {
+  position: absolute; left: var(--cb-hpSide, 12px); right: var(--cb-hpSide, 12px);
+  bottom: var(--cb-hpBot, 305px); z-index: 6; display: flex; align-items: center; gap: 8px; padding: 0;
+}
+.card-battle .cb-hud .hp-gauge { height: var(--cb-hpH, 36px); max-width: none; }
+.cb-hud .hp-gauge { flex: 1; position: relative; }
+.cb-bleedbadge { flex: none; font-size: 13px; font-weight: 800; color: #ff9a84; text-shadow: 0 1px 2px #000; min-width: 0; }
+.enemy-hp .fshield { font-style: normal; font-size: 11px; color: #cfd8e8; text-shadow: 0 1px 2px #000; }
+
+/* v2.17 적 행동 예고 — 위력은 남은 주사위 합이라 깎을 때마다 즉시 줄어든다 */
+.cb-intent {
+  display: inline-flex; align-items: center; gap: 4px; justify-content: center;
+  margin: 2px auto 0; padding: 2px 9px; border-radius: 999px;
+  font-size: 12px; line-height: 16px; color: #e8dcc8; white-space: nowrap;
+  background: rgba(14, 10, 8, .62); border: 1px solid rgba(180, 140, 90, .35);
+  text-shadow: 0 1px 2px #000;
+}
+.cb-intent:empty { display: none; }
+.cb-intent b { font-size: 14px; }
+.cb-intent.hurt { border-color: rgba(220, 90, 70, .55); }
+.cb-intent.hurt b { color: #ff9d7e; }
+.cb-intent.util { border-color: rgba(110, 150, 200, .45); }
+.cb-intent.util b { color: #9fc5ef; }
+.cb-intent small { font-size: 10px; opacity: .9; }
+.cb-intent .ico-intent { width: 14px; height: 14px; }
+.cb-res { display: flex; align-items: center; gap: 4px; }
+.cb-res i { width: 13px; height: 13px; border-radius: 50%; background: #e8b64d; box-shadow: 0 0 6px rgba(232,182,77,.6); }
+.cb-res i.off { background: #3a3226; box-shadow: none; }
+.cb-res small { font-size: 9.5px; color: #8d8064; margin-left: 3px; }
+.battle-screen > .cb-preview {
+  position: absolute; left: 0; right: 0; bottom: var(--cb-pvBot, 286px); z-index: 6;
+  text-align: center; font-size: 12px; color: #b3a685; padding: 0 10px; min-height: 19px;
+}
+.cb-preview b.atk { color: #f0c05a; } .cb-preview b.dmg { color: #e88a72; } .cb-preview b.kill { color: #8fd08a; }
+
+/* 내 주사위 */
+.battle-screen > .cb-dice {
+  position: absolute; left: 0; right: 0; bottom: var(--cb-diceBot, 220px); z-index: 7;
+  display: flex; justify-content: center; gap: var(--cb-diceGap, 10px); padding: 0 8px;
+}
+.cdie {
+  width: var(--cb-diceSize, 58px); height: calc(var(--cb-diceSize, 58px) + 4px); border-radius: 12px; background: #efe6d0; color: #26201a;
+  border: 2px solid #b9a67f; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 800; box-shadow: 0 3px 6px rgba(0,0,0,.55);
+  position: relative; transition: transform .15s; font-family: inherit;
+}
+.cdie.art {
+  background: transparent url('https://sepi-toolbox.github.io/Redhood/assets/ui/die_pad.png') center / contain no-repeat;
+  border-color: transparent; box-shadow: none;
+}
+.cdie.art .pip-art {
+  width: calc(var(--cb-diceSize, 58px) * .88); height: calc(var(--cb-diceSize, 58px) * .88); object-fit: contain; pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5));
+}
+.cdie.art .cnum {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -55%);
+  width: calc(var(--cb-diceSize, 58px) * .58); height: calc(var(--cb-diceSize, 58px) * .58);
+  display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  background: rgba(22, 14, 9, .55);                     /* 어떤 스킨 위에서도 읽히는 어두운 원판 */
+  font-size: calc(var(--cb-diceSize, 58px) * .38); font-weight: 800; color: #ffe9c8;
+  text-shadow: 0 1px 2px #000; pointer-events: none;
+}
+.cdie.art.dead { background-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/die_pad.png'); filter: grayscale(.9) brightness(.55); }
+.cdie.art.sel { filter: drop-shadow(0 0 10px rgba(232,182,77,.85)); }
+.cdie.art.pickable { filter: drop-shadow(0 0 10px rgba(143,208,138,.85)); }
+.cdie.sel { transform: translateY(-7px); border-color: #e8b64d; box-shadow: 0 0 14px rgba(232,182,77,.65); }
+.cdie.dead { background: #37312a; color: #6b6152; border-color: #4a4238; box-shadow: none; }
+.cdie.dead::after {
+  content: ''; position: absolute; inset: 4px; border-radius: 8px;
+  background: linear-gradient(45deg, transparent 46%, #221d17 46%, #221d17 54%, transparent 54%);
+}
+.cdie.pickable { border-color: #8fd08a; box-shadow: 0 0 12px rgba(143,208,138,.6); animation: cb-pulse 1s infinite; }
+.cdie .corig {
+  position: absolute; top: -7px; right: -5px; font-size: 10px; background: #5a4a2e; color: #e8dcae;
+  border-radius: 8px; padding: 0 4px; font-weight: 600;
+}
+
+
+/* 손패 — 부채꼴, 화면 아래 걸침 */
+.battle-screen > .cb-handzone { position: absolute; inset: 0; z-index: 48; pointer-events: none; }
+.cb-hand { pointer-events: none; }
+.cb-card { pointer-events: auto; }
+.cb-hand { position: absolute; bottom: var(--cb-handBottom, -22px); left: 0; width: 100%; height: 224px; }
+/* 등급 프레임: 생성본이 assets/ui/card_frame_{tier}.webp 로 들어오면
+   main.js 의 CARD_FRAME_READY 에 등급을 추가 — 그 등급만 아래 규칙이 켜진다.
+   (다중 배경 폴백은 iOS에서 한 층이 404면 전체가 안 그려져 금지) */
+.cb-card.tf-uncommon::after, .cb-zoom .zbig.tf-uncommon::after { background-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/card_frame_uncommon.webp'); }
+.cb-card.tf-rare::after, .cb-zoom .zbig.tf-rare::after { background-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/card_frame_rare.webp'); }
+.cb-card.tf-epic::after, .cb-zoom .zbig.tf-epic::after { background-image: url('https://sepi-toolbox.github.io/Redhood/assets/ui/card_frame_epic.webp'); }
+.cb-card::after, .cb-zoom .zbig::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/card_frame.webp') center / 100% 100% no-repeat;
+}
+.cb-card {
+  position: absolute; left: 50%; bottom: 0; width: var(--cb-cardW, 118px); height: var(--cb-cardH, 162px); margin-left: calc(var(--cb-cardW, 118px) / -2);
+  background: none; border: none; border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, .55);
+  transform-origin: 50% 120%; transition: transform .22s;
+  touch-action: none;
+}
+.cb-card.dragging { box-shadow: 0 12px 26px rgba(0, 0, 0, .7); }
+.cb-card.usable { box-shadow: 0 0 13px rgba(232, 182, 77, .55), 0 4px 8px rgba(0, 0, 0, .55); }
+.cb-card.unusable { opacity: .78; }
+.cb-card.dragging { transition: none; z-index: 40; }
+
+.cb-card .ccost {
+  position: absolute; left: var(--cb-ccX, 4%); top: var(--cb-ccY, 3.6%); width: var(--cb-ccW, 18.5%); height: var(--cb-ccH, 12.5%);
+  display: flex; align-items: center; justify-content: center;
+  color: #3d2413; font-weight: 800; font-size: calc(var(--cb-cardW, 118px) * .115); z-index: 2;
+}
+.cb-card .cnm { z-index: 2; }
+.cb-card .cart {
+  position: absolute; left: var(--cb-caX, 6%); top: var(--cb-caY, 9%); width: var(--cb-caW, 88%); height: var(--cb-caH, 62%); z-index: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--cb-cardW, 118px) * .38);
+  background: none center / cover no-repeat;
+}
+.cb-card .cnm {
+  position: absolute; left: var(--cb-cnX, 25%); top: var(--cb-cnY, 4.5%); width: var(--cb-cnW, 59%); height: var(--cb-cnH, 8%);
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font-size: calc(var(--cb-cardW, 118px) * .082); line-height: 1; font-weight: 700; color: #3d2413;
+  background: none; border: none; white-space: nowrap; overflow: visible;  /* 글자를 자르지 않는다 */
+}
+.battle-screen > .cb-end {
+  position: absolute; right: var(--cb-endX, 60px); bottom: var(--cb-endY, 216px); z-index: 42;
+  width: var(--cb-endW, 150px); height: var(--cb-endH, 46px); box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center; padding: 0 2px; font-size: 15px;
+}
+.battle-screen > .cb-orb {
+  position: absolute; left: var(--cb-orbX, 10px); bottom: var(--cb-orbY, 212px); z-index: 42;
+  width: var(--cb-orbSize, 50px); height: var(--cb-orbSize, 50px); border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #ffdf9a, #d89b2e 55%, #7d4a12);
+  border: 2px solid #5a3c10; box-shadow: 0 0 14px rgba(232,182,77,.5), 0 3px 6px rgba(0,0,0,.6);
+  display: flex; align-items: center; justify-content: center;
+}
+.battle-screen > .cb-orb b { font-size: calc(var(--cb-orbSize, 50px) * .48); font-weight: 800; color: #2e1e05; text-shadow: 0 1px 1px rgba(255,240,200,.6); }
+.battle-screen > .cb-orb.empty { filter: grayscale(.8) brightness(.6); box-shadow: none; }
+.battle-screen > .cb-pile {
+  position: absolute; bottom: 10px; z-index: 42;
+  width: var(--cb-pileW, 44px); height: var(--cb-pileH, 58px); border-radius: 4px;
+  background: url('https://sepi-toolbox.github.io/Redhood/assets/ui/card_back.webp') center / 100% 100% no-repeat;
+  border: 1px solid #1c0c0a; box-shadow: 2px 2px 0 #1c0c0a, 4px 4px 0 rgba(20, 8, 7, .53), 0 4px 8px rgba(0,0,0,.6);
+  display: flex; align-items: center; justify-content: center;
+}
+.battle-screen > .cb-pile.deck { left: var(--cb-deckX, 66px); bottom: var(--cb-deckY, 210px); }
+.battle-screen > .cb-pile.disc { right: var(--cb-discX, 10px); bottom: var(--cb-discY, 210px); transform: rotate(4deg); filter: brightness(.75); }
+.battle-screen > .cb-pile b {
+  position: absolute; right: -7px; bottom: -7px; min-width: 21px; height: 21px; border-radius: 11px;
+  background: #241f18; border: 1.5px solid #8d8064; color: #f0e2c0;
+  font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 4px;
+}
+
+/* 조준 모드: 화면을 낮추고 선택지만 밝힌다 */
+.card-battle.aiming .bg-layer { filter: brightness(.45) saturate(.75); }
+.card-battle.aiming .enemy-art-img, .card-battle.aiming span.enemy-art { filter: brightness(.35); }
+.card-battle.aiming .enemy-name, .card-battle.aiming .enemy .bar, .card-battle.aiming .enemy-hp,
+.card-battle.aiming .target-pin, .card-battle.aiming .cb-hud, .card-battle.aiming .cb-hand,
+.card-battle.aiming .cb-orb, .card-battle.aiming .cb-pile, .card-battle.aiming .cb-end { opacity: .28; transition: opacity .18s; }
+.card-battle.aiming .cdie:not(.sel) { opacity: .3; transition: opacity .18s; }
+.card-battle.aiming .cdie.sel { opacity: 1; }
+.card-battle.aiming .fdie:not(.dead) { opacity: 1; }
+.enemy-name, .enemy .bar, .enemy-hp, .target-pin, .cb-hud, .cb-hand, .cb-orb, .cb-pile, .cb-end, .cdie { transition: opacity .18s; }
+/* 투사체·굴림·게이지 */
+.battle-screen > .cb-proj {
+  position: absolute; z-index: 70; width: 14px; height: 14px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe9b0, #e8b64d 60%, #a8752a);
+  box-shadow: 0 0 10px rgba(232, 182, 77, .9), 0 0 22px rgba(232, 182, 77, .5);
+  pointer-events: none;
+}
+.cdie.rolling, .fdie.rolling { animation: cbTumble .14s linear infinite; }
+@keyframes cbTumble { 0% { transform: rotate(-6deg) translateY(-1px); } 50% { transform: rotate(5deg) translateY(1px); } 100% { transform: rotate(-6deg) translateY(-1px); } }
+.card-battle .enemy .bar i { transition: width .35s; }
+
+/* 안내·확대·전리품 */
+.battle-screen > .cb-banner {
+  position: absolute; top: 300px; width: 100%; text-align: center; z-index: 50; font-size: 13px;
+  color: #f4dfa8; text-shadow: 0 1px 3px #000; display: none; pointer-events: none;
+}
+.cb-banner.on { display: block; }
+.battle-screen > .cb-zoom { position: absolute; inset: 0; z-index: 60; background: rgba(0,0,0,.62); display: none;
+  align-items: center; justify-content: center; }
+.cb-zoom.on { display: flex; }
+.cb-zoom .zbig { position: relative; width: 258px; height: 387px;
+  background: none; border-radius: 8px;
+  box-shadow: 0 10px 30px #000; }
+.cb-zoom .zart { position: absolute; left: var(--cb-caX, 6%); top: var(--cb-caY, 9%); width: var(--cb-caW, 88%); height: var(--cb-caH, 62%); z-index: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 84px;
+  background: none center / cover no-repeat; }
+.cb-zoom .zcc { z-index: 2; position: absolute; left: var(--cb-ccX, 4%); top: var(--cb-ccY, 3.6%); width: var(--cb-ccW, 18.5%); height: var(--cb-ccH, 12.5%);
+  display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #3d2413; }
+.cb-zoom .ztt { z-index: 2; position: absolute; left: var(--cb-cnX, 25%); top: var(--cb-cnY, 4.5%); width: var(--cb-cnW, 59%); height: var(--cb-cnH, 8%);
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font-size: 17px; line-height: 1; font-weight: 800; color: #3d2413; }
+.cb-zoom .zdd { z-index: 2; position: absolute; left: var(--cb-cdX, 13%); top: var(--cb-cdY, 72.5%); width: var(--cb-cdW, 74%); height: var(--cb-cdH, 14.5%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; line-height: 1.55; color: #4a3a28; text-align: center; overflow: hidden; }
+.battle-screen > .cb-float {
+  position: absolute; z-index: 55; font-size: 17px; font-weight: 800; color: #f0c05a;
+  text-shadow: 0 1px 3px #000; pointer-events: none; animation: cb-rise 1s forwards;
+}
+@keyframes cb-rise { to { transform: translateY(-40px); opacity: 0; } }
+/* 전투 중에는 전리품 판·힌트 줄을 감춘다 → 승리 후 loot-mode에서 켠다 */
+.card-battle .cb-hintline, .card-battle .sheet-zone.cb-loot { display: none; }
+.card-battle.loot-mode .cb-hintline { display: block; }
+.card-battle.loot-mode .sheet-zone.cb-loot { display: flex; position: absolute; left: 0; right: 0; bottom: 0; top: var(--cb-lootTop, 430px); z-index: 45; }
+.card-battle.loot-mode .cb-hand, .card-battle.loot-mode .cb-end, .card-battle.loot-mode .cb-dice,
+.card-battle.loot-mode .cb-preview, .card-battle.loot-mode .cb-help, .card-battle.loot-mode .fdice { display: none; }
+.card-battle.loot-mode .cb-hintline { position: absolute; top: calc(var(--cb-lootTop, 430px) - 28px); width: 100%; text-align: center; z-index: 45; }
+
+
+
+</style>
+<style>
+  /* ---------- 편집기 전용 (게임 CSS 뒤에 얹힘) ---------- */
+  html, body { height: auto; }
+  body { display: block; background: #17130f; padding: 0; overflow: auto; }
+  .ed-top {
+    position: sticky; top: 0; z-index: 200; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 10px 14px; background: #221c15; border-bottom: 2px solid #4a3b2c; color: #e8dcc8;
+  }
+  .ed-top b { font-size: 15px; }
+  .ed-top .sub { font-size: 11px; color: #8d8064; }
+  .ed-btns { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+  .ed-btns button {
+    padding: 7px 11px; font-size: 12.5px; border-radius: 8px; cursor: pointer;
+    background: #2a241e; border: 1px solid #5a4c3e; color: #e8dcc8;
+  }
+  .ed-btns button.prime { background: #5a281f; border-color: #a8543f; font-weight: 700; }
+  .ed-btns button.on { background: #4a3b2c; border-color: #8d7452; }
+  .ed-main { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; align-items: flex-start; justify-content: center; }
+  #app {
+    flex: none; width: 390px; height: 844px; position: relative; overflow: hidden;
+    display: flex; border: 1px solid #4a3b2c; border-radius: 18px; background: #141210;
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+  }
+  .ed-panel { flex: 1 1 320px; max-width: 430px; color: #cfc3a8; font-size: 12.5px; }
+  .ed-hint { line-height: 1.7; margin-bottom: 10px; color: #b3a685; }
+  .ed-panel table { width: 100%; border-collapse: collapse; }
+  .ed-panel th { text-align: left; font-size: 11px; color: #8d8064; padding: 8px 4px 3px; }
+  .ed-panel td { padding: 2px 4px; border-bottom: 1px solid #2a241e; }
+  .ed-panel td.k { color: #e8dcc8; white-space: nowrap; }
+  .ed-panel td.d { color: #6b6152; font-size: 11px; }
+  .ed-panel input {
+    width: 64px; padding: 3px 6px; font-size: 13px; text-align: right;
+    background: #17130f; border: 1px solid #4a3b2c; border-radius: 5px; color: #f0e2c0;
+  }
+  .ed-panel input.changed { border-color: #e8b64d; color: #ffd98a; }
+  /* 선택 상자·핸들 (게임에서 뺀 것 — 편집기 전용) */
+  .battle-screen > .le-layer { position: absolute; inset: 0; z-index: 80; touch-action: none; }
+  .battle-screen > .le-box {
+    position: absolute; border: 1.5px dashed #e8b64d; border-radius: 6px;
+    background: rgba(232, 182, 77, .08); pointer-events: none; z-index: 81;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.5);
+  }
+  .le-box .le-tag {
+    position: absolute; top: -22px; left: 0; font-size: 11px; font-weight: 700;
+    color: #241c07; background: #e8b64d; border-radius: 4px; padding: 1px 6px; white-space: nowrap;
+  }
+  .le-box .le-grip {
+    position: absolute; right: -14px; bottom: -14px; width: 30px; height: 30px; border-radius: 8px;
+    background: #e8b64d; color: #241c07; font-size: 15px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; pointer-events: auto;
+    box-shadow: 0 2px 5px rgba(0,0,0,.6);
+  }
+  .ed-io { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.72); display: none; align-items: center; justify-content: center; }
+  .ed-io.on { display: flex; }
+  .ed-io .box { width: min(560px, 92vw); background: #221c15; border: 1px solid #5a4c3e; border-radius: 12px; padding: 14px; }
+  .ed-io textarea { width: 100%; height: 260px; background: #17130f; color: #e8dcc8; border: 1px solid #4a3b2c; border-radius: 8px; font-size: 12px; padding: 8px; box-sizing: border-box; }
+  .ed-io .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+  #scr .enemy .target-pin { opacity: 1 !important; }  /* 편집기: 화살표를 모든 적에게 표시 */
+</style>
+</head>
+<body>
+<header class="ed-top">
+  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.17 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
+  <div class="ed-btns">
+    <button id="tg-multi">적 2마리</button>
+    <button id="tg-loot">전리품 화면</button>
+    <button id="tg-card">카드 상세</button>
+    <button id="btn-import">가져오기</button>
+    <button id="btn-copy" class="prime">내보내기 (복사)</button>
+    <button id="btn-dl">파일 저장</button>
+    <button id="btn-reset">기본값</button>
+  </div>
+</header>
+<div class="ed-main">
+  <div id="app">
+    <div class="screen battle-screen card-battle" id="scr">
+      <div class="bg-layer" style="background-image: linear-gradient(rgba(16,12,10,.08), rgba(16,12,10,.24) 60%, #0f0c0b 98%), url('https://sepi-toolbox.github.io/Redhood/assets/bg/bg_forest.jpg')"></div>
+      <header class="topbar"><span>⚔ 3층 · 2턴</span><span class="relic-bar">🩸</span><span class="coin-slot">🪙12 <span class="hp">❤️</span></span></header>
+      <div class="enemy-zone" id="ez"></div>
+      <div class="cb-hud">
+        <div class="hp-gauge"><div class="hp-fill" style="width:85%"></div><span class="hp-text">51 / 60</span></div>
+      </div>
+      <div class="cb-preview">턴 종료 → 내 공격 <b class="atk">14</b> (🎯굶주린 까마귀) · 예상 피격 <b class="dmg">9</b></div>
+      <div class="cb-dice" id="dice"></div>
+      <div class="cb-handzone"><div class="cb-hand" id="hand"></div></div>
+      <div class="cb-orb"><b>3</b></div>
+      <div class="cb-pile deck"><b>5</b></div>
+      <div class="cb-pile disc"><b>2</b></div>
+      <button class="btn primary cb-end">턴 종료</button>
+      <div class="hint-line cb-hintline">승리!</div>
+      <div class="sheet-zone combo-grid cb-loot" id="loot"></div>
+      <div class="cb-zoom" id="bigcard"><div class="zbig t-common">
+        <div class="zart" style="background-image:url('https://sepi-toolbox.github.io/Redhood/assets/cards/card_stalk.webp')"></div>
+        <div class="ztt">어둠 속의 추적</div><div class="zcc">2</div>
+        <div class="zdd">부서진 주사위 하나를 골라 3 수리한다. 원래 굴림값 이상으로는 돌아오지 않는다.</div>
+      </div></div>
+    </div>
+  </div>
+  <aside class="ed-panel">
+    <p class="ed-hint">
+      <b>화면에서 직접:</b> 요소를 탭해 선택 → 끌어서 이동 · 모서리 <b>⤡</b>로 크기.<br>
+      몬스터·손패처럼 흐름에 묶인 것은 라벨에 적힌 방향으로만 움직인다.<br>
+      <b>표에서:</b> 숫자를 고치면 화면에 바로 반영. 노란 값 = 기본값에서 바뀐 것.<br>
+      끝나면 <b>내보내기</b> — 복사된 JSON을 그대로 보내주면 게임(layout.json)에 반영된다.
+    </p>
+    <table id="val-table"></table>
+  </aside>
+</div>
+<div class="ed-io" id="io">
+  <div class="box">
+    <p style="color:#e8dcc8; margin-bottom:8px" id="io-title">layout.json 붙여넣기</p>
+    <textarea id="io-text"></textarea>
+    <div class="row">
+      <button id="io-cancel">닫기</button>
+      <button id="io-apply" class="prime">적용</button>
+    </div>
+  </div>
+</div>
+<script>
+'use strict';
+const SITE = 'https://sepi-toolbox.github.io/Redhood';
+const DEFAULTS = {"enemyH": 460, "artH": 288, "artHMulti": 238, "fdiceY": 64, "fdieSize": 44, "diceSize": 58, "diceGap": 10, "orbX": 69, "orbY": 99, "orbSize": 33, "deckX": 19, "deckY": 99, "discX": 18, "discY": 91, "endX": 122, "endY": 125, "cardW": 118, "cardH": 162, "handBottom": -74, "handMargin": 96, "handMaxGap": 58, "lootTop": 430, "hpSide": 7, "hpH": 36, "endW": 141, "endH": 40, "pileW": 35, "pileH": 43, "enemyY": 84, "hpBot": 305, "pvBot": 286, "diceBot": 220, "helpBot": 198, "pinX": 0, "pinY": -23, "pinSize": 21, "cnX": 23.8, "cnY": 5.4, "cnW": 59, "cnH": 8, "ccX": 5.2, "ccY": 4.8, "ccW": 18.5, "ccH": 12.5, "caX": 6, "caY": 9, "caW": 88, "caH": 62, "cdX": 13, "cdY": 72.5, "cdW": 75.6, "cdH": 17.5};
+let L = { ...DEFAULTS };
+const $ = (s) => document.querySelector(s);
+const scr = $('#scr');
+
+/* ---------- 표본 화면 ---------- */
+const FOES = {
+  single: [{ id: 'crow', name: '굶주린 까마귀', hp: '14/34', pct: 41, dice: [3, 6] }],
+  multi: [
+    { id: 'crow', name: '굶주린 까마귀', hp: '14/34', pct: 41, dice: [3, 6] },
+    { id: 'forest_spider', name: '숲거미', hp: '22/28', pct: 78, dice: [2, 5, 4] },
+  ],
+};
+let multi = false, lootView = false;
+function renderFoes() {
+  const list = multi ? FOES.multi : FOES.single;
+  $('#ez').classList.toggle('multi', multi);
+  $('#ez').innerHTML = list.map((f, i) => `
+    <button class="enemy t-normal ${i === 0 ? 'targeted' : ''}">
+      <span class="target-pin">▼</span>
+      <span class="enemy-name">${f.name}</span>
+      <span class="bar t-normal"><i style="width:${f.pct}%"></i></span>
+      <span class="enemy-hp">${f.hp}</span>
+      <span class="cb-intent hurt"><img class="ico-intent" src="${SITE}/assets/icons/intent_attack.png" alt=""> 물어뜯기 <b>14</b></span>
+      <img class="enemy-art enemy-art-img" src="${SITE}/assets/enemies/${f.id}.png" alt="" draggable="false">
+      <span class="fdice">${f.dice.map(v => `<b class="fdie"><img src="${SITE}/assets/dice/blank.png" draggable="false"><span class="fnum">${v}</span></b>`).join('')}</span>
+    </button>`).join('');
+}
+function renderDice() {
+  const vals = [{ v: 1 }, { v: 5 }, { v: 3 }, { v: 1, dead: true }, { v: 4 }];
+  $('#dice').innerHTML = vals.map(d => `
+    <button class="cdie art ${d.dead ? 'dead' : ''}">
+      ${d.dead ? '' : `<img class="pip-art" src="${SITE}/assets/dice/blank.png" draggable="false"><span class="cnum">${d.v}</span>`}
+    </button>`).join('');
+}
+const CARDS = [['courage', '용기', 2, 'rare'], ['stalk', '어둠 속의 추적', 2, 'uncommon'], ['elate', '고양', 1, 'common'], ['repair', '복구', 1, 'common'], ['elate', '고양', 1, 'common']];
+function renderHand() {
+  const hand = $('#hand');
+  const n = CARDS.length;
+  const W = hand.clientWidth || 390;
+  const gap = n > 1 ? Math.min(L.handMaxGap, Math.max(18, (W - L.handMargin - L.cardW) / (n - 1))) : 0;
+  hand.innerHTML = CARDS.map(([id, nm, cost, tier], i) => {
+    const off = i - (n - 1) / 2;
+    return `<div class="cb-card t-${tier}" style="transform: translateX(${off * gap}px) rotate(${off * 5}deg) translateY(${Math.abs(off) * 8}px)">
+      <span class="ccost">${cost}</span><span class="cart" style="background-image:url('${SITE}/assets/cards/card_${id}.webp')"></span><span class="cnm">${nm}</span></div>`;
+  }).join('');
+}
+function renderLoot() {
+  $('#loot').classList.add('loot-list');
+  $('#loot').innerHTML = [
+    ['🪙', '재화', '+12'], ['🃏', '감정 카드', '3개 중 하나를 고른다'], ['🚪', '나가기', ''],
+  ].map(([ico, nm, sub]) => `
+    <button class="sheet-row choice-row loot-row">
+      <span class="row-icon"><span class="row-ico-emoji">${ico}</span></span>
+      <span class="row-body"><span class="choice-main">${nm}</span>${sub ? `<span class="choice-sub">${sub}</span>` : ''}</span>
+    </button>`).join('');
+}
+
+/* ---------- 배치 적용 ---------- */
+function apply() {
+  for (const [k, v] of Object.entries(L)) scr.style.setProperty('--cb-' + k, v + (PCT.has(k) ? '%' : 'px'));
+  renderHand();
+  syncTable();
+  leSync();
+}
+
+/* ---------- 편집 대상 ---------- */
+const clampL = (v, a, b) => Math.max(a, Math.min(b, Math.round(v)));
+const clampP = (v) => Math.max(0, Math.min(98, Math.round(v * 10) / 10));
+const bigEl = (sq) => { const bc = $('#bigcard'); return bc && bc.classList.contains('on') ? bc.querySelector(sq) : null; };
+const bigRect = () => { const el = $('#bigcard .zbig'); const r = el.getBoundingClientRect(); return { w: r.width, h: r.height }; };
+const PCT = new Set(['cnX','cnY','cnW','cnH','ccX','ccY','ccW','ccH','caX','caY','caW','caH','cdX','cdY','cdW','cdH']);
+const ITEMS = [
+  { id: 'cn', label: '카드 이름 (⤡=상자 크기)', keys: ['cnX','cnY','cnW','cnH'], find: () => bigEl('.ztt'),
+    move: (dx, dy) => { const r = bigRect(); L.cnX = clampP(L.cnX + dx / r.w * 100); L.cnY = clampP(L.cnY + dy / r.h * 100); },
+    resize: (dx, dy) => { const r = bigRect(); L.cnW = clampP(L.cnW + dx / r.w * 100); L.cnH = clampP(L.cnH + dy / r.h * 100); } },
+  { id: 'cc', label: '카드 비용 (⤡=상자 크기)', keys: ['ccX','ccY','ccW','ccH'], find: () => bigEl('.zcc'),
+    move: (dx, dy) => { const r = bigRect(); L.ccX = clampP(L.ccX + dx / r.w * 100); L.ccY = clampP(L.ccY + dy / r.h * 100); },
+    resize: (dx, dy) => { const r = bigRect(); L.ccW = clampP(L.ccW + dx / r.w * 100); L.ccH = clampP(L.ccH + dy / r.h * 100); } },
+  { id: 'ca', label: '카드 일러 창 (⤡=크기)', keys: ['caX','caY','caW','caH'], find: () => bigEl('.zart'),
+    move: (dx, dy) => { const r = bigRect(); L.caX = clampP(L.caX + dx / r.w * 100); L.caY = clampP(L.caY + dy / r.h * 100); },
+    resize: (dx, dy) => { const r = bigRect(); L.caW = clampP(L.caW + dx / r.w * 100); L.caH = clampP(L.caH + dy / r.h * 100); } },
+  { id: 'cd', label: '카드 설명 (⤡=상자 크기)', keys: ['cdX','cdY','cdW','cdH'], find: () => bigEl('.zdd'),
+    move: (dx, dy) => { const r = bigRect(); L.cdX = clampP(L.cdX + dx / r.w * 100); L.cdY = clampP(L.cdY + dy / r.h * 100); },
+    resize: (dx, dy) => { const r = bigRect(); L.cdW = clampP(L.cdW + dx / r.w * 100); L.cdH = clampP(L.cdH + dy / r.h * 100); } },
+  { id: 'orb', label: '자원 구슬', keys: ['orbX', 'orbY', 'orbSize'], find: () => $('.cb-orb'),
+    move: (dx, dy) => { L.orbX += dx; L.orbY -= dy; }, resize: (dx, dy) => { L.orbSize = clampL(L.orbSize + dx, 30, 90); } },
+  { id: 'deck', label: '덱 더미 (⤡=크기, 버림과 공용)', keys: ['deckX', 'deckY', 'pileW', 'pileH'], find: () => $('.cb-pile.deck'),
+    move: (dx, dy) => { L.deckX += dx; L.deckY -= dy; },
+    resize: (dx, dy) => { L.pileW = clampL(L.pileW + dx, 26, 90); L.pileH = clampL(L.pileH + dy, 34, 110); } },
+  { id: 'disc', label: '버림 더미 (⤡=크기, 덱과 공용)', keys: ['discX', 'discY', 'pileW', 'pileH'], find: () => $('.cb-pile.disc'),
+    move: (dx, dy) => { L.discX -= dx; L.discY -= dy; },
+    resize: (dx, dy) => { L.pileW = clampL(L.pileW + dx, 26, 90); L.pileH = clampL(L.pileH + dy, 34, 110); } },
+  { id: 'end', label: '턴 종료 버튼 (⤡=크기)', keys: ['endX', 'endY', 'endW', 'endH'], find: () => $('.cb-end'),
+    move: (dx, dy) => { L.endX -= dx; L.endY -= dy; },
+    resize: (dx, dy) => { L.endW = clampL(L.endW + dx, 80, 260); L.endH = clampL(L.endH + dy, 30, 80); } },
+  { id: 'hp', label: '체력바 (좌우=여백, ⤡=높이)', keys: ['hpBot', 'hpSide', 'hpH'], find: () => $('.cb-hud'),
+    move: (dx, dy) => { L.hpBot -= dy; L.hpSide = clampL(L.hpSide + dx, 0, 90); },
+    resize: (dx, dy) => { L.hpH = clampL(L.hpH + dy, 20, 64); } },
+  { id: 'pv', label: '미리보기 줄 (위아래)', keys: ['pvBot'], find: () => $('.cb-preview'),
+    move: (dx, dy) => { L.pvBot -= dy; } },
+  { id: 'pin', label: '타게팅 화살표 ▼ (⤡=크기 · 값은 모든 적 공용)', keys: ['pinX', 'pinY', 'pinSize'],
+    findAll: () => [...document.querySelectorAll('.enemy .target-pin')],
+    move: (dx, dy) => { L.pinX += dx; L.pinY += dy; },
+    resize: (dx, dy) => { L.pinSize = clampL(L.pinSize + dx, 8, 40); } },
+  { id: 'fdice', label: '적 주사위 (위아래로 · 값은 모든 적 공용)', keys: ['fdiceY', 'fdieSize'],
+    findAll: () => [...document.querySelectorAll('.fdice')],
+    move: (dx, dy) => { L.fdiceY = clampL(L.fdiceY + dy, 0, 220); }, resize: (dx, dy) => { L.fdieSize = clampL(L.fdieSize + dx, 22, 64); } },
+  { id: 'mydice', label: '내 주사위 (위아래=위치, 좌우=간격)', keys: ['diceBot', 'diceSize', 'diceGap'], find: () => $('.cb-dice'),
+    move: (dx, dy) => { L.diceBot -= dy; L.diceGap = clampL(L.diceGap + dx / 3, 0, 30); }, resize: (dx, dy) => { L.diceSize = clampL(L.diceSize + dx, 40, 90); } },
+  { id: 'hand', label: '손패 (위아래=높이, 좌우=펼침)', keys: ['cardW', 'cardH', 'handBottom', 'handMargin'], find: () => $('.cb-hand'),
+    move: (dx, dy) => { L.handBottom -= dy; L.handMargin = clampL(L.handMargin - dx, 0, 260); },
+    resize: (dx, dy) => { L.cardW = clampL(L.cardW + dx, 70, 190); L.cardH = Math.round(L.cardW * 162 / 118); } },
+  { id: 'loot', label: '전리품 목록', keys: ['lootTop'], find: () => lootView ? $('.cb-loot') : null,
+    move: (dx, dy) => { L.lootTop = clampL(L.lootTop + dy, 200, 700); } },
+  { id: 'enemy', label: '몬스터 (끌기=내림, ⤡=크기)', keys: ['enemyY', 'enemyH', 'artH', 'artHMulti'], find: () => $('.enemy-zone'),
+    move: (dx, dy) => { L.enemyY = clampL(L.enemyY + dy, -120, 400); },
+    resize: (dx, dy) => { if (multi) L.artHMulti = clampL(L.artHMulti + dy, 120, 360); else L.artH = clampL(L.artH + dy, 140, 420); } },
+];
+
+/* ---------- 선택·드래그 ---------- */
+let sel = null, box = null, boxFor = null, drag = null;
+const layer = document.createElement('div');
+layer.className = 'le-layer';
+scr.appendChild(layer);
+
+function leMove(e) {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (!dx && !dy) return;
+  drag.x = e.clientX; drag.y = e.clientY;
+  if (drag.mode === 'resize' && drag.item.resize) drag.item.resize(dx, dy);
+  else if (drag.item.move) drag.item.move(dx, dy);
+  apply();
+}
+const leEnd = () => { drag = null; };
+const elsOf = (it) => (it.findAll ? it.findAll() : [it.find()]).filter(Boolean);
+layer.addEventListener('pointerdown', (e) => {
+  const hit = ITEMS.flatMap(it => elsOf(it).map(el => ({ it, el })))
+    .map(x => ({ ...x, r: x.el.getBoundingClientRect() }))
+    .filter(x => e.clientX >= x.r.left - 6 && e.clientX <= x.r.right + 6 && e.clientY >= x.r.top - 6 && e.clientY <= x.r.bottom + 6)
+    .sort((a, b) => a.r.width * a.r.height - b.r.width * b.r.height)[0];
+  if (hit) {
+    sel = { it: hit.it, el: hit.el };
+    drag = { item: hit.it, mode: 'move', x: e.clientX, y: e.clientY };
+    try { layer.setPointerCapture(e.pointerId); } catch (_) {}
+  } else sel = null;
+  leSync();
+});
+layer.addEventListener('pointermove', leMove);
+layer.addEventListener('pointerup', leEnd);
+layer.addEventListener('pointercancel', leEnd);
+
+function leSync() {
+  if (sel && sel.el && !sel.el.isConnected) sel = null;   // 화면 전환으로 사라진 요소
+  if (!sel) {
+    if (box) { box.remove(); box = null; boxFor = null; }
+    return;
+  }
+  const el = sel.el;
+  const sr = scr.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  if (!box || boxFor !== el) {
+    if (box) box.remove();
+    box = document.createElement('div');
+    box.className = 'le-box';
+    box.innerHTML = `<span class="le-tag">${sel.it.label}</span>${sel.it.resize ? '<span class="le-grip">⤡</span>' : ''}`;
+    scr.appendChild(box);
+    boxFor = el;
+    const grip = box.querySelector('.le-grip');
+    if (grip) {
+      grip.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        drag = { item: sel.it, mode: 'resize', x: e.clientX, y: e.clientY };
+        try { grip.setPointerCapture(e.pointerId); } catch (_) {}
+      });
+      grip.addEventListener('pointermove', leMove);
+      grip.addEventListener('pointerup', leEnd);
+      grip.addEventListener('pointercancel', leEnd);
+    }
+  }
+  box.style.left = `${r.left - sr.left}px`;
+  box.style.top = `${r.top - sr.top}px`;
+  box.style.width = `${r.width}px`;
+  box.style.height = `${r.height}px`;
+}
+
+/* ---------- 값 표 ---------- */
+const KEY_DESC = {
+  enemyH: '적 영역 높이', artH: '몬스터 크기(1마리)', artHMulti: '몬스터 크기(여럿)', fdiceY: '적 주사위 내림', fdieSize: '적 주사위 크기',
+  diceSize: '내 주사위 크기', diceGap: '내 주사위 간격',
+  orbX: '자원 구슬 왼쪽', orbY: '자원 구슬 아래', orbSize: '자원 구슬 크기',
+  deckX: '덱 더미 왼쪽', deckY: '덱 더미 아래', discX: '버림 더미 오른쪽', discY: '버림 더미 아래',
+  endX: '턴 종료 오른쪽', endY: '턴 종료 아래',
+  cardW: '카드 폭', cardH: '카드 높이', handBottom: '손패 내림(음수=아래로)', handMargin: '손패 좌우 여백', handMaxGap: '카드 간격 최대',
+  lootTop: '전리품 시작 높이', enemyY: '몬스터 내림(통째로)',
+  cnX: '카드 이름 왼쪽(%)', cnY: '카드 이름 위(%)', cnW: '카드 이름 폭(%)', cnH: '카드 이름 높이(%)',
+  ccX: '카드 비용 왼쪽(%)', ccY: '카드 비용 위(%)', ccW: '카드 비용 폭(%)', ccH: '카드 비용 높이(%)',
+  caX: '카드 일러 왼쪽(%)', caY: '카드 일러 위(%)', caW: '카드 일러 폭(%)', caH: '카드 일러 높이(%)',
+  cdX: '카드 설명 왼쪽(%)', cdY: '카드 설명 위(%)', cdW: '카드 설명 폭(%)', cdH: '카드 설명 높이(%)',
+  hpBot: '체력바 (아래에서부터)', hpSide: '체력바 좌우 여백', hpH: '체력바 높이',
+  pvBot: '미리보기 줄 (아래에서부터)', diceBot: '내 주사위 줄 (아래에서부터)', helpBot: '도움말 줄 (아래에서부터)',
+  pinX: '타게팅 화살표 좌우', pinY: '타게팅 화살표 위아래', pinSize: '타게팅 화살표 크기',
+  endW: '턴 종료 폭', endH: '턴 종료 높이',
+  pileW: '덱·버림 더미 폭', pileH: '덱·버림 더미 높이',
+};
+function buildTable() {
+  $('#val-table').innerHTML = '<tr><th>키</th><th>설명</th><th>값</th></tr>' + Object.keys(DEFAULTS).map(k => `
+    <tr><td class="k">${k}</td><td class="d">${KEY_DESC[k] || ''}</td>
+    <td><input type="number" data-k="${k}" value="${L[k]}"></td></tr>`).join('');
+  $('#val-table').querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const v = parseFloat(inp.value);
+      if (Number.isFinite(v)) { L[inp.dataset.k] = v; apply(); }
+    });
+  });
+}
+function syncTable() {
+  $('#val-table').querySelectorAll('input').forEach(inp => {
+    const k = inp.dataset.k;
+    if (document.activeElement !== inp) inp.value = L[k];
+    inp.classList.toggle('changed', L[k] !== DEFAULTS[k]);
+  });
+}
+
+/* ---------- 도구 단추 ---------- */
+$('#tg-multi').addEventListener('click', () => {
+  multi = !multi;
+  $('#tg-multi').classList.toggle('on', multi);
+  $('#tg-multi').textContent = multi ? '적 1마리' : '적 2마리';
+  sel = null;
+  renderFoes(); apply();
+});
+$('#tg-card').addEventListener('click', () => {
+  const bc = $('#bigcard');
+  const on = !bc.classList.contains('on');
+  bc.classList.toggle('on', on);
+  $('#tg-card').classList.toggle('on', on);
+  $('#tg-card').textContent = on ? '카드 닫기' : '카드 상세';
+  sel = null; leSync();
+});
+$('#tg-loot').addEventListener('click', () => {
+  lootView = !lootView;
+  $('#tg-loot').classList.toggle('on', lootView);
+  $('#tg-loot').textContent = lootView ? '전투 화면' : '전리품 화면';
+  scr.classList.toggle('loot-mode', lootView);
+  sel = null; leSync();
+});
+const jsonNow = () => JSON.stringify({ battle: L }, null, 2);
+$('#btn-copy').addEventListener('click', () => {
+  const openBox = () => { $('#io-title').textContent = '이 JSON을 복사해서 보내주세요'; $('#io-text').value = jsonNow(); $('#io').classList.add('on'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(jsonNow()).then(() => { $('#btn-copy').textContent = '복사됨!'; setTimeout(() => { $('#btn-copy').textContent = '내보내기 (복사)'; }, 1600); }, openBox);
+  } else openBox();
+});
+$('#btn-dl').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([jsonNow()], { type: 'application/json' }));
+  a.download = 'layout.json'; a.click();
+});
+$('#btn-reset').addEventListener('click', () => { L = { ...DEFAULTS }; apply(); });
+$('#btn-import').addEventListener('click', () => { $('#io-title').textContent = 'layout.json 붙여넣기'; $('#io-text').value = ''; $('#io').classList.add('on'); });
+$('#io-cancel').addEventListener('click', () => $('#io').classList.remove('on'));
+$('#io-apply').addEventListener('click', () => {
+  try {
+    const o = JSON.parse($('#io-text').value);
+    Object.assign(L, o.battle || o);
+    $('#io').classList.remove('on');
+    apply();
+  } catch (e) { alert('JSON을 읽지 못했어요: ' + e.message); }
+});
+
+renderFoes(); renderDice(); renderLoot(); buildTable(); apply();
+</script>
+</body>
+</html>

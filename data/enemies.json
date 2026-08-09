@@ -1,4693 +1,5937 @@
 [
-  {
-    "id": "crow",
-    "name": "굶주린 까마귀",
-    "tier": "normal",
-    "art": "🐦‍⬛",
-    "hp": [
-      36,
-      41
+ {
+  "id": "crow",
+  "name": "굶주린 까마귀",
+  "tier": "normal",
+  "art": "🐦‍⬛",
+  "hp": [
+   36,
+   41
+  ],
+  "moves": {
+   "peck": {
+    "name": "쪼기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 4,
+      "hits": 2
+     }
     ],
-    "moves": {
-      "peck": {
-        "name": "쪼기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 4,
-            "hits": 2
-          }
-        ],
-        "cooldown": 1
-      },
-      "dive": {
-        "name": "날개쉬기",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      },
-      "caw": {
-        "name": "흉내내기",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "confuse"
-          }
-        ],
-        "cooldown": 1
-      },
-      "surge": {
-        "name": "마구 쪼기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 2,
-            "hits": 5
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      }
-    },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "peck": 1,
-        "dive": 1,
-        "caw": 1,
-        "surge": 99
-      },
-      "noRepeat": 2
-    },
-    "enlightenedMove": {
-      "name": "눈알 노리기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 9
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
-    }
+    "cooldown": 1
+   },
+   "dive": {
+    "name": "날개쉬기",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   },
+   "caw": {
+    "name": "흉내내기",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "confuse"
+     }
+    ],
+    "cooldown": 1
+   },
+   "surge": {
+    "name": "마구 쪼기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 2,
+      "hits": 5
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   }
   },
-  {
-    "id": "will_o_wisp",
-    "name": "도깨비불",
-    "tier": "normal",
-    "art": "🔥",
-    "hp": [
-      32,
-      37
-    ],
-    "moves": {
-      "scorch": {
-        "name": "웅크리기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 1,
-            "hits": 5
-          }
-        ],
-        "cooldown": 1
-      },
-      "flicker": {
-        "name": "명멸",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 15
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "flare",
-          "chance": 1
-        },
-        "cooldown": 1,
-        "lockTurn": 5
-      },
-      "flare": {
-        "name": "불꽃 폭발",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 16
-          }
-        ],
-        "minTurn": 5,
-        "break": {
-          "damage": 1,
-          "move": "ashes"
-        }
-      },
-      "surge": {
-        "name": "심각한 명멸",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 20
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 1,
-        "followUp": {
-          "move": "move1",
-          "chance": 1
-        }
-      },
-      "move1": {
-        "name": "대폭발",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 32
-          }
-        ],
-        "minTurn": 5,
-        "break": {
-          "damage": 1,
-          "move": "ashes"
-        }
-      }
-    },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "scorch": 1,
-        "flicker": 1,
-        "flare": 0,
-        "surge": 1,
-        "move1": 0
-      }
-    },
-    "enlightenedMove": {
-      "name": "도깨비 화염",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 13
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
-    },
-    "uniqueMoves": {
-      "ashes": {
-        "name": "잿더미",
-        "effects": [
-          {
-            "op": "selfDamage",
-            "amount": 15
-          }
-        ]
-      }
-    }
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "peck": 1,
+    "dive": 1,
+    "caw": 1,
+    "surge": 99
+   },
+   "noRepeat": 2
   },
-  {
-    "id": "forest_spider",
-    "name": "숲거미",
-    "tier": "normal",
-    "art": "🕷️",
-    "hp": [
-      39,
-      44
-    ],
-    "moves": {
-      "bite": {
-        "name": "독니",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "poison"
-          },
-          {
-            "op": "damage",
-            "amount": 5
-          }
-        ],
-        "cooldown": 1,
-        "lockTurn": 3
-      },
-      "web": {
-        "name": "거미줄",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "bind"
-          }
-        ],
-        "cooldown": 1
-      },
-      "ambush": {
-        "name": "웅크리기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 10
-          }
-        ],
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "맹독니",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 4,
-            "kind": "poison"
-          },
-          {
-            "op": "damage",
-            "amount": 5
-          }
-        ],
-        "minTurn": 3,
-        "cooldown": 1
-      }
+  "enlightenedMove": {
+   "name": "눈알 노리기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 9
     },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "bite": 1,
-        "web": 1,
-        "ambush": 1,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "맹독 송곳니",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 11
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
+    {
+     "op": "confuse",
+     "amount": 1
     }
+   ]
   },
-  {
-    "id": "stray_dog",
-    "name": "들개",
-    "tier": "normal",
-    "art": "🐕",
-    "hp": [
-      44,
-      47
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    3
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "peck",
+    "name": "쪼기",
+    "op": "damage",
+    "weight": 3
+   },
+   {
+    "id": "rest",
+    "name": "날개쉬기",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.25
+   },
+   {
+    "id": "surge",
+    "name": "마구 쪼기",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 1
+   }
+  ]
+ },
+ {
+  "id": "will_o_wisp",
+  "name": "도깨비불",
+  "tier": "normal",
+  "art": "🔥",
+  "hp": [
+   32,
+   37
+  ],
+  "moves": {
+   "scorch": {
+    "name": "웅크리기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 1,
+      "hits": 5
+     }
     ],
-    "moves": {
-      "bite": {
-        "name": "물어뜯기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 11,
-            "hits": 1
-          }
-        ],
-        "cooldown": 2
-      },
-      "growl": {
-        "name": "울부짖기",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ],
-        "cooldown": 2
-      },
-      "maul": {
-        "name": "상처 보듬기",
-        "effects": [
-          {
-            "op": "rest"
-          }
-        ],
-        "minTurn": 1,
-        "cooldown": 0
-      },
-      "surge": {
-        "name": "허기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 10
-          },
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 5
-      }
+    "cooldown": 1
+   },
+   "flicker": {
+    "name": "명멸",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 15
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "flare",
+     "chance": 1
     },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "bite": 2,
-        "growl": 2,
-        "maul": 1,
-        "surge": 3
-      },
-      "noRepeat": 2
-    },
-    "enlightenedMove": {
-      "name": "굶주림",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 14
-        },
-        {
-          "op": "heal",
-          "amount": 5
-        }
-      ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        5,
-        6
-      ]
-    },
-    "faceAbilities": {
-      "1": {
-        "op": "damage",
-        "name": "물기"
-      },
-      "3": {
-        "op": "bleed",
-        "amount": 2,
-        "name": "이빨 박기"
-      },
-      "5": {
-        "op": "armor",
-        "amount": 5,
-        "name": "웅크리기"
-      },
-      "6": {
-        "op": "lifesteal",
-        "name": "피 핥기"
-      }
+    "cooldown": 1,
+    "lockTurn": 5
+   },
+   "flare": {
+    "name": "불꽃 폭발",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 16
+     }
+    ],
+    "minTurn": 5,
+    "break": {
+     "damage": 1,
+     "move": "ashes"
     }
-  },
-  {
-    "id": "thorn_bush",
-    "name": "가시덤불",
-    "tier": "normal",
-    "art": "🥀",
-    "hp": [
-      47,
-      50
+   },
+   "surge": {
+    "name": "심각한 명멸",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 20
+     }
     ],
-    "moves": {
-      "scratch": {
-        "name": "가시 뿜기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 1,
-            "hits": 5
-          }
-        ],
-        "cooldown": 1
-      },
-      "coil": {
-        "name": "줄기 방패",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 6
-          }
-        ],
-        "cooldown": 1
-      },
-      "lash": {
-        "name": "덩굴 채찍",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          },
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "bind"
-          }
-        ],
-        "minTurn": 3,
-        "cooldown": 3
-      },
-      "surge": {
-        "name": "급성장",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 6
-      }
-    },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "scratch": 1,
-        "coil": 1,
-        "lash": 99,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "가시 폭발",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 12
-        },
-        {
-          "op": "block",
-          "amount": 6
-        }
-      ]
+    "minTurn": 5,
+    "cooldown": 1,
+    "followUp": {
+     "move": "move1",
+     "chance": 1
     }
-  },
-  {
-    "id": "twig_golem",
-    "name": "옹이 골렘",
-    "tier": "normal",
-    "art": "🌳",
-    "hp": [
-      54,
-      60
+   },
+   "move1": {
+    "name": "대폭발",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 32
+     }
     ],
-    "moves": {
-      "slam": {
-        "name": "내리찍기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 8
-          }
-        ],
-        "cooldown": 3
-      },
-      "root": {
-        "name": "뿌리내림",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 10
-          }
-        ],
-        "followUp": {
-          "move": "crush",
-          "chance": 1
-        },
-        "cooldown": 3
-      },
-      "crush": {
-        "name": "짓뭉개기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 15
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 3
-      },
-      "mend": {
-        "name": "수액 빨아올리기",
-        "effects": [
-          {
-            "op": "heal",
-            "amount": 7
-          }
-        ],
-        "cooldown": 3
-      },
-      "surge": {
-        "name": "옹이가 굵어진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "slam": 1,
-        "root": 1,
-        "crush": 0,
-        "mend": 1,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "숲의 분노",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 15
-        },
-        {
-          "op": "block",
-          "amount": 8
-        }
-      ]
+    "minTurn": 5,
+    "break": {
+     "damage": 1,
+     "move": "ashes"
     }
+   }
   },
-  {
-    "id": "brook_sprite",
-    "name": "개울 정령",
-    "tier": "normal",
-    "art": "💧",
-    "hp": [
-      34,
-      39
-    ],
-    "moves": {
-      "splash": {
-        "name": "물장구",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5
-          }
-        ],
-        "cooldown": 1
-      },
-      "mist_veil": {
-        "name": "물안개",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 6
-          },
-          {
-            "op": "status",
-            "kind": "confuse",
-            "amount": 3
-          }
-        ],
-        "followUp": {
-          "move": "torrent",
-          "chance": 1
-        },
-        "cooldown": 1
-      },
-      "torrent": {
-        "name": "급류",
-        "effects": [
-          {
-            "op": "rest",
-            "amount": 9
-          }
-        ],
-        "minTurn": 3,
-        "cooldown": 1,
-        "followUp": {
-          "move": "surge",
-          "chance": 1
-        }
-      },
-      "surge": {
-        "name": "가까워진 급류",
-        "effects": [
-          {
-            "op": "rest",
-            "amount": 5
-          }
-        ],
-        "minTurn": 0,
-        "cooldown": 1,
-        "followUp": {
-          "move": "move1",
-          "chance": 1
-        }
-      },
-      "move1": {
-        "name": "물벼락",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 22
-          },
-          {
-            "op": "status",
-            "kind": "confuse",
-            "amount": 3
-          }
-        ]
-      }
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "scorch": 1,
+    "flicker": 1,
+    "flare": 0,
+    "surge": 1,
+    "move1": 0
+   }
+  },
+  "enlightenedMove": {
+   "name": "도깨비 화염",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 13
     },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "splash": 1,
-        "mist_veil": 1,
-        "torrent": 99,
-        "surge": 0,
-        "move1": 0
-      }
-    },
-    "enlightenedMove": {
-      "name": "소용돌이",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 9
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
+    {
+     "op": "confuse",
+     "amount": 1
     }
+   ]
   },
-  {
-    "id": "leech",
-    "name": "거머리",
-    "tier": "normal",
-    "art": "🪱",
-    "hp": [
-      30,
-      34
-    ],
-    "moves": {
-      "suck": {
-        "name": "피 빨기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 4
-          },
-          {
-            "op": "heal",
-            "amount": 4
-          }
-        ],
-        "followUp": {
-          "move": "swell",
-          "chance": 0.5
-        },
-        "break": {
-          "damage": 24,
-          "move": "unique1"
-        }
-      },
-      "cling": {
-        "name": "들러붙기",
-        "effects": [
-          {
-            "op": "rest",
-            "amount": 5
-          }
-        ],
-        "minTurn": 0,
-        "followUp": {
-          "move": "suck",
-          "chance": 1
-        },
-        "cooldown": 1
-      },
-      "swell": {
-        "name": "대량의 피 빨기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 6
-          },
-          {
-            "op": "heal",
-            "amount": 6
-          }
-        ],
-        "followUp": {
-          "move": "surge",
-          "chance": 1
-        }
-      },
-      "surge": {
-        "name": "심각한 피 빨기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 8
-          },
-          {
-            "op": "heal",
-            "amount": 8
-          }
-        ],
-        "minTurn": 0,
-        "cooldown": 0,
-        "followUp": {
-          "move": "cling",
-          "chance": 0.5
-        },
-        "break": {
-          "damage": 6,
-          "move": "unique1"
-        }
-      }
-    },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "suck": 0,
-        "cling": 2,
-        "swell": 0,
-        "surge": 0
-      },
-      "noRepeat": 2
-    },
-    "enlightenedMove": {
-      "name": "포식",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 8
-        },
-        {
-          "op": "heal",
-          "amount": 8
-        }
-      ]
-    },
-    "uniqueMoves": {
-      "unique1": {
-        "name": "숨고르기",
-        "effects": [
-          {
-            "op": "rest"
-          }
-        ]
-      }
-    }
-  },
-  {
-    "id": "rat_swarm",
-    "name": "쥐떼",
-    "tier": "normal",
-    "art": "🐀",
-    "hp": [
-      32,
-      37
-    ],
-    "moves": {
-      "gnaw": {
-        "name": "갉기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 4
-          }
-        ]
-      },
-      "swarm": {
-        "name": "몰려들기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 6
-          }
-        ],
-        "minTurn": 5
-      },
-      "squeak": {
-        "name": "불길한 찍찍",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ],
-        "followUp": {
-          "move": "swarm",
-          "chance": 0.5
-        }
-      },
-      "surge": {
-        "name": "무리가 불어난다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "gnaw": 3,
-        "swarm": 2,
-        "squeak": 1,
-        "surge": 3
-      },
-      "noRepeat": 2
-    },
-    "enlightenedMove": {
-      "name": "광란의 이빨",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 11
-        }
-      ]
-    }
-  },
-  {
-    "id": "living_broom",
-    "name": "살아있는 빗자루",
-    "tier": "normal",
-    "art": "🧹",
-    "hp": [
-      37,
-      42
-    ],
-    "moves": {
-      "sweep": {
-        "name": "쓸어내기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 1
-      },
-      "dust": {
-        "name": "먼지구름",
-        "effects": [
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ],
-        "cooldown": 3
-      },
-      "stand": {
-        "name": "버티기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 7
-          }
-        ],
-        "followUp": {
-          "move": "sweep",
-          "chance": 1
-        },
-        "cooldown": 3
-      },
-      "surge": {
-        "name": "빗자루가 뻣뻣해진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "sweep": 2,
-        "dust": 1,
-        "stand": 1,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "후려치기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 13
-        }
-      ]
-    }
-  },
-  {
-    "id": "alpha_dog",
-    "name": "우두머리 들개",
-    "tier": "elite",
-    "art": "🦮",
-    "hp": [
-      78,
-      78
-    ],
-    "moves": {
-      "bite": {
-        "name": "물어뜯기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 11
-          }
-        ],
-        "cooldown": 1
-      },
-      "howl": {
-        "name": "울부짖음",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 20
-          },
-          {
-            "op": "empower",
-            "amount": 3
-          }
-        ],
-        "followUp": {
-          "move": "frenzy",
-          "chance": 1
-        },
-        "cooldown": 3
-      },
-      "frenzy": {
-        "name": "광란",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5,
-            "hits": 3
-          },
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "bleed"
-          }
-        ],
-        "minTurn": 3,
-        "cooldown": 0,
-        "lockTurn": 0,
-        "break": {
-          "damage": 1,
-          "move": "unique1"
-        }
-      },
-      "surge": {
-        "name": "상처 찢기",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "bleed"
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 1
-      },
-      "pack_rule": {
-        "name": "무리의 규칙",
-        "effects": [
-          {
-            "op": "demand",
-            "turns": 2,
-            "amount": 18,
-            "category": "twoPair",
-            "power": 2
-          },
-          {
-            "op": "status",
-            "kind": "bleed",
-            "amount": 3
-          }
-        ],
-        "cooldown": 3,
-        "minTurn": 2
-      }
-    },
-    "enlightenedMove": {
-      "name": "무리의 기억",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 24
-        },
-        {
-          "op": "empower",
-          "amount": 2
-        }
-      ]
-    },
-    "uniqueMoves": {
-      "unique1": {
-        "name": "상처 보듬기",
-        "effects": [
-          {
-            "op": "rest"
-          }
-        ]
-      },
-      "unique2": {
-        "name": "궁지에 몰린 야수",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 10
-          }
-        ],
-        "followUp": {
-          "move": "bite",
-          "chance": 1
-        }
-      }
-    },
-    "phases": [
-      {
-        "untilHpRatio": 0.5,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "bite": 2,
-            "howl": 1,
-            "frenzy": 0,
-            "surge": 3,
-            "pack_rule": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "bite": 2,
-            "howl": 1,
-            "frenzy": 0,
-            "surge": 3,
-            "pack_rule": 2
-          }
-        },
-        "enter": "unique2"
-      }
+  "uniqueMoves": {
+   "ashes": {
+    "name": "잿더미",
+    "effects": [
+     {
+      "op": "selfDamage",
+      "amount": 15
+     }
     ]
+   }
   },
-  {
-    "id": "old_pike",
-    "name": "늙은 강꼬치",
-    "tier": "elite",
-    "art": "🐟",
-    "hp": [
-      82,
-      82
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "flare",
+    "name": "홀리기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "waver",
+    "name": "일렁임",
+    "op": "heal",
+    "weight": 2
+   }
+  ]
+ },
+ {
+  "id": "forest_spider",
+  "name": "숲거미",
+  "tier": "normal",
+  "art": "🕷️",
+  "hp": [
+   39,
+   44
+  ],
+  "moves": {
+   "bite": {
+    "name": "독니",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "poison"
+     },
+     {
+      "op": "damage",
+      "amount": 5
+     }
     ],
-    "moves": {
-      "snap": {
-        "name": "물기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          }
-        ],
-        "cooldown": 1
-      },
-      "dive": {
-        "name": "잠수",
-        "effects": [
-          {
-            "op": "rest",
-            "amount": 10
-          }
-        ],
-        "hidden": true,
-        "cooldown": 1,
-        "break": {
-          "damage": 14,
-          "move": "unique1"
-        },
-        "followUp": {
-          "move": "snap",
-          "chance": 1
-        }
-      },
-      "thrash": {
-        "name": "요동",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 2,
-            "kind": "stun"
-          },
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 3
-      },
-      "slick": {
-        "name": "미끄러운 비늘",
-        "effects": [
-          {
-            "op": "cap",
-            "amount": 22,
-            "turns": 3
-          },
-          {
-            "op": "status",
-            "kind": "stun",
-            "amount": 2
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
+    "cooldown": 1,
+    "lockTurn": 3
+   },
+   "web": {
+    "name": "거미줄",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "bind"
+     }
+    ],
+    "cooldown": 1
+   },
+   "ambush": {
+    "name": "웅크리기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 10
+     }
+    ],
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "맹독니",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 4,
+      "kind": "poison"
+     },
+     {
+      "op": "damage",
+      "amount": 5
+     }
+    ],
+    "minTurn": 3,
+    "cooldown": 1
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "bite": 1,
+    "web": 1,
+    "ambush": 1,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "맹독 송곳니",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 11
     },
+    {
+     "op": "confuse",
+     "amount": 1
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    5
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "bite",
+    "name": "물기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "venom",
+    "name": "독니",
+    "op": "bleed",
+    "weight": 2,
+    "amount": 2
+   },
+   {
+    "id": "web",
+    "name": "거미줄 치기",
+    "op": "armor",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "stray_dog",
+  "name": "들개",
+  "tier": "normal",
+  "art": "🐕",
+  "hp": [
+   44,
+   47
+  ],
+  "moves": {
+   "bite": {
+    "name": "물어뜯기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 11,
+      "hits": 1
+     }
+    ],
+    "cooldown": 2
+   },
+   "growl": {
+    "name": "울부짖기",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2
+   },
+   "maul": {
+    "name": "상처 보듬기",
+    "effects": [
+     {
+      "op": "rest"
+     }
+    ],
+    "minTurn": 1,
+    "cooldown": 0
+   },
+   "surge": {
+    "name": "허기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 10
+     },
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 5
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "bite": 2,
+    "growl": 2,
+    "maul": 1,
+    "surge": 3
+   },
+   "noRepeat": 2
+  },
+  "enlightenedMove": {
+   "name": "굶주림",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 14
+    },
+    {
+     "op": "heal",
+     "amount": 5
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    5,
+    6
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "bite",
+    "name": "물어뜯기",
+    "op": "damage",
+    "weight": 3
+   },
+   {
+    "id": "growl",
+    "name": "울부짖기",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.25
+   },
+   {
+    "id": "lick",
+    "name": "상처 핥기",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "hunger",
+    "name": "허기",
+    "op": "lifesteal",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "thorn_bush",
+  "name": "가시덤불",
+  "tier": "normal",
+  "art": "🥀",
+  "hp": [
+   47,
+   50
+  ],
+  "moves": {
+   "scratch": {
+    "name": "가시 뿜기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 1,
+      "hits": 5
+     }
+    ],
+    "cooldown": 1
+   },
+   "coil": {
+    "name": "줄기 방패",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 6
+     }
+    ],
+    "cooldown": 1
+   },
+   "lash": {
+    "name": "덩굴 채찍",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     },
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "bind"
+     }
+    ],
+    "minTurn": 3,
+    "cooldown": 3
+   },
+   "surge": {
+    "name": "급성장",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 3
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 6
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "scratch": 1,
+    "coil": 1,
+    "lash": 99,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "가시 폭발",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 12
+    },
+    {
+     "op": "block",
+     "amount": 6
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    2,
+    3,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "whip",
+    "name": "가시 채찍",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "bristle",
+    "name": "가시 돋기",
+    "op": "armor",
+    "weight": 2
+   }
+  ]
+ },
+ {
+  "id": "twig_golem",
+  "name": "옹이 골렘",
+  "tier": "normal",
+  "art": "🌳",
+  "hp": [
+   54,
+   60
+  ],
+  "moves": {
+   "slam": {
+    "name": "내리찍기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 8
+     }
+    ],
+    "cooldown": 3
+   },
+   "root": {
+    "name": "뿌리내림",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 10
+     }
+    ],
+    "followUp": {
+     "move": "crush",
+     "chance": 1
+    },
+    "cooldown": 3
+   },
+   "crush": {
+    "name": "짓뭉개기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 15
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 3
+   },
+   "mend": {
+    "name": "수액 빨아올리기",
+    "effects": [
+     {
+      "op": "heal",
+      "amount": 7
+     }
+    ],
+    "cooldown": 3
+   },
+   "surge": {
+    "name": "옹이가 굵어진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "slam": 1,
+    "root": 1,
+    "crush": 0,
+    "mend": 1,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "숲의 분노",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 15
+    },
+    {
+     "op": "block",
+     "amount": 8
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    5
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "slam",
+    "name": "후려치기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "rebuild",
+    "name": "재조립",
+    "op": "armor",
+    "weight": 1
+   },
+   {
+    "id": "gather",
+    "name": "가지 그러모으기",
+    "op": "heal",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "brook_sprite",
+  "name": "개울 정령",
+  "tier": "normal",
+  "art": "💧",
+  "hp": [
+   34,
+   39
+  ],
+  "moves": {
+   "splash": {
+    "name": "물장구",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5
+     }
+    ],
+    "cooldown": 1
+   },
+   "mist_veil": {
+    "name": "물안개",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 6
+     },
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 3
+     }
+    ],
+    "followUp": {
+     "move": "torrent",
+     "chance": 1
+    },
+    "cooldown": 1
+   },
+   "torrent": {
+    "name": "급류",
+    "effects": [
+     {
+      "op": "rest",
+      "amount": 9
+     }
+    ],
+    "minTurn": 3,
+    "cooldown": 1,
+    "followUp": {
+     "move": "surge",
+     "chance": 1
+    }
+   },
+   "surge": {
+    "name": "가까워진 급류",
+    "effects": [
+     {
+      "op": "rest",
+      "amount": 5
+     }
+    ],
+    "minTurn": 0,
+    "cooldown": 1,
+    "followUp": {
+     "move": "move1",
+     "chance": 1
+    }
+   },
+   "move1": {
+    "name": "물벼락",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 22
+     },
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 3
+     }
+    ]
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "splash": 1,
+    "mist_veil": 1,
+    "torrent": 99,
+    "surge": 0,
+    "move1": 0
+   }
+  },
+  "enlightenedMove": {
+   "name": "소용돌이",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 9
+    },
+    {
+     "op": "confuse",
+     "amount": 1
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "splash",
+    "name": "물장구",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "play",
+    "name": "물장난",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "glitter",
+    "name": "반짝임",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.25
+   }
+  ]
+ },
+ {
+  "id": "leech",
+  "name": "거머리",
+  "tier": "normal",
+  "art": "🪱",
+  "hp": [
+   30,
+   34
+  ],
+  "moves": {
+   "suck": {
+    "name": "피 빨기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 4
+     },
+     {
+      "op": "heal",
+      "amount": 4
+     }
+    ],
+    "followUp": {
+     "move": "swell",
+     "chance": 0.5
+    },
+    "break": {
+     "damage": 24,
+     "move": "unique1"
+    }
+   },
+   "cling": {
+    "name": "들러붙기",
+    "effects": [
+     {
+      "op": "rest",
+      "amount": 5
+     }
+    ],
+    "minTurn": 0,
+    "followUp": {
+     "move": "suck",
+     "chance": 1
+    },
+    "cooldown": 1
+   },
+   "swell": {
+    "name": "대량의 피 빨기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 6
+     },
+     {
+      "op": "heal",
+      "amount": 6
+     }
+    ],
+    "followUp": {
+     "move": "surge",
+     "chance": 1
+    }
+   },
+   "surge": {
+    "name": "심각한 피 빨기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 8
+     },
+     {
+      "op": "heal",
+      "amount": 8
+     }
+    ],
+    "minTurn": 0,
+    "cooldown": 0,
+    "followUp": {
+     "move": "cling",
+     "chance": 0.5
+    },
+    "break": {
+     "damage": 6,
+     "move": "unique1"
+    }
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "suck": 0,
+    "cling": 2,
+    "swell": 0,
+    "surge": 0
+   },
+   "noRepeat": 2
+  },
+  "enlightenedMove": {
+   "name": "포식",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 8
+    },
+    {
+     "op": "heal",
+     "amount": 8
+    }
+   ]
+  },
+  "uniqueMoves": {
+   "unique1": {
+    "name": "숨고르기",
+    "effects": [
+     {
+      "op": "rest"
+     }
+    ]
+   }
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    3
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "suck",
+    "name": "흡착",
+    "op": "lifesteal",
+    "weight": 3
+   },
+   {
+    "id": "wriggle",
+    "name": "꿈틀거림",
+    "op": "damage",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "rat_swarm",
+  "name": "쥐떼",
+  "tier": "normal",
+  "art": "🐀",
+  "hp": [
+   32,
+   37
+  ],
+  "moves": {
+   "gnaw": {
+    "name": "갉기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 4
+     }
+    ]
+   },
+   "swarm": {
+    "name": "몰려들기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 6
+     }
+    ],
+    "minTurn": 5
+   },
+   "squeak": {
+    "name": "불길한 찍찍",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 2
+     }
+    ],
+    "followUp": {
+     "move": "swarm",
+     "chance": 0.5
+    }
+   },
+   "surge": {
+    "name": "무리가 불어난다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "gnaw": 3,
+    "swarm": 2,
+    "squeak": 1,
+    "surge": 3
+   },
+   "noRepeat": 2
+  },
+  "enlightenedMove": {
+   "name": "광란의 이빨",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 11
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2
+   ],
+   "n": 6
+  },
+  "battleMoves": [
+   {
+    "id": "gnaw",
+    "name": "갉기",
+    "op": "bleed",
+    "weight": 2,
+    "amount": 1
+   },
+   {
+    "id": "rush",
+    "name": "우르르 몰리기",
+    "op": "damage",
+    "weight": 2
+   }
+  ]
+ },
+ {
+  "id": "living_broom",
+  "name": "살아있는 빗자루",
+  "tier": "normal",
+  "art": "🧹",
+  "hp": [
+   37,
+   42
+  ],
+  "moves": {
+   "sweep": {
+    "name": "쓸어내기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 1
+   },
+   "dust": {
+    "name": "먼지구름",
+    "effects": [
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ],
+    "cooldown": 3
+   },
+   "stand": {
+    "name": "버티기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 7
+     }
+    ],
+    "followUp": {
+     "move": "sweep",
+     "chance": 1
+    },
+    "cooldown": 3
+   },
+   "surge": {
+    "name": "빗자루가 뻣뻣해진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "sweep": 2,
+    "dust": 1,
+    "stand": 1,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "후려치기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 13
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "sweep",
+    "name": "쓸기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "guard",
+    "name": "쓸어내기",
+    "op": "armor",
+    "weight": 2
+   }
+  ]
+ },
+ {
+  "id": "alpha_dog",
+  "name": "우두머리 들개",
+  "tier": "elite",
+  "art": "🦮",
+  "hp": [
+   78,
+   78
+  ],
+  "moves": {
+   "bite": {
+    "name": "물어뜯기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 11
+     }
+    ],
+    "cooldown": 1
+   },
+   "howl": {
+    "name": "울부짖음",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 20
+     },
+     {
+      "op": "empower",
+      "amount": 3
+     }
+    ],
+    "followUp": {
+     "move": "frenzy",
+     "chance": 1
+    },
+    "cooldown": 3
+   },
+   "frenzy": {
+    "name": "광란",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5,
+      "hits": 3
+     },
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "bleed"
+     }
+    ],
+    "minTurn": 3,
+    "cooldown": 0,
+    "lockTurn": 0,
+    "break": {
+     "damage": 1,
+     "move": "unique1"
+    }
+   },
+   "surge": {
+    "name": "상처 찢기",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "bleed"
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 1
+   },
+   "pack_rule": {
+    "name": "무리의 규칙",
+    "effects": [
+     {
+      "op": "demand",
+      "turns": 2,
+      "amount": 18,
+      "category": "twoPair",
+      "power": 2
+     },
+     {
+      "op": "status",
+      "kind": "bleed",
+      "amount": 3
+     }
+    ],
+    "cooldown": 3,
+    "minTurn": 2
+   }
+  },
+  "enlightenedMove": {
+   "name": "무리의 기억",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 24
+    },
+    {
+     "op": "empower",
+     "amount": 2
+    }
+   ]
+  },
+  "uniqueMoves": {
+   "unique1": {
+    "name": "상처 보듬기",
+    "effects": [
+     {
+      "op": "rest"
+     }
+    ]
+   },
+   "unique2": {
+    "name": "궁지에 몰린 야수",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 10
+     }
+    ],
+    "followUp": {
+     "move": "bite",
+     "chance": 1
+    }
+   }
+  },
+  "phases": [
+   {
+    "untilHpRatio": 0.5,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "snap": 1,
-        "dive": 1,
-        "thrash": 1,
-        "slick": 2
-      }
-    },
-    "enlightenedMove": {
-      "name": "통째로 삼키기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 26
-        }
-      ]
-    },
-    "uniqueMoves": {
-      "unique1": {
-        "name": "삼키기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 22
-          }
-        ]
-      }
+     "mode": "weighted",
+     "weights": {
+      "bite": 2,
+      "howl": 1,
+      "frenzy": 0,
+      "surge": 3,
+      "pack_rule": 2
+     }
     }
-  },
-  {
-    "id": "cellar_thing",
-    "name": "지하실의 무언가",
-    "tier": "elite",
-    "art": "👤",
-    "hp": [
-      83,
-      83
-    ],
-    "moves": {
-      "scratch": {
-        "name": "긁는 소리",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 11
-          }
-        ],
-        "cooldown": 2
-      },
-      "lurk": {
-        "name": "도사림",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "pounce",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "pounce": {
-        "name": "덮침",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 17
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "어둠을 삼킨다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 6
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "devour_edge": {
-        "name": "어둠이 삼킨다",
-        "effects": [
-          {
-            "op": "drainWhet",
-            "amount": 0
-          },
-          {
-            "op": "empower",
-            "amount": 4
-          },
-          {
-            "op": "status",
-            "kind": "confuse",
-            "amount": 3
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "scratch": 1,
-        "lurk": 1,
-        "pounce": 0,
-        "surge": 3,
-        "devour_edge": 2
-      }
+     "mode": "weighted",
+     "weights": {
+      "bite": 2,
+      "howl": 1,
+      "frenzy": 0,
+      "surge": 3,
+      "pack_rule": 2
+     }
     },
-    "enlightenedMove": {
-      "name": "끌고 내려가기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 24
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
-    }
+    "enter": "unique2"
+   }
+  ],
+  "battleDice": {
+   "faces": [
+    2,
+    4,
+    6,
+    8
+   ],
+   "n": 4
   },
-  {
-    "id": "wolf",
-    "name": "늑대",
-    "tier": "boss",
-    "art": "🐺",
-    "hp": [
-      136,
-      136
+  "battleMoves": [
+   {
+    "id": "bite",
+    "name": "물어뜯기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "howl",
+    "name": "울부짖음",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "frenzy",
+    "name": "광란",
+    "op": "bleed",
+    "weight": 2,
+    "amount": 3
+   },
+   {
+    "id": "rule",
+    "name": "무리의 규칙",
+    "op": "armor",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "old_pike",
+  "name": "늙은 강꼬치",
+  "tier": "elite",
+  "art": "🐟",
+  "hp": [
+   82,
+   82
+  ],
+  "moves": {
+   "snap": {
+    "name": "물기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     }
     ],
-    "moves": {
-      "bite": {
-        "name": "경계",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
-          }
-        ],
-        "cooldown": 0,
-        "break": {
-          "damage": 29,
-          "move": "unique1"
-        },
-        "followUp": {
-          "move": "pounce",
-          "chance": 1
-        }
-      },
-      "pounce": {
-        "name": "덮치기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 18
-          }
-        ],
-        "minTurn": 0,
-        "cooldown": 0
-      },
-      "move1": {
-        "name": "핏빛 발톱",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5
-          },
-          {
-            "op": "status",
-            "amount": 4,
-            "kind": "bleed"
-          }
-        ],
-        "cooldown": 1
-      },
-      "move2": {
-        "name": "광란",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5,
-            "hits": 3
-          }
-        ],
-        "cooldown": 1
-      },
-      "match_fang": {
-        "name": "송곳니를 맞춰라",
-        "effects": [
-          {
-            "op": "demand",
-            "turns": 2,
-            "amount": 40,
-            "category": "fourKind",
-            "power": 3
-          },
-          {
-            "op": "status",
-            "kind": "bleed",
-            "amount": 4
-          }
-        ],
-        "cooldown": 3,
-        "minTurn": 2
-      }
-    },
-    "phases": [
-      {
-        "untilHpRatio": 0.5,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "bite": 1,
-            "pounce": 0,
-            "move1": 0,
-            "move2": 0,
-            "match_fang": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "bite": 0,
-            "pounce": 0,
-            "move1": 1,
-            "move2": 1,
-            "match_fang": 2
-          },
-          "noRepeat": 2
-        },
-        "enter": "unique2"
-      }
+    "cooldown": 1
+   },
+   "dive": {
+    "name": "잠수",
+    "effects": [
+     {
+      "op": "rest",
+      "amount": 10
+     }
     ],
-    "enlightenedMove": {
-      "name": "붉은 달의 사냥",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 25
-        },
-        {
-          "op": "empower",
-          "amount": 2
-        }
-      ]
+    "hidden": true,
+    "cooldown": 1,
+    "break": {
+     "damage": 14,
+     "move": "unique1"
     },
-    "uniqueMoves": {
-      "unique1": {
-        "name": "물러서기",
-        "effects": [
-          {
-            "op": "rest"
-          }
-        ],
-        "followUp": {
-          "move": "bite",
-          "chance": 1
-        }
-      },
-      "unique2": {
-        "name": "피의 향연",
-        "effects": [
-          {
-            "op": "status",
-            "kind": "bleed",
-            "amount": 4
-          }
-        ]
-      }
+    "followUp": {
+     "move": "snap",
+     "chance": 1
     }
+   },
+   "thrash": {
+    "name": "요동",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 2,
+      "kind": "stun"
+     },
+     {
+      "op": "empower",
+      "amount": 2
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 3
+   },
+   "slick": {
+    "name": "미끄러운 비늘",
+    "effects": [
+     {
+      "op": "cap",
+      "amount": 22,
+      "turns": 3
+     },
+     {
+      "op": "status",
+      "kind": "stun",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
   },
-  {
-    "id": "river_hag",
-    "name": "다리 밑 트롤",
-    "tier": "boss",
-    "art": "🗿",
-    "hp": [
-      131,
-      131
-    ],
-    "moves": {
-      "grasp": {
-        "name": "지진",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "stun"
-          }
-        ],
-        "cooldown": 3,
-        "minTurn": 1
-      },
-      "drown": {
-        "name": "힘 모으기",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 1,
-        "cooldown": 1,
-        "break": {
-          "damage": 43,
-          "move": "unique1"
-        },
-        "followUp": {
-          "move": "move1",
-          "chance": 0.5
-        }
-      },
-      "surge": {
-        "name": "기둥 뿌리",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5
-          }
-        ],
-        "minTurn": 0,
-        "cooldown": 1
-      },
-      "move1": {
-        "name": "압도적인 힘",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "break": {
-          "damage": 29,
-          "move": "unique1"
-        },
-        "followUp": {
-          "move": "move2",
-          "chance": 1
-        }
-      },
-      "move2": {
-        "name": "바위 던지기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 24
-          }
-        ]
-      },
-      "move3": {
-        "name": "지진",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "stun"
-          }
-        ],
-        "cooldown": 3
-      },
-      "move4": {
-        "name": "힘 모으기",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "break": {
-          "damage": 51,
-          "move": "unique1"
-        },
-        "followUp": {
-          "move": "move5",
-          "chance": 0.5
-        },
-        "cooldown": 1
-      },
-      "move5": {
-        "name": "압도적인 힘",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "followUp": {
-          "move": "move2",
-          "chance": 1
-        },
-        "break": {
-          "damage": 35,
-          "move": "unique1"
-        }
-      },
-      "move6": {
-        "name": "지진",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "stun"
-          }
-        ],
-        "cooldown": 3
-      },
-      "move7": {
-        "name": "힘 모으기",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "cooldown": 1,
-        "break": {
-          "damage": 57,
-          "move": "unique1"
-        },
-        "followUp": {
-          "move": "move8",
-          "chance": 0.5
-        }
-      },
-      "move8": {
-        "name": "압도적인 힘",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "followUp": {
-          "move": "move2",
-          "chance": 1
-        },
-        "break": {
-          "damage": 43,
-          "move": "unique1"
-        }
-      },
-      "stone_hide": {
-        "name": "바위 가죽",
-        "effects": [
-          {
-            "op": "ward",
-            "amount": 80,
-            "turns": 4
-          },
-          {
-            "op": "status",
-            "kind": "stun",
-            "amount": 3
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
-    },
-    "phases": [
-      {
-        "untilHpRatio": 0.6,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "grasp": 1,
-            "drown": 1,
-            "surge": 1,
-            "move1": 0,
-            "move2": 0,
-            "move3": 0,
-            "move4": 0,
-            "move5": 0,
-            "move6": 0,
-            "move7": 0,
-            "move8": 0,
-            "stone_hide": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0.3,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "grasp": 0,
-            "drown": 0,
-            "surge": 1,
-            "move1": 0,
-            "move2": 0,
-            "move3": 1,
-            "move4": 1,
-            "move5": 0,
-            "move6": 0,
-            "move7": 0,
-            "move8": 0,
-            "stone_hide": 2
-          },
-          "noRepeat": 2
-        },
-        "enter": "unique2"
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "grasp": 0,
-            "drown": 0,
-            "surge": 1,
-            "move1": 0,
-            "move2": 0,
-            "move3": 0,
-            "move4": 0,
-            "move5": 0,
-            "move6": 1,
-            "move7": 1,
-            "move8": 0,
-            "stone_hide": 2
-          },
-          "noRepeat": 2
-        },
-        "enter": "unique3"
-      }
-    ],
-    "enlightenedMove": {
-      "name": "범람",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 20
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
-    },
-    "uniqueMoves": {
-      "unique1": {
-        "name": "땅 흔들기",
-        "effects": [
-          {
-            "op": "status",
-            "kind": "stun",
-            "amount": 3
-          }
-        ]
-      },
-      "unique2": {
-        "name": "전투의 희열",
-        "effects": [
-          {
-            "op": "rest",
-            "amount": 5
-          }
-        ],
-        "followUp": {
-          "move": "move4",
-          "chance": 1
-        }
-      },
-      "unique3": {
-        "name": "전투의 열광",
-        "effects": [
-          {
-            "op": "rest"
-          }
-        ],
-        "followUp": {
-          "move": "move7",
-          "chance": 1
-        }
-      }
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "snap": 1,
+    "dive": 1,
+    "thrash": 1,
+    "slick": 2
+   }
+  },
+  "enlightenedMove": {
+   "name": "통째로 삼키기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 26
     }
+   ]
   },
-  {
-    "id": "old_teddy",
-    "name": "낡은 곰인형",
-    "tier": "boss",
-    "art": "🧸",
-    "hp": [
-      133,
-      133
+  "uniqueMoves": {
+   "unique1": {
+    "name": "삼키기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 22
+     }
+    ]
+   }
+  },
+  "battleDice": {
+   "faces": [
+    3,
+    5,
+    9
+   ],
+   "n": 3
+  },
+  "battleMoves": [
+   {
+    "id": "snap",
+    "name": "물어채기",
+    "op": "bleed",
+    "weight": 2,
+    "amount": 3
+   },
+   {
+    "id": "gulp",
+    "name": "삼키기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "scale",
+    "name": "비늘 세우기",
+    "op": "armor",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "cellar_thing",
+  "name": "지하실의 무언가",
+  "tier": "elite",
+  "art": "👤",
+  "hp": [
+   83,
+   83
+  ],
+  "moves": {
+   "scratch": {
+    "name": "긁는 소리",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 11
+     }
     ],
-    "moves": {
-      "hug": {
-        "name": "꽉 껴안기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 13
-          }
-        ],
-        "cooldown": 2
-      },
-      "button_eye": {
-        "name": "단추 눈",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "curse"
-          },
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "rip",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "rip": {
-        "name": "솔기 뜯기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 21
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "stuff": {
-        "name": "솜 채우기",
-        "effects": [
-          {
-            "op": "heal",
-            "amount": 10
-          },
-          {
-            "op": "block",
-            "amount": 8
-          }
-        ]
-      },
-      "surge": {
-        "name": "솜이 팽팽해진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 7
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "pull_stuffing": {
-        "name": "솜을 뽑는다",
-        "effects": [
-          {
-            "op": "drainWhet",
-            "amount": 0
-          },
-          {
-            "op": "status",
-            "kind": "curse",
-            "amount": 3
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
+    "cooldown": 2
+   },
+   "lurk": {
+    "name": "도사림",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 3
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "pounce",
+     "chance": 1
     },
-    "phases": [
-      {
-        "untilHpRatio": 0.5,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "hug": 1,
-            "button_eye": 1,
-            "rip": 0,
-            "surge": 1.5,
-            "stuff": 0,
-            "pull_stuffing": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "hug": 2,
-            "rip": 3,
-            "stuff": 2,
-            "surge": 1.5,
-            "button_eye": 0,
-            "pull_stuffing": 2
-          },
-          "noRepeat": 2
-        }
-      }
+    "cooldown": 2
+   },
+   "pounce": {
+    "name": "덮침",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 17
+     }
     ],
-    "enlightenedMove": {
-      "name": "올 풀리기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 20
-        },
-        {
-          "op": "empower",
-          "amount": 2
-        }
-      ]
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "어둠을 삼킨다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 6
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "devour_edge": {
+    "name": "어둠이 삼킨다",
+    "effects": [
+     {
+      "op": "drainWhet",
+      "amount": 0
+     },
+     {
+      "op": "empower",
+      "amount": 4
+     },
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 3
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "scratch": 1,
+    "lurk": 1,
+    "pounce": 0,
+    "surge": 3,
+    "devour_edge": 2
+   }
+  },
+  "enlightenedMove": {
+   "name": "끌고 내려가기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 24
+    },
+    {
+     "op": "confuse",
+     "amount": 1
     }
+   ]
   },
-  {
-    "id": "bog_toad",
-    "name": "늪두꺼비",
-    "tier": "normal",
-    "art": "🐸",
-    "hp": [
-      39,
-      44
+  "battleDice": {
+   "faces": [
+    1,
+    4,
+    8
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "pounce",
+    "name": "덮침",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "creep",
+    "name": "스멀거림",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "coil",
+    "name": "웅크림",
+    "op": "armor",
+    "weight": 1
+   },
+   {
+    "id": "gaze",
+    "name": "응시",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.25
+   }
+  ]
+ },
+ {
+  "id": "wolf",
+  "name": "늑대",
+  "tier": "boss",
+  "art": "🐺",
+  "hp": [
+   136,
+   136
+  ],
+  "moves": {
+   "bite": {
+    "name": "경계",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 3
+     }
     ],
-    "moves": {
-      "tongue": {
-        "name": "혀 채찍",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 6
-          }
-        ],
-        "cooldown": 2
-      },
-      "bloat": {
-        "name": "부풀기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 8
-          }
-        ],
-        "followUp": {
-          "move": "spit",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "spit": {
-        "name": "독침 뱉기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 8
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "목이 부푼다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
+    "cooldown": 0,
+    "break": {
+     "damage": 29,
+     "move": "unique1"
     },
+    "followUp": {
+     "move": "pounce",
+     "chance": 1
+    }
+   },
+   "pounce": {
+    "name": "덮치기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 18
+     }
+    ],
+    "minTurn": 0,
+    "cooldown": 0
+   },
+   "move1": {
+    "name": "핏빛 발톱",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5
+     },
+     {
+      "op": "status",
+      "amount": 4,
+      "kind": "bleed"
+     }
+    ],
+    "cooldown": 1
+   },
+   "move2": {
+    "name": "광란",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5,
+      "hits": 3
+     }
+    ],
+    "cooldown": 1
+   },
+   "match_fang": {
+    "name": "송곳니를 맞춰라",
+    "effects": [
+     {
+      "op": "demand",
+      "turns": 2,
+      "amount": 40,
+      "category": "fourKind",
+      "power": 3
+     },
+     {
+      "op": "status",
+      "kind": "bleed",
+      "amount": 4
+     }
+    ],
+    "cooldown": 3,
+    "minTurn": 2
+   }
+  },
+  "phases": [
+   {
+    "untilHpRatio": 0.5,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "tongue": 1,
-        "bloat": 1,
-        "spit": 0,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "삼키기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 14
-        },
-        {
-          "op": "heal",
-          "amount": 5
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "bite": 1,
+      "pounce": 0,
+      "move1": 0,
+      "move2": 0,
+      "match_fang": 2
+     }
     }
-  },
-  {
-    "id": "mosquito_swarm",
-    "name": "모기떼",
-    "tier": "normal",
-    "art": "🦟",
-    "hp": [
-      28,
-      32
-    ],
-    "moves": {
-      "drain": {
-        "name": "흡혈",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5
-          },
-          {
-            "op": "heal",
-            "amount": 3
-          }
-        ],
-        "minTurn": 5
-      },
-      "buzz": {
-        "name": "윙윙거림",
-        "effects": [
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ],
-        "followUp": {
-          "move": "drain",
-          "chance": 0.5
-        }
-      },
-      "scatter": {
-        "name": "흩어지기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 5
-          }
-        ]
-      },
-      "surge": {
-        "name": "날갯소리가 높아진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "drain": 3,
-        "buzz": 2,
-        "scatter": 1,
-        "surge": 3
-      },
-      "noRepeat": 2
+     "mode": "weighted",
+     "weights": {
+      "bite": 0,
+      "pounce": 0,
+      "move1": 1,
+      "move2": 1,
+      "match_fang": 2
+     },
+     "noRepeat": 2
     },
-    "enlightenedMove": {
-      "name": "역병",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 8
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
+    "enter": "unique2"
+   }
+  ],
+  "enlightenedMove": {
+   "name": "붉은 달의 사냥",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 25
+    },
+    {
+     "op": "empower",
+     "amount": 2
     }
+   ]
   },
-  {
-    "id": "mist_wraith",
-    "name": "안개 망령",
-    "tier": "normal",
-    "art": "👻",
-    "hp": [
-      36,
-      41
+  "uniqueMoves": {
+   "unique1": {
+    "name": "물러서기",
+    "effects": [
+     {
+      "op": "rest"
+     }
     ],
-    "moves": {
-      "chill": {
-        "name": "한기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5
-          }
-        ],
-        "cooldown": 2
-      },
-      "fade": {
-        "name": "스러지기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 9
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "wail",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "wail": {
-        "name": "곡소리",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 8
-          },
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "안개가 짙어진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
+    "followUp": {
+     "move": "bite",
+     "chance": 1
+    }
+   },
+   "unique2": {
+    "name": "피의 향연",
+    "effects": [
+     {
+      "op": "status",
+      "kind": "bleed",
+      "amount": 4
+     }
+    ]
+   }
+  },
+  "battleDice": {
+   "faces": [
+    2,
+    4,
+    6,
+    7
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "pounce",
+    "name": "덮치기",
+    "op": "damage",
+    "weight": 3
+   },
+   {
+    "id": "claw",
+    "name": "핏빛 발톱",
+    "op": "bleed",
+    "weight": 2,
+    "amount": 2
+   },
+   {
+    "id": "watch",
+    "name": "경계",
+    "op": "armor",
+    "weight": 1
+   },
+   {
+    "id": "howl",
+    "name": "울음",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   }
+  ]
+ },
+ {
+  "id": "river_hag",
+  "name": "다리 밑 트롤",
+  "tier": "boss",
+  "art": "🗿",
+  "hp": [
+   131,
+   131
+  ],
+  "moves": {
+   "grasp": {
+    "name": "지진",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "stun"
+     }
+    ],
+    "cooldown": 3,
+    "minTurn": 1
+   },
+   "drown": {
+    "name": "힘 모으기",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 1,
+    "cooldown": 1,
+    "break": {
+     "damage": 43,
+     "move": "unique1"
     },
+    "followUp": {
+     "move": "move1",
+     "chance": 0.5
+    }
+   },
+   "surge": {
+    "name": "기둥 뿌리",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5
+     }
+    ],
+    "minTurn": 0,
+    "cooldown": 1
+   },
+   "move1": {
+    "name": "압도적인 힘",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "break": {
+     "damage": 29,
+     "move": "unique1"
+    },
+    "followUp": {
+     "move": "move2",
+     "chance": 1
+    }
+   },
+   "move2": {
+    "name": "바위 던지기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 24
+     }
+    ]
+   },
+   "move3": {
+    "name": "지진",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "stun"
+     }
+    ],
+    "cooldown": 3
+   },
+   "move4": {
+    "name": "힘 모으기",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "break": {
+     "damage": 51,
+     "move": "unique1"
+    },
+    "followUp": {
+     "move": "move5",
+     "chance": 0.5
+    },
+    "cooldown": 1
+   },
+   "move5": {
+    "name": "압도적인 힘",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "followUp": {
+     "move": "move2",
+     "chance": 1
+    },
+    "break": {
+     "damage": 35,
+     "move": "unique1"
+    }
+   },
+   "move6": {
+    "name": "지진",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "stun"
+     }
+    ],
+    "cooldown": 3
+   },
+   "move7": {
+    "name": "힘 모으기",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "cooldown": 1,
+    "break": {
+     "damage": 57,
+     "move": "unique1"
+    },
+    "followUp": {
+     "move": "move8",
+     "chance": 0.5
+    }
+   },
+   "move8": {
+    "name": "압도적인 힘",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "followUp": {
+     "move": "move2",
+     "chance": 1
+    },
+    "break": {
+     "damage": 43,
+     "move": "unique1"
+    }
+   },
+   "stone_hide": {
+    "name": "바위 가죽",
+    "effects": [
+     {
+      "op": "ward",
+      "amount": 80,
+      "turns": 4
+     },
+     {
+      "op": "status",
+      "kind": "stun",
+      "amount": 3
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "phases": [
+   {
+    "untilHpRatio": 0.6,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "chill": 1,
-        "fade": 1,
-        "wail": 0,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "공포",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 13
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "grasp": 1,
+      "drown": 1,
+      "surge": 1,
+      "move1": 0,
+      "move2": 0,
+      "move3": 0,
+      "move4": 0,
+      "move5": 0,
+      "move6": 0,
+      "move7": 0,
+      "move8": 0,
+      "stone_hide": 2
+     }
     }
-  },
-  {
-    "id": "pale_stag",
-    "name": "창백한 사슴",
-    "tier": "normal",
-    "art": "🦌",
-    "hp": [
-      42,
-      46
-    ],
-    "moves": {
-      "gore": {
-        "name": "들이받기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 7
-          }
-        ]
-      },
-      "stare": {
-        "name": "응시",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "trample",
-          "chance": 0.5
-        }
-      },
-      "trample": {
-        "name": "짓밟기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 13
-          }
-        ],
-        "minTurn": 5
-      },
-      "surge": {
-        "name": "뿔이 자란다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0.3,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "gore": 3,
-        "stare": 1,
-        "trample": 1,
-        "surge": 3
-      },
-      "noRepeat": 2
+     "mode": "weighted",
+     "weights": {
+      "grasp": 0,
+      "drown": 0,
+      "surge": 1,
+      "move1": 0,
+      "move2": 0,
+      "move3": 1,
+      "move4": 1,
+      "move5": 0,
+      "move6": 0,
+      "move7": 0,
+      "move8": 0,
+      "stone_hide": 2
+     },
+     "noRepeat": 2
     },
-    "enlightenedMove": {
-      "name": "환영 돌진",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 17
-        }
-      ]
-    }
-  },
-  {
-    "id": "skeleton",
-    "name": "해골 병사",
-    "tier": "normal",
-    "art": "☠️",
-    "hp": [
-      39,
-      44
-    ],
-    "moves": {
-      "slash": {
-        "name": "녹슨 칼",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 7
-          }
-        ],
-        "cooldown": 2
-      },
-      "guard": {
-        "name": "방패 들기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 9
-          }
-        ],
-        "followUp": {
-          "move": "bone_throw",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "bone_throw": {
-        "name": "뼈 던지기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 11
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "뼈를 맞춘다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
+    "enter": "unique2"
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "slash": 1,
-        "guard": 1,
-        "bone_throw": 0,
-        "surge": 3
-      }
+     "mode": "weighted",
+     "weights": {
+      "grasp": 0,
+      "drown": 0,
+      "surge": 1,
+      "move1": 0,
+      "move2": 0,
+      "move3": 0,
+      "move4": 0,
+      "move5": 0,
+      "move6": 1,
+      "move7": 1,
+      "move8": 0,
+      "stone_hide": 2
+     },
+     "noRepeat": 2
     },
-    "enlightenedMove": {
-      "name": "뼈 무너뜨리기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 15
-        },
-        {
-          "op": "block",
-          "amount": 6
-        }
-      ]
+    "enter": "unique3"
+   }
+  ],
+  "enlightenedMove": {
+   "name": "범람",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 20
+    },
+    {
+     "op": "confuse",
+     "amount": 1
     }
+   ]
   },
-  {
-    "id": "grave_worm",
-    "name": "무덤 벌레",
-    "tier": "normal",
-    "art": "🐛",
-    "hp": [
-      34,
-      38
+  "uniqueMoves": {
+   "unique1": {
+    "name": "땅 흔들기",
+    "effects": [
+     {
+      "op": "status",
+      "kind": "stun",
+      "amount": 3
+     }
+    ]
+   },
+   "unique2": {
+    "name": "전투의 희열",
+    "effects": [
+     {
+      "op": "rest",
+      "amount": 5
+     }
     ],
-    "moves": {
-      "bite": {
-        "name": "물기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5
-          }
-        ],
-        "cooldown": 2
-      },
-      "burrow": {
-        "name": "파고들기",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "erupt",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "erupt": {
-        "name": "분출",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "마디가 굵어진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
+    "followUp": {
+     "move": "move4",
+     "chance": 1
+    }
+   },
+   "unique3": {
+    "name": "전투의 열광",
+    "effects": [
+     {
+      "op": "rest"
+     }
+    ],
+    "followUp": {
+     "move": "move7",
+     "chance": 1
+    }
+   }
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    5,
+    7
+   ],
+   "n": 5
+  },
+  "battleMoves": [
+   {
+    "id": "grab",
+    "name": "낚아채기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "bubble",
+    "name": "물거품",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "drown",
+    "name": "익사시키기",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 3
+   },
+   {
+    "id": "song",
+    "name": "강의 노래",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   }
+  ]
+ },
+ {
+  "id": "old_teddy",
+  "name": "낡은 곰인형",
+  "tier": "boss",
+  "art": "🧸",
+  "hp": [
+   133,
+   133
+  ],
+  "moves": {
+   "hug": {
+    "name": "꽉 껴안기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 13
+     }
+    ],
+    "cooldown": 2
+   },
+   "button_eye": {
+    "name": "단추 눈",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "curse"
+     },
+     {
+      "op": "empower",
+      "amount": 2
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "rip",
+     "chance": 1
     },
+    "cooldown": 2
+   },
+   "rip": {
+    "name": "솔기 뜯기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 21
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "stuff": {
+    "name": "솜 채우기",
+    "effects": [
+     {
+      "op": "heal",
+      "amount": 10
+     },
+     {
+      "op": "block",
+      "amount": 8
+     }
+    ]
+   },
+   "surge": {
+    "name": "솜이 팽팽해진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 7
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "pull_stuffing": {
+    "name": "솜을 뽑는다",
+    "effects": [
+     {
+      "op": "drainWhet",
+      "amount": 0
+     },
+     {
+      "op": "status",
+      "kind": "curse",
+      "amount": 3
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "phases": [
+   {
+    "untilHpRatio": 0.5,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "bite": 1,
-        "burrow": 1,
-        "erupt": 0,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "흙째 삼키기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 14
-        },
-        {
-          "op": "heal",
-          "amount": 6
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "hug": 1,
+      "button_eye": 1,
+      "rip": 0,
+      "surge": 1.5,
+      "stuff": 0,
+      "pull_stuffing": 2
+     }
     }
-  },
-  {
-    "id": "mud_golem",
-    "name": "진흙 골렘",
-    "tier": "elite",
-    "art": "🗿",
-    "hp": [
-      89,
-      89
-    ],
-    "moves": {
-      "slam": {
-        "name": "진흙 주먹",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          }
-        ],
-        "cooldown": 2
-      },
-      "harden": {
-        "name": "굳히기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 12
-          },
-          {
-            "op": "status",
-            "kind": "chain",
-            "amount": 3
-          }
-        ],
-        "followUp": {
-          "move": "quake",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "quake": {
-        "name": "진동",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 16
-          },
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "진흙을 더 끌어모은다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 6
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "mud_plate": {
-        "name": "진흙 갑주",
-        "effects": [
-          {
-            "op": "ward",
-            "amount": 40,
-            "turns": 4
-          },
-          {
-            "op": "status",
-            "kind": "chain",
-            "amount": 3
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "slam": 1,
-        "harden": 1,
-        "quake": 0,
-        "surge": 3,
-        "mud_plate": 2
-      }
-    },
-    "enlightenedMove": {
-      "name": "파묻기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 25
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "hug": 2,
+      "rip": 3,
+      "stuff": 2,
+      "surge": 1.5,
+      "button_eye": 0,
+      "pull_stuffing": 2
+     },
+     "noRepeat": 2
     }
-  },
-  {
-    "id": "headless_knight",
-    "name": "목 없는 기사",
-    "tier": "elite",
-    "art": "🏇",
-    "hp": [
-      83,
-      83
-    ],
-    "moves": {
-      "lance": {
-        "name": "창격",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          }
-        ],
-        "cooldown": 2
-      },
-      "charge_up": {
-        "name": "고삐 당기기",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
-          },
-          {
-            "op": "block",
-            "amount": 6
-          }
-        ],
-        "followUp": {
-          "move": "cleave",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "cleave": {
-        "name": "참격",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 17
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "창을 고쳐 쥔다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 6
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "open_road": {
-        "name": "길을 열어라",
-        "effects": [
-          {
-            "op": "demand",
-            "kind": "straight",
-            "turns": 2,
-            "amount": 18,
-            "power": 2
-          },
-          {
-            "op": "status",
-            "kind": "bind",
-            "amount": 2
-          }
-        ],
-        "cooldown": 3,
-        "minTurn": 2
-      }
+   }
+  ],
+  "enlightenedMove": {
+   "name": "올 풀리기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 20
     },
+    {
+     "op": "empower",
+     "amount": 2
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    2,
+    5,
+    8
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "crush",
+    "name": "으스러뜨리기",
+    "op": "damage",
+    "weight": 3
+   },
+   {
+    "id": "stuff",
+    "name": "솜 채우기",
+    "op": "armor",
+    "weight": 2
+   },
+   {
+    "id": "button",
+    "name": "단추 눈 빛냄",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   }
+  ]
+ },
+ {
+  "id": "bog_toad",
+  "name": "늪두꺼비",
+  "tier": "normal",
+  "art": "🐸",
+  "hp": [
+   39,
+   44
+  ],
+  "moves": {
+   "tongue": {
+    "name": "혀 채찍",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 6
+     }
+    ],
+    "cooldown": 2
+   },
+   "bloat": {
+    "name": "부풀기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 8
+     }
+    ],
+    "followUp": {
+     "move": "spit",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "spit": {
+    "name": "독침 뱉기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 8
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "목이 부푼다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "tongue": 1,
+    "bloat": 1,
+    "spit": 0,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "삼키기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 14
+    },
+    {
+     "op": "heal",
+     "amount": 5
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    5
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "tongue",
+    "name": "혀 채찍",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "puff",
+    "name": "부풀리기",
+    "op": "armor",
+    "weight": 1
+   },
+   {
+    "id": "spit",
+    "name": "독 뱉기",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 2
+   }
+  ]
+ },
+ {
+  "id": "mosquito_swarm",
+  "name": "모기떼",
+  "tier": "normal",
+  "art": "🦟",
+  "hp": [
+   28,
+   32
+  ],
+  "moves": {
+   "drain": {
+    "name": "흡혈",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5
+     },
+     {
+      "op": "heal",
+      "amount": 3
+     }
+    ],
+    "minTurn": 5
+   },
+   "buzz": {
+    "name": "윙윙거림",
+    "effects": [
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ],
+    "followUp": {
+     "move": "drain",
+     "chance": 0.5
+    }
+   },
+   "scatter": {
+    "name": "흩어지기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 5
+     }
+    ]
+   },
+   "surge": {
+    "name": "날갯소리가 높아진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "drain": 3,
+    "buzz": 2,
+    "scatter": 1,
+    "surge": 3
+   },
+   "noRepeat": 2
+  },
+  "enlightenedMove": {
+   "name": "역병",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 8
+    },
+    {
+     "op": "confuse",
+     "amount": 1
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2
+   ],
+   "n": 6
+  },
+  "battleMoves": [
+   {
+    "id": "drain",
+    "name": "흡혈",
+    "op": "lifesteal",
+    "weight": 3
+   },
+   {
+    "id": "buzz",
+    "name": "앵앵거림",
+    "op": "damage",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "mist_wraith",
+  "name": "안개 망령",
+  "tier": "normal",
+  "art": "👻",
+  "hp": [
+   36,
+   41
+  ],
+  "moves": {
+   "chill": {
+    "name": "한기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5
+     }
+    ],
+    "cooldown": 2
+   },
+   "fade": {
+    "name": "스러지기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 9
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "wail",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "wail": {
+    "name": "곡소리",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 8
+     },
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "안개가 짙어진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "chill": 1,
+    "fade": 1,
+    "wail": 0,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "공포",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 13
+    },
+    {
+     "op": "confuse",
+     "amount": 1
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "graze",
+    "name": "스치기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "blur",
+    "name": "흐려지기",
+    "op": "armor",
+    "weight": 1
+   },
+   {
+    "id": "chill",
+    "name": "한기",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 2
+   }
+  ]
+ },
+ {
+  "id": "pale_stag",
+  "name": "창백한 사슴",
+  "tier": "normal",
+  "art": "🦌",
+  "hp": [
+   42,
+   46
+  ],
+  "moves": {
+   "gore": {
+    "name": "들이받기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 7
+     }
+    ]
+   },
+   "stare": {
+    "name": "응시",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 3
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "trample",
+     "chance": 0.5
+    }
+   },
+   "trample": {
+    "name": "짓밟기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 13
+     }
+    ],
+    "minTurn": 5
+   },
+   "surge": {
+    "name": "뿔이 자란다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "gore": 3,
+    "stare": 1,
+    "trample": 1,
+    "surge": 3
+   },
+   "noRepeat": 2
+  },
+  "enlightenedMove": {
+   "name": "환영 돌진",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 17
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    2,
+    3,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "ram",
+    "name": "들이받기",
+    "op": "damage",
+    "weight": 3
+   },
+   {
+    "id": "breath",
+    "name": "안개 숨",
+    "op": "heal",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "skeleton",
+  "name": "해골 병사",
+  "tier": "normal",
+  "art": "☠️",
+  "hp": [
+   39,
+   44
+  ],
+  "moves": {
+   "slash": {
+    "name": "녹슨 칼",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 7
+     }
+    ],
+    "cooldown": 2
+   },
+   "guard": {
+    "name": "방패 들기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 9
+     }
+    ],
+    "followUp": {
+     "move": "bone_throw",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "bone_throw": {
+    "name": "뼈 던지기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 11
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "뼈를 맞춘다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "slash": 1,
+    "guard": 1,
+    "bone_throw": 0,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "뼈 무너뜨리기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 15
+    },
+    {
+     "op": "block",
+     "amount": 6
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    5
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "cut",
+    "name": "뼈칼",
+    "op": "damage",
+    "weight": 3
+   },
+   {
+    "id": "mend",
+    "name": "뼈 맞추기",
+    "op": "heal",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "grave_worm",
+  "name": "무덤 벌레",
+  "tier": "normal",
+  "art": "🐛",
+  "hp": [
+   34,
+   38
+  ],
+  "moves": {
+   "bite": {
+    "name": "물기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5
+     }
+    ],
+    "cooldown": 2
+   },
+   "burrow": {
+    "name": "파고들기",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 2
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "erupt",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "erupt": {
+    "name": "분출",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "마디가 굵어진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "bite": 1,
+    "burrow": 1,
+    "erupt": 0,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "흙째 삼키기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 14
+    },
+    {
+     "op": "heal",
+     "amount": 6
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    3
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "burrow",
+    "name": "파고들기",
+    "op": "bleed",
+    "weight": 2,
+    "amount": 2
+   },
+   {
+    "id": "swallow",
+    "name": "삼키기",
+    "op": "lifesteal",
+    "weight": 1
+   },
+   {
+    "id": "squirm",
+    "name": "꿈틀거림",
+    "op": "damage",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "mud_golem",
+  "name": "진흙 골렘",
+  "tier": "elite",
+  "art": "🗿",
+  "hp": [
+   89,
+   89
+  ],
+  "moves": {
+   "slam": {
+    "name": "진흙 주먹",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     }
+    ],
+    "cooldown": 2
+   },
+   "harden": {
+    "name": "굳히기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 12
+     },
+     {
+      "op": "status",
+      "kind": "chain",
+      "amount": 3
+     }
+    ],
+    "followUp": {
+     "move": "quake",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "quake": {
+    "name": "진동",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 16
+     },
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "진흙을 더 끌어모은다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 6
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "mud_plate": {
+    "name": "진흙 갑주",
+    "effects": [
+     {
+      "op": "ward",
+      "amount": 40,
+      "turns": 4
+     },
+     {
+      "op": "status",
+      "kind": "chain",
+      "amount": 3
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "slam": 1,
+    "harden": 1,
+    "quake": 0,
+    "surge": 3,
+    "mud_plate": 2
+   }
+  },
+  "enlightenedMove": {
+   "name": "파묻기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 25
+    },
+    {
+     "op": "confuse",
+     "amount": 1
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    2,
+    4,
+    6
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "fist",
+    "name": "진흙 주먹",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "reform",
+    "name": "재형성",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "harden",
+    "name": "굳히기",
+    "op": "armor",
+    "weight": 2
+   }
+  ]
+ },
+ {
+  "id": "headless_knight",
+  "name": "목 없는 기사",
+  "tier": "elite",
+  "art": "🏇",
+  "hp": [
+   83,
+   83
+  ],
+  "moves": {
+   "lance": {
+    "name": "창격",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     }
+    ],
+    "cooldown": 2
+   },
+   "charge_up": {
+    "name": "고삐 당기기",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 3
+     },
+     {
+      "op": "block",
+      "amount": 6
+     }
+    ],
+    "followUp": {
+     "move": "cleave",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "cleave": {
+    "name": "참격",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 17
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "창을 고쳐 쥔다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 6
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "open_road": {
+    "name": "길을 열어라",
+    "effects": [
+     {
+      "op": "demand",
+      "kind": "straight",
+      "turns": 2,
+      "amount": 18,
+      "power": 2
+     },
+     {
+      "op": "status",
+      "kind": "bind",
+      "amount": 2
+     }
+    ],
+    "cooldown": 3,
+    "minTurn": 2
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "lance": 1,
+    "charge_up": 1,
+    "cleave": 0,
+    "surge": 3,
+    "open_road": 2
+   }
+  },
+  "enlightenedMove": {
+   "name": "목 없는 돌격",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 29
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    3,
+    5,
+    8
+   ],
+   "n": 3
+  },
+  "battleMoves": [
+   {
+    "id": "sword",
+    "name": "대검 휘두르기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "dignity",
+    "name": "목 없는 위엄",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "shield",
+    "name": "방패 들기",
+    "op": "armor",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "grave_keeper",
+  "name": "무덤지기",
+  "tier": "elite",
+  "art": "⚰️",
+  "hp": [
+   87,
+   87
+  ],
+  "moves": {
+   "shovel": {
+    "name": "삽질",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     }
+    ],
+    "cooldown": 2
+   },
+   "toll": {
+    "name": "조종(弔鐘)",
+    "effects": [
+     {
+      "op": "confuse",
+      "amount": 3
+     }
+    ],
+    "followUp": {
+     "move": "inter",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "inter": {
+    "name": "매장",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 17
+     },
+     {
+      "op": "status",
+      "kind": "rot",
+      "amount": 2,
+      "power": 12
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "삽자루를 고쳐 쥔다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 6
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "cover_soil": {
+    "name": "흙을 덮는다",
+    "effects": [
+     {
+      "op": "ward",
+      "amount": 36,
+      "turns": 4
+     },
+     {
+      "op": "status",
+      "kind": "rot",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "shovel": 1,
+    "toll": 1,
+    "inter": 0,
+    "surge": 3,
+    "cover_soil": 2
+   }
+  },
+  "enlightenedMove": {
+   "name": "마지막 의식",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 22
+    },
+    {
+     "op": "empower",
+     "amount": 3
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    4,
+    6
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "shovel",
+    "name": "삽질",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "bury",
+    "name": "매장",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 3
+   },
+   {
+    "id": "mound",
+    "name": "봉분 쌓기",
+    "op": "armor",
+    "weight": 1
+   },
+   {
+    "id": "mourn",
+    "name": "애도",
+    "op": "heal",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "swamp_king",
+  "name": "늪의 왕",
+  "tier": "boss",
+  "art": "🐊",
+  "hp": [
+   139,
+   139
+  ],
+  "moves": {
+   "chomp": {
+    "name": "우적",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 14
+     }
+    ],
+    "cooldown": 2
+   },
+   "submerge": {
+    "name": "잠수",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 12
+     },
+     {
+      "op": "status",
+      "kind": "bind",
+      "amount": 3
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "death_roll",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "death_roll": {
+    "name": "죽음의 회전",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 22
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "regrow": {
+    "name": "재생",
+    "effects": [
+     {
+      "op": "heal",
+      "amount": 14
+     }
+    ]
+   },
+   "surge": {
+    "name": "늪이 끓어오른다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 7
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "cross_bog": {
+    "name": "늪을 건너라",
+    "effects": [
+     {
+      "op": "demand",
+      "kind": "straight",
+      "turns": 2,
+      "amount": 40,
+      "power": 3
+     },
+     {
+      "op": "status",
+      "kind": "bind",
+      "amount": 3
+     }
+    ],
+    "cooldown": 3,
+    "minTurn": 2
+   }
+  },
+  "phases": [
+   {
+    "untilHpRatio": 0.5,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "lance": 1,
-        "charge_up": 1,
-        "cleave": 0,
-        "surge": 3,
-        "open_road": 2
-      }
-    },
-    "enlightenedMove": {
-      "name": "목 없는 돌격",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 29
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "chomp": 1,
+      "submerge": 1,
+      "death_roll": 0,
+      "surge": 1.5,
+      "regrow": 0,
+      "cross_bog": 2
+     }
     }
-  },
-  {
-    "id": "grave_keeper",
-    "name": "무덤지기",
-    "tier": "elite",
-    "art": "⚰️",
-    "hp": [
-      87,
-      87
-    ],
-    "moves": {
-      "shovel": {
-        "name": "삽질",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          }
-        ],
-        "cooldown": 2
-      },
-      "toll": {
-        "name": "조종(弔鐘)",
-        "effects": [
-          {
-            "op": "confuse",
-            "amount": 3
-          }
-        ],
-        "followUp": {
-          "move": "inter",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "inter": {
-        "name": "매장",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 17
-          },
-          {
-            "op": "status",
-            "kind": "rot",
-            "amount": 2,
-            "power": 12
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "삽자루를 고쳐 쥔다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 6
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "cover_soil": {
-        "name": "흙을 덮는다",
-        "effects": [
-          {
-            "op": "ward",
-            "amount": 36,
-            "turns": 4
-          },
-          {
-            "op": "status",
-            "kind": "rot",
-            "amount": 2
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "shovel": 1,
-        "toll": 1,
-        "inter": 0,
-        "surge": 3,
-        "cover_soil": 2
-      }
-    },
-    "enlightenedMove": {
-      "name": "마지막 의식",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 22
-        },
-        {
-          "op": "empower",
-          "amount": 3
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "chomp": 2,
+      "death_roll": 3,
+      "regrow": 2,
+      "surge": 1.5,
+      "submerge": 0,
+      "cross_bog": 2
+     },
+     "noRepeat": 2
     }
-  },
-  {
-    "id": "swamp_king",
-    "name": "늪의 왕",
-    "tier": "boss",
-    "art": "🐊",
-    "hp": [
-      139,
-      139
-    ],
-    "moves": {
-      "chomp": {
-        "name": "우적",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 14
-          }
-        ],
-        "cooldown": 2
-      },
-      "submerge": {
-        "name": "잠수",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 12
-          },
-          {
-            "op": "status",
-            "kind": "bind",
-            "amount": 3
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "death_roll",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "death_roll": {
-        "name": "죽음의 회전",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 22
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "regrow": {
-        "name": "재생",
-        "effects": [
-          {
-            "op": "heal",
-            "amount": 14
-          }
-        ]
-      },
-      "surge": {
-        "name": "늪이 끓어오른다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 7
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "cross_bog": {
-        "name": "늪을 건너라",
-        "effects": [
-          {
-            "op": "demand",
-            "kind": "straight",
-            "turns": 2,
-            "amount": 40,
-            "power": 3
-          },
-          {
-            "op": "status",
-            "kind": "bind",
-            "amount": 3
-          }
-        ],
-        "cooldown": 3,
-        "minTurn": 2
-      }
+   }
+  ],
+  "enlightenedMove": {
+   "name": "통째로 삼키기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 22
     },
-    "phases": [
-      {
-        "untilHpRatio": 0.5,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "chomp": 1,
-            "submerge": 1,
-            "death_roll": 0,
-            "surge": 1.5,
-            "regrow": 0,
-            "cross_bog": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "chomp": 2,
-            "death_roll": 3,
-            "regrow": 2,
-            "surge": 1.5,
-            "submerge": 0,
-            "cross_bog": 2
-          },
-          "noRepeat": 2
-        }
-      }
-    ],
-    "enlightenedMove": {
-      "name": "통째로 삼키기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 22
-        },
-        {
-          "op": "heal",
-          "amount": 8
-        }
-      ]
+    {
+     "op": "heal",
+     "amount": 8
     }
+   ]
   },
-  {
-    "id": "fog_mother",
-    "name": "안개의 어머니",
-    "tier": "boss",
-    "art": "🌫️",
-    "hp": [
-      136,
-      136
-    ],
-    "moves": {
-      "caress": {
-        "name": "안개 손길",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 13
-          },
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "confuse"
-          }
-        ],
-        "cooldown": 2
-      },
-      "veil": {
-        "name": "장막",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 14
-          }
-        ],
-        "followUp": {
-          "move": "smother",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "smother": {
-        "name": "질식",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 21
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "lullaby": {
-        "name": "자장가",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "confuse"
-          },
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ]
-      },
-      "surge": {
-        "name": "숨을 깊이 들이쉰다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 7
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "erase": {
-        "name": "안개가 지운다",
-        "effects": [
-          {
-            "op": "unpin"
-          },
-          {
-            "op": "status",
-            "kind": "confuse",
-            "amount": 3
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
-    },
-    "phases": [
-      {
-        "untilHpRatio": 0.5,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "caress": 1,
-            "veil": 1,
-            "smother": 0,
-            "surge": 1.5,
-            "lullaby": 0,
-            "erase": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "caress": 2,
-            "smother": 3,
-            "lullaby": 2,
-            "surge": 1.5,
-            "veil": 0,
-            "erase": 2
-          },
-          "noRepeat": 2
-        }
-      }
-    ],
-    "enlightenedMove": {
-      "name": "백무(白霧)",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 20
-        },
-        {
-          "op": "confuse",
-          "amount": 2
-        }
-      ]
-    }
+  "battleDice": {
+   "faces": [
+    1,
+    4,
+    7
+   ],
+   "n": 4
   },
-  {
-    "id": "the_buried",
-    "name": "파묻힌 자",
-    "tier": "boss",
-    "art": "🧟",
-    "hp": [
-      142,
-      142
+  "battleMoves": [
+   {
+    "id": "grip",
+    "name": "왕의 손아귀",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "mire",
+    "name": "수렁",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 3
+   },
+   {
+    "id": "crown",
+    "name": "왕관 빛",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "mail",
+    "name": "진흙 갑주",
+    "op": "armor",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "fog_mother",
+  "name": "안개의 어머니",
+  "tier": "boss",
+  "art": "🌫️",
+  "hp": [
+   136,
+   136
+  ],
+  "moves": {
+   "caress": {
+    "name": "안개 손길",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 13
+     },
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "confuse"
+     }
     ],
-    "moves": {
-      "claw": {
-        "name": "손톱",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 14
-          }
-        ],
-        "cooldown": 2
-      },
-      "rise": {
-        "name": "일어서기",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
-          },
-          {
-            "op": "block",
-            "amount": 10
-          }
-        ],
-        "followUp": {
-          "move": "grave_call",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "grave_call": {
-        "name": "무덤의 부름",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 18
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "rot": {
-        "name": "부패",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 4,
-            "kind": "poison"
-          },
-          {
-            "op": "heal",
-            "amount": 10
-          }
-        ]
-      },
-      "surge": {
-        "name": "흙을 밀어낸다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 7
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "under_soil": {
-        "name": "흙 아래",
-        "effects": [
-          {
-            "op": "ward",
-            "amount": 85,
-            "turns": 4
-          },
-          {
-            "op": "status",
-            "kind": "poison",
-            "amount": 3
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
+    "cooldown": 2
+   },
+   "veil": {
+    "name": "장막",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 14
+     }
+    ],
+    "followUp": {
+     "move": "smother",
+     "chance": 1
     },
-    "phases": [
-      {
-        "untilHpRatio": 0.5,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "claw": 1,
-            "rise": 1,
-            "grave_call": 0,
-            "surge": 1.5,
-            "rot": 0,
-            "under_soil": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "claw": 2,
-            "grave_call": 3,
-            "rot": 2,
-            "surge": 1.5,
-            "rise": 0,
-            "under_soil": 2
-          },
-          "noRepeat": 2
-        }
-      }
+    "cooldown": 2
+   },
+   "smother": {
+    "name": "질식",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 21
+     }
     ],
-    "enlightenedMove": {
-      "name": "합장(合葬)",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 22
-        },
-        {
-          "op": "empower",
-          "amount": 3
-        }
-      ]
-    }
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "lullaby": {
+    "name": "자장가",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "confuse"
+     },
+     {
+      "op": "empower",
+      "amount": 2
+     }
+    ]
+   },
+   "surge": {
+    "name": "숨을 깊이 들이쉰다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 7
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "erase": {
+    "name": "안개가 지운다",
+    "effects": [
+     {
+      "op": "unpin"
+     },
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 3
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
   },
-  {
-    "id": "nightmare_hare",
-    "name": "악몽 토끼",
-    "tier": "normal",
-    "art": "🐇",
-    "hp": [
-      37,
-      42
-    ],
-    "moves": {
-      "nibble": {
-        "name": "갉아먹기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 6
-          }
-        ]
-      },
-      "hop": {
-        "name": "뜀박질",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 7
-          }
-        ],
-        "followUp": {
-          "move": "shriek",
-          "chance": 0.5
-        }
-      },
-      "shriek": {
-        "name": "끽 소리",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 10
-          },
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ],
-        "minTurn": 5
-      },
-      "surge": {
-        "name": "귀를 세운다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
+  "phases": [
+   {
+    "untilHpRatio": 0.5,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "nibble": 3,
-        "hop": 2,
-        "shriek": 2,
-        "surge": 3
-      },
-      "noRepeat": 2
-    },
-    "enlightenedMove": {
-      "name": "달빛 발차기",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 15
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "caress": 1,
+      "veil": 1,
+      "smother": 0,
+      "surge": 1.5,
+      "lullaby": 0,
+      "erase": 2
+     }
     }
-  },
-  {
-    "id": "floating_eye",
-    "name": "떠도는 눈",
-    "tier": "normal",
-    "art": "👁️",
-    "hp": [
-      32,
-      37
-    ],
-    "moves": {
-      "gaze": {
-        "name": "응시",
-        "effects": [
-          {
-            "op": "confuse",
-            "amount": 3
-          }
-        ],
-        "followUp": {
-          "move": "beam",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "beam": {
-        "name": "시선 광선",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 11
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      },
-      "blink": {
-        "name": "깜빡임",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 8
-          }
-        ],
-        "hidden": true,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "동공이 벌어진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "gaze": 1,
-        "beam": 0,
-        "blink": 1,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "광기의 응시",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 13
-        },
-        {
-          "op": "confuse",
-          "amount": 2
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "caress": 2,
+      "smother": 3,
+      "lullaby": 2,
+      "surge": 1.5,
+      "veil": 0,
+      "erase": 2
+     },
+     "noRepeat": 2
     }
-  },
-  {
-    "id": "dream_moth",
-    "name": "꿈나방",
-    "tier": "normal",
-    "art": "🦋",
-    "hp": [
-      34,
-      39
-    ],
-    "moves": {
-      "dust": {
-        "name": "인분(鱗粉)",
-        "effects": [
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ]
-      },
-      "wing": {
-        "name": "날개치기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 7
-          }
-        ],
-        "minTurn": 5,
-        "followUp": {
-          "move": "cocoon",
-          "chance": 0.5
-        }
-      },
-      "cocoon": {
-        "name": "고치",
-        "effects": [
-          {
-            "op": "heal",
-            "amount": 8
-          },
-          {
-            "op": "block",
-            "amount": 5
-          }
-        ]
-      },
-      "surge": {
-        "name": "비늘가루를 모은다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
+   }
+  ],
+  "enlightenedMove": {
+   "name": "백무(白霧)",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 20
     },
+    {
+     "op": "confuse",
+     "amount": 2
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    6
+   ],
+   "n": 5
+  },
+  "battleMoves": [
+   {
+    "id": "touch",
+    "name": "안개 손길",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "lullaby",
+    "name": "자장가",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "fade",
+    "name": "안개 속으로",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "smother",
+    "name": "숨 막는 안개",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 3
+   }
+  ]
+ },
+ {
+  "id": "the_buried",
+  "name": "파묻힌 자",
+  "tier": "boss",
+  "art": "🧟",
+  "hp": [
+   142,
+   142
+  ],
+  "moves": {
+   "claw": {
+    "name": "손톱",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 14
+     }
+    ],
+    "cooldown": 2
+   },
+   "rise": {
+    "name": "일어서기",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 3
+     },
+     {
+      "op": "block",
+      "amount": 10
+     }
+    ],
+    "followUp": {
+     "move": "grave_call",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "grave_call": {
+    "name": "무덤의 부름",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 18
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "rot": {
+    "name": "부패",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 4,
+      "kind": "poison"
+     },
+     {
+      "op": "heal",
+      "amount": 10
+     }
+    ]
+   },
+   "surge": {
+    "name": "흙을 밀어낸다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 7
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "under_soil": {
+    "name": "흙 아래",
+    "effects": [
+     {
+      "op": "ward",
+      "amount": 85,
+      "turns": 4
+     },
+     {
+      "op": "status",
+      "kind": "poison",
+      "amount": 3
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "phases": [
+   {
+    "untilHpRatio": 0.5,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "wing": 3,
-        "dust": 2,
-        "cocoon": 1,
-        "surge": 3
-      },
-      "noRepeat": 2
-    },
-    "enlightenedMove": {
-      "name": "꿈 흡수",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 12
-        },
-        {
-          "op": "heal",
-          "amount": 8
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "claw": 1,
+      "rise": 1,
+      "grave_call": 0,
+      "surge": 1.5,
+      "rot": 0,
+      "under_soil": 2
+     }
     }
-  },
-  {
-    "id": "whisper_polyp",
-    "name": "속삭이는 폴립",
-    "tier": "normal",
-    "art": "🦠",
-    "hp": [
-      39,
-      44
-    ],
-    "moves": {
-      "whisper": {
-        "name": "속삭임",
-        "effects": [
-          {
-            "op": "confuse",
-            "amount": 2
-          },
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ],
-        "followUp": {
-          "move": "pulse",
-          "chance": 0.5
-        },
-        "cooldown": 2
-      },
-      "lash": {
-        "name": "촉수질",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 8
-          }
-        ],
-        "cooldown": 2,
-        "followUp": {
-          "move": "pulse",
-          "chance": 1
-        }
-      },
-      "pulse": {
-        "name": "맥동",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "속삭임이 커진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "whisper": 1,
-        "lash": 1,
-        "pulse": 0,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "광란의 합창",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 15
-        },
-        {
-          "op": "empower",
-          "amount": 3
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "claw": 2,
+      "grave_call": 3,
+      "rot": 2,
+      "surge": 1.5,
+      "rise": 0,
+      "under_soil": 2
+     },
+     "noRepeat": 2
     }
-  },
-  {
-    "id": "faceless_cultist",
-    "name": "얼굴 없는 광신도",
-    "tier": "normal",
-    "art": "🕯️",
-    "hp": [
-      37,
-      42
-    ],
-    "moves": {
-      "dagger": {
-        "name": "제식 단검",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 8
-          }
-        ]
-      },
-      "pray": {
-        "name": "기도",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "sacrifice",
-          "chance": 0.5
-        }
-      },
-      "sacrifice": {
-        "name": "제물",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 14
-          }
-        ],
-        "minTurn": 5
-      },
-      "surge": {
-        "name": "기도를 삼킨다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
+   }
+  ],
+  "enlightenedMove": {
+   "name": "합장(合葬)",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 22
     },
+    {
+     "op": "empower",
+     "amount": 3
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    2,
+    5,
+    7
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "hands",
+    "name": "무덤의 손",
+    "op": "damage",
+    "weight": 3
+   },
+   {
+    "id": "dirt",
+    "name": "흙비",
+    "op": "armor",
+    "weight": 1
+   },
+   {
+    "id": "grudge",
+    "name": "원한",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   }
+  ]
+ },
+ {
+  "id": "nightmare_hare",
+  "name": "악몽 토끼",
+  "tier": "normal",
+  "art": "🐇",
+  "hp": [
+   37,
+   42
+  ],
+  "moves": {
+   "nibble": {
+    "name": "갉아먹기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 6
+     }
+    ]
+   },
+   "hop": {
+    "name": "뜀박질",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 7
+     }
+    ],
+    "followUp": {
+     "move": "shriek",
+     "chance": 0.5
+    }
+   },
+   "shriek": {
+    "name": "끽 소리",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 10
+     },
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ],
+    "minTurn": 5
+   },
+   "surge": {
+    "name": "귀를 세운다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "nibble": 3,
+    "hop": 2,
+    "shriek": 2,
+    "surge": 3
+   },
+   "noRepeat": 2
+  },
+  "enlightenedMove": {
+   "name": "달빛 발차기",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 15
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "kick",
+    "name": "악몽 발길질",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "eyes",
+    "name": "홀린 눈",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "hop",
+    "name": "깡총 물러서기",
+    "op": "armor",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "floating_eye",
+  "name": "떠도는 눈",
+  "tier": "normal",
+  "art": "👁️",
+  "hp": [
+   32,
+   37
+  ],
+  "moves": {
+   "gaze": {
+    "name": "응시",
+    "effects": [
+     {
+      "op": "confuse",
+      "amount": 3
+     }
+    ],
+    "followUp": {
+     "move": "beam",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "beam": {
+    "name": "시선 광선",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 11
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   },
+   "blink": {
+    "name": "깜빡임",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 8
+     }
+    ],
+    "hidden": true,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "동공이 벌어진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "gaze": 1,
+    "beam": 0,
+    "blink": 1,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "광기의 응시",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 13
+    },
+    {
+     "op": "confuse",
+     "amount": 2
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "stare",
+    "name": "응시",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "tear",
+    "name": "눈물",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "hypno",
+    "name": "최면",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   }
+  ]
+ },
+ {
+  "id": "dream_moth",
+  "name": "꿈나방",
+  "tier": "normal",
+  "art": "🦋",
+  "hp": [
+   34,
+   39
+  ],
+  "moves": {
+   "dust": {
+    "name": "인분(鱗粉)",
+    "effects": [
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ]
+   },
+   "wing": {
+    "name": "날개치기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 7
+     }
+    ],
+    "minTurn": 5,
+    "followUp": {
+     "move": "cocoon",
+     "chance": 0.5
+    }
+   },
+   "cocoon": {
+    "name": "고치",
+    "effects": [
+     {
+      "op": "heal",
+      "amount": 8
+     },
+     {
+      "op": "block",
+      "amount": 5
+     }
+    ]
+   },
+   "surge": {
+    "name": "비늘가루를 모은다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "wing": 3,
+    "dust": 2,
+    "cocoon": 1,
+    "surge": 3
+   },
+   "noRepeat": 2
+  },
+  "enlightenedMove": {
+   "name": "꿈 흡수",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 12
+    },
+    {
+     "op": "heal",
+     "amount": 8
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    3
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "dust",
+    "name": "인분 가루",
+    "op": "bleed",
+    "weight": 2,
+    "amount": 2
+   },
+   {
+    "id": "flap",
+    "name": "날갯짓",
+    "op": "damage",
+    "weight": 1
+   },
+   {
+    "id": "cocoon",
+    "name": "고치",
+    "op": "armor",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "whisper_polyp",
+  "name": "속삭이는 폴립",
+  "tier": "normal",
+  "art": "🦠",
+  "hp": [
+   39,
+   44
+  ],
+  "moves": {
+   "whisper": {
+    "name": "속삭임",
+    "effects": [
+     {
+      "op": "confuse",
+      "amount": 2
+     },
+     {
+      "op": "empower",
+      "amount": 2
+     }
+    ],
+    "followUp": {
+     "move": "pulse",
+     "chance": 0.5
+    },
+    "cooldown": 2
+   },
+   "lash": {
+    "name": "촉수질",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 8
+     }
+    ],
+    "cooldown": 2,
+    "followUp": {
+     "move": "pulse",
+     "chance": 1
+    }
+   },
+   "pulse": {
+    "name": "맥동",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "속삭임이 커진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "whisper": 1,
+    "lash": 1,
+    "pulse": 0,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "광란의 합창",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 15
+    },
+    {
+     "op": "empower",
+     "amount": 3
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    5
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "whisper",
+    "name": "속삭임",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "bud",
+    "name": "증식",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "spore",
+    "name": "포자",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 2
+   }
+  ]
+ },
+ {
+  "id": "faceless_cultist",
+  "name": "얼굴 없는 광신도",
+  "tier": "normal",
+  "art": "🕯️",
+  "hp": [
+   37,
+   42
+  ],
+  "moves": {
+   "dagger": {
+    "name": "제식 단검",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 8
+     }
+    ]
+   },
+   "pray": {
+    "name": "기도",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 3
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "sacrifice",
+     "chance": 0.5
+    }
+   },
+   "sacrifice": {
+    "name": "제물",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 14
+     }
+    ],
+    "minTurn": 5
+   },
+   "surge": {
+    "name": "기도를 삼킨다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "dagger": 3,
+    "pray": 2,
+    "sacrifice": 1,
+    "surge": 3
+   },
+   "noRepeat": 2
+  },
+  "enlightenedMove": {
+   "name": "어둠의 봉헌",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 13
+    },
+    {
+     "op": "heal",
+     "amount": 10
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "knife",
+    "name": "제물 칼",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "pray",
+    "name": "기도",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "zeal",
+    "name": "광신",
+    "op": "lifesteal",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "screaming_stone",
+  "name": "비명 지르는 돌",
+  "tier": "normal",
+  "art": "🪨",
+  "hp": [
+   46,
+   49
+  ],
+  "moves": {
+   "scream": {
+    "name": "비명",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 7
+     },
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2
+   },
+   "harden": {
+    "name": "굳히기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 12
+     }
+    ],
+    "followUp": {
+     "move": "crack",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "crack": {
+    "name": "균열",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 13
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "금이 갈라진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "scream": 1,
+    "harden": 1,
+    "crack": 0,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "공명",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 15
+    },
+    {
+     "op": "confuse",
+     "amount": 2
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    2,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "scream",
+    "name": "비명",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "skin",
+    "name": "돌의 살갗",
+    "op": "armor",
+    "weight": 2
+   }
+  ]
+ },
+ {
+  "id": "sandman",
+  "name": "모래 사나이",
+  "tier": "elite",
+  "art": "⏳",
+  "hp": [
+   87,
+   87
+  ],
+  "moves": {
+   "sand": {
+    "name": "모래 뿌리기",
+    "effects": [
+     {
+      "op": "confuse",
+      "amount": 3
+     }
+    ],
+    "cooldown": 3
+   },
+   "grip": {
+    "name": "모래 손",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 14
+     },
+     {
+      "op": "status",
+      "kind": "numb",
+      "amount": 2
+     }
+    ],
+    "cooldown": 3
+   },
+   "hourglass": {
+    "name": "시간의 모래",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 4
+     }
+    ],
+    "followUp": {
+     "move": "collapse",
+     "chance": 1
+    },
+    "cooldown": 3
+   },
+   "collapse": {
+    "name": "붕괴",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 18
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 3
+   },
+   "surge": {
+    "name": "모래를 끌어모은다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 6
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "scatter": {
+    "name": "모래로 흩어진다",
+    "effects": [
+     {
+      "op": "unpin"
+     },
+     {
+      "op": "confuse",
+      "amount": 3
+     },
+     {
+      "op": "status",
+      "kind": "numb",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "sand": 1,
+    "grip": 1,
+    "hourglass": 1,
+    "collapse": 0,
+    "surge": 3,
+    "scatter": 2
+   }
+  },
+  "enlightenedMove": {
+   "name": "영원한 잠",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 26
+    },
+    {
+     "op": "confuse",
+     "amount": 2
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    2,
+    4,
+    6
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "sand",
+    "name": "모래 뿌리기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "sleep",
+    "name": "잠재우기",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "wall",
+    "name": "모래벽",
+    "op": "armor",
+    "weight": 1
+   },
+   {
+    "id": "glass",
+    "name": "모래시계 뒤집기",
+    "op": "heal",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "hill_tentacle",
+  "name": "언덕의 촉수",
+  "tier": "elite",
+  "art": "🦑",
+  "hp": [
+   89,
+   89
+  ],
+  "moves": {
+   "slap": {
+    "name": "후려치기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     }
+    ],
+    "cooldown": 3
+   },
+   "coil": {
+    "name": "휘감기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 10
+     },
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ],
+    "cooldown": 3
+   },
+   "rise": {
+    "name": "솟아오르기",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 3
+     },
+     {
+      "op": "block",
+      "amount": 10
+     }
+    ],
+    "followUp": {
+     "move": "smash",
+     "chance": 1
+    },
+    "cooldown": 3
+   },
+   "smash": {
+    "name": "내려찍기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 20
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 3
+   },
+   "surge": {
+    "name": "촉수가 굵어진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 6
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "take_form": {
+    "name": "형태를 갖춰라",
+    "effects": [
+     {
+      "op": "demand",
+      "kind": "fullHouse",
+      "turns": 2,
+      "amount": 18,
+      "power": 2
+     },
+     {
+      "op": "status",
+      "kind": "bind",
+      "amount": 3
+     }
+    ],
+    "cooldown": 3,
+    "minTurn": 2
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "slap": 1,
+    "coil": 1,
+    "rise": 1,
+    "smash": 0,
+    "surge": 3,
+    "take_form": 2
+   }
+  },
+  "enlightenedMove": {
+   "name": "심연의 손아귀",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 29
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    5,
+    7
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "wrap",
+    "name": "휘감기",
+    "op": "bleed",
+    "weight": 2,
+    "amount": 3
+   },
+   {
+    "id": "smash",
+    "name": "내리치기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "shrink",
+    "name": "움츠림",
+    "op": "heal",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "bell_ringer",
+  "name": "종지기",
+  "tier": "elite",
+  "art": "🔔",
+  "hp": [
+   83,
+   83
+  ],
+  "moves": {
+   "toll": {
+    "name": "타종",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     },
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2
+   },
+   "silence": {
+    "name": "침묵",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 4
+     },
+     {
+      "op": "status",
+      "kind": "plunder",
+      "amount": 2
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "peal",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "peal": {
+    "name": "큰 종소리",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 18
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "줄을 힘껏 당긴다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 6
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "toll_cage": {
+    "name": "종소리가 가둔다",
+    "effects": [
+     {
+      "op": "cap",
+      "amount": 20,
+      "turns": 3
+     },
+     {
+      "op": "status",
+      "kind": "plunder",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "toll": 1,
+    "silence": 1,
+    "peal": 0,
+    "surge": 3,
+    "toll_cage": 2
+   }
+  },
+  "enlightenedMove": {
+   "name": "진혼곡",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 27
+    },
+    {
+     "op": "confuse",
+     "amount": 1
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    3,
+    5,
+    7
+   ],
+   "n": 3
+  },
+  "battleMoves": [
+   {
+    "id": "toll",
+    "name": "타종",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "ring",
+    "name": "귀울림",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 3
+   },
+   {
+    "id": "sanctum",
+    "name": "종의 성역",
+    "op": "armor",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "lucid_king",
+  "name": "자각몽의 왕",
+  "tier": "boss",
+  "art": "🌙",
+  "hp": [
+   146,
+   146
+  ],
+  "moves": {
+   "dream_blade": {
+    "name": "꿈의 칼날",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 15
+     }
+    ],
+    "cooldown": 2
+   },
+   "rewrite": {
+    "name": "꿈 고쳐쓰기",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 14
+     },
+     {
+      "op": "empower",
+      "amount": 3
+     }
+    ],
+    "hidden": true,
+    "followUp": {
+     "move": "nightmare",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "nightmare": {
+    "name": "악몽",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 22
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "wake_false": {
+    "name": "거짓 기상",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "seal"
+     },
+     {
+      "op": "heal",
+      "amount": 12
+     }
+    ]
+   },
+   "surge": {
+    "name": "꿈을 고쳐 쓴다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 7
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "whole_dream": {
+    "name": "완전한 꿈",
+    "effects": [
+     {
+      "op": "demand",
+      "category": "fullHouse",
+      "turns": 2,
+      "amount": 40,
+      "power": 3
+     },
+     {
+      "op": "status",
+      "kind": "seal",
+      "amount": 3
+     }
+    ],
+    "cooldown": 3,
+    "minTurn": 2
+   }
+  },
+  "phases": [
+   {
+    "untilHpRatio": 0.5,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "dagger": 3,
-        "pray": 2,
-        "sacrifice": 1,
-        "surge": 3
-      },
-      "noRepeat": 2
-    },
-    "enlightenedMove": {
-      "name": "어둠의 봉헌",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 13
-        },
-        {
-          "op": "heal",
-          "amount": 10
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "dream_blade": 1,
+      "rewrite": 1,
+      "nightmare": 0,
+      "surge": 1.5,
+      "wake_false": 0,
+      "whole_dream": 2
+     }
     }
-  },
-  {
-    "id": "screaming_stone",
-    "name": "비명 지르는 돌",
-    "tier": "normal",
-    "art": "🪨",
-    "hp": [
-      46,
-      49
-    ],
-    "moves": {
-      "scream": {
-        "name": "비명",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 7
-          },
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ],
-        "cooldown": 2
-      },
-      "harden": {
-        "name": "굳히기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 12
-          }
-        ],
-        "followUp": {
-          "move": "crack",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "crack": {
-        "name": "균열",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 13
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "금이 갈라진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "scream": 1,
-        "harden": 1,
-        "crack": 0,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "공명",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 15
-        },
-        {
-          "op": "confuse",
-          "amount": 2
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "dream_blade": 2,
+      "nightmare": 3,
+      "wake_false": 2,
+      "surge": 1.5,
+      "rewrite": 0,
+      "whole_dream": 2
+     },
+     "noRepeat": 2
     }
-  },
-  {
-    "id": "sandman",
-    "name": "모래 사나이",
-    "tier": "elite",
-    "art": "⏳",
-    "hp": [
-      87,
-      87
-    ],
-    "moves": {
-      "sand": {
-        "name": "모래 뿌리기",
-        "effects": [
-          {
-            "op": "confuse",
-            "amount": 3
-          }
-        ],
-        "cooldown": 3
-      },
-      "grip": {
-        "name": "모래 손",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 14
-          },
-          {
-            "op": "status",
-            "kind": "numb",
-            "amount": 2
-          }
-        ],
-        "cooldown": 3
-      },
-      "hourglass": {
-        "name": "시간의 모래",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 4
-          }
-        ],
-        "followUp": {
-          "move": "collapse",
-          "chance": 1
-        },
-        "cooldown": 3
-      },
-      "collapse": {
-        "name": "붕괴",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 18
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 3
-      },
-      "surge": {
-        "name": "모래를 끌어모은다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 6
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "scatter": {
-        "name": "모래로 흩어진다",
-        "effects": [
-          {
-            "op": "unpin"
-          },
-          {
-            "op": "confuse",
-            "amount": 3
-          },
-          {
-            "op": "status",
-            "kind": "numb",
-            "amount": 2
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
+   }
+  ],
+  "enlightenedMove": {
+   "name": "자각의 끝",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 25
     },
+    {
+     "op": "confuse",
+     "amount": 2
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    2,
+    4,
+    6,
+    8
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "scepter",
+    "name": "왕홀 내리찍기",
+    "op": "damage",
+    "weight": 3
+   },
+   {
+    "id": "crown",
+    "name": "꿈의 왕관",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "daydream",
+    "name": "백일몽",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "shield",
+    "name": "왕의 방패",
+    "op": "armor",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "the_maw",
+  "name": "벌어진 아가리",
+  "tier": "boss",
+  "art": "🕳️",
+  "hp": [
+   149,
+   149
+  ],
+  "moves": {
+   "gnash": {
+    "name": "이갈이",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 15
+     }
+    ],
+    "cooldown": 2
+   },
+   "abyss_call": {
+    "name": "심연의 부름",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 4
+     }
+    ],
+    "followUp": {
+     "move": "crush",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "swallow_light": {
+    "name": "빛 삼키기",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "devour"
+     },
+     {
+      "op": "block",
+      "amount": 12
+     }
+    ]
+   },
+   "crush": {
+    "name": "짓씹기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 25
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "아가리가 더 벌어진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 7
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "not_one_bite": {
+    "name": "한 입에 삼킬 수 없다",
+    "effects": [
+     {
+      "op": "cap",
+      "amount": 38,
+      "turns": 3
+     },
+     {
+      "op": "status",
+      "kind": "devour",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "phases": [
+   {
+    "untilHpRatio": 0.5,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "sand": 1,
-        "grip": 1,
-        "hourglass": 1,
-        "collapse": 0,
-        "surge": 3,
-        "scatter": 2
-      }
-    },
-    "enlightenedMove": {
-      "name": "영원한 잠",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 26
-        },
-        {
-          "op": "confuse",
-          "amount": 2
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "gnash": 1,
+      "abyss_call": 1,
+      "crush": 0,
+      "surge": 1.5,
+      "swallow_light": 0,
+      "not_one_bite": 2
+     }
     }
-  },
-  {
-    "id": "hill_tentacle",
-    "name": "언덕의 촉수",
-    "tier": "elite",
-    "art": "🦑",
-    "hp": [
-      89,
-      89
-    ],
-    "moves": {
-      "slap": {
-        "name": "후려치기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          }
-        ],
-        "cooldown": 3
-      },
-      "coil": {
-        "name": "휘감기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 10
-          },
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ],
-        "cooldown": 3
-      },
-      "rise": {
-        "name": "솟아오르기",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 3
-          },
-          {
-            "op": "block",
-            "amount": 10
-          }
-        ],
-        "followUp": {
-          "move": "smash",
-          "chance": 1
-        },
-        "cooldown": 3
-      },
-      "smash": {
-        "name": "내려찍기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 20
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 3
-      },
-      "surge": {
-        "name": "촉수가 굵어진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 6
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "take_form": {
-        "name": "형태를 갖춰라",
-        "effects": [
-          {
-            "op": "demand",
-            "kind": "fullHouse",
-            "turns": 2,
-            "amount": 18,
-            "power": 2
-          },
-          {
-            "op": "status",
-            "kind": "bind",
-            "amount": 3
-          }
-        ],
-        "cooldown": 3,
-        "minTurn": 2
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "slap": 1,
-        "coil": 1,
-        "rise": 1,
-        "smash": 0,
-        "surge": 3,
-        "take_form": 2
-      }
-    },
-    "enlightenedMove": {
-      "name": "심연의 손아귀",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 29
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "gnash": 2,
+      "crush": 3,
+      "swallow_light": 2,
+      "surge": 1.5,
+      "abyss_call": 0,
+      "not_one_bite": 2
+     },
+     "noRepeat": 2
     }
-  },
-  {
-    "id": "bell_ringer",
-    "name": "종지기",
-    "tier": "elite",
-    "art": "🔔",
-    "hp": [
-      83,
-      83
-    ],
-    "moves": {
-      "toll": {
-        "name": "타종",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          },
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ],
-        "cooldown": 2
-      },
-      "silence": {
-        "name": "침묵",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 4
-          },
-          {
-            "op": "status",
-            "kind": "plunder",
-            "amount": 2
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "peal",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "peal": {
-        "name": "큰 종소리",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 18
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "줄을 힘껏 당긴다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 6
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "toll_cage": {
-        "name": "종소리가 가둔다",
-        "effects": [
-          {
-            "op": "cap",
-            "amount": 20,
-            "turns": 3
-          },
-          {
-            "op": "status",
-            "kind": "plunder",
-            "amount": 2
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
+   }
+  ],
+  "enlightenedMove": {
+   "name": "망각",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 26
     },
+    {
+     "op": "empower",
+     "amount": 4
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    4,
+    8
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "devour",
+    "name": "집어삼키기",
+    "op": "lifesteal",
+    "weight": 3
+   },
+   {
+    "id": "chew",
+    "name": "짓씹기",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 4
+   },
+   {
+    "id": "digest",
+    "name": "소화",
+    "op": "heal",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "false_saint",
+  "name": "거짓 성인",
+  "tier": "boss",
+  "art": "😇",
+  "hp": [
+   142,
+   142
+  ],
+  "moves": {
+   "hymn": {
+    "name": "거짓 찬송",
+    "effects": [
+     {
+      "op": "status",
+      "amount": 3,
+      "kind": "blessing"
+     },
+     {
+      "op": "empower",
+      "amount": 3
+     }
+    ],
+    "cooldown": 2
+   },
+   "smite": {
+    "name": "단죄",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 16
+     }
+    ],
+    "cooldown": 2,
+    "followUp": {
+     "move": "judgment",
+     "chance": 1
+    }
+   },
+   "absolve": {
+    "name": "거짓 사면",
+    "effects": [
+     {
+      "op": "heal",
+      "amount": 16
+     },
+     {
+      "op": "block",
+      "amount": 10
+     }
+    ],
+    "followUp": {
+     "move": "judgment",
+     "chance": 0.7
+    }
+   },
+   "judgment": {
+    "name": "심판",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 24
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "후광이 짙어진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 7
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   },
+   "force_humility": {
+    "name": "겸손을 강요한다",
+    "effects": [
+     {
+      "op": "drainWhet",
+      "amount": 0
+     },
+     {
+      "op": "status",
+      "kind": "blessing",
+      "amount": 1
+     },
+     {
+      "op": "status",
+      "kind": "curse",
+      "amount": 3
+     }
+    ],
+    "cooldown": 2,
+    "minTurn": 2
+   }
+  },
+  "phases": [
+   {
+    "untilHpRatio": 0.5,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "toll": 1,
-        "silence": 1,
-        "peal": 0,
-        "surge": 3,
-        "toll_cage": 2
-      }
-    },
-    "enlightenedMove": {
-      "name": "진혼곡",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 27
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "hymn": 1,
+      "smite": 1,
+      "judgment": 0,
+      "surge": 1.5,
+      "absolve": 0,
+      "force_humility": 2
+     }
     }
-  },
-  {
-    "id": "lucid_king",
-    "name": "자각몽의 왕",
-    "tier": "boss",
-    "art": "🌙",
-    "hp": [
-      146,
-      146
-    ],
-    "moves": {
-      "dream_blade": {
-        "name": "꿈의 칼날",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 15
-          }
-        ],
-        "cooldown": 2
-      },
-      "rewrite": {
-        "name": "꿈 고쳐쓰기",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 14
-          },
-          {
-            "op": "empower",
-            "amount": 3
-          }
-        ],
-        "hidden": true,
-        "followUp": {
-          "move": "nightmare",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "nightmare": {
-        "name": "악몽",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 22
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "wake_false": {
-        "name": "거짓 기상",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "seal"
-          },
-          {
-            "op": "heal",
-            "amount": 12
-          }
-        ]
-      },
-      "surge": {
-        "name": "꿈을 고쳐 쓴다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 7
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "whole_dream": {
-        "name": "완전한 꿈",
-        "effects": [
-          {
-            "op": "demand",
-            "category": "fullHouse",
-            "turns": 2,
-            "amount": 40,
-            "power": 3
-          },
-          {
-            "op": "status",
-            "kind": "seal",
-            "amount": 3
-          }
-        ],
-        "cooldown": 3,
-        "minTurn": 2
-      }
-    },
-    "phases": [
-      {
-        "untilHpRatio": 0.5,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "dream_blade": 1,
-            "rewrite": 1,
-            "nightmare": 0,
-            "surge": 1.5,
-            "wake_false": 0,
-            "whole_dream": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "dream_blade": 2,
-            "nightmare": 3,
-            "wake_false": 2,
-            "surge": 1.5,
-            "rewrite": 0,
-            "whole_dream": 2
-          },
-          "noRepeat": 2
-        }
-      }
-    ],
-    "enlightenedMove": {
-      "name": "자각의 끝",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 25
-        },
-        {
-          "op": "confuse",
-          "amount": 2
-        }
-      ]
-    }
-  },
-  {
-    "id": "the_maw",
-    "name": "벌어진 아가리",
-    "tier": "boss",
-    "art": "🕳️",
-    "hp": [
-      149,
-      149
-    ],
-    "moves": {
-      "gnash": {
-        "name": "이갈이",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 15
-          }
-        ],
-        "cooldown": 2
-      },
-      "abyss_call": {
-        "name": "심연의 부름",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 4
-          }
-        ],
-        "followUp": {
-          "move": "crush",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "swallow_light": {
-        "name": "빛 삼키기",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "devour"
-          },
-          {
-            "op": "block",
-            "amount": 12
-          }
-        ]
-      },
-      "crush": {
-        "name": "짓씹기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 25
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "아가리가 더 벌어진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 7
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "not_one_bite": {
-        "name": "한 입에 삼킬 수 없다",
-        "effects": [
-          {
-            "op": "cap",
-            "amount": 38,
-            "turns": 3
-          },
-          {
-            "op": "status",
-            "kind": "devour",
-            "amount": 2
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
-    },
-    "phases": [
-      {
-        "untilHpRatio": 0.5,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "gnash": 1,
-            "abyss_call": 1,
-            "crush": 0,
-            "surge": 1.5,
-            "swallow_light": 0,
-            "not_one_bite": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "gnash": 2,
-            "crush": 3,
-            "swallow_light": 2,
-            "surge": 1.5,
-            "abyss_call": 0,
-            "not_one_bite": 2
-          },
-          "noRepeat": 2
-        }
-      }
-    ],
-    "enlightenedMove": {
-      "name": "망각",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 26
-        },
-        {
-          "op": "empower",
-          "amount": 4
-        }
-      ]
-    }
-  },
-  {
-    "id": "false_saint",
-    "name": "거짓 성인",
-    "tier": "boss",
-    "art": "😇",
-    "hp": [
-      142,
-      142
-    ],
-    "moves": {
-      "hymn": {
-        "name": "거짓 찬송",
-        "effects": [
-          {
-            "op": "status",
-            "amount": 3,
-            "kind": "blessing"
-          },
-          {
-            "op": "empower",
-            "amount": 3
-          }
-        ],
-        "cooldown": 2
-      },
-      "smite": {
-        "name": "단죄",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 16
-          }
-        ],
-        "cooldown": 2,
-        "followUp": {
-          "move": "judgment",
-          "chance": 1
-        }
-      },
-      "absolve": {
-        "name": "거짓 사면",
-        "effects": [
-          {
-            "op": "heal",
-            "amount": 16
-          },
-          {
-            "op": "block",
-            "amount": 10
-          }
-        ],
-        "followUp": {
-          "move": "judgment",
-          "chance": 0.7
-        }
-      },
-      "judgment": {
-        "name": "심판",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 24
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "후광이 짙어진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 7
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      },
-      "force_humility": {
-        "name": "겸손을 강요한다",
-        "effects": [
-          {
-            "op": "drainWhet",
-            "amount": 0
-          },
-          {
-            "op": "status",
-            "kind": "blessing",
-            "amount": 1
-          },
-          {
-            "op": "status",
-            "kind": "curse",
-            "amount": 3
-          }
-        ],
-        "cooldown": 2,
-        "minTurn": 2
-      }
-    },
-    "phases": [
-      {
-        "untilHpRatio": 0.5,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "hymn": 1,
-            "smite": 1,
-            "judgment": 0,
-            "surge": 1.5,
-            "absolve": 0,
-            "force_humility": 2
-          }
-        }
-      },
-      {
-        "untilHpRatio": 0,
-        "pattern": {
-          "mode": "weighted",
-          "weights": {
-            "smite": 2,
-            "judgment": 3,
-            "absolve": 2,
-            "surge": 1.5,
-            "hymn": 0,
-            "force_humility": 2
-          },
-          "noRepeat": 2
-        }
-      }
-    ],
-    "enlightenedMove": {
-      "name": "거짓 기적",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 22
-        },
-        {
-          "op": "heal",
-          "amount": 12
-        }
-      ]
-    }
-  },
-  {
-    "id": "nameless_dread",
-    "name": "이름 없는 공포",
-    "tier": "boss",
-    "art": "🐙",
-    "hp": [
-      99999,
-      99999
-    ],
-    "moves": {
-      "watch": {
-        "name": "바라본다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ],
-        "hidden": true,
-        "cooldown": 3
-      },
-      "whisper": {
-        "name": "귓가의 속삭임",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 9
-          },
-          {
-            "op": "confuse",
-            "amount": 1
-          }
-        ],
-        "cooldown": 3
-      },
-      "reach": {
-        "name": "닿는다",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 13
-          }
-        ],
-        "followUp": {
-          "move": "unmake",
-          "chance": 1
-        },
-        "cooldown": 3
-      },
-      "unmake": {
-        "name": "지운다",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 16
-          },
-          {
-            "op": "confuse",
-            "amount": 1
-          }
-        ],
-        "minTurn": 6,
-        "cooldown": 3
-      }
-    },
+   },
+   {
+    "untilHpRatio": 0,
     "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "watch": 1,
-        "whisper": 1,
-        "reach": 1,
-        "unmake": 0
-      }
-    },
-    "enlightenedMove": {
-      "name": "눈뜬다",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 22
-        },
-        {
-          "op": "confuse",
-          "amount": 2
-        }
-      ]
-    },
-    "final": true,
-    "escalation": 2
-  },
-  {
-    "id": "hollow_priest",
-    "name": "속 빈 사제",
-    "tier": "normal",
-    "art": "🧎",
-    "hp": [
-      39,
-      44
-    ],
-    "moves": {
-      "sermon": {
-        "name": "공허한 설교",
-        "effects": [
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ],
-        "followUp": {
-          "move": "strike",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "strike": {
-        "name": "지팡이 내리치기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 8
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      },
-      "blessing": {
-        "name": "거꾸로 된 축복",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 2
-          },
-          {
-            "op": "block",
-            "amount": 6
-          }
-        ],
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "설교가 빨라진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
-    },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "sermon": 1,
-        "strike": 0,
-        "blessing": 1,
-        "surge": 3
-      }
-    },
-    "enlightenedMove": {
-      "name": "공허의 손길",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 14
-        },
-        {
-          "op": "confuse",
-          "amount": 1
-        }
-      ]
+     "mode": "weighted",
+     "weights": {
+      "smite": 2,
+      "judgment": 3,
+      "absolve": 2,
+      "surge": 1.5,
+      "hymn": 0,
+      "force_humility": 2
+     },
+     "noRepeat": 2
     }
-  },
-  {
-    "id": "choir_ghost",
-    "name": "성가대 유령",
-    "tier": "normal",
-    "art": "👥",
-    "hp": [
-      34,
-      39
-    ],
-    "moves": {
-      "hymn": {
-        "name": "어긋난 화음",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 6
-          },
-          {
-            "op": "confuse",
-            "amount": 2
-          }
-        ]
-      },
-      "crescendo": {
-        "name": "크레셴도",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 11
-          }
-        ],
-        "minTurn": 5,
-        "followUp": {
-          "move": "hymn",
-          "chance": 0.5
-        }
-      },
-      "rest_note": {
-        "name": "쉼표",
-        "effects": [
-          {
-            "op": "block",
-            "amount": 8
-          }
-        ],
-        "hidden": true
-      },
-      "surge": {
-        "name": "음이 높아진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
+   }
+  ],
+  "enlightenedMove": {
+   "name": "거짓 기적",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 22
     },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "hymn": 3,
-        "crescendo": 2,
-        "rest_note": 1,
-        "surge": 3
-      },
-      "noRepeat": 2
-    },
-    "enlightenedMove": {
-      "name": "마지막 소절",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 15
-        }
-      ]
+    {
+     "op": "heal",
+     "amount": 12
     }
+   ]
   },
-  {
-    "id": "candle_swarm",
-    "name": "촛불 떼",
-    "tier": "normal",
-    "art": "🎇",
-    "hp": [
-      32,
-      37
+  "battleDice": {
+   "faces": [
+    2,
+    5,
+    8
+   ],
+   "n": 4
+  },
+  "battleMoves": [
+   {
+    "id": "judge",
+    "name": "심판",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "prayer",
+    "name": "거짓 기도",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "stigma",
+    "name": "성흔",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 3
+   },
+   {
+    "id": "halo",
+    "name": "후광",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   }
+  ]
+ },
+ {
+  "id": "nameless_dread",
+  "name": "이름 없는 공포",
+  "tier": "boss",
+  "art": "🐙",
+  "hp": [
+   99999,
+   99999
+  ],
+  "moves": {
+   "watch": {
+    "name": "바라본다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 2
+     }
     ],
-    "moves": {
-      "singe": {
-        "name": "그을리기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 5
-          }
-        ],
-        "cooldown": 2
-      },
-      "waver": {
-        "name": "일렁임",
-        "effects": [
-          {
-            "op": "confuse",
-            "amount": 2
-          },
-          {
-            "op": "empower",
-            "amount": 2
-          }
-        ],
-        "followUp": {
-          "move": "flareup",
-          "chance": 1
-        },
-        "cooldown": 2
-      },
-      "flareup": {
-        "name": "확 타오르기",
-        "effects": [
-          {
-            "op": "damage",
-            "amount": 12
-          }
-        ],
-        "minTurn": 5,
-        "cooldown": 2
-      },
-      "surge": {
-        "name": "심지가 길어진다",
-        "effects": [
-          {
-            "op": "empower",
-            "amount": 5
-          }
-        ],
-        "minTurn": 4,
-        "cooldown": 3
-      }
+    "hidden": true,
+    "cooldown": 3
+   },
+   "whisper": {
+    "name": "귓가의 속삭임",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 9
+     },
+     {
+      "op": "confuse",
+      "amount": 1
+     }
+    ],
+    "cooldown": 3
+   },
+   "reach": {
+    "name": "닿는다",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 13
+     }
+    ],
+    "followUp": {
+     "move": "unmake",
+     "chance": 1
     },
-    "pattern": {
-      "mode": "weighted",
-      "weights": {
-        "singe": 1,
-        "waver": 1,
-        "flareup": 0,
-        "surge": 3
-      }
+    "cooldown": 3
+   },
+   "unmake": {
+    "name": "지운다",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 16
+     },
+     {
+      "op": "confuse",
+      "amount": 1
+     }
+    ],
+    "minTurn": 6,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "watch": 1,
+    "whisper": 1,
+    "reach": 1,
+    "unmake": 0
+   }
+  },
+  "enlightenedMove": {
+   "name": "눈뜬다",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 22
     },
-    "enlightenedMove": {
-      "name": "불바다",
-      "effects": [
-        {
-          "op": "damage",
-          "amount": 14
-        },
-        {
-          "op": "heal",
-          "amount": 5
-        }
-      ]
+    {
+     "op": "confuse",
+     "amount": 2
     }
-  }
+   ]
+  },
+  "final": true,
+  "escalation": 2,
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    5
+   ],
+   "n": 3
+  },
+  "battleMoves": [
+   {
+    "id": "whisper",
+    "name": "귓가의 속삭임",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "reach",
+    "name": "닿는다",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 3
+   },
+   {
+    "id": "watch",
+    "name": "바라본다",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "unmake",
+    "name": "지운다",
+    "op": "damage",
+    "weight": 1
+   }
+  ]
+ },
+ {
+  "id": "hollow_priest",
+  "name": "속 빈 사제",
+  "tier": "normal",
+  "art": "🧎",
+  "hp": [
+   39,
+   44
+  ],
+  "moves": {
+   "sermon": {
+    "name": "공허한 설교",
+    "effects": [
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ],
+    "followUp": {
+     "move": "strike",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "strike": {
+    "name": "지팡이 내리치기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 8
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   },
+   "blessing": {
+    "name": "거꾸로 된 축복",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 2
+     },
+     {
+      "op": "block",
+      "amount": 6
+     }
+    ],
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "설교가 빨라진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "sermon": 1,
+    "strike": 0,
+    "blessing": 1,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "공허의 손길",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 14
+    },
+    {
+     "op": "confuse",
+     "amount": 1
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    3,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "sermon",
+    "name": "설교",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "tithe",
+    "name": "헌금 걷기",
+    "op": "lifesteal",
+    "weight": 1
+   },
+   {
+    "id": "bless",
+    "name": "축복",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   }
+  ]
+ },
+ {
+  "id": "choir_ghost",
+  "name": "성가대 유령",
+  "tier": "normal",
+  "art": "👥",
+  "hp": [
+   34,
+   39
+  ],
+  "moves": {
+   "hymn": {
+    "name": "어긋난 화음",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 6
+     },
+     {
+      "op": "confuse",
+      "amount": 2
+     }
+    ]
+   },
+   "crescendo": {
+    "name": "크레셴도",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 11
+     }
+    ],
+    "minTurn": 5,
+    "followUp": {
+     "move": "hymn",
+     "chance": 0.5
+    }
+   },
+   "rest_note": {
+    "name": "쉼표",
+    "effects": [
+     {
+      "op": "block",
+      "amount": 8
+     }
+    ],
+    "hidden": true
+   },
+   "surge": {
+    "name": "음이 높아진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "hymn": 3,
+    "crescendo": 2,
+    "rest_note": 1,
+    "surge": 3
+   },
+   "noRepeat": 2
+  },
+  "enlightenedMove": {
+   "name": "마지막 소절",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 15
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2,
+    4
+   ]
+  },
+  "battleMoves": [
+   {
+    "id": "discord",
+    "name": "불협화음",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "hymn",
+    "name": "찬송",
+    "op": "heal",
+    "weight": 1
+   },
+   {
+    "id": "high",
+    "name": "찢어지는 고음",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 2
+   }
+  ]
+ },
+ {
+  "id": "candle_swarm",
+  "name": "촛불 떼",
+  "tier": "normal",
+  "art": "🎇",
+  "hp": [
+   32,
+   37
+  ],
+  "moves": {
+   "singe": {
+    "name": "그을리기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 5
+     }
+    ],
+    "cooldown": 2
+   },
+   "waver": {
+    "name": "일렁임",
+    "effects": [
+     {
+      "op": "confuse",
+      "amount": 2
+     },
+     {
+      "op": "empower",
+      "amount": 2
+     }
+    ],
+    "followUp": {
+     "move": "flareup",
+     "chance": 1
+    },
+    "cooldown": 2
+   },
+   "flareup": {
+    "name": "확 타오르기",
+    "effects": [
+     {
+      "op": "damage",
+      "amount": 12
+     }
+    ],
+    "minTurn": 5,
+    "cooldown": 2
+   },
+   "surge": {
+    "name": "심지가 길어진다",
+    "effects": [
+     {
+      "op": "empower",
+      "amount": 5
+     }
+    ],
+    "minTurn": 4,
+    "cooldown": 3
+   }
+  },
+  "pattern": {
+   "mode": "weighted",
+   "weights": {
+    "singe": 1,
+    "waver": 1,
+    "flareup": 0,
+    "surge": 3
+   }
+  },
+  "enlightenedMove": {
+   "name": "불바다",
+   "effects": [
+    {
+     "op": "damage",
+     "amount": 14
+    },
+    {
+     "op": "heal",
+     "amount": 5
+    }
+   ]
+  },
+  "battleDice": {
+   "faces": [
+    1,
+    2
+   ],
+   "n": 6
+  },
+  "battleMoves": [
+   {
+    "id": "wax",
+    "name": "촛농 떨구기",
+    "op": "damage",
+    "weight": 2
+   },
+   {
+    "id": "kindle",
+    "name": "타오르기",
+    "op": "empower",
+    "weight": 1,
+    "mult": 0.3
+   },
+   {
+    "id": "ignite",
+    "name": "불붙기",
+    "op": "bleed",
+    "weight": 1,
+    "amount": 1
+   }
+  ]
+ }
 ]
