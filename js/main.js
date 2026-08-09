@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes } from './run.js';
 
-export const VERSION = 'v1.30'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v1.31'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -833,13 +833,13 @@ function renderBattle(opts = {}) {
       </div>
       <div class="hint-line">${hintHtml()}</div>
       <div class="sheet-zone ${battle.rolled ? '' : 'dim'}">
-        ${previews.map(({ cat, variant, seal, locked, bd }) => `
-          <button class="sheet-row combo-row t-${variant.tier || 'common'} ${locked ? 'used' : ''} ${COMBO_PLATE_READY.has(variant.id) ? 'has-plate' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
+        ${previews.map(({ cat, variant, seal, locked, burst, bd }) => `
+          <button class="sheet-row combo-row t-${variant.tier || 'common'} ${burst ? 'burst' : ''} ${locked ? 'used' : ''} ${COMBO_PLATE_READY.has(variant.id) ? 'has-plate' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
             data-cat="${cat.id}" data-variant="${variant.id}" data-locked="${locked ? 1 : 0}"
             ${COMBO_PLATE_READY.has(variant.id) ? `style="border-image-source: url('assets/ui/paper_${variant.id}.png'); border-width: 11px ${plateEdge(variant.id)}px"` : ''}>
             ${COMBO_PLATE_READY.has(variant.id) ? '' : rowIcon(comboIcon(cat, variant))}
             <span class="row-body">
-              <span class="sheet-name">${esc(variant.name)}</span>
+              <span class="sheet-name">${burst ? '<b class="bolt">⚡</b>' : ''}${esc(variant.name)}</span>
               <small class="cat-tag">${esc(cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
             </span>
             <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? bd.total : '—') : '—'}</span>
@@ -849,7 +849,7 @@ function renderBattle(opts = {}) {
         // 내 버프 칩 — 체력바 위, 길게 눌러 상세 (v0.19)
         const b = battle.buffs;
         const chips = [
-          battle.whet > 0 ? `<span class="whet-chip">🔥벼름 ${battle.whet} <b>×${whetMultOf(battle.whet).toFixed(1)}</b></span>` : '',
+          battle.whet > 0 ? `<span class="whet-chip" title="⚡일격 족보로만 쓸 수 있다">🔥벼름 ${battle.whet} <b>⚡×${whetMultOf(battle.whet).toFixed(1)}</b></span>` : '',
           b.strength > 0 ? `${ico('status_strength')}${b.strength}` : '', b.focus > 0 ? `${ico('status_focus')}+${b.focus}` : '', b.regen > 0 ? `${ico('status_regen')}+${b.regen}` : '',
           battle.player.dot > 0 ? `${ico('status_bleed')}${DOT_KO[battle.player.dotKind] || '독'} ${battle.player.dot}` : '',
         ].filter(Boolean);
@@ -1007,7 +1007,7 @@ function showPlayerBuffs() {
     b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 모든 족보 피해 +${b.strength} · 매 턴 1 소멸</li>` : '',
     b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus} — 매 턴 리롤 +${b.focus} · 매 턴 1 소멸</li>` : '',
     b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen} · 매 턴 1 소멸</li>` : '',
-    battle.whet > 0 ? `<li>🔥 벼름 ${battle.whet} — 다음에 확정하는 족보 피해가 <b>×${whetMultOf(battle.whet).toFixed(1)}</b>. 쓰면 0으로 돌아간다</li>` : '',
+    battle.whet > 0 ? `<li>🔥 벼름 ${battle.whet} — <b>⚡일격</b> 족보로 터뜨리면 피해 <b>×${whetMultOf(battle.whet).toFixed(1)}</b>. 일격이 아닌 족보로는 쓰이지도 깎이지도 않는다</li>` : '',
     battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
     confusedNow > 0 ? `<li>${ico('status_confuse')} 혼란 — 이번 턴 주사위 ${confusedNow}개가 뒤틀려 다시 굴릴 수 없음</li>` : '',
     battle.pendingConfuse > 0 ? `<li>${ico('status_confuse')} 혼란 예고 — 다음 턴 주사위 ${battle.pendingConfuse}개가 뒤틀린다</li>` : '',

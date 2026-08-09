@@ -36,7 +36,7 @@
       "11": "boss"
     }
   },
-  "hpScalePerFloor": 0.12,
+  "hpScalePerFloor": 0.11,
   "encounters": {
     "easyFloors": [
       1,
