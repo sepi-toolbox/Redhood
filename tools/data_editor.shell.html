@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v1.27 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v1.28 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -146,7 +146,8 @@ function spliceChanged(arrPath, idx){
  * 그래서 요약을 뽑는 순간에 경로를 보고 지금 데이터로 다시 만든다. */
 const F_LABEL={name:'이름',cooldown:'쿨다운',minTurn:'해금 턴',lockTurn:'락 턴',hidden:'숨김',
   'break.damage':'파쇄 피해','break.move':'파쇄 후 행동','followUp.move':'연계 대상','followUp.chance':'연계 확률',
-  defaultMove:'기본 행동','hp.0':'HP 최소','hp.1':'HP 최대',art:'그림',desc:'설명',tier:'등급',name2:'이름'};
+  defaultMove:'기본 행동','hp.0':'HP 최소','hp.1':'HP 최대',art:'그림',desc:'설명',tier:'등급',
+  'hook.type':'효과 유형','hook.amount':'수치',abilityText:'부가 설명',ruleText:'족보 설명',text:'설명'};
 function mvName(e,id){
   const M={...e.moves,...(e.uniqueMoves||{})}, m=M[id];
   if(!m) return id;
@@ -193,6 +194,46 @@ function labelFor(path, fallback){
     if(f==='relics'){ const r=DB.relics[Number(ks[0])]; if(!r) return fallback;
       if(tailOf(1)==='hook.amount') return `${r.name} 수치`;
       return `${r.name} ${F_LABEL[tailOf(1)]||tailOf(1)}`; }
+    if(f==='scoring'&&ks[0]==='categories'){
+      const c=(DB.scoring.categories||[])[Number(ks[1])]; if(!c) return fallback;
+      const CN={name:'족보 이름',ruleText:'족보 설명',mult:'배수',kind:'판정',score:'점수 방식'};
+      if(ks[2]==='variants'){
+        const vr=(c.variants||[])[Number(ks[3])]; if(!vr) return fallback;
+        const t=tailOf(4), VN={name:'이름',tier:'등급',abilityText:'부가 설명'};
+        if(ks[4]==='ability'&&ks[5]!==undefined){
+          const a=(vr.ability||[])[Number(ks[5])]||{}, nth='능력'+(Number(ks[5])+1);
+          return `${vr.name} ${nth}${ks[6]==='amount'?' '+(OPN[a.op]||'수치'):''}`;
+        }
+        return `${vr.name} ${VN[t]||t}`;
+      }
+      return `${c.name} ${CN[tailOf(2)]||tailOf(2)}`;
+    }
+    if(f==='acts'&&ks[0]==='acts'){
+      const a=(DB.acts.acts||[])[Number(ks[1])]; if(!a) return fallback;
+      if(ks[2]==='themes'){
+        const t=(a.themes||[])[Number(ks[3])]; if(!t) return fallback;
+        const TN={name:'테마 이름',boss:'보스',icon:'아이콘'};
+        if(ks[4]==='normals') return `${t.name} 일반 적${ks[5]!==undefined?' '+(Number(ks[5])+1)+'번':''}`;
+        if(ks[4]==='elites')  return `${t.name} 정예${ks[5]!==undefined?' '+(Number(ks[5])+1)+'번':''}`;
+        if(ks[4]==='events')  return `${t.name} 이벤트${ks[5]!==undefined?' '+(Number(ks[5])+1)+'번':''}`;
+        return `${t.name} ${TN[tailOf(4)]||tailOf(4)}`;
+      }
+      return `${a.act}막 ${tailOf(2)}`;
+    }
+    if(f==='events'&&ks[0]==='events'){
+      const e=(DB.events.events||[])[Number(ks[1])]; if(!e) return fallback;
+      const head=(e.npc&&e.npc.name)||e.id;
+      if(ks[2]==='choices'){
+        const c=(e.choices||[])[Number(ks[3])]||{}, nth='선택지'+(Number(ks[3])+1);
+        const CN={text:'문구',sub:'요약',result:'결과 문구'};
+        if(ks[4]==='effects'&&ks[5]!==undefined){
+          const x=(c.effects||[])[Number(ks[5])]||{};
+          return `${head} ${nth} 효과${Number(ks[5])+1}${ks[6]==='amount'?' '+(OPN[x.op]||'수치'):''}`;
+        }
+        return `${head} ${nth} ${CN[tailOf(4)]||tailOf(4)}`;
+      }
+      return `${head} ${tailOf(2)}`;
+    }
     if(f==='statuses'&&ks[0]==='list'){ const st=(DB.statuses.list||[])[Number(ks[1])]; if(!st) return fallback;
       const N={amount:'수치',turns:'지속 턴',name:'이름',text:'설명',rule:'규칙',color:'색'};
       return `${st.name} ${N[tailOf(2)]||tailOf(2)}`; }
@@ -253,6 +294,32 @@ const ST_RULES=[['onUseFaceDamage','쓰면 눈금만큼 피해'],['onUseFaceCoin
   ['zeroValue','눈금 0 계산'],['faceLow','수치 이하만 나옴'],['faceHigh','수치 이상만 나옴'],['hideFace','눈 가림'],
   ['needReroll','한 번 굴리기 전 값 없음'],['fuse','턴 지나면 폭발'],['linked','같이 굴러감'],
   ['rerollCost','리롤 더 소모'],['spread','양옆으로 번짐']];
+const TIER_OPS=[['common','일반'],['uncommon','고급'],['rare','희귀'],['epic','서사']];
+const ENEMY_TIER_OPS=[['normal','일반'],['elite','정예'],['boss','보스']];
+const RELIC_TIER_OPS=[['normal','일반'],['elite','정예']];
+const RELIC_HOOKS=[['flatDamage','평타 +N'],['categoryMult','특정 족보 배수'],['categoryBonus','특정 족보 가산'],
+  ['kindBonus','특정 눈 가산'],['aoeBonus','전체공격 가산'],['lowHpDamage','저체력 추가피해'],
+  ['maxHp','최대 HP'],['turnHeal','턴마다 회복'],['turnBlock','턴마다 방어'],['healOnKill','처치 시 회복'],
+  ['healOnVictory','승리 시 회복'],['blockKeep','방어 유지'],['extraReroll','리롤 +N'],['luck','행운'],
+  ['coinBonus','코인 보너스'],['shopDiscount','상점 할인'],['confuseImmune','혼란 면역']];
+const EVENT_OPS=[['gainCoins','코인 획득'],['loseCoins','코인 잃음'],['heal','회복'],['loseHp','HP 잃음'],
+  ['maxHp','최대 HP 증가'],['maxHpLoss','최대 HP 감소'],['gainDie','주사위 획득'],
+  ['gainRelic','유물 획득'],['gainRelicElite','정예 유물 획득'],['gainVariant','족보 획득']];
+const CAT_KINDS=[['ofKind','같은 눈 N개'],['fullHouse','풀하우스'],['straight','스트레이트'],['chance','찬스'],['twoPair','투페어']];
+const CAT_SCORES=[['matchedSum','매칭 합'],['sumTop3','상위 3합'],['sumTop3Distinct','서로 다른 상위 3합'],['highestDie','가장 높은 눈']];
+/* 목록 하나(예: 테마의 일반 적 목록)를 줄줄이 고칠 수 있게 만든다 */
+function listEditor(path, label, options, arr){
+  const box=document.createElement('div');
+  (arr||[]).forEach((_,k)=>{ const r=document.createElement('div'); r.className='efrow';
+    r.appendChild(select(`${path}.${k}`, `${label} ${k+1}번`, options, {after:redraw}));
+    r.appendChild(miniBtn('×','이 줄 빼기',()=>{ removeP(`${path}.${k}`); spliceChanged(path,k);
+      mark(path, `${label}에서 빼기`); redraw(); }));
+    box.appendChild(r); });
+  box.appendChild(miniBtn('+ 추가', label+'에 하나 더', ()=>{
+    const cur=readP(path)||[]; cur.push(options[0][0]); writeP(path,cur);
+    mark(path, `${label}에 추가`); redraw(); }));
+  return box;
+}
 const NO_AMOUNT=new Set(['rest']);   // 수치가 없는 효과
 const ABILITY_OPS=[['strength','힘'],['focus','집중'],['regen','재생'],['block','방어'],['heal','회복'],
   ['weakEnemy','적 약화'],['bleed','출혈'],['vulnerable','취약'],['stun','기절'],['dodge','회피'],
@@ -334,8 +401,8 @@ function tabEnemy(v){
   ENEMIES.forEach(([e,i])=>{
     const tr=document.createElement('tr'); tr.className='t-'+e.tier;
     tr.dataset.k=(e.id+' '+e.name).toLowerCase();
-    cell(tr,e.id,1); cell(tr,e.name,1);
-    cell(tr,{normal:'일반',elite:'정예',boss:'보스'}[e.tier],1);
+    cell(tr,e.id,1); cell(tr, field(`enemies:${i}.name`, e.id+' 이름'));
+    cell(tr, select(`enemies:${i}.tier`, e.name+' 격', ENEMY_TIER_OPS, {after:redraw}));
     const a=ACT[e.id]||['—','—']; cell(tr,a[0],1); cell(tr,a[1],1);
     cell(tr, field(`enemies:${i}.hp.0`,e.name+' HP 최소'));
     cell(tr, field(`enemies:${i}.hp.1`,e.name+' HP 최대'));
@@ -531,16 +598,20 @@ function tabMoves(v){
   });
 }
 function tabScore(v){
-  const tb=table(v,['족보','배수','변형','등급','부가 능력','수치','설명']);
+  const tb=table(v,['족보','판정','점수','배수','변형','등급','부가 능력','수치','부가 설명','족보 설명']);
   DB.scoring.categories.forEach((c,ci)=>{
     c.variants.forEach((vr,vi)=>{
       const tr=document.createElement('tr'); tr.className='t-'+(vr.tier||'common');
       tr.dataset.k=(c.id+' '+c.name+' '+vr.id+' '+vr.name).toLowerCase();
-      cell(tr,c.name+'<br><span class="sub">'+c.id+'</span>',1);
-      cell(tr, c.mult!=null? field(`scoring:categories.${ci}.mult`,c.name+' 배수') : '—', c.mult==null);
+      cell(tr, vi===0 ? field(`scoring:categories.${ci}.name`, c.id+' 족보 이름') : c.name+'<br><span class="sub">'+c.id+'</span>', vi!==0);
+      cell(tr, vi===0 ? select(`scoring:categories.${ci}.kind`, c.name+' 판정', CAT_KINDS, {after:redraw}) : '', vi!==0);
+      cell(tr, vi===0 && typeof c.score==='string'
+        ? select(`scoring:categories.${ci}.score`, c.name+' 점수 방식', CAT_SCORES, {after:redraw})
+        : (vi===0 ? field(`scoring:categories.${ci}.score`, c.name+' 고정 점수', {num:true}) : ''), vi!==0);
+      cell(tr, vi===0 && c.mult!=null? field(`scoring:categories.${ci}.mult`,c.name+' 배수') : '—', vi!==0 || c.mult==null);
       cell(tr, field(`scoring:categories.${ci}.variants.${vi}.name`,vr.id+' 이름'));
-      cell(tr, vr.tier||'common',1);
       const vb=`scoring:categories.${ci}.variants.${vi}`;
+      cell(tr, select(`${vb}.tier`, vr.name+' 등급', TIER_OPS, {def:'common', after:redraw}));
       const ab=document.createElement('div');
       (vr.ability||[]).forEach((a,k)=>{ const r=document.createElement('div'); r.className='efrow';
         r.appendChild(select(`${vb}.ability.${k}.op`, vr.name+' 능력'+(k+1), ABILITY_OPS, {after:redraw}));
@@ -553,7 +624,8 @@ function tabScore(v){
       (vr.ability||[]).forEach((a,k)=>{ const r=document.createElement('div'); r.className='efrow';
         r.appendChild(field(`${vb}.ability.${k}.amount`, vr.name+' '+(OPN[a.op]||a.op), {num:true, def:0})); w.appendChild(r); });
       cell(tr, w.children.length?w:'—', !w.children.length);
-      cell(tr, vr.abilityText||'',1);
+      cell(tr, field(`${vb}.abilityText`, vr.name+' 부가 설명'));
+      cell(tr, vi===0 ? field(`scoring:categories.${ci}.ruleText`, c.name+' 족보 설명') : '', vi!==0);
       tb.appendChild(tr);
     });
   });
@@ -563,7 +635,8 @@ function tabDice(v){
   DB.dice.forEach((d,i)=>{
     const tr=document.createElement('tr'); tr.className='t-'+(d.tier||'common');
     tr.dataset.k=(d.id+' '+d.name).toLowerCase();
-    cell(tr,d.id,1); cell(tr, field(`dice:${i}.name`,d.id+' 이름')); cell(tr,d.tier||'common',1);
+    cell(tr,d.id,1); cell(tr, field(`dice:${i}.name`,d.id+' 이름'));
+    cell(tr, select(`dice:${i}.tier`, d.name+' 등급', TIER_OPS, {def:'common', after:redraw}));
     d.faces.forEach((f,k)=> cell(tr, field(`dice:${i}.faces.${k}`, d.name+' '+(k+1)+'번 면')));
     cell(tr, field(`dice:${i}.desc`, d.id+' 설명'));
     const box=document.createElement('div');
@@ -585,8 +658,8 @@ function tabRelic(v){
     const tr=document.createElement('tr'); tr.className='t-'+(r.tier==='elite'?'elite':'common');
     tr.dataset.k=(r.id+' '+r.name).toLowerCase();
     cell(tr,(r.icon||'')+' '+r.id,1); cell(tr, field(`relics:${i}.name`,r.id+' 이름'));
-    cell(tr,r.tier==='elite'?'정예':'일반',1);
-    cell(tr,(r.hook&&r.hook.type)||'—',1);
+    cell(tr, select(`relics:${i}.tier`, r.name+' 등급', RELIC_TIER_OPS, {def:'normal', after:redraw}));
+    cell(tr, r.hook ? select(`relics:${i}.hook.type`, r.name+' 효과 유형', RELIC_HOOKS, {after:redraw}) : '—', !r.hook);
     cell(tr, r.hook&&r.hook.amount!=null? field(`relics:${i}.hook.amount`,r.name+' 수치') : '—', !(r.hook&&r.hook.amount!=null));
     cell(tr, field(`relics:${i}.desc`,r.name+' 설명'));
     const box=document.createElement('div'); box.style.cssText='display:flex;gap:6px';
@@ -666,11 +739,15 @@ function tabTheme(v){
   const tb=table(v,['막','테마','일반 적','정예','보스','이벤트','HP 배율','공격 배율']);
   DB.acts.acts.forEach((a,ai)=>a.themes.forEach((t,ti)=>{
     const tr=document.createElement('tr'); tr.dataset.k=(t.id+' '+t.name).toLowerCase();
-    cell(tr,a.act,1); cell(tr,t.name+'<br><span class="sub">'+t.id+'</span>',1);
-    cell(tr,(t.normals||[]).map(x=>EN[x]?EN[x].e.name:x).join(', '),1);
-    cell(tr,(t.elites||[]).map(x=>EN[x]?EN[x].e.name:x).join(', '),1);
-    cell(tr,EN[t.boss]?EN[t.boss].e.name:t.boss,1);
-    cell(tr,(t.events||[]).join(', '),1);
+    const tp=`acts:acts.${ai}.themes.${ti}`;
+    const EOPT=(f)=>DB.enemies.filter(x=>!f||x.tier===f).map(x=>[x.id,x.name]);
+    cell(tr,a.act,1);
+    cell(tr, field(`${tp}.name`, t.id+' 테마 이름'));
+    cell(tr, listEditor(`${tp}.normals`, t.name+' 일반 적', EOPT('normal'), t.normals));
+    cell(tr, listEditor(`${tp}.elites`, t.name+' 정예', EOPT('elite'), t.elites));
+    cell(tr, select(`${tp}.boss`, t.name+' 보스', EOPT('boss'), {after:redraw}));
+    cell(tr, listEditor(`${tp}.events`, t.name+' 이벤트',
+      DB.events.events.map(x=>[x.id,x.npc?x.npc.name:x.id]), t.events));
     cell(tr, ti===0? field(`acts:scaling.hp.${a.act}`,a.act+'막 HP 배율') : '', ti!==0);
     cell(tr, ti===0? field(`acts:scaling.atk.${a.act}`,a.act+'막 공격 배율') : '', ti!==0);
     tb.appendChild(tr);
@@ -681,12 +758,17 @@ function tabEvent(v){
   DB.events.events.forEach((e,ei)=>e.choices.forEach((c,ci)=>{
     const tr=document.createElement('tr'); tr.dataset.k=(e.id+' '+e.npc.name).toLowerCase();
     cell(tr, ci===0? e.id:'',1); cell(tr, ci===0? e.npc.name:'',1);
-    cell(tr,c.text,1); cell(tr, field(`events:events.${ei}.choices.${ci}.sub`,e.id+' 요약'));
-    cell(tr,(c.effects||[]).map(x=>OPN[x.op]||x.op).join(' · ')||'—',1);
+    cell(tr, field(`events:events.${ei}.choices.${ci}.text`,e.id+' 선택지 문구'));
+    cell(tr, field(`events:events.${ei}.choices.${ci}.sub`,e.id+' 요약'));
+    const ow=document.createElement('div');
+    (c.effects||[]).forEach((x,k)=>{ const r=document.createElement('div'); r.className='efrow';
+      r.appendChild(select(`events:events.${ei}.choices.${ci}.effects.${k}.op`, e.id+' 효과'+(k+1), EVENT_OPS, {after:redraw}));
+      ow.appendChild(r); });
+    cell(tr, ow.children.length?ow:'—', !ow.children.length);
     const w=document.createElement('div'); w.style.display='flex'; w.style.gap='4px';
     (c.effects||[]).forEach((x,k)=>{ if(x.amount!=null) w.appendChild(field(`events:events.${ei}.choices.${ci}.effects.${k}.amount`, e.id+' '+(OPN[x.op]||x.op))); });
     cell(tr, w.children.length?w:'—', !w.children.length);
-    cell(tr,c.result||'',1);
+    cell(tr, field(`events:events.${ei}.choices.${ci}.result`,e.id+' 결과 문구'));
     tb.appendChild(tr);
   }));
 }
@@ -820,6 +902,22 @@ function validateDB(){
     }
   }
   for(const id of DB.act1.player.startDice) if(!DB.dice.some(d=>d.id===id)) bad.push(`시작 주사위 "${id}" 가 없음`);
+  // 막·테마에 배치한 적이 실제로 있고 자리에 맞는 격인지
+  const EBY=Object.fromEntries(DB.enemies.map(e=>[e.id,e]));
+  for(const a of (DB.acts.acts||[])) for(const t of (a.themes||[])){
+    const chk=(list,want,what)=>{ for(const id of (list||[])){
+      if(!EBY[id]){ bad.push(`${t.name}: ${what} "${id}" 라는 적이 없음`); continue; }
+      if(EBY[id].tier!==want) bad.push(`${t.name}: ${what} 자리에 ${EBY[id].name}(${EBY[id].tier}) 이 들어 있음`);
+    }};
+    chk(t.normals,'normal','일반 적'); chk(t.elites,'elite','정예'); chk([t.boss],'boss','보스');
+    if(!(t.normals||[]).length) bad.push(`${t.name}: 일반 적이 하나도 없음`);
+    for(const id of (t.events||[])) if(!DB.events.events.some(x=>x.id===id)) bad.push(`${t.name}: "${id}" 라는 만남이 없음`);
+  }
+  // 족보 판정에 필요한 값이 빠졌는지
+  for(const c of (DB.scoring.categories||[])){
+    if(c.kind==='ofKind' && !(c.count>0)) bad.push(`${c.name}: 판정이 '같은 눈 N개' 인데 N(count)이 없음`);
+    if(c.kind==='straight' && !(c.length>0)) bad.push(`${c.name}: 판정이 '스트레이트' 인데 길이(length)가 없음`);
+  }
   return bad;
 }
 
