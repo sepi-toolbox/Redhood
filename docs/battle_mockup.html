@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>REDHOOD — 카드 전투 시안 (플레이 가능)</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html,body { background:#0b0908; color:#e8ddc8; font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif; }
+  body { display:flex; justify-content:center; padding:8px 0; }
+  .phone { position:relative; width:390px; height:844px; background:#141210; border:1px solid #2a241e;
+    border-radius:22px; overflow:hidden; display:flex; flex-direction:column; touch-action:none; }
+
+  /* ── 적 영역 ─────────────────────────── */
+  .foes { position:relative; height:250px; flex:none; display:flex; align-items:stretch; justify-content:space-evenly;
+    background:linear-gradient(180deg,#1d2418 0%,#171a13 55%,#141210 100%); padding:26px 6px 4px; gap:4px; }
+  .foe { position:relative; width:46%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    border-radius:12px; padding:4px 2px 6px; transition:opacity .5s; }
+  .foe.targeted .nm::before { content:'🎯 '; }
+  .foe.dead { opacity:.22; filter:grayscale(1); pointer-events:none; }
+  .foe .art { font-size:52px; line-height:1; filter:drop-shadow(0 4px 6px #000a); }
+  .foe .nm { font-size:12px; color:#cfc3a8; margin-top:2px; }
+  .foe .hpbar { width:86%; height:11px; background:#241c17; border:1px solid #3a2d24; border-radius:6px; margin-top:3px; overflow:hidden; position:relative; }
+  .foe .hpbar i { position:absolute; inset:0; background:linear-gradient(90deg,#8d3126,#b8503c); transition:width .4s; }
+  .foe .hpbar b { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; color:#fbeee2; font-weight:600; text-shadow:0 1px 2px #000; }
+  .fdice { display:flex; gap:5px; margin-top:6px; min-height:34px; }
+  .fdie { width:32px; height:32px; border-radius:8px; background:#3a1713; border:1.5px solid #7d3a2e;
+    display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; color:#f4c9ae;
+    box-shadow:0 2px 4px #0008; transition:transform .15s; position:relative; }
+  .fdie.hurt { animation:shake .3s; }
+  .fdie.dead { opacity:0; transform:scale(.2) rotate(40deg); pointer-events:none; transition:all .4s; }
+  .fdie.pickable { border-color:#e8b64d; box-shadow:0 0 10px #e8b64d88; animation:pulse 1s infinite; }
+  @keyframes pulse { 50% { box-shadow:0 0 16px #e8b64dcc; } }
+  @keyframes shake { 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
+
+  /* ── HUD ─────────────────────────── */
+  .hud { flex:none; display:flex; align-items:center; gap:8px; padding:7px 12px 4px; }
+  .myhp { flex:1; height:15px; background:#241c17; border:1px solid #3a2d24; border-radius:8px; position:relative; overflow:hidden; }
+  .myhp i { position:absolute; inset:0; background:linear-gradient(90deg,#4a7a52,#6da368); transition:width .4s; }
+  .myhp b { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#eefbe8; text-shadow:0 1px 2px #000; }
+  .res { display:flex; gap:4px; }
+  .res i { width:13px; height:13px; border-radius:50%; background:#e8b64d; box-shadow:0 0 6px #e8b64d99; }
+  .res i.off { background:#3a3226; box-shadow:none; }
+  .tno { font-size:11px; color:#8d8064; }
+  .preview { flex:none; text-align:center; font-size:12px; color:#b3a685; padding:2px 10px 4px; min-height:20px; }
+  .preview b.atk { color:#f0c05a; } .preview b.dmg { color:#e88a72; } .preview b.kill { color:#8fd08a; }
+
+  /* ── 내 주사위 ─────────────────────────── */
+  .mine { flex:none; display:flex; justify-content:center; gap:10px; padding:6px 8px 10px; }
+  .die { width:56px; height:56px; border-radius:13px; background:#efe6d0; color:#26201a; border:2px solid #b9a67f;
+    display:flex; align-items:center; justify-content:center; font-size:27px; font-weight:800;
+    box-shadow:0 3px 6px #0009; position:relative; transition:transform .15s; }
+  .die.sel { transform:translateY(-8px); border-color:#e8b64d; box-shadow:0 0 14px #e8b64daa; }
+  .die.dead { background:#37312a; color:#6b6152; border-color:#4a4238; box-shadow:none; }
+  .die.dead::after { content:''; position:absolute; inset:4px; background:
+    linear-gradient(45deg,transparent 46%,#221d17 46%,#221d17 54%,transparent 54%); border-radius:8px; }
+  .die.pickable { border-color:#8fd08a; box-shadow:0 0 12px #8fd08a99; animation:pulse 1s infinite; }
+  .die .orig { position:absolute; top:-7px; right:-5px; font-size:10px; background:#5a4a2e; color:#e8dcae;
+    border-radius:8px; padding:0 4px; font-weight:600; }
+
+  /* ── 손패 ─────────────────────────── */
+  .handzone { position:relative; flex:1; min-height:0; }
+  .hint { position:absolute; top:2px; width:100%; text-align:center; font-size:10.5px; color:#7d7258; }
+  .hand { position:absolute; bottom:-34px; left:0; width:100%; height:196px; }
+  .card { position:absolute; left:50%; bottom:0; width:96px; height:132px; margin-left:-48px;
+    border-radius:10px; background:linear-gradient(180deg,#f2e7cd,#e3d3ab); border:3px solid #a8352e;
+    box-shadow:0 4px 10px #000b; transform-origin:50% 120%; transition:transform .22s;
+    display:flex; flex-direction:column; overflow:hidden; }
+  .card.dragging { transition:none; z-index:40; }
+  .card .cost { position:absolute; top:-2px; left:-2px; width:26px; height:26px; border-radius:50%;
+    background:radial-gradient(#e8b64d,#b07f22); border:2px solid #7d5a17; color:#241c07;
+    display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; z-index:2; }
+  .card .art { flex:1; display:flex; align-items:center; justify-content:center; font-size:38px;
+    background:linear-gradient(180deg,#2a2018,#3d2c1e); }
+  .card .nm { flex:none; text-align:center; font-size:12px; font-weight:700; color:#3d2413; padding:4px 2px 5px;
+    background:linear-gradient(180deg,#e8d8b2,#d8c69a); border-top:2px solid #a8352e; white-space:nowrap; }
+  .endturn { position:absolute; right:10px; bottom:172px; z-index:30; padding:11px 18px; font-size:14px; font-weight:700;
+    color:#f7ecd8; background:linear-gradient(180deg,#7d3a2e,#5a281f); border:1.5px solid #a8543f;
+    border-radius:12px; box-shadow:0 3px 8px #000a; }
+  .endturn:active { transform:scale(.95); }
+  .info { position:absolute; left:10px; top:10px; z-index:30; width:26px; height:26px; border-radius:50%;
+    background:#241f18; border:1px solid #4a4238; color:#b3a685; font-size:14px; display:flex; align-items:center; justify-content:center; }
+
+  /* ── 확대 보기 / 규칙 / 배너 ─────────────────────────── */
+  .zoom { position:absolute; inset:0; z-index:60; background:#000a; display:none; align-items:center; justify-content:center; }
+  .zoom.on { display:flex; }
+  .zoom .big { width:230px; border-radius:14px; background:linear-gradient(180deg,#f2e7cd,#e3d3ab);
+    border:4px solid #a8352e; overflow:hidden; box-shadow:0 8px 30px #000; }
+  .zoom .big .art { height:130px; display:flex; align-items:center; justify-content:center; font-size:72px;
+    background:linear-gradient(180deg,#2a2018,#3d2c1e); }
+  .zoom .big .tt { padding:10px 12px 4px; font-size:17px; font-weight:800; color:#3d2413; }
+  .zoom .big .cc { padding:0 12px; font-size:12px; color:#7d5a17; font-weight:700; }
+  .zoom .big .dd { padding:8px 12px 14px; font-size:13.5px; line-height:1.55; color:#4a3a28; }
+  .banner { position:absolute; top:255px; width:100%; text-align:center; z-index:50; font-size:13px; color:#f4dfa8;
+    text-shadow:0 1px 3px #000; display:none; pointer-events:none; }
+  .banner.on { display:block; animation:bfade .4s; }
+  @keyframes bfade { from{opacity:0; transform:translateY(-6px)} }
+  .fx { position:absolute; inset:0; pointer-events:none; z-index:55; overflow:hidden; }
+  .float { position:absolute; font-size:17px; font-weight:800; text-shadow:0 1px 3px #000; animation:rise 1s forwards; }
+  @keyframes rise { to { transform:translateY(-42px); opacity:0; } }
+  .rules { position:absolute; inset:0; z-index:70; background:#0e0c0aef; display:none; padding:26px 20px; overflow-y:auto; }
+  .rules.on { display:block; }
+  .rules h2 { font-size:15px; color:#e8b64d; margin-bottom:10px; }
+  .rules p { font-size:12.5px; line-height:1.7; color:#cfc3a8; margin-bottom:9px; }
+  .rules b { color:#f0e2c0; }
+  .overlay { position:absolute; inset:0; z-index:80; background:#000c; display:none; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; }
+  .overlay.on { display:flex; }
+  .overlay .tt { font-size:30px; font-weight:800; }
+  .overlay button { padding:10px 26px; font-size:15px; border-radius:10px; border:1px solid #a8543f;
+    background:#5a281f; color:#f7ecd8; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="foes" id="foes"></div>
+  <div class="hud">
+    <button class="info" id="btnInfo">ⓘ</button>
+    <span class="tno" id="tno">1턴</span>
+    <div class="myhp"><i id="hpFill"></i><b id="hpTxt"></b></div>
+    <div class="res" id="res"></div>
+  </div>
+  <div class="preview" id="preview"></div>
+  <div class="mine" id="mine"></div>
+  <div class="handzone">
+    <div class="hint">카드: 꾹 누르면 상세 · 위로 끌어올리면 발동 &nbsp;|&nbsp; 주사위: 내 것 탭 → 적 것 탭 = 부딪치기</div>
+    <div class="hand" id="hand"></div>
+  </div>
+  <button class="endturn" id="btnEnd">턴 종료 ⚔</button>
+  <div class="banner" id="banner"></div>
+  <div class="fx" id="fx"></div>
+  <div class="zoom" id="zoom"></div>
+  <div class="rules" id="rules">
+    <h2>이 시안이 못 박은 규칙 (여기를 확인해줘)</h2>
+    <p><b>1. 대결</b> — 내 주사위를 적 주사위에 대면 서로 값을 깎는다. 0이 된 쪽은 부서지고, 큰 쪽은 <b>차액만큼 남아 계속 쓸 수 있다</b>. 판정과 연출은 배정 즉시.</p>
+    <p><b>2. 턴 종료</b> — <b>내 공격이 먼저다.</b> 남은 내 주사위 합이 🎯 대상에게 들어가고, 그때 죽은 몬스터의 공격은 불발된다. 그다음 살아남은 몬스터들의 남은 주사위가 나를 때린다. (처치가 곧 방어)</p>
+    <p><b>3. 타겟</b> — 몬스터 초상을 탭하면 🎯 가 옮겨간다. 내 공격은 남은 주사위 전부가 그 대상에게.</p>
+    <p><b>4. 굴림</b> — 적이 먼저 공개 → 내가 굴림. <b>리롤 없음.</b> 조작은 전부 카드.</p>
+    <p><b>5. 카드</b> — 덱 10장(용기1·추적1·고양4·복구4), 매 턴 5장이 되도록 뽑고 안 쓴 건 버림. 자원 3/턴. 덱이 비면 버림 더미를 섞는다.</p>
+    <p><b>6. 복구</b> — 부서진 내 주사위를 골라 2 수리(원래 굴림값 한도). 이번 턴 안에서 되살려 다시 쓴다.</p>
+    <p><b>7. 첫 턴은 네가 준 예시 그대로</b> — 나 [1,6,4,2,5] vs A[6,3,6] B[1,3,2].</p>
+    <p style="margin-top:14px;color:#8d8064">아무 곳이나 누르면 닫힘</p>
+  </div>
+  <div class="overlay" id="overlay"><div class="tt" id="ovTxt"></div><button id="btnRetry">다시 하기</button></div>
+</div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const CARDS={
+  courage:{name:'용기',cost:2,icon:'🦁',target:null,desc:'가장 눈이 낮은 주사위의 값을 2배로 만든다. 같은 최저값이 여럿이면 모두.'},
+  stalk:{name:'어둠 속의 추적',cost:2,icon:'🌘',target:'active',desc:'내 주사위 하나를 골라 6으로 바꾼다.'},
+  elate:{name:'고양',cost:1,icon:'🔥',target:null,desc:'내 주사위 하나가 무작위로 +1.'},
+  repair:{name:'복구',cost:1,icon:'🧵',target:'dead',desc:'부서진 주사위 하나를 골라 2 수리한다. 원래 굴림값 이상으로는 돌아오지 않는다.'},
+};
+const DECK10=['courage','stalk','elate','elate','elate','elate','repair','repair','repair','repair'];
+let deck=[],disc=[],hand=[],res=3,myHp=30,turn=1,over=false;
+let foes=[],myDice=[],sel=-1,tgt=0,picking=null; // picking={key,idx,kind}
+const R=n=>1+Math.floor(Math.random()*n);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+
+function newGame(){
+  deck=shuffle([...DECK10]); disc=[]; hand=[]; res=3; myHp=30; turn=1; over=false; sel=-1; tgt=0; picking=null;
+  foes=[{name:'외눈 늑대',icon:'🐺',hp:24,max:24,n:3,dice:[]},{name:'가시 거미',icon:'🕷️',hp:14,max:14,n:3,dice:[]}];
+  foes[0].dice=[6,3,6].map(v=>({v,orig:v,dead:false}));   // 네 예시 그대로
+  foes[1].dice=[1,3,2].map(v=>({v,orig:v,dead:false}));
+  myDice=[1,6,4,2,5].map(v=>({v,orig:v,dead:false}));
+  draw(); $('overlay').classList.remove('on'); render();
+}
+function draw(){ while(hand.length<5){ if(!deck.length){ if(!disc.length)break; deck=shuffle(disc); disc=[]; } hand.push(deck.pop()); } }
+function newTurn(){
+  turn++; res=3; sel=-1; picking=null;
+  for(const f of foes) if(f.hp>0) f.dice=Array.from({length:f.n},()=>{const v=R(6);return{v,orig:v,dead:false};});
+  myDice=Array.from({length:5},()=>{const v=R(6);return{v,orig:v,dead:false};});
+  disc.push(...hand); hand=[]; draw();
+  if(foes[tgt].hp<=0) tgt=foes.findIndex(f=>f.hp>0);
+  render();
+}
+const aliveSum=ds=>ds.filter(d=>!d.dead).reduce((s,d)=>s+d.v,0);
+
+function float(x,y,txt,color){ const s=document.createElement('span'); s.className='float'; s.textContent=txt;
+  s.style.left=x+'px'; s.style.top=y+'px'; s.style.color=color||'#f0c05a'; $('fx').appendChild(s); setTimeout(()=>s.remove(),1000); }
+function midOf(el){ const r=el.getBoundingClientRect(), p=document.querySelector('.phone').getBoundingClientRect();
+  return [r.left-p.left+r.width/2-10, r.top-p.top-6]; }
+function banner(t,ms){ const b=$('banner'); b.textContent=t; b.classList.add('on'); if(ms)setTimeout(()=>b.classList.remove('on'),ms); }
+
+/* ── 대결: 즉시 판정 ── */
+function clashMy(fi,di){
+  const m=myDice[sel], f=foes[fi].dice[di]; if(!m||m.dead||f.dead)return;
+  const x=Math.min(m.v,f.v);
+  m.v-=x; f.v-=x;
+  const fe=document.querySelector(`.fdie[data-f="${fi}-${di}"]`);
+  if(fe){ fe.classList.add('hurt'); const [px,py]=midOf(fe); float(px,py,'-'+x,'#f4c9ae'); }
+  if(m.v<=0){ m.dead=true; }
+  if(f.v<=0){ f.dead=true; }
+  sel=-1; setTimeout(render,120);
+}
+
+/* ── 카드 ── */
+function tryPlay(i){
+  const c=CARDS[hand[i]];
+  if(res<c.cost){ banner('자원이 부족해 ('+c.cost+' 필요)',1200); render(); return; }
+  if(c.target){ picking={idx:i,kind:c.target}; banner(c.name+' — 대상 주사위를 골라줘 (다른 곳을 누르면 취소)'); render(); return; }
+  applyCard(i,-1);
+}
+function applyCard(i,dieIdx){
+  const key=hand[i], c=CARDS[key]; res-=c.cost;
+  if(key==='courage'){ const alive=myDice.filter(d=>!d.dead); if(alive.length){ const mn=Math.min(...alive.map(d=>d.v));
+    myDice.forEach((d,k)=>{ if(!d.dead&&d.v===mn){ d.v*=2; const el=document.querySelector(`.die[data-i="${k}"]`); if(el){const[x,y]=midOf(el);float(x,y,'×2','#8fd08a');} }}); } }
+  else if(key==='elate'){ const idxs=myDice.map((d,k)=>d.dead?-1:k).filter(k=>k>=0);
+    if(idxs.length){ const k=idxs[Math.floor(Math.random()*idxs.length)]; myDice[k].v++;
+      const el=document.querySelector(`.die[data-i="${k}"]`); if(el){const[x,y]=midOf(el);float(x,y,'+1','#8fd08a');} } }
+  else if(key==='stalk'){ const d=myDice[dieIdx]; d.v=6;
+    const el=document.querySelector(`.die[data-i="${dieIdx}"]`); if(el){const[x,y]=midOf(el);float(x,y,'→6','#c9a8f0');} }
+  else if(key==='repair'){ const d=myDice[dieIdx]; d.v=Math.min(d.orig,d.v+2); if(d.v>0)d.dead=false;
+    const el=document.querySelector(`.die[data-i="${dieIdx}"]`); if(el){const[x,y]=midOf(el);float(x,y,'+2 수리','#8fd08a');} }
+  disc.push(hand.splice(i,1)[0]); picking=null; $('banner').classList.remove('on'); render();
+}
+
+/* ── 턴 종료: 내 공격 먼저 → 처치 시 불발 → 적 공격 ── */
+function endTurn(){
+  if(over)return; over=true; picking=null; $('banner').classList.remove('on');
+  const atk=aliveSum(myDice), T=foes[tgt];
+  const seq=[];
+  seq.push(()=>{ if(atk>0&&T.hp>0){ T.hp=Math.max(0,T.hp-atk);
+      const fe=document.querySelectorAll('.foe')[tgt]; if(fe){const[x,y]=midOf(fe);float(x,y,'-'+atk,'#f0c05a');}
+      if(T.hp<=0) banner(T.name+' 처치! 공격 불발',1400); render(); } });
+  for(const f of foes) seq.push(()=>{ if(f.hp>0){ const d=aliveSum(f.dice); if(d>0){ myHp=Math.max(0,myHp-d);
+      const hp=$('hpTxt'); const r=hp.getBoundingClientRect(),p=document.querySelector('.phone').getBoundingClientRect();
+      float(r.left-p.left+40,r.top-p.top-4,'-'+d,'#e88a72'); render(); } } });
+  seq.push(()=>{ over=false;
+    if(myHp<=0){ over=true; $('ovTxt').textContent='패배…'; $('ovTxt').style.color='#e88a72'; $('overlay').classList.add('on'); return; }
+    if(foes.every(f=>f.hp<=0)){ over=true; $('ovTxt').textContent='승리!'; $('ovTxt').style.color='#8fd08a'; $('overlay').classList.add('on'); return; }
+    newTurn(); });
+  seq.forEach((fn,i)=>setTimeout(fn,i*650+200));
+}
+
+/* ── 렌더 ── */
+function render(){
+  $('tno').textContent=turn+'턴';
+  $('hpFill').style.width=(myHp/30*100)+'%'; $('hpTxt').textContent='나  '+myHp+' / 30';
+  $('res').innerHTML=[0,1,2].map(i=>`<i class="${i<res?'':'off'}"></i>`).join('');
+  /* 적 */
+  $('foes').innerHTML=foes.map((f,fi)=>`
+    <div class="foe ${fi===tgt?'targeted':''} ${f.hp<=0?'dead':''}" data-foe="${fi}">
+      <div class="art">${f.icon}</div><div class="nm">${f.name}</div>
+      <div class="hpbar"><i style="width:${f.hp/f.max*100}%"></i><b>${f.hp}/${f.max}</b></div>
+      <div class="fdice">${f.dice.map((d,di)=>
+        `<div class="fdie ${d.dead?'dead':''} ${sel>=0&&!d.dead&&f.hp>0?'pickable':''}" data-f="${fi}-${di}">${d.dead?'':d.v}</div>`).join('')}</div>
+    </div>`).join('');
+  /* 내 주사위 */
+  $('mine').innerHTML=myDice.map((d,i)=>{
+    const pk=picking&&((picking.kind==='active'&&!d.dead)||(picking.kind==='dead'&&d.dead));
+    return `<div class="die ${d.dead?'dead':''} ${i===sel?'sel':''} ${pk?'pickable':''}" data-i="${i}">
+      ${d.dead?'':d.v}${!d.dead&&d.v!==d.orig?`<span class="orig">${d.orig}</span>`:''}</div>`;}).join('');
+  /* 미리보기 — 처치 계산 포함 */
+  const atk=aliveSum(myDice), T=foes[tgt];
+  let take=0; foes.forEach((f,fi)=>{ if(f.hp>0&&!(fi===tgt&&atk>=f.hp)) take+=aliveSum(f.dice); });
+  const kills=T.hp>0&&atk>=T.hp;
+  $('preview').innerHTML=`이대로 턴 종료 → 내 공격 <b class="atk">${atk}</b> (🎯${T.name})${kills?' <b class="kill">처치! 공격 불발</b>':''} · 예상 피격 <b class="dmg">${take}</b>`;
+  renderHand();
+}
+function renderHand(){
+  const h=$('hand'); h.innerHTML='';
+  hand.forEach((key,i)=>{
+    const c=CARDS[key], n=hand.length, off=i-(n-1)/2;
+    const el=document.createElement('div'); el.className='card'; el.dataset.i=i;
+    el.innerHTML=`<div class="cost">${c.cost}</div><div class="art">${c.icon}</div><div class="nm">${c.name}</div>`;
+    el.style.transform=`translateX(${off*58}px) rotate(${off*7}deg) translateY(${Math.abs(off)*9}px)`;
+    h.appendChild(el); bindCard(el,i);
+  });
+}
+
+/* ── 카드 제스처: 홀드=상세, 위로 끌기=발동 ── */
+function bindCard(el,i){
+  let sx=0,sy=0,drag=false,holdT=null,zoomed=false,pressed=false;
+  el.addEventListener('pointerdown',e=>{
+    if(over)return; pressed=true; sx=e.clientX; sy=e.clientY; drag=false; zoomed=false;
+    try{ el.setPointerCapture(e.pointerId); }catch(_){}
+    holdT=setTimeout(()=>{ zoomed=true; showZoom(hand[i]); },380);
+  });
+  el.addEventListener('pointermove',e=>{
+    if(!pressed)return;
+    const dx=e.clientX-sx, dy=e.clientY-sy;
+    if(!drag&&Math.hypot(dx,dy)>12){ drag=true; clearTimeout(holdT); if(zoomed){hideZoom();zoomed=false;} el.classList.add('dragging'); }
+    if(drag) el.style.transform=`translate(${dx}px,${dy}px) scale(1.12)`;
+  });
+  el.addEventListener('pointerup',e=>{
+    if(!pressed)return; pressed=false; clearTimeout(holdT);
+    if(zoomed){ hideZoom(); renderHand(); return; }
+    if(drag){ const dy=e.clientY-sy;
+      if(dy<-70) tryPlay(i); else renderHand(); }
+  });
+  el.addEventListener('pointercancel',()=>{ pressed=false; clearTimeout(holdT); hideZoom(); renderHand(); });
+}
+function showZoom(key){ const c=CARDS[key];
+  $('zoom').innerHTML=`<div class="big"><div class="art">${c.icon}</div><div class="tt">${c.name}</div>
+    <div class="cc">자원 ${c.cost}</div><div class="dd">${c.desc}</div></div>`;
+  $('zoom').classList.add('on'); }
+function hideZoom(){ $('zoom').classList.remove('on'); }
+
+/* ── 보드 탭 ── */
+document.querySelector('.phone').addEventListener('pointerdown',e=>{
+  if(over)return;
+  const die=e.target.closest('.die'), fdie=e.target.closest('.fdie'), foe=e.target.closest('.foe');
+  if($('rules').classList.contains('on')){ $('rules').classList.remove('on'); return; }
+  if(picking){ // 카드 대상 선택 중
+    if(die){ const k=+die.dataset.i, d=myDice[k];
+      if((picking.kind==='active'&&!d.dead)||(picking.kind==='dead'&&d.dead)){ applyCard(picking.idx,k); return; } }
+    if(!e.target.closest('.card')){ picking=null; $('banner').classList.remove('on'); render(); }
+    return;
+  }
+  if(die){ const k=+die.dataset.i; if(!myDice[k].dead){ sel=(sel===k?-1:k); render(); } return; }
+  if(fdie&&sel>=0){ const [fi,di]=fdie.dataset.f.split('-').map(Number); if(foes[fi].hp>0) clashMy(fi,di); return; }
+  if(foe){ const fi=+foe.dataset.foe; if(foes[fi].hp>0){ tgt=fi; render(); } return; }
+});
+$('btnEnd').addEventListener('pointerdown',e=>{ e.stopPropagation(); endTurn(); });
+$('btnInfo').addEventListener('pointerdown',e=>{ e.stopPropagation(); $('rules').classList.toggle('on'); });
+$('btnRetry').addEventListener('pointerdown',e=>{ e.stopPropagation(); newGame(); });
+newGame();
+</script>
+</body>
+</html>
