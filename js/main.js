@@ -6,7 +6,7 @@ import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind } from './cardbattle.js';
 
-export const VERSION = 'v2.01'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v2.02'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1828,7 +1828,7 @@ function cbRenderHand() {
     const off = hi - (n - 1) / 2;
     // 좌우 여백을 지키고, 카드가 늘면 같은 폭 안에서 더 겹친다 (양옆 더미·버튼 자리 확보)
     const W = hand.clientWidth || 390;
-    const spacing = n > 1 ? Math.min(52, Math.max(16, (W - 200 - 104) / (n - 1))) : 0;
+    const spacing = n > 1 ? Math.min(58, Math.max(18, (W - 100 - 118) / (n - 1))) : 0;
     const el = document.createElement('div');
     el.className = 'cb-card' + (battle.res < c.cost ? ' broke' : '');
     el.dataset.hi = hi;
