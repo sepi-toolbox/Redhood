@@ -12,7 +12,7 @@ events, acts, act1 = D('events'), D('acts'), D('act1')
 statuses = D('statuses')
 
 EN = {e['id']: e for e in enemies}
-VERSION = 'v1.32'
+VERSION = 'v1.33'
 TODAY = '2026-08-08'
 
 FONT = 'Arial'

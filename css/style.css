@@ -1042,15 +1042,15 @@ span.enemy-art {
 /* ==================== v1.17 주사위 상태이상 ====================
    네 겹으로 얹는다 — 물듦(아래) · 그림 · 안쪽 발광 · 이름표.
    그림은 눈을 가리지 않게 그려져 있고, 움직임만 상태마다 다르다. */
-.die.art.st .st-tint,
-.die.art.st .st-rim { position: absolute; left: 8px; right: 8px; top: 12px; bottom: 12px;
+.die.art.st .st-tint, .die.art.pinned .st-tint,
+.die.art.st .st-rim, .die.art.pinned .st-rim { position: absolute; left: 8px; right: 8px; top: 12px; bottom: 12px;
   border-radius: 6px; pointer-events: none; animation: stPulse 2.4s ease-in-out infinite; }
-.die.art.st .st-tint { mix-blend-mode: multiply; z-index: 2; }
-.die.art.st .st-rim { z-index: 4; }
+.die.art.st .st-tint, .die.art.pinned .st-tint { mix-blend-mode: multiply; z-index: 2; }
+.die.art.st .st-rim, .die.art.pinned .st-rim { z-index: 4; }
 .die.art.st .st-art { position: absolute; left: 8px; top: 12px; width: 46px; height: 46px;
   object-fit: contain; z-index: 3; pointer-events: none;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .75)); animation: 2.4s ease-in-out infinite; }
-.die.art.st small { color: #e8dcc8; z-index: 6; }
+.die.art.st small, .die.art.pinned small { color: #e8dcc8; z-index: 6; }
 @keyframes stPulse { 0%, 100% { opacity: .76 } 50% { opacity: 1 } }
 
 /* 상태이상이 걸린 주사위는 다시굴림을 붉은 발광 대신 점선으로 표시한다 (색이 겹치지 않게) */
@@ -1139,28 +1139,59 @@ span.enemy-art {
 .roll-btn .cost { font-size: 11px; color: #ffb1a2; }
 
 /* ---------- v1.29 벼름 · 새김 ---------- */
-.whet-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:9px;
-  background:linear-gradient(180deg,#5a2410,#3a1408);border:1px solid #b5642a;color:#ffcf94;
-  font-weight:700;text-shadow:0 1px 0 #2a0d04;animation:whetPulse 1.6s ease-in-out infinite}
-.whet-chip b{color:#ffe9b8;font-size:1.05em}
-@keyframes whetPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,150,60,.0)}50%{box-shadow:0 0 8px 1px rgba(255,150,60,.45)}}
-.die.art.pinned{box-shadow:0 0 0 2px #d9a05a inset, 0 0 7px rgba(217,160,90,.5)}
-.die.art .pin-mark{position:absolute;top:-4px;right:-3px;font-size:12px;line-height:1;
-  filter:drop-shadow(0 1px 1px #000);pointer-events:none;animation:pinBob 2.2s ease-in-out infinite}
-@keyframes pinBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-1.5px) rotate(-8deg)}}
+50%{box-shadow:0 0 8px 1px rgba(255,150,60,.45)}}
+50%{transform:translateY(-1.5px) rotate(-8deg)}}
 
 /* ---------- v1.30 정예·보스 기믹 표시 ---------- */
-.enemy-buffs .gim{display:inline-block;padding:0 5px;margin-right:3px;border-radius:7px;
-  font-weight:700;font-size:11px;line-height:16px;border:1px solid rgba(0,0,0,.45);
-  text-shadow:0 1px 0 rgba(0,0,0,.5)}
-.enemy-buffs .gim.ward{background:#4b4136;color:#e6d3ad;border-color:#8a7550}
-.enemy-buffs .gim.cap{background:#2f3a4b;color:#bcd2ee;border-color:#5c7ba6}
-.enemy-buffs .gim.demand{background:#4a2f4b;color:#f0c8f0;border-color:#9a5f9c;animation:gimBlink 1.4s ease-in-out infinite}
-@keyframes gimBlink{0%,100%{opacity:1}50%{opacity:.6}}
+50%{opacity:.6}}
 
 /* ---------- v1.31 일격(⚡) 족보 ---------- */
 .sheet-row.combo-row.burst{position:relative}
-.sheet-row.combo-row.burst .bolt{color:#ffcf6b;margin-right:2px;
-  filter:drop-shadow(0 0 3px rgba(255,180,60,.7));animation:boltFlick 2s ease-in-out infinite}
-@keyframes boltFlick{0%,100%{opacity:1}45%{opacity:.55}}
+45%{opacity:.55}}
 .sheet-row.combo-row.burst:not(.used) .sheet-preview{color:#ffd98a;text-shadow:0 0 6px rgba(255,170,60,.45)}
+
+/* ==========================================================================
+   표식(badge) — v1.33: 화면의 '아이콘 + 값' 은 전부 이 하나로 그린다
+   결(tone)은 셋: good(내게 유리) / bad(내게 불리) / rule(규칙·제약)
+   ========================================================================== */
+.badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 1px 7px 1px 5px; border-radius: 9px;
+  font-size: 12px; font-weight: 800; line-height: 16px;
+  border: 1px solid; text-shadow: 0 1px 0 rgba(0, 0, 0, .55);
+  vertical-align: middle;
+}
+.badge .bdg-ico { width: 13px; height: 13px; display: inline-block; }
+.badge .bdg-ico.glyph { font-size: 11px; line-height: 13px; text-align: center; font-weight: 400; }
+.badge .bdg-val { letter-spacing: .2px; }
+.badge .bdg-sub {
+  margin-left: 1px; padding-left: 4px; font-size: 11px; opacity: .92;
+  border-left: 1px solid rgba(255, 255, 255, .22);
+}
+.badge.t-good { background: #1e2a20; border-color: #4a7a52; color: #cdeccf; }
+.badge.t-bad  { background: #2a1c19; border-color: #7d4438; color: #f0c5b4; }
+.badge.t-rule { background: #241f2e; border-color: #6b5a8e; color: #ddcaf2; }
+.badge.whet   { background: linear-gradient(180deg, #4a2410, #2c1408); border-color: #b5642a; color: #ffcf94; }
+.badge.whet .bdg-sub { color: #ffe9b8; border-left-color: rgba(255, 210, 140, .35); }
+.badge.urgent { animation: badgePulse 1.4s ease-in-out infinite; }
+@keyframes badgePulse { 0%, 100% { opacity: 1 } 50% { opacity: .62 } }
+
+.badge-row { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.buff-strip .badge-row { justify-content: center; }
+.enemy-buffs { display: inline-flex; align-items: center; gap: 3px; flex-wrap: wrap; }
+
+/* 족보 행의 꼬리표 — 족보 이름표와 같은 형식, 결만 다르다 */
+.cat-tag.t-burst { color: #ffd98a; border-color: #b5822a; background: #2e2210; margin-left: 4px; }
+.sheet-row.combo-row.burst:not(.used) .sheet-preview { color: #ffd98a; text-shadow: 0 0 6px rgba(255, 170, 60, .45); }
+
+/* 주사위 낙인 — 새김도 상태이상과 같은 형식(틴트+테두리+이름표)으로 */
+.die.art.pinned .st-tint { background: linear-gradient(180deg, rgba(217, 160, 90, .30), rgba(217, 160, 90, .10)); }
+.die.art.pinned .st-rim { box-shadow: inset 0 0 0 2px rgba(217, 160, 90, .85); }
+/* 규칙 표식은 예고 바로 아래, 자기 줄에 — 상태 표식과 섞지 않는다 */
+.rule-row { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; margin: 1px 0 2px; }
+.enemy-buffs .badge, .rule-row .badge { padding: 0 6px 0 4px; font-size: 11px; line-height: 15px; }
+.enemy-buffs .badge .bdg-ico, .rule-row .badge .bdg-ico { width: 12px; height: 12px; }
+.sheet-name .cat-tag.t-burst { margin-left: 5px; vertical-align: 1px; }
+/* 새김 — 상태이상 낙인과 같은 두께로 또렷하게 */
+.die.art.pinned .st-tint { background: radial-gradient(ellipse at 50% -15%, rgba(226,168,74,.62) 0%, rgba(180,124,48,.34) 55%, rgba(120,80,28,.12) 100%); }
+.die.art.pinned .st-rim { box-shadow: inset 0 0 0 2px rgba(245, 190, 105, .95), 0 0 8px rgba(230, 170, 80, .45); }
