@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REDHOOD 배치 편집기 — v2.05 기준</title>
+<title>REDHOOD 배치 편집기 — v2.06 기준</title>
 <link rel="stylesheet" href="https://sepi-toolbox.github.io/Redhood/assets/fonts/song-myung/index.css">
 <style id="game-css">
 /* REDHOOD v0.2 — 다크 페어리테일 · 주사위판 · 모바일 세로 전용 */
@@ -1366,7 +1366,7 @@ span.enemy-art {
 .battle-screen > .cb-orb.empty { filter: grayscale(.8) brightness(.6); box-shadow: none; }
 .battle-screen > .cb-pile {
   position: absolute; bottom: 10px; z-index: 42;
-  width: 44px; height: 58px; border-radius: 7px;
+  width: var(--cb-pileW, 44px); height: var(--cb-pileH, 58px); border-radius: 7px;
   background: linear-gradient(160deg, #4a1f1a, #2a120f);
   border: 2px solid #7d3a2e; box-shadow: 2px 2px 0 #1c0c0a, 4px 4px 0 #14080788, 0 4px 8px rgba(0,0,0,.6);
   display: flex; align-items: center; justify-content: center;
@@ -1477,7 +1477,7 @@ span.enemy-art {
 </head>
 <body>
 <header class="ed-top">
-  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.05 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
+  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.06 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
   <div class="ed-btns">
     <button id="tg-multi">적 2마리</button>
     <button id="tg-loot">전리품 화면</button>
@@ -1531,7 +1531,7 @@ span.enemy-art {
 <script>
 'use strict';
 const SITE = 'https://sepi-toolbox.github.io/Redhood';
-const DEFAULTS = {"enemyH": 306, "artH": 288, "artHMulti": 238, "fdiceY": 46, "fdieSize": 38, "diceSize": 58, "diceGap": 10, "orbX": 10, "orbY": 212, "orbSize": 50, "deckX": 66, "deckY": 210, "discX": 10, "discY": 210, "endX": 60, "endY": 216, "cardW": 118, "cardH": 162, "handBottom": -22, "handMargin": 100, "handMaxGap": 58, "lootTop": 430, "hpY": 386, "hpSide": 12, "hpH": 36, "pvY": 424, "diceY": 448, "helpY": 516, "endW": 150, "endH": 46};
+const DEFAULTS = {"enemyH": 306, "artH": 288, "artHMulti": 238, "fdiceY": 46, "fdieSize": 38, "diceSize": 58, "diceGap": 10, "orbX": 10, "orbY": 212, "orbSize": 50, "deckX": 66, "deckY": 210, "discX": 10, "discY": 210, "endX": 60, "endY": 216, "cardW": 118, "cardH": 162, "handBottom": -22, "handMargin": 100, "handMaxGap": 58, "lootTop": 430, "hpY": 386, "hpSide": 12, "hpH": 36, "pvY": 424, "diceY": 448, "helpY": 516, "endW": 150, "endH": 46, "pileW": 44, "pileH": 58};
 let L = { ...DEFAULTS };
 const $ = (s) => document.querySelector(s);
 const scr = $('#scr');
@@ -1601,10 +1601,12 @@ const clampL = (v, a, b) => Math.max(a, Math.min(b, Math.round(v)));
 const ITEMS = [
   { id: 'orb', label: '자원 구슬', keys: ['orbX', 'orbY', 'orbSize'], find: () => $('.cb-orb'),
     move: (dx, dy) => { L.orbX += dx; L.orbY -= dy; }, resize: (dx, dy) => { L.orbSize = clampL(L.orbSize + dx, 30, 90); } },
-  { id: 'deck', label: '덱 더미', keys: ['deckX', 'deckY'], find: () => $('.cb-pile.deck'),
-    move: (dx, dy) => { L.deckX += dx; L.deckY -= dy; } },
-  { id: 'disc', label: '버림 더미', keys: ['discX', 'discY'], find: () => $('.cb-pile.disc'),
-    move: (dx, dy) => { L.discX -= dx; L.discY -= dy; } },
+  { id: 'deck', label: '덱 더미 (⤡=크기, 버림과 공용)', keys: ['deckX', 'deckY', 'pileW', 'pileH'], find: () => $('.cb-pile.deck'),
+    move: (dx, dy) => { L.deckX += dx; L.deckY -= dy; },
+    resize: (dx, dy) => { L.pileW = clampL(L.pileW + dx, 26, 90); L.pileH = clampL(L.pileH + dy, 34, 110); } },
+  { id: 'disc', label: '버림 더미 (⤡=크기, 덱과 공용)', keys: ['discX', 'discY', 'pileW', 'pileH'], find: () => $('.cb-pile.disc'),
+    move: (dx, dy) => { L.discX -= dx; L.discY -= dy; },
+    resize: (dx, dy) => { L.pileW = clampL(L.pileW + dx, 26, 90); L.pileH = clampL(L.pileH + dy, 34, 110); } },
   { id: 'end', label: '턴 종료 버튼 (⤡=크기)', keys: ['endX', 'endY', 'endW', 'endH'], find: () => $('.cb-end'),
     move: (dx, dy) => { L.endX -= dx; L.endY -= dy; },
     resize: (dx, dy) => { L.endW = clampL(L.endW + dx, 80, 260); L.endH = clampL(L.endH + dy, 30, 80); } },
@@ -1706,6 +1708,7 @@ const KEY_DESC = {
   hpY: '체력바 위(위에서부터)', hpSide: '체력바 좌우 여백', hpH: '체력바 높이',
   pvY: '미리보기 줄 위', diceY: '내 주사위 줄 위', helpY: '도움말 줄 위',
   endW: '턴 종료 폭', endH: '턴 종료 높이',
+  pileW: '덱·버림 더미 폭', pileH: '덱·버림 더미 높이',
 };
 function buildTable() {
   $('#val-table').innerHTML = '<tr><th>키</th><th>설명</th><th>값</th></tr>' + Object.keys(DEFAULTS).map(k => `

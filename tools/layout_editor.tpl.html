@@ -193,10 +193,12 @@ const clampL = (v, a, b) => Math.max(a, Math.min(b, Math.round(v)));
 const ITEMS = [
   { id: 'orb', label: '자원 구슬', keys: ['orbX', 'orbY', 'orbSize'], find: () => $('.cb-orb'),
     move: (dx, dy) => { L.orbX += dx; L.orbY -= dy; }, resize: (dx, dy) => { L.orbSize = clampL(L.orbSize + dx, 30, 90); } },
-  { id: 'deck', label: '덱 더미', keys: ['deckX', 'deckY'], find: () => $('.cb-pile.deck'),
-    move: (dx, dy) => { L.deckX += dx; L.deckY -= dy; } },
-  { id: 'disc', label: '버림 더미', keys: ['discX', 'discY'], find: () => $('.cb-pile.disc'),
-    move: (dx, dy) => { L.discX -= dx; L.discY -= dy; } },
+  { id: 'deck', label: '덱 더미 (⤡=크기, 버림과 공용)', keys: ['deckX', 'deckY', 'pileW', 'pileH'], find: () => $('.cb-pile.deck'),
+    move: (dx, dy) => { L.deckX += dx; L.deckY -= dy; },
+    resize: (dx, dy) => { L.pileW = clampL(L.pileW + dx, 26, 90); L.pileH = clampL(L.pileH + dy, 34, 110); } },
+  { id: 'disc', label: '버림 더미 (⤡=크기, 덱과 공용)', keys: ['discX', 'discY', 'pileW', 'pileH'], find: () => $('.cb-pile.disc'),
+    move: (dx, dy) => { L.discX -= dx; L.discY -= dy; },
+    resize: (dx, dy) => { L.pileW = clampL(L.pileW + dx, 26, 90); L.pileH = clampL(L.pileH + dy, 34, 110); } },
   { id: 'end', label: '턴 종료 버튼 (⤡=크기)', keys: ['endX', 'endY', 'endW', 'endH'], find: () => $('.cb-end'),
     move: (dx, dy) => { L.endX -= dx; L.endY -= dy; },
     resize: (dx, dy) => { L.endW = clampL(L.endW + dx, 80, 260); L.endH = clampL(L.endH + dy, 30, 80); } },
@@ -298,6 +300,7 @@ const KEY_DESC = {
   hpY: '체력바 위(위에서부터)', hpSide: '체력바 좌우 여백', hpH: '체력바 높이',
   pvY: '미리보기 줄 위', diceY: '내 주사위 줄 위', helpY: '도움말 줄 위',
   endW: '턴 종료 폭', endH: '턴 종료 높이',
+  pileW: '덱·버림 더미 폭', pileH: '덱·버림 더미 높이',
 };
 function buildTable() {
   $('#val-table').innerHTML = '<tr><th>키</th><th>설명</th><th>값</th></tr>' + Object.keys(DEFAULTS).map(k => `
