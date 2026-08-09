@@ -6,7 +6,7 @@ import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind } from './cardbattle.js';
 
-export const VERSION = 'v2.12'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v2.13'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1674,9 +1674,10 @@ let cbPicking = null;    // 대상 선택 중인 카드 { hi, kind }
 function layoutOf() {
   return { ...((DB.layout && DB.layout.battle) || {}) };
 }
+const LAYOUT_PCT = new Set(['cnX','cnY','cnW','cnH','ccX','ccY','ccW','ccH','caX','caY','caW','caH','cdX','cdY','cdW','cdH']); // 카드 내부는 카드 크기 기준 %
 function applyLayout(el) {
   const L = layoutOf();
-  for (const [k, v] of Object.entries(L)) el.style.setProperty('--cb-' + k, v + 'px');
+  for (const [k, v] of Object.entries(L)) el.style.setProperty('--cb-' + k, v + (LAYOUT_PCT.has(k) ? '%' : 'px'));
   return L;
 }
 
