@@ -60,19 +60,29 @@
 
 ---
 
-## 1) 카드 프레임 — `card_frame.png`
+## 1) 카드 프레임 — `card_frame.png` (v2 — 이름 자리를 비용 옆으로)
+
+> v1 프레임(✅ 적용됨)은 이름이 아래 양피지 밴드에 들어가 본문(설명)과 섞였다.
+> v2는 **이름표를 위쪽, 비용 메달 바로 옆**으로 옮긴다 — 손패가 아래에 접혀 있어도 이름이 바로 보이게.
+> 아래 양피지 밴드는 그대로 두고 **설명 전용**이 된다.
+>
+> **첨부: 승인된 v1 프레임 원본** (`assets/ui/card_frame` 원본 PNG) — 같은 디자인을 유지한 채 이름표만 추가한다.
 
 ```
-Dark fairytale trading card frame, portrait orientation, ornate but rustic:
-aged parchment inner panel bordered by deep crimson painted wood with faint
-carved thorn-vine reliefs, corners slightly worn and chipped. The upper
-two-thirds is an EMPTY dark window for artwork, the lower third an EMPTY
-parchment band for a title. A small empty circular medallion sits at the
-top-left corner for a cost gem. Muted palette: blood red, aged gold accents,
-dark walnut. Painterly storybook style matching the attached still-life key
-art, crisp silhouette on transparent background.
+Modify the attached dark fairytale trading card frame, keeping its exact
+style, palette, thorn-vine red and gold frame, corner decorations, bells,
+doll and cage ornaments, and the large dark art window and lower parchment
+band UNCHANGED. Add ONE new element: a small horizontal EMPTY parchment
+name-plate ribbon at the TOP of the card, starting immediately to the right
+of the circular cost medallion and stretching toward the top-right corner —
+like a narrow aged scroll pinned over the frame's top bar, with slightly
+torn ends and thin gold trim. It must stay clear of the art window below.
+The medallion stays empty, the name ribbon stays empty, the art window stays
+empty dark, the lower parchment band stays empty.
 No text, no letters, no numbers, no watermark.
 ```
+
+생성본이 오면: 게임의 이름 글자가 그 리본 위에 얹히도록 좌표를 맞춘다 (지금은 임시로 어두운 프레임 위에 밝은 글자).
 
 ## 2) 카드 뒷면 — `card_back.png`
 
