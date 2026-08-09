@@ -218,8 +218,8 @@ const ITEMS = [
     resize: (dx, dy) => { L.cardW = clampL(L.cardW + dx, 70, 190); L.cardH = Math.round(L.cardW * 162 / 118); } },
   { id: 'loot', label: '전리품 목록', keys: ['lootTop'], find: () => lootView ? $('.cb-loot') : null,
     move: (dx, dy) => { L.lootTop = clampL(L.lootTop + dy, 200, 700); } },
-  { id: 'enemy', label: '몬스터 (위아래=영역, ⤡=크기)', keys: ['enemyH', 'artH', 'artHMulti'], find: () => $('.enemy-zone'),
-    move: (dx, dy) => { L.enemyH = clampL(L.enemyH + dy, 160, 460); },
+  { id: 'enemy', label: '몬스터 (끌기=내림, ⤡=크기)', keys: ['enemyY', 'enemyH', 'artH', 'artHMulti'], find: () => $('.enemy-zone'),
+    move: (dx, dy) => { L.enemyY = clampL(L.enemyY + dy, -120, 400); },
     resize: (dx, dy) => { if (multi) L.artHMulti = clampL(L.artHMulti + dy, 120, 360); else L.artH = clampL(L.artH + dy, 140, 420); } },
 ];
 
@@ -296,7 +296,7 @@ const KEY_DESC = {
   deckX: '덱 더미 왼쪽', deckY: '덱 더미 아래', discX: '버림 더미 오른쪽', discY: '버림 더미 아래',
   endX: '턴 종료 오른쪽', endY: '턴 종료 아래',
   cardW: '카드 폭', cardH: '카드 높이', handBottom: '손패 내림(음수=아래로)', handMargin: '손패 좌우 여백', handMaxGap: '카드 간격 최대',
-  lootTop: '전리품 시작 높이',
+  lootTop: '전리품 시작 높이', enemyY: '몬스터 내림(통째로)',
   hpY: '체력바 위(위에서부터)', hpSide: '체력바 좌우 여백', hpH: '체력바 높이',
   pvY: '미리보기 줄 위', diceY: '내 주사위 줄 위', helpY: '도움말 줄 위',
   endW: '턴 종료 폭', endH: '턴 종료 높이',

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REDHOOD 배치 편집기 — v2.06 기준</title>
+<title>REDHOOD 배치 편집기 — v2.07 기준</title>
 <link rel="stylesheet" href="https://sepi-toolbox.github.io/Redhood/assets/fonts/song-myung/index.css">
 <style id="game-css">
 /* REDHOOD v0.2 — 다크 페어리테일 · 주사위판 · 모바일 세로 전용 */
@@ -1243,6 +1243,7 @@ span.enemy-art {
 .card-battle .bg-layer { height: 100%; }   /* v2.01: 족보판이 사라졌으니 배경이 화면 전체를 덮는다 */
 /* v2.02: 몬스터가 화면 가운데를 채운다 — v2.03부터 배치는 data/layout.json + 📐 배치 모드로 조정 */
 .card-battle .enemy-zone { height: var(--cb-enemyH, 306px); }
+.card-battle .enemy { transform: translateY(var(--cb-enemyY, 0px)); }
 .card-battle .enemy-art-img { height: var(--cb-artH, 288px); }
 .card-battle span.enemy-art { font-size: 170px; height: 250px; line-height: 250px; }
 .card-battle .enemy-zone.multi .enemy-art-img { height: var(--cb-artHMulti, 238px); margin-bottom: -34px; }
@@ -1477,7 +1478,7 @@ span.enemy-art {
 </head>
 <body>
 <header class="ed-top">
-  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.06 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
+  <b>📐 REDHOOD 배치 편집기</b><span class="sub">v2.07 기준 · 2026-08-09 · 그림은 배포 사이트에서 불러옴 (인터넷 필요)</span>
   <div class="ed-btns">
     <button id="tg-multi">적 2마리</button>
     <button id="tg-loot">전리품 화면</button>
@@ -1531,7 +1532,7 @@ span.enemy-art {
 <script>
 'use strict';
 const SITE = 'https://sepi-toolbox.github.io/Redhood';
-const DEFAULTS = {"enemyH": 306, "artH": 288, "artHMulti": 238, "fdiceY": 46, "fdieSize": 38, "diceSize": 58, "diceGap": 10, "orbX": 10, "orbY": 212, "orbSize": 50, "deckX": 66, "deckY": 210, "discX": 10, "discY": 210, "endX": 60, "endY": 216, "cardW": 118, "cardH": 162, "handBottom": -22, "handMargin": 100, "handMaxGap": 58, "lootTop": 430, "hpY": 386, "hpSide": 12, "hpH": 36, "pvY": 424, "diceY": 448, "helpY": 516, "endW": 150, "endH": 46, "pileW": 44, "pileH": 58};
+const DEFAULTS = {"enemyH": 460, "artH": 288, "artHMulti": 238, "fdiceY": 120, "fdieSize": 38, "diceSize": 58, "diceGap": 10, "orbX": 69, "orbY": 99, "orbSize": 33, "deckX": 19, "deckY": 99, "discX": 18, "discY": 91, "endX": 122, "endY": 125, "cardW": 118, "cardH": 162, "handBottom": -74, "handMargin": 96, "handMaxGap": 58, "lootTop": 430, "hpY": 503, "hpSide": 7, "hpH": 36, "pvY": 539, "diceY": 562, "helpY": 632, "endW": 141, "endH": 40, "pileW": 35, "pileH": 43, "enemyY": 0};
 let L = { ...DEFAULTS };
 const $ = (s) => document.querySelector(s);
 const scr = $('#scr');
@@ -1626,8 +1627,8 @@ const ITEMS = [
     resize: (dx, dy) => { L.cardW = clampL(L.cardW + dx, 70, 190); L.cardH = Math.round(L.cardW * 162 / 118); } },
   { id: 'loot', label: '전리품 목록', keys: ['lootTop'], find: () => lootView ? $('.cb-loot') : null,
     move: (dx, dy) => { L.lootTop = clampL(L.lootTop + dy, 200, 700); } },
-  { id: 'enemy', label: '몬스터 (위아래=영역, ⤡=크기)', keys: ['enemyH', 'artH', 'artHMulti'], find: () => $('.enemy-zone'),
-    move: (dx, dy) => { L.enemyH = clampL(L.enemyH + dy, 160, 460); },
+  { id: 'enemy', label: '몬스터 (끌기=내림, ⤡=크기)', keys: ['enemyY', 'enemyH', 'artH', 'artHMulti'], find: () => $('.enemy-zone'),
+    move: (dx, dy) => { L.enemyY = clampL(L.enemyY + dy, -120, 400); },
     resize: (dx, dy) => { if (multi) L.artHMulti = clampL(L.artHMulti + dy, 120, 360); else L.artH = clampL(L.artH + dy, 140, 420); } },
 ];
 
@@ -1704,7 +1705,7 @@ const KEY_DESC = {
   deckX: '덱 더미 왼쪽', deckY: '덱 더미 아래', discX: '버림 더미 오른쪽', discY: '버림 더미 아래',
   endX: '턴 종료 오른쪽', endY: '턴 종료 아래',
   cardW: '카드 폭', cardH: '카드 높이', handBottom: '손패 내림(음수=아래로)', handMargin: '손패 좌우 여백', handMaxGap: '카드 간격 최대',
-  lootTop: '전리품 시작 높이',
+  lootTop: '전리품 시작 높이', enemyY: '몬스터 내림(통째로)',
   hpY: '체력바 위(위에서부터)', hpSide: '체력바 좌우 여백', hpH: '체력바 높이',
   pvY: '미리보기 줄 위', diceY: '내 주사위 줄 위', helpY: '도움말 줄 위',
   endW: '턴 종료 폭', endH: '턴 종료 높이',
