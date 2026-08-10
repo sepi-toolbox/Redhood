@@ -29,44 +29,39 @@ python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.bui
 2. **같은 모티프** — 덮개는 그 모티프를 가장자리에 펼치고, 아이콘은 같은 모티프를 하나로 압축한다
 3. **같은 화풍** — 굵은 외곽선·넓은 색면 (ART_PROMPTS 규칙 3·4)
 
-| 상태 | 색 | **핵심 모티프** | 덮개 (가장자리에 펼침) | 아이콘 (하나로 압축) | 현재 |
+| 상태 | 색 | **핵심 모티프** | 덮개 (가장자리에 펼침) | 아이콘 (하나로 압축) | 비고 |
 |---|---|---|---|---|---|
-| 출혈 | `#ff5a4a` | 붉은 핏방울 | 위 모서리에서 흘러내리는 핏줄기 | 굵은 핏방울 세 개 | ✅ 맞음 |
-| 혼란 | `#c68cff` | 보라 소용돌이 | 칸 전체를 덮는 소용돌이 | 보라 나선 | ✅ 맞음 |
-| 독 | `#b8e04a` | **송곳니 + 초록 점액** | 위에서 물어내리는 송곳니, 아래에 고인 점액 | 송곳니와 떨어지는 점액 방울 | ⚠ 덮개에 송곳니 없음 → **덮개 보강** |
-| 저주 | `#c78cff` | **보라 불꽃** | 아래 가장자리에서 타오르는 보라 불 | 보라 불꽃 한 덩이 | ⚠ 아이콘이 초승달+눈 → **아이콘 수정** |
-| 약탈 | `#d9a05a` | **움켜쥐는 손** | 왼쪽에서 뻗어와 움켜쥐는 뼈손 | 동전을 움켜쥔 손 | ⚠ 아이콘이 동전 주머니 → **아이콘 수정** |
-| 축복 | `#f3ecdd` | 흰 왕관 | 위 가장자리에 얹힌 왕관 | 왕관 하나 | ✅ 맞음 |
-| 결속 | `#a8c2d8` | 쇠사슬 | 좌우를 가로지르는 사슬 | 사슬 두 칸 | ✅ 맞음 |
-| 부패 | `#d98cc0` | 부푼 종기 + 불씨 | 아래에 부푼 종기 덩어리, 불씨 | 종기와 짧은 심지 | ✅ 맞음 |
-| 잠식 | `#9fd8f0` | 삼키는 검은 공허 | 아래·왼쪽을 먹어드는 검은 덩어리 | 이빨 달린 검은 덩어리 | ✅ 맞음 |
-| 봉인 | `#8fa8e0` | 붉은 밀랍 | 아래 가장자리의 밀랍과 끈 | 밀랍 봉인 | 🔧 덮개만 재제작 |
-| 포박 | `#7fbf8a` | 굵은 밧줄 매듭 | 좌우를 감은 밧줄, 왼쪽에 매듭 | 밧줄 매듭 | 🔧 덮개만 재제작 |
-| 기절 | `#dfe6ee` | 돌처럼 굳은 균열 | 모서리에서 번지는 돌 껍질 | 갈라진 돌 주사위 | 🔧 덮개만 재제작 |
-| 마비 | `#8fd4ff` | 얼어붙은 번개 | 좌우 가장자리의 굵은 번개 | 번개와 굳은 손바닥 | 🔧 덮개만 재제작 |
-| 물림 | (신규) | **빨판 입** | 왼쪽에서 물어붙은 빨판 입 | 주사위를 문 빨판 입 | ❌ 둘 다 신규 |
+| 출혈 | `#ff5a4a` | 붉은 핏방울 | 위 모서리에서 흘러내리는 핏줄기 | 굵은 핏방울 세 개 | 덮개 새로 |
+| 혼란 | `#c68cff` | 보라 소용돌이 | 칸 전체를 덮는 소용돌이 | 보라 나선 | 덮개 새로 |
+| 독 | `#b8e04a` | **송곳니 + 초록 점액** | 위에서 물어내리는 송곳니, 아래에 고인 점액 | 송곳니와 떨어지는 점액 방울 | 아이콘 완료 · 덮개 새로 |
+| 저주 | `#c78cff` | **보라 불꽃** | 아래 가장자리에서 타오르는 보라 불 | 보라 불꽃 한 덩이 | 둘 다 새로 |
+| 약탈 | `#d9a05a` | **움켜쥐는 손** | 왼쪽에서 뻗어와 움켜쥐는 뼈손 | 동전을 움켜쥔 손 | 둘 다 새로 |
+| 축복 | `#f3ecdd` | 흰 왕관 | 위 가장자리에 얹힌 왕관 | 왕관 하나 | 덮개 새로 |
+| 결속 | `#a8c2d8` | 쇠사슬 | 좌우를 가로지르는 사슬 | 사슬 두 칸 | 덮개 새로 |
+| 부패 | `#d98cc0` | 부푼 종기 + 불씨 | 아래에 부푼 종기 덩어리, 불씨 | 종기와 짧은 심지 | 덮개 새로 |
+| 잠식 | `#9fd8f0` | 삼키는 검은 공허 | 아래·왼쪽을 먹어드는 검은 덩어리 | 이빨 달린 검은 덩어리 | 덮개 새로 |
+| 봉인 | `#8fa8e0` | **청회색 밀랍 봉인** | 아래 가장자리의 밀랍 덩이와 굵은 끈 | 밀랍 봉인 하나 | 둘 다 새로 |
+| 포박 | `#7fbf8a` | 굵은 밧줄 매듭 | 좌우를 감은 밧줄, 왼쪽에 매듭 | 밧줄 매듭 | 덮개 새로 |
+| 기절 | `#dfe6ee` | 돌처럼 굳은 균열 | 모서리에서 번지는 돌 껍질 | 갈라진 돌 주사위 | 덮개 새로 |
+| 마비 | `#8fd4ff` | 얼어붙은 번개 | 좌우 가장자리의 굵은 번개 | 번개와 굳은 손바닥 | 덮개 새로 |
+| 물림 | (신규) | **빨판 입** | 왼쪽에서 물어붙은 빨판 입 | 주사위를 문 빨판 입 | 둘 다 신규 |
 
 > **작업 순서 권장**: 한 상태를 골라 **덮개와 아이콘을 한 번에 뽑는다.** 따로 뽑으면 또 어긋난다.
-> 이미 뽑은 독 아이콘(송곳니)은 그대로 쓰고, 덮개에 송곳니를 더해 맞추는 쪽으로 정리했다.
+> 덮개는 14종 전량 새로 만들고, 아이콘은 이미 나온 독(송곳니)만 확정 — 나머지는 임시다.
 
 
 # 1부 · 주사위 덮개 (①)
 
-## 지금 상태 — 13종 있음. **화풍은 유지한 채 14종 전량 재제작**한다
+## 방침 — **현재 덮개 13종은 전량 폐기하고 새로 만든다**
 
-지금 덮개 화풍(굵은 외곽선·넓은 색면·가장자리에 붙는 구성)이 정답이라 그대로 간다.
-아래 판정은 "특히 급한 것"이고, 프롬프트는 14종 전부 준비돼 있다.
+지금 화풍은 쓰지 않는다. 아래 프롬프트가 기준이고, **현재 덮개를 참고 이미지로 첨부하지 말 것**
+(첨부하면 지금 스타일이 그대로 따라온다). 스타일 기준은 게임 마스터 키아트다.
 
-| 상태 | 현재 | 판정 |
-|---|---|---|
-| 출혈·독·저주·축복·부패·결속·약탈 | 가장자리 모티프, 눈 잘 보임 | ✅ 그대로 |
-| 혼란 | 보라 소용돌이가 칸 전체를 덮음 | ✅ 의도대로 (규칙이 "눈을 가린다") |
-| **봉인** | 밀랍이 칸을 전부 덮어 **눈이 안 보임** | ⚠ 규칙은 "굴리기 전엔 값이 없다"지 가리는 게 아님 → **재제작** |
-| **포박** | 가는 실 낙서처럼 보임 | ⚠ 가는 선 문제 → **재제작** |
-| **기절** | 가는 흰 금 — 잘 안 보임 | ⚠ **재제작** |
-| **마비** | 가는 파란 번개 여러 줄 — 어수선함 | ⚠ **재제작** |
-| **잠식** | 아래쪽 검은 촉수, 가늘다 | 🔸 여유되면 재제작 |
-| **물림(신규)** | **없음** — 지금은 CSS 사슬 기호로 때움 | ❌ **신규 필요** |
+새 방향 요약 — 지금 것과 무엇이 다른가:
+- 가는 선·잔가닥 낙서 → **굵은 덩어리와 넓은 색면**
+- 칸을 덮어 눈을 가리는 구성 → **가장자리·모서리에 붙고 가운데는 비운다** (혼란만 예외)
+- 흐릿한 잔효과 → **상태 색이 주조색으로 뚜렷하게**
+
 
 ## 덮개 규격
 
@@ -95,8 +90,9 @@ No text, no letters, no watermark.
 
 ## 덮개 프롬프트 — 14종 전량 (지금 화풍 유지)
 
-**첨부 필수**: `docs/keyart/status_die_ref.png` (지금 잘 나온 독·출혈·결속·약탈 덮개 4종을 한 장으로 묶은 것).
-"이 화풍 그대로"가 목표이므로 이 키아트를 반드시 함께 넣는다. 머리 블록의 `the attached key art`가 이걸 가리킨다.
+**첨부**: `docs/keyart/keyart_stilllife.jpg` (사물·정물 계열 마스터 키아트). 머리 블록의
+`the attached key art`가 이걸 가리킨다. **현재 덮개 파일(`assets/ui/status_die_*.png`)은 첨부하지 않는다** —
+넣으면 폐기하려는 지금 스타일을 그대로 물려받는다.
 
 한 번에 여러 개를 뽑을 때는 머리 블록의 비율만 바꾼다:
 `Landscape 3:2 image. A 3x2 grid of six separate overlay effects, equal cells, equal spacing, each cell has an EMPTY CENTER` + `IN ORDER — {1} / {2} / {3} // {4} / {5} / {6}`
@@ -110,7 +106,7 @@ No text, no letters, no watermark.
 | 5 | `status_die_curse.png` | 저주 | `#c78cff` | `thick violet flames burning upward along the bottom edge, solid blocky tongues of fire, dark smoke curling at the lower corners` |
 | 6 | `status_die_blessing.png` | 축복 | `#f3ecdd` | `a wide pale ivory crown resting on the top edge, thick blunt points, one broad warm glow behind it` |
 | 7 | `status_die_confuse.png` | 혼란 | `#c68cff` | `a thick violet whirlpool filling the WHOLE square and covering the center completely — this one is the exception, it must hide what is underneath` |
-| 8 | `status_die_seal.png` | 봉인 | `#8fa8e0` | `a wide dark-red wax seal blob sitting on the bottom edge with two thick blue-grey ribbons crossing only the lower corners, center left open` |
+| 8 | `status_die_seal.png` | 봉인 | `#8fa8e0` | `a wide blue-grey wax seal blob sitting on the bottom edge with two thick pale ribbons crossing only the lower corners, center left open` |
 | 9 | `status_die_rot.png` | 부패 | `#d98cc0` | `a swollen pink-purple pustule mass bulging up from the bottom edge, two glowing embers on its surface, one short fat fuse` |
 | 10 | `status_die_chain.png` | 결속 | `#a8c2d8` | `one heavy iron chain of thick blocky links crossing from the left edge to the right edge, cold steel highlights` |
 | 11 | `status_die_numb.png` | 마비 | `#8fd4ff` | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
@@ -176,7 +172,7 @@ A 3x2 grid of six symbols, equal cells, equal spacing` 로 바꾸고 `IN ORDER �
 | `status_stun.png` | 기절 | `a grey stone die split by one heavy jagged crack` |
 | `status_curse.png` | 저주 | `one thick violet flame burning upward, solid blocky tongues of fire` (덮개의 보라 불꽃과 같은 모티프) |
 | `status_blessing.png` | 축복 | `a small solid pale-gold crown with one broad halo of warm light behind it` |
-| `status_seal.png` | 봉인 | `one deep-red wax seal blob stamped over a folded parchment corner` |
+| `status_seal.png` | 봉인 | `one thick blue-grey wax seal blob stamped over a folded parchment corner` |
 | `status_rot.png` | 부패 | `a swollen dark pustule with one short lit fuse and a bright ember tip` |
 | `status_chain.png` | 결속 | `two thick iron chain links interlocked, heavy blocky shapes` |
 | `status_numb.png` | 마비 | `one thick pale-blue lightning bolt over a stiff open palm` |
