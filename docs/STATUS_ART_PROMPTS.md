@@ -49,7 +49,10 @@ python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.bui
 
 # 1부 · 주사위 덮개 (①)
 
-## 지금 상태 — 13종 있음, 손볼 것 5종
+## 지금 상태 — 13종 있음. **화풍은 유지한 채 14종 전량 재제작**한다
+
+지금 덮개 화풍(굵은 외곽선·넓은 색면·가장자리에 붙는 구성)이 정답이라 그대로 간다.
+아래 판정은 "특히 급한 것"이고, 프롬프트는 14종 전부 준비돼 있다.
 
 | 상태 | 현재 | 판정 |
 |---|---|---|
@@ -86,19 +89,33 @@ completely EMPTY (nothing in the middle 60 percent). The effect: {묘사}.
 No text, no letters, no watermark.
 ```
 
-## 덮개 프롬프트
+## 덮개 프롬프트 — 14종 전량 (지금 화풍 유지)
 
-| 파일명 | 상태 | 효과 묘사 |
-|---|---|---|
-| `status_die_lock.png` | **물림** (신규) | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` |
-| `status_die_seal.png` | **봉인** (재제작) | `a wide dark-red wax seal blob sitting on the bottom edge with two thick parchment ribbons crossing only the lower corners` |
-| `status_die_bind.png` | **포박** (재제작) | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` |
-| `status_die_stun.png` | **기절** (재제작) | `heavy grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle still open` |
-| `status_die_numb.png` | **마비** (재제작) | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
-| `status_die_poison.png` | **독** (아이콘과 맞추려면) | `one thick pale fang biting down from the top edge with heavy green venom running off it, a fat pool of green slime along the bottom edge` |
-| `status_die_devour.png` | 잠식 (선택) | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim` |
+**첨부 필수**: `docs/keyart/status_die_ref.png` (지금 잘 나온 독·출혈·결속·약탈 덮개 4종을 한 장으로 묶은 것).
+"이 화풍 그대로"가 목표이므로 이 키아트를 반드시 함께 넣는다. 머리 블록의 `the attached key art`가 이걸 가리킨다.
 
----
+한 번에 여러 개를 뽑을 때는 머리 블록의 비율만 바꾼다:
+`Landscape 3:2 image. A 3x2 grid of six separate overlay effects, equal cells, equal spacing, each cell has an EMPTY CENTER` + `IN ORDER — {1} / {2} / {3} // {4} / {5} / {6}`
+
+| # | 파일명 | 상태 | 색 | 효과 묘사 (머리 블록의 `The effect:` 뒤에) |
+|---|---|---|---|---|
+| 1 | `status_die_bleed.png` | 출혈 | `#ff5a4a` | `thick crimson blood running down from the top edge in three fat streaks, one heavy drop hanging at the end of each` |
+| 2 | `status_die_poison.png` | 독 | `#b8e04a` | `one thick pale fang biting down from the top edge with heavy green venom running off it, a fat pool of bright green slime along the bottom edge with two round bubbles` |
+| 3 | `status_die_bind.png` | 포박 | `#7fbf8a` | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` |
+| 4 | `status_die_stun.png` | 기절 | `#dfe6ee` | `heavy pale-grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle left open` |
+| 5 | `status_die_curse.png` | 저주 | `#c78cff` | `thick violet flames burning upward along the bottom edge, solid blocky tongues of fire, dark smoke curling at the lower corners` |
+| 6 | `status_die_blessing.png` | 축복 | `#f3ecdd` | `a wide pale ivory crown resting on the top edge, thick blunt points, one broad warm glow behind it` |
+| 7 | `status_die_confuse.png` | 혼란 | `#c68cff` | `a thick violet whirlpool filling the WHOLE square and covering the center completely — this one is the exception, it must hide what is underneath` |
+| 8 | `status_die_seal.png` | 봉인 | `#8fa8e0` | `a wide dark-red wax seal blob sitting on the bottom edge with two thick blue-grey ribbons crossing only the lower corners, center left open` |
+| 9 | `status_die_rot.png` | 부패 | `#d98cc0` | `a swollen pink-purple pustule mass bulging up from the bottom edge, two glowing embers on its surface, one short fat fuse` |
+| 10 | `status_die_chain.png` | 결속 | `#a8c2d8` | `one heavy iron chain of thick blocky links crossing from the left edge to the right edge, cold steel highlights` |
+| 11 | `status_die_numb.png` | 마비 | `#8fd4ff` | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
+| 12 | `status_die_plunder.png` | 약탈 | `#d9a05a` | `a bony hand reaching in from the left edge with thick fingers clenching, one dull gold coin caught between them` |
+| 13 | `status_die_devour.png` | 잠식 | `#9fd8f0` | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim, faint pale-blue rim light` |
+| 14 | `status_die_lock.png` | **물림** (신규) | — | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` |
+
+> 7번(혼란)만 가운데를 덮는다. 나머지 13종은 **가운데 60%가 비어야** 주사위 눈이 읽힌다.
+> 붙일 때 스크립트가 가림률을 재서 25%를 넘으면 경고한다.
 
 # 2부 · 배지 아이콘 (②)
 
