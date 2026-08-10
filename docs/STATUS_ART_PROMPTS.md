@@ -25,7 +25,8 @@ python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.bui
 1. **같은 색이 첫째** (성권) — 사람이 가장 빨리 알아채는 건 색이다. 13px 배지에서는 형태가 안 보여도
    색은 보인다. `statuses.json`의 색을 두 계열이 반드시 공유한다 (아래 표의 색 코드).
    → 아이콘 메달의 안판·테를 그 상태 색으로 물들여 두었다 (`tools/make_icon.py`가 자동 적용).
-   그림을 뽑을 때 색을 못 박고 싶으면 묘사 안에 색을 적는다 (머리 블록은 건드리지 않는다).
+   정식 아트를 그릴 때도 **그 색이 그림의 주조색**이어야 한다 — 머리 블록의 `{색코드}` 자리에
+   그 상태의 색을 넣는다 (표의 색 열 그대로).
 2. **같은 모티프** — 덮개는 그 모티프를 가장자리에 펼치고, 아이콘은 같은 모티프를 하나로 압축한다
 3. **같은 화풍** — 굵은 외곽선·넓은 색면 (ART_PROMPTS 규칙 3·4)
 
@@ -83,7 +84,8 @@ no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorea
 Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard.
 Do NOT draw a die or any object underneath — draw ONLY the effect itself.
 The effect clings to the EDGES and CORNERS of the square frame and the CENTER of the image is
-completely EMPTY (nothing in the middle 60 percent). The effect: {묘사}.
+completely EMPTY (nothing in the middle 60 percent). The dominant color of the effect must be {색코드}.
+The effect: {묘사}.
 No text, no letters, no watermark.
 ```
 
@@ -156,7 +158,8 @@ shapes, LARGE flat color planes, LOW detail density — no dense repeating textu
 no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
 ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
 background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
-decoration. Bold silhouette, readable at 20px. The symbol: {묘사}. No text, no letters, no watermark.
+decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be {색코드}.
+The symbol: {묘사}. No text, no letters, no watermark.
 ```
 
 **여러 개를 한 번에 뽑을 때** (권장 — 톤이 일정하게 나온다): 위 블록에서 비율만 `Landscape 3:2 image.
