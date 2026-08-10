@@ -1164,53 +1164,53 @@ span.enemy-art {
 .t-bleed    .st-tint { background: radial-gradient(ellipse at 50% -15%, rgba(176,20,18,.72) 0%, rgba(120,14,12,.42) 55%, rgba(70,8,8,.16) 100%) }
 .t-bleed    .st-rim  { box-shadow: inset 0 8px 10px -5px rgba(255,45,36,.7) }
 .t-bleed    .st-art  { animation-name: stOoze; transform-origin: top center }
-.t-bleed    small    { color: #ff5a4a }
+.t-bleed    small    { color: #e83b2e }
 .t-poison   .st-tint { background: radial-gradient(ellipse at 50% 118%, rgba(96,150,20,.7) 0%, rgba(66,110,16,.42) 55%, rgba(34,58,10,.16) 100%) }
 .t-poison   .st-rim  { box-shadow: inset 0 -9px 11px -5px rgba(180,230,60,.7) }
 .t-poison   .st-art  { animation-name: stBoil; transform-origin: bottom center }
-.t-poison   small    { color: #b8e04a }
+.t-poison   small    { color: #a8d63a }
 .t-bind     .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(24,52,30,.24) 0%, rgba(28,58,32,.5) 62%, rgba(14,32,18,.7) 100%) }
 .t-bind     .st-rim  { box-shadow: inset 0 0 11px 3px rgba(20,44,24,.8) }
 .t-bind     .st-art  { animation-name: stSqueeze }
-.t-bind     small    { color: #7fbf8a }
+.t-bind     small    { color: #2f9e5c }
 .t-stun     .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(120,130,145,.3) 0%, rgba(78,86,100,.44) 60%, rgba(46,52,62,.56) 100%) }
 .t-stun     .st-rim  { box-shadow: inset 0 0 10px 2px rgba(215,232,255,.5) }
 .t-stun     .st-art  { animation-name: stJitter }
-.t-stun     small    { color: #dfe6ee }
+.t-stun     small    { color: #c9c2b0 }
 .t-curse    .st-tint { background: radial-gradient(ellipse at 45% 118%, rgba(46,14,72,.86) 0%, rgba(34,10,54,.5) 52%, rgba(18,6,28,.2) 100%) }
 .t-curse    .st-rim  { box-shadow: inset 0 -8px 13px -3px rgba(150,70,220,.65) }
 .t-curse    .st-art  { animation-name: stCreep; transform-origin: bottom center }
-.t-curse    small    { color: #c78cff }
+.t-curse    small    { color: #c33ad6 }
 .t-blessing .st-tint { background: radial-gradient(ellipse at 50% 12%, rgba(240,236,225,.4) 0%, rgba(190,188,182,.28) 55%, rgba(120,120,118,.2) 100%) }
 .t-blessing .st-rim  { box-shadow: inset 0 8px 13px -4px rgba(255,253,245,.85) }
 .t-blessing .st-art  { animation-name: stHover }
-.t-blessing small    { color: #f3ecdd }
+.t-blessing small    { color: #ffd257 }
 .t-confuse  .st-tint, .t-confuse .st-rim { background: none; box-shadow: none }
 .t-confuse  .st-art  { animation-name: stMist }
-.t-confuse  small    { color: #c68cff }
+.t-confuse  small    { color: #8b4de8 }
 .t-seal     .st-tint, .t-seal .st-rim { background: none; box-shadow: none }
 .t-seal     .st-art  { animation-name: stWax }
-.t-seal     small    { color: #8fa8e0 }
+.t-seal     small    { color: #3a52c8 }
 .t-rot      .st-tint { background: radial-gradient(ellipse at 50% 112%, rgba(120,30,86,.6) 0%, rgba(78,26,60,.42) 52%, rgba(44,20,34,.2) 100%) }
 .t-rot      .st-rim  { box-shadow: inset 0 -8px 11px -4px rgba(230,120,190,.6) }
 .t-rot      .st-art  { animation-name: stBulge; transform-origin: bottom center }
-.t-rot      small    { color: #d98cc0 }
+.t-rot      small    { color: #e5468f }
 .t-chain    .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(40,54,68,.26) 0%, rgba(30,42,56,.46) 60%, rgba(18,26,36,.6) 100%) }
 .t-chain    .st-rim  { box-shadow: inset 0 0 10px 2px rgba(170,205,235,.45) }
 .t-chain    .st-art  { animation-name: stTaut }
-.t-chain    small    { color: #a8c2d8 }
+.t-chain    small    { color: #8fa0b0 }
 .t-numb     .st-tint { background: radial-gradient(ellipse at 50% 50%, rgba(60,120,190,.5) 0%, rgba(30,70,130,.4) 60%, rgba(14,34,70,.26) 100%) }
 .t-numb     .st-rim  { box-shadow: inset 0 0 9px 1px rgba(150,220,255,.7) }
 .t-numb     .st-art  { animation-name: stZap }
-.t-numb     small    { color: #8fd4ff }
+.t-numb     small    { color: #3aa8e6 }
 .t-plunder  .st-tint { background: radial-gradient(ellipse at 55% 112%, rgba(120,74,26,.64) 0%, rgba(84,54,22,.44) 52%, rgba(46,32,16,.2) 100%) }
 .t-plunder  .st-rim  { box-shadow: inset 0 -8px 10px -4px rgba(215,150,70,.6) }
 .t-plunder  .st-art  { animation-name: stGrab; transform-origin: bottom center }
-.t-plunder  small    { color: #d9a05a }
+.t-plunder  small    { color: #e08a2a }
 .t-devour   .st-tint { background: radial-gradient(ellipse at 50% 115%, rgba(2,6,12,.92) 0%, rgba(6,14,24,.6) 48%, rgba(10,20,32,.2) 100%) }
 .t-devour   .st-rim  { box-shadow: inset 0 -9px 13px -4px rgba(140,215,250,.7) }
 .t-devour   .st-art  { animation-name: stRise; transform-origin: bottom center }
-.t-devour   small    { color: #9fd8f0 }
+.t-devour   small    { color: #17bfae }
 
 @keyframes stOoze    { 0%, 100% { transform: scaleY(.94) } 50% { transform: scaleY(1.08) } }
 @keyframes stBoil    { 0%, 100% { transform: scaleY(.95) } 50% { transform: scaleY(1.07) } }
