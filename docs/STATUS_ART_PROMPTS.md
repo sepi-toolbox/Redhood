@@ -25,7 +25,7 @@ python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.bui
 1. **같은 색이 첫째** (성권) — 사람이 가장 빨리 알아채는 건 색이다. 13px 배지에서는 형태가 안 보여도
    색은 보인다. `statuses.json`의 색을 두 계열이 반드시 공유한다 (아래 표의 색 코드).
    → 아이콘 메달의 안판·테를 그 상태 색으로 물들여 두었다 (`tools/make_icon.py`가 자동 적용).
-   정식 아트를 그릴 때도 **그 색이 그림의 주조색**이어야 한다.
+   그림을 뽑을 때 색을 못 박고 싶으면 묘사 안에 색을 적는다 (머리 블록은 건드리지 않는다).
 2. **같은 모티프** — 덮개는 그 모티프를 가장자리에 펼치고, 아이콘은 같은 모티프를 하나로 압축한다
 3. **같은 화풍** — 굵은 외곽선·넓은 색면 (ART_PROMPTS 규칙 3·4)
 
@@ -83,8 +83,7 @@ no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorea
 Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard.
 Do NOT draw a die or any object underneath — draw ONLY the effect itself.
 The effect clings to the EDGES and CORNERS of the square frame and the CENTER of the image is
-completely EMPTY (nothing in the middle 60 percent). The dominant color of the effect must be {색코드}.
-The effect: {묘사}.
+completely EMPTY (nothing in the middle 60 percent). The effect: {묘사}.
 No text, no letters, no watermark.
 ```
 
@@ -97,24 +96,27 @@ No text, no letters, no watermark.
 한 번에 여러 개를 뽑을 때는 머리 블록의 비율만 바꾼다:
 `Landscape 3:2 image. A 3x2 grid of six separate overlay effects, equal cells, equal spacing, each cell has an EMPTY CENTER` + `IN ORDER — {1} / {2} / {3} // {4} / {5} / {6}`
 
+> **1~6번은 처음 드린 문구 그대로다** (성권 확정). 7~14번은 같은 규격으로 나중에 덧붙인 것이니,
+> 확정 문구를 바꿔야 할 일이 생기면 임의로 고치지 않고 먼저 묻는다.
+
 | # | 파일명 | 상태 | 색 | 효과 묘사 (머리 블록의 `The effect:` 뒤에) |
 |---|---|---|---|---|
-| 1 | `status_die_bleed.png` | 출혈 | `#ff5a4a` | `thick crimson blood running down from the top edge in three fat streaks, one heavy drop hanging at the end of each` |
-| 2 | `status_die_poison.png` | 독 | `#b8e04a` | `one thick pale fang biting down from the top edge with heavy green venom running off it, a fat pool of bright green slime along the bottom edge with two round bubbles` |
-| 3 | `status_die_bind.png` | 포박 | `#7fbf8a` | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` |
-| 4 | `status_die_stun.png` | 기절 | `#dfe6ee` | `heavy pale-grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle left open` |
-| 5 | `status_die_curse.png` | 저주 | `#c78cff` | `thick violet flames burning upward along the bottom edge, solid blocky tongues of fire, dark smoke curling at the lower corners` |
-| 6 | `status_die_blessing.png` | 축복 | `#f3ecdd` | `a wide pale ivory crown resting on the top edge, thick blunt points, one broad warm glow behind it` |
-| 7 | `status_die_confuse.png` | 혼란 | `#c68cff` | `a thick violet whirlpool filling the WHOLE square and covering the center completely — this one is the exception, it must hide what is underneath` |
-| 8 | `status_die_seal.png` | 봉인 | `#8fa8e0` | `a wide dark-red wax seal blob sitting on the bottom edge with two thick blue-grey ribbons crossing only the lower corners, center left open` |
-| 9 | `status_die_rot.png` | 부패 | `#d98cc0` | `a swollen pink-purple pustule mass bulging up from the bottom edge, two glowing embers on its surface, one short fat fuse` |
-| 10 | `status_die_chain.png` | 결속 | `#a8c2d8` | `one heavy iron chain of thick blocky links crossing from the left edge to the right edge, cold steel highlights` |
-| 11 | `status_die_numb.png` | 마비 | `#8fd4ff` | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
-| 12 | `status_die_plunder.png` | 약탈 | `#d9a05a` | `a bony hand reaching in from the left edge with thick fingers clenching, one dull gold coin caught between them` |
-| 13 | `status_die_devour.png` | 잠식 | `#9fd8f0` | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim, faint pale-blue rim light` |
-| 14 | `status_die_lock.png` | **물림** (신규) | — | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` |
+| 1 | `status_die_lock.png` | **물림** (신규) ✅확정 | — | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` |
+| 2 | `status_die_seal.png` | 봉인 ✅확정 | `#8fa8e0` | `a wide dark-red wax seal blob sitting on the bottom edge with two thick parchment ribbons crossing only the lower corners` |
+| 3 | `status_die_bind.png` | 포박 ✅확정 | `#7fbf8a` | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` |
+| 4 | `status_die_stun.png` | 기절 ✅확정 | `#dfe6ee` | `heavy grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle still open` |
+| 5 | `status_die_numb.png` | 마비 ✅확정 | `#8fd4ff` | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
+| 6 | `status_die_devour.png` | 잠식 ✅확정 | `#9fd8f0` | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim` |
+| 7 | `status_die_bleed.png` | 출혈 ＋추가 | `#ff5a4a` | `thick crimson blood running down from the top edge in three fat streaks, one heavy drop hanging at the end of each` |
+| 8 | `status_die_poison.png` | 독 ＋추가 | `#b8e04a` | `one thick pale fang biting down from the top edge with heavy green venom running off it, a fat pool of green slime along the bottom edge` |
+| 9 | `status_die_curse.png` | 저주 ＋추가 | `#c78cff` | `thick violet flames burning upward along the bottom edge, solid blocky tongues of fire, dark smoke curling at the lower corners` |
+| 10 | `status_die_blessing.png` | 축복 ＋추가 | `#f3ecdd` | `a wide pale ivory crown resting on the top edge, thick blunt points, one broad warm glow behind it` |
+| 11 | `status_die_confuse.png` | 혼란 ＋추가 | `#c68cff` | `a thick violet whirlpool filling the WHOLE square and covering the center completely — this one is the exception, it must hide what is underneath` |
+| 12 | `status_die_rot.png` | 부패 ＋추가 | `#d98cc0` | `a swollen pink-purple pustule mass bulging up from the bottom edge, two glowing embers on its surface, one short fat fuse` |
+| 13 | `status_die_chain.png` | 결속 ＋추가 | `#a8c2d8` | `one heavy iron chain of thick blocky links crossing from the left edge to the right edge, cold steel highlights` |
+| 14 | `status_die_plunder.png` | 약탈 ＋추가 | `#d9a05a` | `a bony hand reaching in from the left edge with thick fingers clenching, one dull gold coin caught between them` |
 
-> 7번(혼란)만 가운데를 덮는다. 나머지 13종은 **가운데 60%가 비어야** 주사위 눈이 읽힌다.
+> 혼란만 가운데를 덮는다. 나머지 13종은 **가운데 60%가 비어야** 주사위 눈이 읽힌다.
 > 붙일 때 스크립트가 가림률을 재서 25%를 넘으면 경고한다.
 
 # 2부 · 배지 아이콘 (②)
@@ -154,8 +156,7 @@ shapes, LARGE flat color planes, LOW detail density — no dense repeating textu
 no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
 ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
 background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
-decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be {색코드}.
-The symbol: {묘사}. No text, no letters, no watermark.
+decoration. Bold silhouette, readable at 20px. The symbol: {묘사}. No text, no letters, no watermark.
 ```
 
 **여러 개를 한 번에 뽑을 때** (권장 — 톤이 일정하게 나온다): 위 블록에서 비율만 `Landscape 3:2 image.
