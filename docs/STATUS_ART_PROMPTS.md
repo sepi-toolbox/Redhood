@@ -32,20 +32,20 @@ python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.bui
 
 | 상태 | 색 | **핵심 모티프** | 덮개 (가장자리에 펼침) | 아이콘 (하나로 압축) | 비고 |
 |---|---|---|---|---|---|
-| 출혈 | `#ff5a4a` | 붉은 핏방울 | 위 모서리에서 흘러내리는 핏줄기 | 굵은 핏방울 세 개 | 덮개 새로 |
-| 혼란 | `#c68cff` | 보라 소용돌이 | 칸 전체를 덮는 소용돌이 | 보라 나선 | 덮개 새로 |
-| 독 | `#b8e04a` | **송곳니 + 초록 점액** | 위에서 물어내리는 송곳니, 아래에 고인 점액 | 송곳니와 떨어지는 점액 방울 | 아이콘 완료 · 덮개 새로 |
-| 저주 | `#c78cff` | **보라 불꽃** | 아래 가장자리에서 타오르는 보라 불 | 보라 불꽃 한 덩이 | 둘 다 새로 |
-| 약탈 | `#d9a05a` | **움켜쥐는 손** | 왼쪽에서 뻗어와 움켜쥐는 뼈손 | 동전을 움켜쥔 손 | 둘 다 새로 |
-| 축복 | `#f3ecdd` | 흰 왕관 | 위 가장자리에 얹힌 왕관 | 왕관 하나 | 덮개 새로 |
-| 결속 | `#a8c2d8` | 쇠사슬 | 좌우를 가로지르는 사슬 | 사슬 두 칸 | 덮개 새로 |
-| 부패 | `#d98cc0` | 부푼 종기 + 불씨 | 아래에 부푼 종기 덩어리, 불씨 | 종기와 짧은 심지 | 덮개 새로 |
-| 잠식 | `#9fd8f0` | 삼키는 검은 공허 | 아래·왼쪽을 먹어드는 검은 덩어리 | 이빨 달린 검은 덩어리 | 덮개 새로 |
-| 봉인 | `#8fa8e0` | 붉은 밀랍 | 아래 가장자리의 밀랍과 끈 | 밀랍 봉인 | 덮개 새로 |
-| 포박 | `#7fbf8a` | 굵은 밧줄 매듭 | 좌우를 감은 밧줄, 왼쪽에 매듭 | 밧줄 매듭 | 덮개 새로 |
-| 기절 | `#dfe6ee` | 돌처럼 굳은 균열 | 모서리에서 번지는 돌 껍질 | 갈라진 돌 주사위 | 덮개 새로 |
-| 마비 | `#8fd4ff` | 얼어붙은 번개 | 좌우 가장자리의 굵은 번개 | 번개와 굳은 손바닥 | 덮개 새로 |
-| 물림 | (신규) | **빨판 입** | 왼쪽에서 물어붙은 빨판 입 | 주사위를 문 빨판 입 | 둘 다 신규 |
+| 출혈 | `#e83b2e` | 붉은 핏방울 | 위 모서리에서 흘러내리는 핏줄기 | 굵은 핏방울 세 개 | 덮개 새로 |
+| 혼란 | `#8b4de8` | 보라 소용돌이 | 칸 전체를 덮는 소용돌이 | 보라 나선 | 덮개 새로 |
+| 독 | `#a8d63a` | **송곳니 + 초록 점액** | 위에서 물어내리는 송곳니, 아래에 고인 점액 | 송곳니와 떨어지는 점액 방울 | 아이콘 완료 · 덮개 새로 |
+| 저주 | `#c33ad6` | **보라 불꽃** | 아래 가장자리에서 타오르는 보라 불 | 보라 불꽃 한 덩이 | 둘 다 새로 |
+| 약탈 | `#e08a2a` | **움켜쥐는 손** | 왼쪽에서 뻗어와 움켜쥐는 뼈손 | 동전을 움켜쥔 손 | 둘 다 새로 |
+| 축복 | `#ffd257` | 흰 왕관 | 위 가장자리에 얹힌 왕관 | 왕관 하나 | 덮개 새로 |
+| 결속 | `#8fa0b0` | 쇠사슬 | 좌우를 가로지르는 사슬 | 사슬 두 칸 | 덮개 새로 |
+| 부패 | `#e5468f` | 부푼 종기 + 불씨 | 아래에 부푼 종기 덩어리, 불씨 | 종기와 짧은 심지 | 덮개 새로 |
+| 잠식 | `#17bfae` | 삼키는 검은 공허 | 아래·왼쪽을 먹어드는 검은 덩어리 | 이빨 달린 검은 덩어리 | 덮개 새로 |
+| 봉인 | `#3a52c8` | 붉은 밀랍 | 아래 가장자리의 밀랍과 끈 | 밀랍 봉인 | 덮개 새로 |
+| 포박 | `#2f9e5c` | 굵은 밧줄 매듭 | 좌우를 감은 밧줄, 왼쪽에 매듭 | 밧줄 매듭 | 덮개 새로 |
+| 기절 | `#c9c2b0` | 돌처럼 굳은 균열 | 모서리에서 번지는 돌 껍질 | 갈라진 돌 주사위 | 덮개 새로 |
+| 마비 | `#3aa8e6` | 얼어붙은 번개 | 좌우 가장자리의 굵은 번개 | 번개와 굳은 손바닥 | 덮개 새로 |
+| 물림 | `#8a6a3f` | **빨판 입** | 왼쪽에서 물어붙은 빨판 입 | 주사위를 문 빨판 입 | 둘 다 신규 |
 
 > **작업 순서 권장**: 한 상태를 골라 **덮개와 아이콘을 한 번에 뽑는다.** 따로 뽑으면 또 어긋난다.
 > 덮개는 14종 전량 새로 만들고, 아이콘은 이미 나온 독(송곳니)만 확정 — 나머지는 임시다.
@@ -103,20 +103,20 @@ No text, no letters, no watermark.
 
 | # | 파일명 | 상태 | 색 | 효과 묘사 (머리 블록의 `The effect:` 뒤에) |
 |---|---|---|---|---|
-| 1 | `status_die_lock.png` | **물림** (신규) ✅확정 | — | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` |
-| 2 | `status_die_seal.png` | 봉인 ✅확정 | `#8fa8e0` | `a wide dark-red wax seal blob sitting on the bottom edge with two thick parchment ribbons crossing only the lower corners` |
-| 3 | `status_die_bind.png` | 포박 ✅확정 | `#7fbf8a` | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` |
-| 4 | `status_die_stun.png` | 기절 ✅확정 | `#dfe6ee` | `heavy grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle still open` |
-| 5 | `status_die_numb.png` | 마비 ✅확정 | `#8fd4ff` | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
-| 6 | `status_die_devour.png` | 잠식 ✅확정 | `#9fd8f0` | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim` |
-| 7 | `status_die_bleed.png` | 출혈 ＋추가 | `#ff5a4a` | `thick crimson blood running down from the top edge in three fat streaks, one heavy drop hanging at the end of each` |
-| 8 | `status_die_poison.png` | 독 ＋추가 | `#b8e04a` | `one thick pale fang biting down from the top edge with heavy green venom running off it, a fat pool of green slime along the bottom edge` |
-| 9 | `status_die_curse.png` | 저주 ＋추가 | `#c78cff` | `thick violet flames burning upward along the bottom edge, solid blocky tongues of fire, dark smoke curling at the lower corners` |
-| 10 | `status_die_blessing.png` | 축복 ＋추가 | `#f3ecdd` | `a wide pale ivory crown resting on the top edge, thick blunt points, one broad warm glow behind it` |
-| 11 | `status_die_confuse.png` | 혼란 ＋추가 | `#c68cff` | `a thick violet whirlpool filling the WHOLE square and covering the center completely — this one is the exception, it must hide what is underneath` |
-| 12 | `status_die_rot.png` | 부패 ＋추가 | `#d98cc0` | `a swollen pink-purple pustule mass bulging up from the bottom edge, two glowing embers on its surface, one short fat fuse` |
-| 13 | `status_die_chain.png` | 결속 ＋추가 | `#a8c2d8` | `one heavy iron chain of thick blocky links crossing from the left edge to the right edge, cold steel highlights` |
-| 14 | `status_die_plunder.png` | 약탈 ＋추가 | `#d9a05a` | `a bony hand reaching in from the left edge with thick fingers clenching, one dull gold coin caught between them` |
+| 1 | `status_die_lock.png` | **물림** (신규) ✅확정 | `#8a6a3f` | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` |
+| 2 | `status_die_seal.png` | 봉인 ✅확정 | `#3a52c8` | `a wide dark-red wax seal blob sitting on the bottom edge with two thick parchment ribbons crossing only the lower corners` |
+| 3 | `status_die_bind.png` | 포박 ✅확정 | `#2f9e5c` | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` |
+| 4 | `status_die_stun.png` | 기절 ✅확정 | `#c9c2b0` | `heavy grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle still open` |
+| 5 | `status_die_numb.png` | 마비 ✅확정 | `#3aa8e6` | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
+| 6 | `status_die_devour.png` | 잠식 ✅확정 | `#17bfae` | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim` |
+| 7 | `status_die_bleed.png` | 출혈 ＋추가 | `#e83b2e` | `thick crimson blood running down from the top edge in three fat streaks, one heavy drop hanging at the end of each` |
+| 8 | `status_die_poison.png` | 독 ＋추가 | `#a8d63a` | `one thick pale fang biting down from the top edge with heavy green venom running off it, a fat pool of green slime along the bottom edge` |
+| 9 | `status_die_curse.png` | 저주 ＋추가 | `#c33ad6` | `thick violet flames burning upward along the bottom edge, solid blocky tongues of fire, dark smoke curling at the lower corners` |
+| 10 | `status_die_blessing.png` | 축복 ＋추가 | `#ffd257` | `a wide pale ivory crown resting on the top edge, thick blunt points, one broad warm glow behind it` |
+| 11 | `status_die_confuse.png` | 혼란 ＋추가 | `#8b4de8` | `a thick violet whirlpool filling the WHOLE square and covering the center completely — this one is the exception, it must hide what is underneath` |
+| 12 | `status_die_rot.png` | 부패 ＋추가 | `#e5468f` | `a swollen pink-purple pustule mass bulging up from the bottom edge, two glowing embers on its surface, one short fat fuse` |
+| 13 | `status_die_chain.png` | 결속 ＋추가 | `#8fa0b0` | `one heavy iron chain of thick blocky links crossing from the left edge to the right edge, cold steel highlights` |
+| 14 | `status_die_plunder.png` | 약탈 ＋추가 | `#e08a2a` | `a bony hand reaching in from the left edge with thick fingers clenching, one dull gold coin caught between them` |
 
 > 혼란만 가운데를 덮는다. 나머지 13종은 **가운데 60%가 비어야** 주사위 눈이 읽힌다.
 > 붙일 때 스크립트가 가림률을 재서 25%를 넘으면 경고한다.
