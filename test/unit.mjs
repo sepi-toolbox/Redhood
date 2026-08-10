@@ -965,29 +965,6 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.__test_deal(b, e, 40);
     eq('상한: 40을 줘도 10만 들어간다', e.hp, hp0 - 10);
   }
-  // 요구 — 지키면 벌이 없고, 못 지키면 맞는다
-  {
-    const b = mkB(); const e = b.enemies[0];
-    e.demand = { kind: 'ofKind', left: 1, damage: 20, met: false };
-    eng.rng.next = () => 0.5;
-    eng.initialRoll(b);
-    eng.confirmCategory(b, 'onePair', 'clasped_hands', e.uid);   // 원페어 = ofKind
-    eq('요구를 지켰다고 표시된다', e.demand.met, true);
-    const hp0 = b.player.hp;
-    e.nextMove = { id: 'x', name: '가만히', effects: [{ op: 'rest' }] };   // 벌 말고는 아플 일이 없게
-    eng.enemyPhase(b);
-    eq('지켰으면 벌이 없다', b.player.hp, hp0);
-    eq('지킨 요구는 사라진다', e.demand, null);
-    eng.rng.next = Math.random;
-  }
-  {
-    const b = mkB(); const e = b.enemies[0];
-    e.demand = { kind: 'straight', left: 1, damage: 20, met: false };
-    b.player.block = 0;
-    const hp0 = b.player.hp;
-    b.await = 'enemy'; eng.enemyPhase(b);
-    eq('못 지키면 벌을 받는다', hp0 - b.player.hp >= 20, true);
-  }
   // 벼름 흡수 · 새김 흩기
   {
     const b = mkB(['nail','normal','normal','normal','normal']);
@@ -1000,11 +977,12 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
   // 데이터: 정예·보스는 전부 기믹을 하나씩 가진다
   {
-    const GIM = new Set(['ward', 'cap', 'demand', 'drainWhet', 'unpin']);
+    const GIM = new Set(['ward', 'cap', 'drainWhet', 'unpin']);
     const missing = DB.enemies.filter(e => !e.final && (e.tier === 'elite' || e.tier === 'boss'))
-      .filter(e => !Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
+      .filter(e => !e.signature && !Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
       .map(e => e.name);
-    eq('정예·보스는 모두 기믹을 하나씩 가진다', missing, []);
+    // 2·3막 넷은 요구 제거로 기믹이 비었다 — 2·3막 시그니처 배치 때 채운다 (알려진 대기)
+    eq('정예·보스 기믹/시그니처 공백은 2·3막 대기 4종뿐', missing, ['목 없는 기사', '늪의 왕', '언덕의 촉수', '자각몽의 왕']);
     const normalsWithGim = DB.enemies.filter(e => e.tier === 'normal')
       .filter(e => Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
       .map(e => e.name);
@@ -1135,12 +1113,18 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = mk(['forest_spider']);
     eq('거미줄: 주사위 2개 결속', b.dice.filter(d => d.st && d.st.kind === 'chain').length, 2);
   }
-  // petrify — 6은 0 취급 + 5 트리플로 해제
+  // petrify — 6이 나온 칸에 기절 상태이상이 붙는다 + 5 트리플로 해제
   {
+    const b2 = mk(['twig_golem']);
+    eng.rng.next = () => 0.999;   // normal 주사위에서 6이 나오게
+    eng.initialRoll(b2);
+    eq('굳음: 6이 나온 칸마다 기절이 붙는다', b2.dice.every(d => d.st && d.st.kind === 'stun'), true);
+    eng.rng.next = () => 0.5;
     const b = mk(['twig_golem']);
     setFaces(b, [6, 6, 4, 2, 1]);
-    const p = eng.previewAll(b).find(x => x.cat.id === 'onePair');
-    eq('굳음: 6페어는 0이라 잠김', p.locked, true);
+    b.dice[0].st = { kind: 'stun', power: 0, left: 1, fuse: 0, opened: false, fresh: false };
+    b.dice[1].st = { kind: 'stun', power: 0, left: 1, fuse: 0, opened: false, fresh: false };
+    eq('굳음: 기절 붙은 6페어는 0이라 잠김', eng.previewAll(b).find(x => x.cat.id === 'onePair').locked, true);
     setFaces(b, [5, 5, 5, 2, 1]);
     eng.confirmCategory(b, 'threeKind', 'threeKind__base');
     eq('굳음: 5 셋으로 부순다', !!b.sigBroken[b.enemies[0].uid], true);
@@ -1186,13 +1170,10 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.reroll(b);
     eq('가시: 지킨 4개 → 피해 2', hp0 - b.player.hp, 2);
   }
-  // forceReroll — 지킨 것 하나가 미끄러진다
+  // 물수제비 — 이제 결속(상태이상)이다
   {
     const b = mk(['brook_sprite']);
-    eng.initialRoll(b);
-    eng.toggleHold(b, 0);
-    eng.reroll(b);
-    eq('물수제비: 미끄러진 주사위 기록', b.sigEvents.some(ev => ev.slip != null), true);
+    eq('물수제비: 주사위 2개 결속', b.dice.filter(d => d.st && d.st.kind === 'chain').length, 2);
   }
   // minRank — 낮은 족보 봉인
   {

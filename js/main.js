@@ -2,11 +2,10 @@
 import { loadAll, DB } from './data.js';
 import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf, activeSignature } from './engine.js';
 import { whetMultOf } from './yahtzee.js';
-import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.1'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.2'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -806,14 +805,12 @@ function renderBattle(opts = {}) {
           <button class="enemy t-${e.tier} ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
             ${/* v0.52: 정보(의도·이름·체력바)는 머리 위, 그림은 크게 아래 */ ''}
             <span class="target-pin">▼</span>
-            <span class="intent ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.chained ? 'chained' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
-            ${badgeRow('rule-row', [
-              sig && sig.uid === e.uid ? badge('rule', '⚜️', sig.name, { cls: 'sig', title: sig.desc }) : '',
-              e.wardLeft > 0 ? badge('rule', '🪨', e.ward, { title: `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다` }) : '',
-              e.capLeft > 0 ? badge('rule', '⛓', e.cap, { title: `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다` }) : '',
-              e.demand ? badge('rule', '📜', DEMAND_KO[e.demand.kind || e.demand.category] || '요구',
-                { sub: e.demand.left, cls: 'urgent', title: `${e.demand.left}턴 안에 확정하지 않으면 ${e.demand.damage} 피해` }) : '',
-            ])}
+            <span class="intent-row">
+              <span class="intent2 ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}"><b>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</b><span class="iv">${iconifyIntent(intentOf(e))}</span></span>
+              ${sig && sig.uid === e.uid ? `<span class="intent2 sig" title="${esc(sig.desc)}">⚜️ ${esc(sig.name)}</span>` : ''}
+              ${e.wardLeft > 0 ? `<span class="intent2 util" title="문턱 ${e.ward} — 한 번에 넘겨야 뚫린다">🪨 ${e.ward}</span>` : ''}
+              ${e.capLeft > 0 ? `<span class="intent2 util" title="상한 ${e.cap} — 한 번에 이 이상 줄 수 없다">⛓ ${e.cap}</span>` : ''}
+            </span>
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
               // 적 방어도 LoL식: HP 구간 끝에 회백색 실드 세그먼트
@@ -857,7 +854,7 @@ function renderBattle(opts = {}) {
             ${st ? `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>${st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''}` : ''}
             ${pinned && !st ? '<span class="st-tint"></span><span class="st-rim"></span>' : ''}
             ${d.sigLock ? '<span class="st-tint"></span><span class="st-rim"></span>' : ''}
-            <small>${d.sigLock ? '잠김' : st ? esc(st.name) : marked ? '다시' : pinned ? '새김' : ''}</small>
+            <small>${d.sigLock ? esc((sig && sig.name) || '잠김') : st ? esc(st.name) : marked ? '다시' : pinned ? '새김' : ''}</small>
           </button>`;
         }).join('')}
       </div>
@@ -870,7 +867,7 @@ function renderBattle(opts = {}) {
       <div class="hint-line">${hintHtml()}</div>
       <div class="sheet-zone combo-grid ${battle.rolled ? '' : 'dim'}">
         ${previews.map(({ cat, variant, seal, sigBlock, locked, burst, bd }) => `
-          <button class="sheet-row combo-row t-${variant.tier || 'common'} ${burst ? 'burst' : ''} ${locked ? 'used' : ''} ${COMBO_PLATE_READY.has(variant.id) ? 'has-plate' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
+          <button class="sheet-row combo-row t-${variant.tier || 'common'} ${burst ? 'burst' : ''} ${locked ? 'used' : ''} ${sigBlock ? 'sig-sealed' : ''} ${COMBO_PLATE_READY.has(variant.id) ? 'has-plate' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
             data-cat="${cat.id}" data-variant="${variant.id}" data-locked="${locked ? 1 : 0}"
             ${COMBO_PLATE_READY.has(variant.id) ? `style="border-image-source: url('assets/ui/paper_${variant.id}.png')"` : ''}>
             <span class="row-body">
@@ -941,8 +938,14 @@ function renderBattle(opts = {}) {
   if (rerollBtn) rerollBtn.addEventListener('click', () => {
     if (busy) return;
     selectedCat = null;
+    const hpBefore = battle.player.hp;
     const rerolled = battle.dice.map((d, i) => (d.held ? -1 : i)).filter(i => i >= 0);
-    if (reroll(battle)) animateRoll(rerolled);
+    if (reroll(battle)) {
+      animateRoll(rerolled);
+      const tax = hpBefore - battle.player.hp;             // 시그니처 세금 (이빨 자국·가시)
+      if (tax > 0) sigHurtFx(tax);
+      if (battle.over && battle.result === 'defeat') setTimeout(() => renderBattle(), 700);
+    }
   });
   // 적 탭 = 표적 변경 (언제든, 확정과 무관) / 길게 누르면 행동 상세 (치트)
   app.querySelectorAll('.enemy').forEach(el => {
@@ -1082,7 +1085,6 @@ function showEnemyInfo(uid) {
     d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable} · 매 턴 1 소멸</li>` : '',
     e.wardLeft > 0 ? `<li>🪨 문턱 ${e.ward} — 한 번에 ${e.ward} 이하로 때리면 아예 안 통한다 (${e.wardLeft}턴)</li>` : '',
     e.capLeft > 0 ? `<li>⛓ 상한 ${e.cap} — 한 번에 ${e.cap}을 넘겨 줄 수 없다 (${e.capLeft}턴)</li>` : '',
-    e.demand ? `<li>📜 요구 — ${e.demand.left}턴 안에 <b>${DEMAND_KO[e.demand.kind || e.demand.category] || '지정 족보'}</b>를 확정하지 않으면 ${e.demand.damage} 피해</li>` : '',
     e.stunned ? '<li>💫 다음 행동 취소됨</li>' : '',
   ].filter(Boolean).join('');
   app.append(h(`

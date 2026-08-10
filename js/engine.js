@@ -99,7 +99,6 @@ function spawnEnemy(id, idx, scale) {
     // v1.30 정예·보스 기믹 — 머리를 써서 풀라고 거는 조건들
     ward: 0, wardLeft: 0,                 // 문턱: 이 값 이하의 단발 피해는 통째로 무시
     cap: 0, capLeft: 0,                   // 상한: 단발 피해가 이 값을 넘으면 이 값으로 깎인다
-    demand: null,                         // 요구: {kind|category, left, damage, met}
   };
 }
 
@@ -160,10 +159,10 @@ export function clearStatuses(battle, kind = null) {
    · 해제(break): {face, count} — 그 눈을 count개 이상 포함한 족보를 확정하면 전투 내내 부서진다.
      face 없이 count만 있으면 "아무 눈이든 같은 눈 count개".
    · fromPhase: 보스 전용 — 그 국면부터 켜진다.
-   ops: echo(직전 족보 봉인) web(결속) haze(혼란) sealDie(봉인) rollTax(리롤마다 피해)
-        holdTax(리롤 시 지킨 주사위당 피해) petrify(그 눈 합산 0) forceReroll(지킨 것 1개 강제 리롤)
-        lockHigh(최고 눈 잠금, heal이면 그만큼 회복) gnaw(리롤 비용 배) blind(미리보기 숨김)
-        minRank(낮은 족보 봉인) bloodhunt(rollTax + echo)                                   */
+   전부 "주사위/족보에 붙는 상태이상" 문법으로 나타난다 — 새 표기 체계를 만들지 않는다.
+   ops: echo(직전 족보 봉인) web(결속st) haze(혼란st) sealDie(봉인st) rollTax(리롤마다 피해)
+        holdTax(리롤 시 지킨 주사위당 피해) petrify(그 눈에 기절st) lockHigh(최고 눈 잠금+회복)
+        gnaw(리롤 비용 배) blind(미리보기 숨김) minRank(낮은 족보 봉인) bloodhunt(rollTax+echo) */
 export function activeSignature(battle) {
   for (const e of battle.enemies) {
     if (e.hp <= 0) continue;
@@ -199,16 +198,25 @@ function sigDamage(battle, n, tag) {
 // 시그니처에 잠긴 주사위(sigLock — 거머리 흡착·강꼬치 물어채기)도 같은 취급.
 export const faceOf = (d) => ((stRule(d, 'needReroll') && !d.st.opened) || d.sigLock) ? 0 : d.face;
 export const facesOf = (battle) => battle.dice.map(faceOf);
-// 기절은 족보에는 들어가되 합산에서만 0으로 친다. 굳음(petrify)은 그 눈 전부가 같은 취급.
+// 기절은 족보에는 들어가되 합산에서만 0으로 친다.
+// 굳음(petrify)은 그 눈이 나온 칸에 기절 상태이상을 직접 붙인다 — 규칙도 연출도 상태이상 문법 하나로 통일.
 const zeroedOf = (battle) => {
   const s = new Set();
-  const pet = sigIs(battle, 'petrify');
-  battle.dice.forEach((d, i) => {
-    if (stRule(d, 'zeroValue')) s.add(i);
-    if (pet && d.face === (pet.face ?? 6)) s.add(i);
-  });
+  battle.dice.forEach((d, i) => { if (stRule(d, 'zeroValue')) s.add(i); });
   return s;
 };
+// 굴림 직후 훅 — 굳음이 이번에 나온 그 눈들에 들러붙는다 (한 턴짜리, 다음 턴 시작에 떨어진다)
+function sigAfterRoll(battle, idxs) {
+  const s = sigIs(battle, 'petrify');
+  if (!s) return;
+  for (const i of idxs) {
+    const d = battle.dice[i];
+    if (d.face === (s.face ?? 6) && !stRule(d, 'zeroValue')) {
+      d.st = { kind: 'stun', power: 0, left: 1, fuse: 0, opened: false, fresh: false };
+      (battle.sigEvents = battle.sigEvents || []).push({ tag: s.name, petrify: i, face: d.face });
+    }
+  }
+}
 // 저주·축복은 나올 수 있는 눈을 자른다
 function allowedFaces(die, d) {
   const all = die.faces;
@@ -363,6 +371,7 @@ export function initialRoll(battle) {
   });
   applyMirror(battle, battle.dice.map((_, i) => i));
   applyLadder(battle, battle.dice.map((_, i) => i));
+  sigAfterRoll(battle, battle.dice.map((_, i) => i));
   // 시그니처: 흡착·물어채기 — 가장 높은 눈 하나가 잠긴다 (족보 제외·리롤 불가)
   {
     const s = sigIs(battle, 'lockHigh');
@@ -414,21 +423,13 @@ export function reroll(battle) {
   });
   applyMirror(battle, rolled);
   applyLadder(battle, rolled);
+  sigAfterRoll(battle, rolled);
   // 시그니처: 리롤에 붙는 세금·훼방
   {
     const s = activeSignature(battle);
     if (s) {
       if (s.op === 'rollTax' || s.op === 'bloodhunt') sigDamage(battle, s.amount ?? 1, s.name);
       else if (s.op === 'holdTax') sigDamage(battle, Math.ceil(keptIdx.length * (s.per ?? 0.5)), s.name);
-      else if (s.op === 'forceReroll') {
-        // 지킨 것 중 하나가 손을 빠져나가 같이 굴러가 버린다
-        const cand = keptIdx.filter(i => !battle.dice[i].sigLock && !battle.dice[i].pinned && battle.dice[i].face > 0);
-        if (cand.length) {
-          const i = cand[Math.floor(rng.next() * cand.length)];
-          battle.dice[i].face = rollWith(battle.diceDefs[i], battle.dice[i]);
-          (battle.sigEvents = battle.sigEvents || []).push({ tag: s.name, slip: i, face: battle.dice[i].face });
-        }
-      }
     }
   }
   return true;
@@ -739,12 +740,6 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   applyDiceEffects(battle, bd);
   applyStatusCost(battle, bd);
   applyConfirmRelics(battle, cat, faces, bd);
-  // 요구를 지켰는지 — 살아 있는 모든 적의 요구를 본다 (표적이 아니어도 인정)
-  for (const e of aliveEnemies(battle)) {
-    if (!e.demand) continue;
-    const ok = e.demand.category ? cat.id === e.demand.category : cat.kind === e.demand.kind;
-    if (ok) { e.demand.met = true; battle.lastResult.bonusHits.push('📜 요구를 지켰다'); }
-  }
   // 시그니처 해제 — 조건 눈을 채운 족보를 확정하면 그 시그니처는 전투 내내 부서진다
   {
     const s = activeSignature(battle);
@@ -896,22 +891,6 @@ export function enemyPhase(battle) {
       e.debuffs.bleed -= 1;
       if (e.hp <= 0) continue; // 출혈사 — 행동 없이 쓰러진다
     }
-    // 요구 — 기한이 끝났는데 못 지켰으면 벌을 받는다
-    if (e.demand) {
-      e.demand.left -= 1;
-      if (e.demand.met) e.demand = null;
-      else if (e.demand.left <= 0) {
-        const dmg = e.demand.damage;
-        if (e.demand.power > 0) e.power = (e.power || 0) + e.demand.power;   // 못 지키면 적이 기세를 얻는다
-        e.demand = null;
-        if (dmg > 0) {
-          const ab = Math.min(battle.player.block, dmg);
-          battle.player.block -= ab;
-          battle.player.hp -= (dmg - ab);
-          if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; return; }
-        }
-      }
-    }
     if (e.wardLeft > 0) { e.wardLeft -= 1; if (e.wardLeft <= 0) e.ward = 0; }
     if (e.capLeft > 0) { e.capLeft -= 1; if (e.capLeft <= 0) e.cap = 0; }
     if (e.stunned) { e.stunned = false; chooseMove(e, battle.turn + 1); continue; }
@@ -971,17 +950,6 @@ export function enemyPhase(battle) {
         case 'cap':                                        // ⛓ 상한 — 단발 피해를 amount 로 깎는다
           e.cap = ef.amount; e.capLeft = Math.max(1, ef.turns || 2);
           break;
-        case 'demand': {                                   // 📜 요구 — 정한 족보를 내지 않으면 벌을 받는다
-          // v3.1 족보 수집제: 갖고 있지도 않은 족보를 요구하는 건 불공정 — 그 요구는 불발된다
-          const ownable = ef.category
-            ? (ef.category in battle.categories)
-            : DB.scoring.categories.some(c => c.kind === ef.kind && (c.id in battle.categories));
-          if (!ownable) break;
-          e.demand = { kind: ef.kind || null, category: ef.category || null,
-                       left: Math.max(1, ef.turns || 2), damage: ef.amount || 0,
-                       power: ef.power || 0, met: false };
-          break;
-        }
         case 'drainWhet':                                  // 🌀 벼름 흡수 — 쌓아둔 벼름을 빼앗는다
           battle.whet = ef.amount > 0 ? Math.max(0, battle.whet - ef.amount) : 0;
           break;
@@ -1132,9 +1100,6 @@ export function hitDamage(enemy, ef) {
 }
 export const hitCount = (ef) => Math.max(1, Math.floor(ef.hits || 1));
 
-export const DEMAND_KO = { ofKind: '같은 눈', straight: '스트레이트', fullHouse: '풀하우스', twoPair: '투페어',
-  chance: '노페어', onePair: '원페어', threeKind: '트리플', fourKind: '포카드', yahtzee: '야찌',
-  largeStraight: '스트레이트' };
 // 의도 표기 (v0.11): ⚔️공격 / 🛡방어 / 🌀혼란 / 💪강화 / 💚치료 / ❓의문 — 혼합은 병기
 export function intentOf(enemy) {
   const mv = enemy.nextMove;
@@ -1161,7 +1126,6 @@ export function intentOf(enemy) {
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
     else if (ef.op === 'ward') parts.push(`🪨${ef.amount}`);
     else if (ef.op === 'cap') parts.push(`⛓${ef.amount}`);
-    else if (ef.op === 'demand') parts.push(`📜${DEMAND_KO[ef.kind || ef.category] || '요구'}`);
     else if (ef.op === 'drainWhet') parts.push('🌀벼름');
     else if (ef.op === 'unpin') parts.push('💨새김');
   }
