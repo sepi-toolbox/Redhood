@@ -62,8 +62,7 @@ export function createBattle(run, encounterIds) {
     coinsLost: 0,                         // v1.17 약탈 — 전투가 끝나면 run에서 깎는다
     voidLocked: false,                    // v1.17 잠식이 다섯 칸을 다 먹은 상태
     lastHits: [],                         // [{uid, amount}] — 연출용
-    sigBroken: {},                        // v3.0 시그니처 해제 — uid → true (전투 내내)
-    sigEvents: [],                        // 이번 턴 시그니처가 벌인 일 (연출용)
+    mods: {},                             // v3.3 행동이 남긴 지속 방해 (rollTax·holdTax·petrify·lockHigh·blind)
   };
   for (const e of battle.enemies) chooseMove(e, 1);
   startTurn(battle, true);
@@ -90,15 +89,16 @@ function spawnEnemy(id, idx, scale) {
     hp, maxHpInit: hp, stunned: false,
     atkScale: (def.final ? 1 : scale.atk) * em.atk,   // v1.0: 전역 보정 제거 — 낮춘 값은 enemies.json 의 기본 피해에 이미 반영돼 있다
     enlightened,
-    block: 0,                             // 방어: 자기 다음 행동 때까지 피해 흡수
-    power: 0,                             // 강화: 이후 모든 공격 피해 +power (전투 내 누적)
+    block: (def.start || {}).block || 0,  // 방어: 자기 다음 행동 때까지 피해 흡수 (start.block 으로 시작 부여 가능)
+    power: (def.start || {}).power || 0,  // 강화: 이후 모든 공격 피해 +power (전투 내 누적)
     debuffs: { weak: 0, bleed: 0, vulnerable: 0 }, // v0.19: 약화(공격-N)/출혈(행동마다 피해, -1씩 감소)/취약(받는 피해+N)
     patternState: { index: 0, recent: [], count: 0 }, phaseIndex: 0, nextMove: null,
     cooldown: {},                         // v1.01: 행동 id → 다시 쓸 수 있게 되는 턴. moves.*.cooldown 이 없으면 0(제한 없음)
     breakTaken: 0,                        // v1.08: 지금 예고된 행동을 건 뒤 HP로 받은 피해 누적 (파쇄 판정용)
     // v1.30 정예·보스 기믹 — 머리를 써서 풀라고 거는 조건들
-    ward: 0, wardLeft: 0,                 // 문턱: 이 값 이하의 단발 피해는 통째로 무시
-    cap: 0, capLeft: 0,                   // 상한: 단발 피해가 이 값을 넘으면 이 값으로 깎인다
+    ward: (def.start || {}).ward || 0, wardLeft: (def.start || {}).ward ? ((def.start || {}).wardTurns || 99) : 0,
+    cap: (def.start || {}).cap || 0, capLeft: (def.start || {}).cap ? ((def.start || {}).capTurns || 99) : 0,
+    // 문턱·상한은 별도 시스템이 아니라 버프다 — 행동으로도, 시작 버프(enemies.json start)로도 얻는다
   };
 }
 
@@ -153,49 +153,8 @@ export function clearStatuses(battle, kind = null) {
   return n;
 }
 
-/* ==================== 시그니처 방해 (v3.0) ====================
-   발라트로 보스 블라인드의 이식 — 몬스터당 1개, 족보 공간을 비트는 "규칙".
-   · 활성: 살아있는 적 중 맨 앞(선임자)의 signature 하나만 켜진다. 죽으면 다음 놈 것으로.
-   · 해제(break): {face, count} — 그 눈을 count개 이상 포함한 족보를 확정하면 전투 내내 부서진다.
-     face 없이 count만 있으면 "아무 눈이든 같은 눈 count개".
-   · fromPhase: 보스 전용 — 그 국면부터 켜진다.
-   전부 "주사위/족보에 붙는 상태이상" 문법으로 나타난다 — 새 표기 체계를 만들지 않는다.
-   ops: echo(직전 족보 봉인) web(결속st) haze(혼란st) sealDie(봉인st) rollTax(리롤마다 피해)
-        holdTax(리롤 시 지킨 주사위당 피해) petrify(그 눈에 기절st) lockHigh(최고 눈 잠금+회복)
-        gnaw(리롤 비용 배) blind(미리보기 숨김) minRank(낮은 족보 봉인) bloodhunt(rollTax+echo) */
-export function activeSignature(battle) {
-  for (const e of battle.enemies) {
-    if (e.hp <= 0) continue;
-    const sig = (DB.enemyById[e.defId] || {}).signature;
-    if (!sig) continue;
-    if (battle.sigBroken && battle.sigBroken[e.uid]) continue;
-    if (sig.fromPhase != null && (e.phaseIndex || 0) < sig.fromPhase) continue;
-    return { ...sig, uid: e.uid, owner: e.name };
-  }
-  return null;
-}
-const sigIs = (battle, ...ops) => {
-  const s = activeSignature(battle);
-  return s && ops.includes(s.op) ? s : null;
-};
-// 이 족보 칸이 시그니처에 막혀 있나 (echo: 직전 사용 족보 / minRank: 지정 목록)
-export function sigBlocksCat(battle, catId) {
-  const s = activeSignature(battle);
-  if (!s) return false;
-  if ((s.op === 'echo' || s.op === 'bloodhunt') && battle.lastUsedCat === catId) return true;
-  if (s.op === 'minRank' && (s.cats || []).includes(catId)) return true;
-  return false;
-}
-// 시그니처 세금 피해 — 방어도를 무시하고 바로 아프다
-function sigDamage(battle, n, tag) {
-  if (!(n > 0)) return;
-  battle.player.hp -= n;
-  (battle.sigEvents = battle.sigEvents || []).push({ tag, amount: n });
-  if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; }
-}
-
 // 봉인은 한 번 다시 굴리기 전에는 값이 없다 — 족보 계산에서 아예 빠진다.
-// 시그니처에 잠긴 주사위(sigLock — 거머리 흡착·강꼬치 물어채기)도 같은 취급.
+// 물린 주사위(sigLock — 흡착·물어채기 행동)도 같은 취급.
 export const faceOf = (d) => ((stRule(d, 'needReroll') && !d.st.opened) || d.sigLock) ? 0 : d.face;
 export const facesOf = (battle) => battle.dice.map(faceOf);
 // 기절은 족보에는 들어가되 합산에서만 0으로 친다.
@@ -205,15 +164,29 @@ const zeroedOf = (battle) => {
   battle.dice.forEach((d, i) => { if (stRule(d, 'zeroValue')) s.add(i); });
   return s;
 };
-// 굴림 직후 훅 — 굳음이 이번에 나온 그 눈들에 들러붙는다 (한 턴짜리, 다음 턴 시작에 떨어진다)
-function sigAfterRoll(battle, idxs) {
-  const s = sigIs(battle, 'petrify');
-  if (!s) return;
+/* ==================== 행동이 남기는 지속 효과 (v3.3 mods) ====================
+   적의 "행동"이 걸어두는 플레이어 쪽 지속 방해 — 상태이상과 같은 문법(턴 감쇠).
+   rollTax  리롤할 때마다 피해   holdTax  리롤 시 지킨 주사위당 피해
+   petrify  그 눈이 나오면 기절st 부착   lockHigh  최고 눈 잠금(+시전자 회복)
+   blind    족보 위력 미리보기 숨김
+   족보 봉인(sealLast/sealCat)은 기존 sealed 를 그대로 쓴다.                     */
+export const modOf = (battle, key) => (battle.mods && battle.mods[key] && battle.mods[key].left > 0) ? battle.mods[key] : null;
+function decayMods(battle) {
+  for (const k of Object.keys(battle.mods || {})) {
+    const m = battle.mods[k];
+    if (!m) continue;
+    m.left -= 1;
+    if (m.left <= 0) delete battle.mods[k];
+  }
+}
+// 굴림 직후 훅 — 굳음(petrify)이 이번에 나온 그 눈들에 기절을 들러붙인다 (다음 턴 시작에 떨어진다)
+function modAfterRoll(battle, idxs) {
+  const m = modOf(battle, 'petrify');
+  if (!m) return;
   for (const i of idxs) {
     const d = battle.dice[i];
-    if (d.face === (s.face ?? 6) && !stRule(d, 'zeroValue')) {
+    if (d.face === (m.face ?? 6) && !stRule(d, 'zeroValue')) {
       d.st = { kind: 'stun', power: 0, left: 1, fuse: 0, opened: false, fresh: false };
-      (battle.sigEvents = battle.sigEvents || []).push({ tag: s.name, petrify: i, face: d.face });
     }
   }
 }
@@ -338,16 +311,7 @@ function startTurn(battle, first = false) {
   battle.whetGained = 0;
   addWhet(battle, sumRelic(battle.relics, 'turnWhet') + dicePassive(battle, 'whet'));  // 숫돌 등
   statusTurn(battle);
-  // 시그니처: 상시형은 매 턴 다시 걸린다 (statusTurn 이후라 이번 턴 내내 산다)
-  battle.sigEvents = [];
-  {
-    const s = activeSignature(battle);
-    if (s) {
-      if (s.op === 'web') applyStatus(battle, 'chain', s.count ?? 2);
-      else if (s.op === 'haze') applyStatus(battle, 'confuse', s.count ?? 1);
-      else if (s.op === 'sealDie') applyStatus(battle, 'seal', s.count ?? 1);
-    }
-  }
+  if (!first) decayMods(battle);
   if (hasRelic(battle.relics, 'confuseImmune')) battle.pendingConfuse = 0; // 수지 양초: 혼란 면역
   // 혼란(🌀): 무작위 주사위 N개가 뒤틀림 — 이번 턴 다시 굴릴 수 없다
   if (battle.pendingConfuse > 0) {
@@ -371,22 +335,20 @@ export function initialRoll(battle) {
   });
   applyMirror(battle, battle.dice.map((_, i) => i));
   applyLadder(battle, battle.dice.map((_, i) => i));
-  sigAfterRoll(battle, battle.dice.map((_, i) => i));
-  // 시그니처: 흡착·물어채기 — 가장 높은 눈 하나가 잠긴다 (족보 제외·리롤 불가)
+  modAfterRoll(battle, battle.dice.map((_, i) => i));
+  // 흡착·물어채기(lockHigh 행동) — 가장 높은 눈 하나가 물린다 (족보 제외·리롤 불가)
   {
-    const s = sigIs(battle, 'lockHigh');
-    if (s) {
+    const m = modOf(battle, 'lockHigh');
+    if (m) {
       let hi = -1;
       battle.dice.forEach((d, i) => { if (d.face > 0 && (hi < 0 || d.face > battle.dice[hi].face)) hi = i; });
       if (hi >= 0) {
         const d = battle.dice[hi];
         d.sigLock = true;
-        let healed = 0;
-        if (s.heal) {
-          const e = battle.enemies.find(x => x.uid === s.uid);
-          if (e && e.hp > 0) { healed = Math.min(d.face, e.maxHpInit - e.hp); e.hp += healed; }
+        if (m.heal) {
+          const e = battle.enemies.find(x => x.uid === m.from);
+          if (e && e.hp > 0) e.hp = Math.min(e.maxHpInit, e.hp + d.face);
         }
-        (battle.sigEvents = battle.sigEvents || []).push({ tag: s.name, lock: hi, face: d.face, heal: healed });
       }
     }
   }
@@ -399,8 +361,6 @@ export function rerollCost(battle) {
   // 마비가 하나라도 끼면 그 수치만큼 리롤을 먹는다 (여럿이면 가장 비싼 것 하나)
   let c = 1;
   battle.dice.forEach(d => { if (!d.held && stRule(d, 'rerollCost')) c = Math.max(c, stAmount(d)); });
-  const s = sigIs(battle, 'gnaw');           // 갉기 — 리롤 비용이 배가 된다
-  if (s) c *= (s.mult ?? 2);
   return c;
 }
 
@@ -423,13 +383,17 @@ export function reroll(battle) {
   });
   applyMirror(battle, rolled);
   applyLadder(battle, rolled);
-  sigAfterRoll(battle, rolled);
-  // 시그니처: 리롤에 붙는 세금·훼방
+  modAfterRoll(battle, rolled);
+  // 행동이 남긴 세금 — 이빨 자국(리롤당)·가시(지킨 주사위당). 방어도 무시.
   {
-    const s = activeSignature(battle);
-    if (s) {
-      if (s.op === 'rollTax' || s.op === 'bloodhunt') sigDamage(battle, s.amount ?? 1, s.name);
-      else if (s.op === 'holdTax') sigDamage(battle, Math.ceil(keptIdx.length * (s.per ?? 0.5)), s.name);
+    const rt = modOf(battle, 'rollTax');
+    const ht = modOf(battle, 'holdTax');
+    let tax = 0;
+    if (rt) tax += rt.amount ?? 1;
+    if (ht) tax += Math.ceil(keptIdx.length * (ht.per ?? 0.5));
+    if (tax > 0) {
+      battle.player.hp -= tax;
+      if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; }
     }
   }
   return true;
@@ -498,7 +462,6 @@ export function previewAll(battle) {
   for (const cat of DB.scoring.categories) {
     if (!(cat.id in battle.categories)) continue;        // v3.1 미보유 족보
     const seal = battle.sealed[cat.id] || 0;
-    const sigBlock = sigBlocksCat(battle, cat.id);       // 시그니처가 잠근 칸 (흉내내기·솜 채우기)
     {
       const variant = variantOf(cat, battle.categories[cat.id]);
       // v1.31 일격(burst) — 이 변형만 벼름을 태우고 그만큼 증폭된다. 나머지는 벼름을 건드리지 않는다.
@@ -506,8 +469,8 @@ export function previewAll(battle) {
         ? computeDamage(cat, faces, battle.diceDefs, battle.relics, zero, dmgOpts(battle, variant))
         : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, whetMult: 1, bonus: 0, flat: 0 };
       const total = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ + battle.buffs.strength : bd0.total;
-      const locked = seal > 0 || sigBlock || !battle.rolled || total === 0;
-      out.push({ cat, variant, seal, sigBlock, locked, burst: !!variant.burst, bd: { ...bd0, total } });
+      const locked = seal > 0 || !battle.rolled || total === 0;
+      out.push({ cat, variant, seal, locked, burst: !!variant.burst, bd: { ...bd0, total } });
     }
   }
   return out;
@@ -700,7 +663,6 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   if (variantId !== slot && variantId !== baseIdOf(catId)) return null;   // 그 자리에 없는 변형은 못 쓴다
   const variant = variantOf(cat, slot);
   if ((battle.sealed[catId] || 0) > 0) return null;
-  if (sigBlocksCat(battle, catId)) return null;      // 시그니처가 잠근 칸
 
   const alive = aliveEnemies(battle);
   if (alive.length === 0) return null; // v0.32: 전멸 후 중복 확정 가드 (대상 없음)
@@ -740,20 +702,6 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   applyDiceEffects(battle, bd);
   applyStatusCost(battle, bd);
   applyConfirmRelics(battle, cat, faces, bd);
-  // 시그니처 해제 — 조건 눈을 채운 족보를 확정하면 그 시그니처는 전투 내내 부서진다
-  {
-    const s = activeSignature(battle);
-    if (s && s.break && s.break.count) {
-      const cnt = {};
-      for (const f of faces) if (f > 0) cnt[f] = (cnt[f] || 0) + 1;
-      const ok = s.break.face ? (cnt[s.break.face] || 0) >= s.break.count
-        : Object.values(cnt).some(n => n >= s.break.count);
-      if (ok) {
-        battle.sigBroken[s.uid] = true;
-        battle.lastResult.bonusHits.push(`⛓️ ${s.name} 부서짐!`);
-      }
-    }
-  }
   if (battle.over && battle.result === 'defeat') return battle.lastResult; // 저주 주사위 등으로 자멸
 
   // 늑대 가죽: 처치한 적 수만큼 회복
@@ -944,6 +892,27 @@ export function enemyPhase(battle) {
           e.hp -= ef.amount;                                //   예고로는 무슨 행동인지 알 수 없다
           break;
         // ---- v1.30 정예·보스 기믹 ----
+        case 'sealLast':                                   // 🔒 직전에 쓴 족보를 봉인한다 (흉내내기)
+          if (battle.lastUsedCat) battle.sealed[battle.lastUsedCat] = Math.max(battle.sealed[battle.lastUsedCat] || 0, (ef.turns || 1) + 1);
+          break;
+        case 'sealCat':                                    // 🔒 지정 족보들을 봉인한다 (솜 채우기)
+          for (const cid of (ef.cats || [])) battle.sealed[cid] = Math.max(battle.sealed[cid] || 0, (ef.turns || 1) + 1);
+          break;
+        case 'rollTax':                                    // 🩸 리롤할 때마다 피해 (이빨 자국)
+          battle.mods.rollTax = { amount: ef.amount || 1, left: (ef.turns || 1) + 1, name: e.nextMove.name };
+          break;
+        case 'holdTax':                                    // 🩸 리롤 시 지킨 주사위당 피해 (가시)
+          battle.mods.holdTax = { per: ef.per || 0.5, left: (ef.turns || 1) + 1, name: e.nextMove.name };
+          break;
+        case 'petrify':                                    // 🗿 그 눈이 나오면 기절이 붙는다 (굳음)
+          battle.mods.petrify = { face: ef.face || 6, left: (ef.turns || 1) + 1, name: e.nextMove.name };
+          break;
+        case 'lockHigh':                                   // 🧲 매 굴림 최고 눈을 문다 (흡착·물어채기)
+          battle.mods.lockHigh = { heal: !!ef.heal, from: e.uid, left: (ef.turns || 1) + 1, name: e.nextMove.name };
+          break;
+        case 'blind':                                      // 🌫 족보 위력 미리보기 숨김 (스멀거림)
+          battle.mods.blind = { left: (ef.turns || 1) + 1, name: e.nextMove.name };
+          break;
         case 'ward':                                       // 🪨 문턱 — amount 이하의 단발 피해를 무시한다
           e.ward = ef.amount; e.wardLeft = Math.max(1, ef.turns || 2);
           break;
@@ -1124,6 +1093,11 @@ export function intentOf(enemy) {
     }
     else if (ef.op === 'empower') parts.push('💪');
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
+    else if (ef.op === 'sealLast' || ef.op === 'sealCat') parts.push('🔒족보');
+    else if (ef.op === 'rollTax' || ef.op === 'holdTax') parts.push('🩸리롤');
+    else if (ef.op === 'petrify') parts.push(`🗿${ef.face || 6}`);
+    else if (ef.op === 'lockHigh') parts.push('🧲');
+    else if (ef.op === 'blind') parts.push('🌫');
     else if (ef.op === 'ward') parts.push(`🪨${ef.amount}`);
     else if (ef.op === 'cap') parts.push(`⛓${ef.amount}`);
     else if (ef.op === 'drainWhet') parts.push('🌀벼름');

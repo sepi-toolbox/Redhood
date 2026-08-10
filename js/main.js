@@ -1,11 +1,11 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
-import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf, activeSignature } from './engine.js';
+import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf, modOf } from './engine.js';
 import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.2'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.3'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -785,7 +785,7 @@ function renderBattle(opts = {}) {
   const prevSheetScroll = app.querySelector('.sheet-zone')?.scrollTop || 0;
   const previews = previewAll(battle);
   const lastR = battle.lastResult;
-  const sig = activeSignature(battle);          // v3.0 시그니처 방해
+  const blindMod = modOf(battle, 'blind');       // 도사림 — 족보 위력 숨김
   const multi = aliveEnemies(battle).length > 1;
   // 방어도는 LoL식: HP바 끝에 회백색 실드 구간으로 겹쳐 표시 (넘치면 바 전체가 재비율)
   const barTotal = Math.max(p.maxHp, p.hp + p.block);
@@ -807,7 +807,6 @@ function renderBattle(opts = {}) {
             <span class="target-pin">▼</span>
             <span class="intent-row">
               <span class="intent2 ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}"><b>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</b><span class="iv">${iconifyIntent(intentOf(e))}</span></span>
-              ${sig && sig.uid === e.uid ? `<span class="intent2 sig" title="${esc(sig.desc)}">⚜️ ${esc(sig.name)}</span>` : ''}
               ${e.wardLeft > 0 ? `<span class="intent2 util" title="문턱 ${e.ward} — 한 번에 넘겨야 뚫린다">🪨 ${e.ward}</span>` : ''}
               ${e.capLeft > 0 ? `<span class="intent2 util" title="상한 ${e.cap} — 한 번에 이 이상 줄 수 없다">⛓ ${e.cap}</span>` : ''}
             </span>
@@ -854,7 +853,7 @@ function renderBattle(opts = {}) {
             ${st ? `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>${st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''}` : ''}
             ${pinned && !st ? '<span class="st-tint"></span><span class="st-rim"></span>' : ''}
             ${d.sigLock ? '<span class="st-tint"></span><span class="st-rim"></span>' : ''}
-            <small>${d.sigLock ? esc((sig && sig.name) || '잠김') : st ? esc(st.name) : marked ? '다시' : pinned ? '새김' : ''}</small>
+            <small>${d.sigLock ? esc((modOf(battle, 'lockHigh') || {}).name || '물림') : st ? esc(st.name) : marked ? '다시' : pinned ? '새김' : ''}</small>
           </button>`;
         }).join('')}
       </div>
@@ -863,18 +862,17 @@ function renderBattle(opts = {}) {
           ? `<button class="btn primary roll-btn" id="roll-btn">🎲 굴림</button>`
           : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft < rerollCost(battle) || battle.await || battle.dice.every(d => d.held) ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})${rerollCost(battle) > 1 ? ` <span class="cost">-${rerollCost(battle)}</span>` : ''}</button>`}
       </div>
-      ${sig ? `<div class="sig-note">${battle.turn === 1 && !battle.rolled ? `⚜️ <b>${esc(sig.name)}</b> — ${esc(sig.desc)}` : (battle.sigEvents || []).map(ev => ev.amount ? `⚜️ ${esc(ev.tag)} <b class="dmg">-${ev.amount}</b>` : ev.lock != null ? `⚜️ ${esc(ev.tag)} — <b>${ev.face}</b> 잠김${ev.heal ? ` (+${ev.heal} 회복)` : ''}` : ev.slip != null ? `⚜️ ${esc(ev.tag)} — 주사위가 미끄러져 <b>${ev.face}</b>` : '').filter(Boolean).join(' · ') || `⚜️ ${esc(sig.name)}`}</div>` : ''}
       <div class="hint-line">${hintHtml()}</div>
       <div class="sheet-zone combo-grid ${battle.rolled ? '' : 'dim'}">
-        ${previews.map(({ cat, variant, seal, sigBlock, locked, burst, bd }) => `
-          <button class="sheet-row combo-row t-${variant.tier || 'common'} ${burst ? 'burst' : ''} ${locked ? 'used' : ''} ${sigBlock ? 'sig-sealed' : ''} ${COMBO_PLATE_READY.has(variant.id) ? 'has-plate' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
+        ${previews.map(({ cat, variant, seal, locked, burst, bd }) => `
+          <button class="sheet-row combo-row t-${variant.tier || 'common'} ${burst ? 'burst' : ''} ${locked ? 'used' : ''} ${seal ? 'sig-sealed' : ''} ${COMBO_PLATE_READY.has(variant.id) ? 'has-plate' : ''} ${selectedCat === `${cat.id}:${variant.id}` ? 'selected' : ''}"
             data-cat="${cat.id}" data-variant="${variant.id}" data-locked="${locked ? 1 : 0}"
             ${COMBO_PLATE_READY.has(variant.id) ? `style="border-image-source: url('assets/ui/paper_${variant.id}.png')"` : ''}>
             <span class="row-body">
               <span class="sheet-name">${esc(variant.name)}</span>
               <small class="cat-tag${variant.base ? ' t-slot' : ''}">${burst ? '<b class="burst-mark">⚡일격</b> · ' : ''}${variant.base ? '빈 자리' : esc(cat.short || cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
             </span>
-            <span class="sheet-preview">${seal ? `🔒${seal}` : sigBlock ? '⚜️' : battle.rolled ? (bd.total > 0 ? (sig && sig.op === 'blind' ? '?' : bd.total) : '—') : '—'}</span>
+            <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
           </button>`).join('')}
       </div>
       ${(() => {
@@ -888,6 +886,12 @@ function renderBattle(opts = {}) {
           b.regen > 0 ? badge('good', 'status_regen', '+' + b.regen, { title: '재생 — 턴마다 회복' }) : '',
           battle.player.dot > 0 ? badge('bad', 'status_bleed', battle.player.dot,
             { title: (DOT_KO[battle.player.dotKind] || '독') + ' — 내 행동 뒤에 피해' }) : '',
+          ...['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind'].map(k => {
+            const m = modOf(battle, k);
+            if (!m) return '';
+            const ic = { rollTax: '🩸', holdTax: '🩸', petrify: '🗿', lockHigh: '🧲', blind: '🌫' }[k];
+            return badge('bad', ic, m.left, { title: `${m.name} — ${CB_MOD_KO[k]}` });
+          }),
         ]);
         return row ? `<div class="buff-strip" id="buff-strip">${row}</div>` : '';
       })()}
@@ -1017,6 +1021,11 @@ function updateComboHint() {
 // ---------- 적 행동 상세 (치트): 적 길게 눌러 예고 행동의 실제 내용 확인 — ❓ 의문도 공개 ----------
 const ENEMY_TIER_KO = { normal: '일반', elite: '정예', boss: '보스' };
 const DOT_KO = { poison: '독', bleed: '출혈' };   // v1.14: 같은 장치, 이름만 다르다
+const CB_MOD_KO = {
+  rollTax: '리롤할 때마다 피해 (방어도 무시)', holdTax: '리롤 시 지킨 주사위 2개당 피해 1',
+  petrify: '그 눈이 나오면 굳는다 (기절)', lockHigh: '매 굴림 가장 높은 눈이 물린다', blind: '족보 위력이 보이지 않는다',
+};
+
 function enemyEffectText(e, ef) {
   const weak = e.debuffs ? e.debuffs.weak : 0;
   switch (ef.op) {
@@ -1037,6 +1046,19 @@ function enemyEffectText(e, ef) {
     case 'confuse': return `${ico('intent_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
     case 'empower': return `${ico('intent_empower')} 강화 — 공격력 +${ef.amount} (전투 내 누적)`;
     case 'heal': return `${ico('intent_heal')} 자신 HP ${ef.amount} 회복`;
+    case 'sealLast': return `🔒 흉내 — 직전에 쓴 족보를 ${ef.turns || 1}턴 봉인`;
+    case 'sealCat': return `🔒 봉인 — ${(ef.cats || []).join('·')} 족보를 ${ef.turns || 1}턴 봉인`;
+    case 'rollTax': return `🩸 이빨 자국 — ${ef.turns || 1}턴간 리롤할 때마다 피해 ${ef.amount || 1} (방어도 무시)`;
+    case 'holdTax': return `🩸 가시 — ${ef.turns || 1}턴간 리롤 시 지킨 주사위 2개당 피해 1`;
+    case 'petrify': return `🗿 굳음 — ${ef.turns || 1}턴간 ${ef.face || 6}이 나오면 굳는다(기절)`;
+    case 'lockHigh': return `🧲 물기 — ${ef.turns || 1}턴간 매 굴림 가장 높은 눈이 물린다${ef.heal ? ' (그만큼 회복)' : ''}`;
+    case 'blind': return `🌫 어둠 — ${ef.turns || 1}턴간 족보 위력이 보이지 않는다`;
+    case 'ward': return `🪨 문턱 ${ef.amount} — 한 번에 넘겨야 뚫린다`;
+    case 'cap': return `⛓ 상한 ${ef.amount} — 한 번에 이 이상 안 들어간다`;
+    case 'rest': return `💤 휴식`;
+    case 'drainWhet': return `🌀 벼름을 빼앗는다`;
+    case 'unpin': return `💨 새김을 흩는다`;
+    case 'status': { const st = DB.statusById[ef.kind]; return `🎲 ${st ? st.name : ef.kind} ×${ef.amount || 1} — ${st ? st.text : ''}`; }
     default: return ef.op;
   }
 }
@@ -1074,10 +1096,7 @@ function showEnemyInfo(uid) {
   const mv = e.nextMove;
   const effects = mv.effects.map(ef => `<li>${enemyEffectText(e, ef)}</li>`).join(''); // enemyEffectText는 내부 생성 HTML(아이콘 포함)
   const d = e.debuffs || {};
-  const esig = (DB.enemyById[e.defId] || {}).signature;
-  const sigActive = activeSignature(battle);
   const status = [
-    esig ? `<li>⚜️ <b>${esc(esig.name)}</b> — ${esc(esig.desc)}${battle.sigBroken && battle.sigBroken[e.uid] ? ' <b class="kill">(부서짐)</b>' : sigActive && sigActive.uid !== e.uid ? ' <span class="modal-text">(선임자가 살아있는 동안 잠잠하다)</span>' : ''}</li>` : '',
     e.block > 0 ? `<li>${ico('intent_defend')} 방어 ${e.block} — 다음 행동까지 받는 피해 흡수</li>` : '',
     e.power > 0 ? `<li>${ico('intent_empower')} 강화 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
     d.weak > 0 ? `<li>${ico('status_weak')} 약화 ${d.weak} — 공격력 -${d.weak} · 매 턴 1 소멸</li>` : '',

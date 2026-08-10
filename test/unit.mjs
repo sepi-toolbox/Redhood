@@ -977,16 +977,18 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
   // 데이터: 정예·보스는 전부 기믹을 하나씩 가진다
   {
-    const GIM = new Set(['ward', 'cap', 'drainWhet', 'unpin']);
+    const GIM = new Set(['ward', 'cap', 'drainWhet', 'unpin',
+      'sealLast', 'sealCat', 'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']);
     const missing = DB.enemies.filter(e => !e.final && (e.tier === 'elite' || e.tier === 'boss'))
       .filter(e => !e.signature && !Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
       .map(e => e.name);
     // 2·3막 넷은 요구 제거로 기믹이 비었다 — 2·3막 시그니처 배치 때 채운다 (알려진 대기)
     eq('정예·보스 기믹/시그니처 공백은 2·3막 대기 4종뿐', missing, ['목 없는 기사', '늪의 왕', '언덕의 촉수', '자각몽의 왕']);
+    // v3.3: 테마 행동은 일반 적도 가진다 — 1막 테마 보유 5종 (상태이상형 테마는 status op 라 여기 안 잡힘)
     const normalsWithGim = DB.enemies.filter(e => e.tier === 'normal')
       .filter(e => Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
       .map(e => e.name);
-    eq('일반 적에는 기믹을 안 붙인다', normalsWithGim, []);
+    eq('일반 적의 테마 행동 보유 목록', normalsWithGim, ['굶주린 까마귀', '들개', '가시덤불', '옹이 골렘', '거머리']);
   }
 }
 
@@ -1079,7 +1081,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 }
 
 
-// ========== v3.0 시그니처 방해 ==========
+// ========== v3.3 테마 행동 — 전부 '행동'이 거는 효과다 (별도 시스템 없음) ==========
 {
   const eng = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
@@ -1088,107 +1090,93 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     dice: ['normal', 'normal', 'normal', 'normal', 'normal'],
     categories: { onePair: null, twoPair: null, threeKind: null, chance: null } });
   const mk = (ids) => eng.createBattle(RUN(), ids, 'battle');
+  const cast = (b, e, effects, name = '시험') => {   // 적이 이 행동을 실행하게 한다
+    e.nextMove = { id: 't', name, effects };
+    b.await = 'enemy';
+    eng.enemyPhase(b);
+  };
   const setFaces = (b, fs) => { b.dice.forEach((d, i) => { d.face = fs[i]; d.held = true; d.st = null; d.sigLock = false; }); b.rolled = true; };
 
-  // 선임자 우선
+  // sealLast — 직전 족보 봉인 (흉내내기)
   {
-    const b = mk(['crow', 'forest_spider']);
-    eq('시그니처: 선임자(까마귀 흉내내기)만 활성', eng.activeSignature(b).op, 'echo');
-    b.enemies[0].hp = 0;
-    eq('시그니처: 선임자 죽으면 다음 놈(거미줄)', eng.activeSignature(b).op, 'web');
-  }
-  // echo — 직전 족보 봉인
-  {
-    const b = mk(['crow']);
+    const b = mk(['crow']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
     setFaces(b, [5, 5, 4, 2, 1]);
-    eq('흉내내기: 첫 확정은 된다', !!eng.confirmCategory(b, 'onePair', 'onePair__base'), true);
-    b.await = null;
+    eng.confirmCategory(b, 'onePair', 'onePair__base');
+    cast(b, e, [{ op: 'sealLast', turns: 2 }]);
+    eq('흉내내기: 직전 족보가 봉인된다', (b.sealed.onePair || 0) > 0, true);
     setFaces(b, [5, 5, 4, 2, 1]);
-    eq('흉내내기: 같은 족보 연속 확정 불가', eng.confirmCategory(b, 'onePair', 'onePair__base'), null);
-    eq('흉내내기: 족보판 잠금 표시', eng.previewAll(b).find(x => x.cat.id === 'onePair').sigBlock, true);
+    eq('흉내내기: 봉인된 족보 확정 불가', eng.confirmCategory(b, 'onePair', 'onePair__base'), null);
     eq('흉내내기: 다른 족보는 된다', !!eng.confirmCategory(b, 'chance', 'chance__base'), true);
   }
-  // web — 매 턴 결속 2개
+  // sealCat — 지정 족보 봉인 (솜 채우기)
   {
-    const b = mk(['forest_spider']);
-    eq('거미줄: 주사위 2개 결속', b.dice.filter(d => d.st && d.st.kind === 'chain').length, 2);
-  }
-  // petrify — 6이 나온 칸에 기절 상태이상이 붙는다 + 5 트리플로 해제
-  {
-    const b2 = mk(['twig_golem']);
-    eng.rng.next = () => 0.999;   // normal 주사위에서 6이 나오게
-    eng.initialRoll(b2);
-    eq('굳음: 6이 나온 칸마다 기절이 붙는다', b2.dice.every(d => d.st && d.st.kind === 'stun'), true);
-    eng.rng.next = () => 0.5;
-    const b = mk(['twig_golem']);
-    setFaces(b, [6, 6, 4, 2, 1]);
-    b.dice[0].st = { kind: 'stun', power: 0, left: 1, fuse: 0, opened: false, fresh: false };
-    b.dice[1].st = { kind: 'stun', power: 0, left: 1, fuse: 0, opened: false, fresh: false };
-    eq('굳음: 기절 붙은 6페어는 0이라 잠김', eng.previewAll(b).find(x => x.cat.id === 'onePair').locked, true);
-    setFaces(b, [5, 5, 5, 2, 1]);
-    eng.confirmCategory(b, 'threeKind', 'threeKind__base');
-    eq('굳음: 5 셋으로 부순다', !!b.sigBroken[b.enemies[0].uid], true);
-    b.await = null;
-    setFaces(b, [6, 6, 4, 2, 1]);
-    eq('굳음: 부서진 뒤 6페어 살아남', eng.previewAll(b).find(x => x.cat.id === 'onePair').locked, false);
-  }
-  // lockHigh — 최고 눈 잠김 + 흡혈
-  {
-    const b = mk(['leech']);
-    b.enemies[0].hp -= 10;
+    const b = mk(['old_teddy']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
+    cast(b, e, [{ op: 'sealCat', cats: ['chance', 'onePair'], turns: 2 }]);
     eng.initialRoll(b);
-    const locked = b.dice.filter(d => d.sigLock);
-    eq('흡착: 딱 하나 잠긴다', locked.length, 1);
-    eq('흡착: 잠긴 칸은 족보에서 빠진다', eng.faceOf(locked[0]), 0);
-    eq('흡착: 그 값만큼 회복', b.enemies[0].maxHpInit - b.enemies[0].hp, 10 - locked[0].face);
+    eq('솜 채우기: 노페어 봉인', eng.previewAll(b).find(x => x.cat.id === 'chance').seal > 0, true);
+    eq('솜 채우기: 원페어 봉인', eng.previewAll(b).find(x => x.cat.id === 'onePair').seal > 0, true);
+    eq('솜 채우기: 투페어는 된다', eng.previewAll(b).find(x => x.cat.id === 'twoPair').seal, 0);
   }
-  // gnaw — 리롤 비용 2배 + 아무 트리플로 해제
+  // rollTax — 리롤할 때마다 피해 (이빨 자국)
   {
-    const b = mk(['rat_swarm']);
-    eng.initialRoll(b);
-    eq('갉기: 리롤 비용 2', eng.rerollCost(b), 2);
-    setFaces(b, [3, 3, 3, 2, 1]);
-    eng.confirmCategory(b, 'threeKind', 'threeKind__base');
-    eq('갉기: 트리플로 부순다', !!b.sigBroken[b.enemies[0].uid], true);
-    eq('갉기: 부서지면 비용 1', eng.rerollCost(b), 1);
-  }
-  // rollTax — 리롤마다 피해
-  {
-    const b = mk(['stray_dog']);
+    const b = mk(['stray_dog']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
+    cast(b, e, [{ op: 'rollTax', amount: 1, turns: 2 }]);
     eng.initialRoll(b);
     const hp0 = b.player.hp;
     eng.toggleHold(b, 0);
     eng.reroll(b);
     eq('이빨 자국: 리롤 1회 = 피해 1', hp0 - b.player.hp, 1);
+    eq('이빨 자국: 버프 칩용 mods 노출', !!eng.modOf(b, 'rollTax'), true);
   }
-  // holdTax — 지킨 주사위 2개당 1
+  // holdTax — 지킨 주사위 2개당 1 (가시)
   {
-    const b = mk(['thorn_bush']);
+    const b = mk(['thorn_bush']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
+    cast(b, e, [{ op: 'holdTax', per: 0.5, turns: 2 }]);
     eng.initialRoll(b);
     const hp0 = b.player.hp;
     eng.toggleHold(b, 0);           // 1개 굴림 = 4개 지킴 → ceil(4×0.5)=2
     eng.reroll(b);
     eq('가시: 지킨 4개 → 피해 2', hp0 - b.player.hp, 2);
   }
-  // 물수제비 — 이제 결속(상태이상)이다
+  // petrify — 그 눈이 나오면 기절이 붙는다 (굳히기)
   {
-    const b = mk(['brook_sprite']);
-    eq('물수제비: 주사위 2개 결속', b.dice.filter(d => d.st && d.st.kind === 'chain').length, 2);
-  }
-  // minRank — 낮은 족보 봉인
-  {
-    const b = mk(['old_teddy']);
+    const b = mk(['twig_golem']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
+    cast(b, e, [{ op: 'petrify', face: 6, turns: 2 }]);
+    eng.rng.next = () => 0.999;     // 전부 6이 나오게
     eng.initialRoll(b);
-    eq('솜 채우기: 노페어 봉인', eng.previewAll(b).find(x => x.cat.id === 'chance').sigBlock, true);
-    eq('솜 채우기: 원페어 봉인', eng.previewAll(b).find(x => x.cat.id === 'onePair').sigBlock, true);
-    eq('솜 채우기: 투페어는 된다', eng.previewAll(b).find(x => x.cat.id === 'twoPair').sigBlock, false);
+    eq('굳히기: 6이 나온 칸마다 기절', b.dice.every(d => d.st && d.st.kind === 'stun'), true);
+    eng.rng.next = () => 0.5;
   }
-  // fromPhase — 늑대는 2국면부터
+  // lockHigh — 최고 눈 물림 + 회복 (흡착)
   {
-    const b = mk(['wolf']);
-    eq('피의 사냥: 1국면엔 잠잠', eng.activeSignature(b), null);
-    b.enemies[0].phaseIndex = 1;
-    eq('피의 사냥: 2국면부터 켜진다', eng.activeSignature(b).op, 'bloodhunt');
+    const b = mk(['leech']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
+    e.hp = 900;
+    cast(b, e, [{ op: 'lockHigh', heal: true, turns: 2 }]);
+    eng.initialRoll(b);
+    const locked = b.dice.filter(d => d.sigLock);
+    eq('흡착: 딱 하나 물린다', locked.length, 1);
+    eq('흡착: 물린 칸은 족보에서 빠진다', eng.faceOf(locked[0]), 0);
+    eq('흡착: 그 값만큼 회복', e.hp - 900, locked[0].face);
+  }
+  // blind + 감쇠 — 턴이 지나면 풀린다
+  {
+    const b = mk(['cellar_thing']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
+    cast(b, e, [{ op: 'blind', turns: 1 }]);
+    eq('도사림: 어둠이 깔린다', !!eng.modOf(b, 'blind'), true);
+    cast(b, e, [{ op: 'rest' }]);   // 한 턴 더 → 감쇠로 소멸
+    eq('도사림: 턴이 지나면 걷힌다', eng.modOf(b, 'blind'), null);
+  }
+  // 시작 버프 — 문턱·상한은 그냥 버프다 (enemies.json start 로 시작 부여)
+  {
+    DB.enemyById.__startbuff = { id: '__startbuff', name: '시험용', tier: 'normal', art: 'X', hp: [50, 50],
+      start: { ward: 7, cap: 15, block: 5 },
+      moves: { hit: { name: '치기', effects: [{ op: 'damage', amount: 3 }] } },
+      pattern: { mode: 'weighted', weights: { hit: 1 } } };
+    const b = mk(['__startbuff']); const e = b.enemies[0];
+    eq('시작 버프: 문턱 7', e.ward, 7);
+    eq('시작 버프: 상한 15', e.cap, 15);
+    eq('시작 버프: 방어 5', e.block, 5);
+    delete DB.enemyById.__startbuff;
   }
 }
 
