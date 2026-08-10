@@ -28,11 +28,20 @@ def medallion(tint=None, mix=0.42):
     im.alpha_composite(hi.filter(ImageFilter.GaussianBlur(26)))
     return im.resize((S,S), Image.LANCZOS)
 
-def key_out(im, tol=34):
+def bg_center(im, frac=0.12):
+    """덮개는 가운데가 비어 있다는 규격이므로 배경색을 중앙에서 뽑는다.
+    (가장자리에 붙는 그림은 귀퉁이를 물고 있어 귀퉁이 표본이 틀린다)"""
+    im = im.convert('RGB'); w,h = im.size
+    box = im.crop((int(w*(.5-frac)), int(h*(.5-frac)), int(w*(.5+frac)), int(h*(.5+frac))))
+    px = list(box.getdata())
+    return tuple(sorted(c[i] for c in px)[len(px)//2] for i in range(3))
+
+def key_out(im, tol=34, bg=None):
     """평평한 회색 배경을 지운다. 귀퉁이 색을 배경으로 보고 거리 기준으로 알파를 깎는다."""
     im = im.convert('RGBA'); w,h = im.size; px = im.load()
-    cs = [px[2,2], px[w-3,2], px[2,h-3], px[w-3,h-3]]
-    bg = tuple(sum(c[i] for c in cs)//4 for i in range(3))
+    if bg is None:
+        cs = [px[2,2], px[w-3,2], px[2,h-3], px[w-3,h-3]]
+        bg = tuple(sum(c[i] for c in cs)//4 for i in range(3))
     out = im.copy(); o = out.load()
     for y in range(h):
         for x in range(w):
@@ -65,8 +74,11 @@ if __name__ == '__main__':
 
 # ---------- 주사위 덮개 ----------
 def build_die(src, name, keep_center=True):
-    """회색 배경을 키잉해 주사위 덮개(256px, 알파)로 저장. 중앙 가림률을 재서 경고한다."""
-    im = key_out(Image.open(src)).resize((256, 256), Image.LANCZOS)
+    """회색 배경을 키잉해 주사위 덮개(256px, 알파)로 저장. 중앙 가림률을 재서 경고한다.
+    keep_center=False (혼란)는 칸 전체를 덮는 게 규격이라 키잉을 건너뛴다."""
+    raw = Image.open(src)
+    im = (raw.convert('RGBA') if not keep_center
+          else key_out(raw, bg=bg_center(raw))).resize((256, 256), Image.LANCZOS)
     a = im.getchannel('A')
     c = a.crop((56, 56, 200, 200))
     center = sum(c.getdata()) / (c.size[0] * c.size[1] * 255) * 100
@@ -74,4 +86,27 @@ def build_die(src, name, keep_center=True):
     im.save(p)
     flag = '' if (center < 25 or not keep_center) else '  ⚠ 중앙을 덮어 눈이 안 보인다'
     print(f'{p} · 중앙 가림 {center:.0f}%{flag}')
+    return im
+
+# ---------- UI 표식 (C절: 메달 없음·색 물들이지 않음) ----------
+def build_ui(src, name, size=96, pad=0.04, out_dir='assets/icons', prefix='ui_'):
+    """이모지를 대체하는 민짜 심볼. 메달을 씌우지 않고 알파만 남긴 채 정사각으로 맞춘다."""
+    im = key_out(Image.open(src))
+    bb = im.getchannel('A').point(lambda a: 255 if a > 24 else 0).getbbox()
+    if bb: im = im.crop(bb)
+    t = size * (1 - pad * 2)
+    w, h = im.size; sc = min(t / w, t / h)
+    im = im.resize((max(1, round(w * sc)), max(1, round(h * sc))), Image.LANCZOS)
+    out = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    out.alpha_composite(im, ((size - im.size[0]) // 2, (size - im.size[1]) // 2))
+    p = f'{out_dir}/{prefix}{name}.png'
+    out.save(p)
+    print(f'{p} · {out.size} · {os.path.getsize(p)}B')
+    return out
+
+def build_band(src, path, w=384, h=128):
+    """가로로 긴 띠(족보 봉인 씰). 비율 그대로 알파만 남긴다."""
+    im = key_out(Image.open(src)).resize((w, h), Image.LANCZOS)
+    im.save(path)
+    print(f'{path} · {im.size} · {os.path.getsize(path)}B')
     return im
