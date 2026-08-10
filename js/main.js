@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.12'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.13'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -536,11 +536,11 @@ function iconifyIntent(s) {
     .replaceAll('💪', ico('intent_empower', 'ico-intent'))
     .replaceAll('💚', ico('intent_heal', 'ico-intent'))
     .replaceAll('❓', ico('intent_unknown', 'ico-intent'))
-    .replaceAll('🪨', ico('status_block', 'ico-intent'))
-    .replaceAll('⛓', ico('status_block', 'ico-intent'))
+    .replaceAll('🪨', ico('fx_ward', 'ico-intent'))
+    .replaceAll('⛓', ico('fx_cap', 'ico-intent'))
     .replaceAll('💗', ico('status_regen', 'ico-intent'))
-    .replaceAll('💢', ico('status_strength', 'ico-intent'))
-    .replaceAll('🌵', ico('status_vulnerable', 'ico-intent'));
+    .replaceAll('💢', ico('fx_enrage', 'ico-intent'))
+    .replaceAll('🌵', ico('fx_reflect', 'ico-intent'));
 }
 
 // ---------- 맵 ----------
@@ -1031,11 +1031,11 @@ function updateComboHint() {
 const ENEMY_TIER_KO = { normal: '일반', elite: '정예', boss: '보스' };
 const DOT_KO = { poison: '독', bleed: '출혈' };   // v1.14: 같은 장치, 이름만 다르다
 // v3.10 상태/버프 아이콘 — 이모지 금지. (임시) 표시가 붙은 것은 전용 아트 대기 중
-const FX_ICON = {
-  rollTax: 'status_bleed', holdTax: 'status_bleed', petrify: 'status_stun',
-  lockHigh: 'status_lock', blind: 'status_confuse', sealLast: 'status_seal', sealCat: 'status_seal',
-  ward: 'status_block', cap: 'status_block', enrage: 'status_strength',
-  reflect: 'status_vulnerable', undying: 'status_regen', regen: 'status_regen',
+const FX_ICON = {          // v3.13 전량 정식 아트
+  rollTax: 'fx_rolltax', holdTax: 'fx_holdtax', petrify: 'fx_petrify',
+  lockHigh: 'status_lock', blind: 'fx_blind', sealLast: 'fx_seal_cat', sealCat: 'fx_seal_cat',
+  ward: 'fx_ward', cap: 'fx_cap', enrage: 'fx_enrage',
+  reflect: 'fx_reflect', undying: 'fx_undying', regen: 'status_regen',
 };
 const fxIco = (key, cls = '') => ico(FX_ICON[key] || 'status_block', cls);
 

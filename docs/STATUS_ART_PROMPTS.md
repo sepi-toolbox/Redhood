@@ -152,7 +152,7 @@ No text, no letters, no watermark.
 |---|---|---|
 | 기존 정식 8종 | `status_{bleed,block,confuse,focus,regen,strength,vulnerable,weak}.png` | ✅ 완성 (기준 아트) |
 | 상태이상 11종 | `status_{poison,bind,stun,curse,blessing,seal,rot,chain,numb,plunder,devour}.png` | ⚠ 임시 — 주사위 오버레이 아트를 메달에 얹어 자동 합성. **A절 프롬프트로 교체 필요** |
-| 새 효과 11종 | 전용 파일 없음 — 뜻이 가까운 기존 아이콘을 임시로 돌려 씀 | ⚠ **B절 프롬프트로 신규 제작 필요** |
+| 새 효과 11종 | `fx_*.png` + `status_lock.png` | ✅ **완료 (v3.13 정식 아트 적용)** |
 
 임시로 돌려 쓰는 매핑 (`js/main.js`의 `FX_ICON`): 리롤 세금·홀드 세금→bleed / 굳음→stun / 물기→bind /
 어둠→confuse / 족보 봉인→seal / 문턱·상한→block / 격노→strength / 반사→vulnerable / 불사·재생→regen.
@@ -259,6 +259,33 @@ decoration. Bold silhouette, readable at 16px. The symbol: {묘사}. No text, no
 
 > 이미 그림이 있는 것 — 🌀(intent_confuse) · 🪨/⛓(status_block) · 💨(없음, 새김 흩기 · 드묾).
 > 위 6종만 채우면 전투 화면에서 이모지가 사라진다.
+
+---
+
+## D. 족보 봉인 프레임 (신규 — 성권 제안)
+
+족보 줄이 봉인됐을 때 **줄 위에 씌우는 띠 그림**. 지금은 자물쇠 아이콘 + 빗금으로 때우고 있다.
+족보 판(`paper_*.png`)과 같은 **9-슬라이스 띠**라서 규칙 9·15~17이 그대로 적용된다.
+
+| 파일명 | 규격 | 프롬프트 |
+|---|---|---|
+| `seal_frame.png` | Landscape 3:1 · 512×170 | 아래 블록 |
+
+```
+Stylized dark fairytale UI band for the dice game REDHOOD. Match the EXACT painting style, angular
+brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
+shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
+no thin hatching lines. NOT photorealistic, NOT 3D. Landscape 3:1 image on one plain flat mid-grey
+background — solid color, no gradient, no checkerboard.
+A long horizontal SEAL BAND that will be stretched over a paper row: two thick blue-grey wax seals
+at the far left and far right ends, joined by one heavy taut cord running straight across, the
+MIDDLE of the band is mostly EMPTY so the text underneath stays readable. Perfectly symmetrical
+left and right, uniform border thickness, no perspective, light from the upper left.
+The dominant color must be #3a52c8. No text, no letters, no watermark.
+```
+
+**붙이는 법**: 받으면 `assets/ui/seal_frame.png` 로 넣고 CSS `.sheet-row.sig-sealed::after` 의
+배경을 `border-image` 로 바꾼다 (내가 처리). 9-슬라이스 잘림 값도 그때 계산한다.
 
 ---
 
