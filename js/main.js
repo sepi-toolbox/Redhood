@@ -6,7 +6,7 @@ import { DEMAND_KO } from './engine.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.0'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.1'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -687,8 +687,8 @@ function showBagModal() {
     const d = DB.diceById[id];
     return `<li><b>${esc(d.name)}</b> <span class="modal-text">[${d.faces.join(',')}] ${esc(d.desc)}</span></li>`;
   }).join('');
-  // 아홉 자리를 전부 보여준다 — 빈 자리는 기본 족보
-  const catItems = DB.scoring.categories.map(c => {
+  // v3.1 수집제: 가진 족보만 보여준다
+  const catItems = DB.scoring.categories.filter(c => c.id in run.categories).map(c => {
     const v = variantOf(c, run.categories[c.id]);
     return `<li${v.base ? ' class="slot-empty"' : ''}><b>${esc(v.name)}</b> <small class="cat-tag${v.base ? ' t-slot' : ''}">${v.base ? '빈 자리' : esc(c.name)}</small>`
       + `${v.burst ? ' <small class="cat-tag t-burst">⚡일격</small>' : ''}`
@@ -701,7 +701,7 @@ function showBagModal() {
   app.append(h(`
     <div class="modal-back">
       <div class="modal">
-        <h3>족보</h3><ul class="deck-list">${catItems}</ul>
+        <h3>족보 (${Object.keys(run.categories).length}/${DB.scoring.categories.length})</h3><ul class="deck-list">${catItems}</ul>
         <h3>주사위 (5)</h3><ul class="deck-list">${diceItems}</ul>
         <h3>유물</h3><ul class="deck-list">${relicItems}</ul>
         <button class="btn primary" id="modal-close">닫기</button>
@@ -1592,11 +1592,12 @@ function showLootModal(gi) {
         <div class="loot-choices">
           ${g.choices.map((c, i) => {
             const isCat = c.kind === 'category';
-            const isNew = isCat && !c.item.owned;
+            const isNew = isCat && c.item.newCat;
             const name = isCat ? c.item.variant.name : c.item.name;
             const sub = c.kind === 'die' ? `[${c.item.faces.join(',')}] ${c.item.desc || ''}`
               : c.kind === 'relic' ? (c.item.desc || '')
               : c.kind === 'card' ? `자원 ${c.item.cost} · ${c.item.desc || ''}`
+              : c.item.newCat ? `✨ 새 족보 — ${c.item.cat.name} 을(를) 쓸 수 있게 된다 · ${c.item.variant.abilityText || '부가 없음'}`
               : `${c.item.cat.name} 자리 · ${c.item.replaces ? `${c.item.replaces.name} 을(를) 대신한다` : '지금은 기본'} · ${c.item.variant.abilityText || '부가 없음'}`;
             return `
               <button class="sheet-row choice-row loot-choice t-${c.item.tier}" data-idx="${i}">

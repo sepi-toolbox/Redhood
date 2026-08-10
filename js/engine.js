@@ -18,9 +18,11 @@ function enlightMults(enlight, tier) {
 // ---------- 전투 생성 ----------
 // 옛 저장본(변형 배열)도 받아준다 — 첫 칸을 끼워진 것으로 본다
 export function slotsOf(cats) {
+  // v3.1 족보 수집제 — 키가 있는 족보만 소유. 없는 족보는 전투에서 아예 안 보인다.
   const out = {};
   for (const c of DB.scoring.categories) {
-    const v = cats ? cats[c.id] : null;
+    if (!cats || !(c.id in cats)) continue;
+    const v = cats[c.id];
     out[c.id] = Array.isArray(v) ? (v[0] || null) : (v || null);
   }
   return out;
@@ -493,6 +495,7 @@ export function previewAll(battle) {
               bd: { total: 0, isZero: true, base: 0, gold: 0, mult: 1, bonus: 0, flat: 0 } }];
   }
   for (const cat of DB.scoring.categories) {
+    if (!(cat.id in battle.categories)) continue;        // v3.1 미보유 족보
     const seal = battle.sealed[cat.id] || 0;
     const sigBlock = sigBlocksCat(battle, cat.id);       // 시그니처가 잠근 칸 (흉내내기·솜 채우기)
     {
@@ -691,6 +694,7 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   if (battle.over || !battle.rolled || battle.await) return null;
   const cat = DB.scoring.categories.find(c => c.id === catId);
   if (!cat) return null;
+  if (!(catId in battle.categories)) return null;        // v3.1 미보유 족보
   const slot = battle.categories[catId] || baseIdOf(catId);
   if (variantId !== slot && variantId !== baseIdOf(catId)) return null;   // 그 자리에 없는 변형은 못 쓴다
   const variant = variantOf(cat, slot);
@@ -967,11 +971,17 @@ export function enemyPhase(battle) {
         case 'cap':                                        // ⛓ 상한 — 단발 피해를 amount 로 깎는다
           e.cap = ef.amount; e.capLeft = Math.max(1, ef.turns || 2);
           break;
-        case 'demand':                                     // 📜 요구 — 정한 족보를 내지 않으면 벌을 받는다
+        case 'demand': {                                   // 📜 요구 — 정한 족보를 내지 않으면 벌을 받는다
+          // v3.1 족보 수집제: 갖고 있지도 않은 족보를 요구하는 건 불공정 — 그 요구는 불발된다
+          const ownable = ef.category
+            ? (ef.category in battle.categories)
+            : DB.scoring.categories.some(c => c.kind === ef.kind && (c.id in battle.categories));
+          if (!ownable) break;
           e.demand = { kind: ef.kind || null, category: ef.category || null,
                        left: Math.max(1, ef.turns || 2), damage: ef.amount || 0,
                        power: ef.power || 0, met: false };
           break;
+        }
         case 'drainWhet':                                  // 🌀 벼름 흡수 — 쌓아둔 벼름을 빼앗는다
           battle.whet = ef.amount > 0 ? Math.max(0, battle.whet - ef.amount) : 0;
           break;
