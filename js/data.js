@@ -62,6 +62,16 @@ function validate() {
       }
     }
     if (e.faceAbilities) throw new Error(`enemies.json: ${e.id} faceAbilities 는 v2.17에서 폐기 — battleMoves 로 옮기세요`);
+    // v3.0 시그니처 방해
+    if (e.signature) {
+      const SIG_OPS = new Set(['echo', 'web', 'haze', 'sealDie', 'rollTax', 'holdTax', 'petrify',
+        'forceReroll', 'lockHigh', 'gnaw', 'blind', 'minRank', 'bloodhunt']);
+      const s = e.signature;
+      if (!SIG_OPS.has(s.op)) throw new Error(`enemies.json: ${e.id} 미지원 시그니처 "${s.op}"`);
+      if (!s.name || !s.desc) throw new Error(`enemies.json: ${e.id} 시그니처에 name/desc 가 필요합니다`);
+      if (s.break && !(s.break.count >= 2)) throw new Error(`enemies.json: ${e.id} 시그니처 해제 count 는 2 이상`);
+      if (s.op === 'minRank' && !(Array.isArray(s.cats) && s.cats.length)) throw new Error(`enemies.json: ${e.id} minRank 는 cats 목록 필요`);
+    }
     if (e.battleMoves) {
       if (!Array.isArray(e.battleMoves) || !e.battleMoves.length) throw new Error(`enemies.json: ${e.id} battleMoves 는 비어있지 않은 목록이어야 합니다`);
       const seen = new Set();

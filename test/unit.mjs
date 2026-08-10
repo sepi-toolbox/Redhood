@@ -1095,6 +1095,116 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('모든 족보에 짧은 이름이 있다', DB.scoring.categories.every(c => !!c.short), true);
 }
 
+
+// ========== v3.0 시그니처 방해 ==========
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = () => 0.5;
+  const RUN = () => ({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: {} });
+  const mk = (ids) => eng.createBattle(RUN(), ids, 'battle');
+  const setFaces = (b, fs) => { b.dice.forEach((d, i) => { d.face = fs[i]; d.held = true; d.st = null; d.sigLock = false; }); b.rolled = true; };
+
+  // 선임자 우선
+  {
+    const b = mk(['crow', 'forest_spider']);
+    eq('시그니처: 선임자(까마귀 흉내내기)만 활성', eng.activeSignature(b).op, 'echo');
+    b.enemies[0].hp = 0;
+    eq('시그니처: 선임자 죽으면 다음 놈(거미줄)', eng.activeSignature(b).op, 'web');
+  }
+  // echo — 직전 족보 봉인
+  {
+    const b = mk(['crow']);
+    setFaces(b, [5, 5, 4, 2, 1]);
+    eq('흉내내기: 첫 확정은 된다', !!eng.confirmCategory(b, 'onePair', 'onePair__base'), true);
+    b.await = null;
+    setFaces(b, [5, 5, 4, 2, 1]);
+    eq('흉내내기: 같은 족보 연속 확정 불가', eng.confirmCategory(b, 'onePair', 'onePair__base'), null);
+    eq('흉내내기: 족보판 잠금 표시', eng.previewAll(b).find(x => x.cat.id === 'onePair').sigBlock, true);
+    eq('흉내내기: 다른 족보는 된다', !!eng.confirmCategory(b, 'chance', 'chance__base'), true);
+  }
+  // web — 매 턴 결속 2개
+  {
+    const b = mk(['forest_spider']);
+    eq('거미줄: 주사위 2개 결속', b.dice.filter(d => d.st && d.st.kind === 'chain').length, 2);
+  }
+  // petrify — 6은 0 취급 + 5 트리플로 해제
+  {
+    const b = mk(['twig_golem']);
+    setFaces(b, [6, 6, 4, 2, 1]);
+    const p = eng.previewAll(b).find(x => x.cat.id === 'onePair');
+    eq('굳음: 6페어는 0이라 잠김', p.locked, true);
+    setFaces(b, [5, 5, 5, 2, 1]);
+    eng.confirmCategory(b, 'threeKind', 'threeKind__base');
+    eq('굳음: 5 셋으로 부순다', !!b.sigBroken[b.enemies[0].uid], true);
+    b.await = null;
+    setFaces(b, [6, 6, 4, 2, 1]);
+    eq('굳음: 부서진 뒤 6페어 살아남', eng.previewAll(b).find(x => x.cat.id === 'onePair').locked, false);
+  }
+  // lockHigh — 최고 눈 잠김 + 흡혈
+  {
+    const b = mk(['leech']);
+    b.enemies[0].hp -= 10;
+    eng.initialRoll(b);
+    const locked = b.dice.filter(d => d.sigLock);
+    eq('흡착: 딱 하나 잠긴다', locked.length, 1);
+    eq('흡착: 잠긴 칸은 족보에서 빠진다', eng.faceOf(locked[0]), 0);
+    eq('흡착: 그 값만큼 회복', b.enemies[0].maxHpInit - b.enemies[0].hp, 10 - locked[0].face);
+  }
+  // gnaw — 리롤 비용 2배 + 아무 트리플로 해제
+  {
+    const b = mk(['rat_swarm']);
+    eng.initialRoll(b);
+    eq('갉기: 리롤 비용 2', eng.rerollCost(b), 2);
+    setFaces(b, [3, 3, 3, 2, 1]);
+    eng.confirmCategory(b, 'threeKind', 'threeKind__base');
+    eq('갉기: 트리플로 부순다', !!b.sigBroken[b.enemies[0].uid], true);
+    eq('갉기: 부서지면 비용 1', eng.rerollCost(b), 1);
+  }
+  // rollTax — 리롤마다 피해
+  {
+    const b = mk(['stray_dog']);
+    eng.initialRoll(b);
+    const hp0 = b.player.hp;
+    eng.toggleHold(b, 0);
+    eng.reroll(b);
+    eq('이빨 자국: 리롤 1회 = 피해 1', hp0 - b.player.hp, 1);
+  }
+  // holdTax — 지킨 주사위 2개당 1
+  {
+    const b = mk(['thorn_bush']);
+    eng.initialRoll(b);
+    const hp0 = b.player.hp;
+    eng.toggleHold(b, 0);           // 1개 굴림 = 4개 지킴 → ceil(4×0.5)=2
+    eng.reroll(b);
+    eq('가시: 지킨 4개 → 피해 2', hp0 - b.player.hp, 2);
+  }
+  // forceReroll — 지킨 것 하나가 미끄러진다
+  {
+    const b = mk(['brook_sprite']);
+    eng.initialRoll(b);
+    eng.toggleHold(b, 0);
+    eng.reroll(b);
+    eq('물수제비: 미끄러진 주사위 기록', b.sigEvents.some(ev => ev.slip != null), true);
+  }
+  // minRank — 낮은 족보 봉인
+  {
+    const b = mk(['old_teddy']);
+    eng.initialRoll(b);
+    eq('솜 채우기: 노페어 봉인', eng.previewAll(b).find(x => x.cat.id === 'chance').sigBlock, true);
+    eq('솜 채우기: 원페어 봉인', eng.previewAll(b).find(x => x.cat.id === 'onePair').sigBlock, true);
+    eq('솜 채우기: 투페어는 된다', eng.previewAll(b).find(x => x.cat.id === 'twoPair').sigBlock, false);
+  }
+  // fromPhase — 늑대는 2국면부터
+  {
+    const b = mk(['wolf']);
+    eq('피의 사냥: 1국면엔 잠잠', eng.activeSignature(b), null);
+    b.enemies[0].phaseIndex = 1;
+    eq('피의 사냥: 2국면부터 켜진다', eng.activeSignature(b).op, 'bloodhunt');
+  }
+}
+
 // ========== v2.0 카드 전투 ==========
 {
   const { DB } = await import('../js/data.js');
