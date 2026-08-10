@@ -172,15 +172,14 @@ body {
   pointer-events: none;
 }
 .map-node2 .ico-node { width: 42px; height: 42px; display: block; position: relative; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .7)); }
-/* 보스 낙서는 짙은 잉크선이라 검은 후광에 묻힌다 — 낡은 종이 얼룩처럼 밝게 깔아준다 */
+/* 보스도 다른 노드와 똑같이 밝은 잉크 + 어두운 후광이다. 크기만 크다 */
 .map-node2.boss-node::before {
-  width: 112px; height: 112px;
-  background: radial-gradient(circle, rgba(226, 205, 165, .88) 0%, rgba(216, 193, 152, .7) 40%,
-    rgba(200, 174, 132, .4) 60%, rgba(180, 152, 110, .14) 76%, transparent 90%);
+  width: 122px; height: 122px;
+  background: radial-gradient(circle, rgba(8, 5, 3, .62) 0%, rgba(10, 6, 4, .38) 52%, transparent 74%);
 }
 .map-node2.boss-node .ico-node {
   width: 96px; height: 96px;
-  filter: drop-shadow(0 1px 1px rgba(60, 34, 18, .45));
+  filter: contrast(1.12) saturate(1.1) drop-shadow(0 2px 4px rgba(0, 0, 0, .8));
 }
 /* 보스가 들어앉는 맨 윗줄은 키를 준다 */
 .map-row2.boss-row { height: 120px; }
