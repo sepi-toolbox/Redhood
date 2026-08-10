@@ -173,14 +173,14 @@ body {
 }
 .map-node2 .ico-node { width: 42px; height: 42px; display: block; position: relative; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .7)); }
 /* 보스도 다른 노드와 똑같이 밝은 잉크 + 어두운 후광이다. 크기만 크다 */
+/* 보스 낙서의 잉크(143,118,86)는 양피지와 명도가 거의 같다 — 시트에서 쓰던
+   새까만 바탕을 그대로 노드 뒤에 깔아야 원래 보이던 대로 읽힌다 (잉크 얼룩처럼) */
 .map-node2.boss-node::before {
-  width: 122px; height: 122px;
-  background: radial-gradient(circle, rgba(8, 5, 3, .62) 0%, rgba(10, 6, 4, .38) 52%, transparent 74%);
+  width: 134px; height: 134px;
+  background: radial-gradient(circle, rgba(23, 17, 12, .97) 0%, rgba(23, 17, 12, .95) 46%,
+    rgba(21, 15, 10, .72) 64%, rgba(18, 13, 9, .3) 80%, transparent 92%);
 }
-.map-node2.boss-node .ico-node {
-  width: 96px; height: 96px;
-  filter: contrast(1.12) saturate(1.1) drop-shadow(0 2px 4px rgba(0, 0, 0, .8));
-}
+.map-node2.boss-node .ico-node { width: 100px; height: 100px; filter: none; }
 /* 보스가 들어앉는 맨 윗줄은 키를 준다 */
 .map-row2.boss-row { height: 120px; }
 .map-node2.reachable { cursor: pointer; filter: drop-shadow(0 0 6px rgba(190, 60, 45, .55)); }
