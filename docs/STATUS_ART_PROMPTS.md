@@ -1,15 +1,82 @@
-# 상태·버프 아이콘 프롬프트 (v3.10)
+# 상태·버프 아트 프롬프트 (v3.10)
 
-이모지를 전부 걷어내고 그림으로 바꿨다. 지금 인게임에는 **임시 아이콘**이 들어가 있고,
-아래 프롬프트로 뽑은 정식 아트가 오면 같은 파일명으로 덮으면 끝난다(코드 수정 불필요).
+상태이상 표시는 **리소스가 두 종류**다. 섞으면 안 된다.
 
-## 지금 상태
+| 종류 | 파일 | 어디에 쓰이나 | 규격 |
+|---|---|---|---|
+| **① 덮개** | `assets/ui/status_die_*.png` | **주사위 칸 위**에 얹힌다 | 256×256, 알파, 가장자리에 붙고 **가운데는 비운다** |
+| **② 아이콘** | `assets/icons/status_*.png` | 버프 칩·배지·설명문 앞 (13~17px) | 96×96, 둥근 메달, 심볼 하나 |
+
+붙이는 건 스크립트 한 줄이다 — 회색 배경으로 뽑아서 주면 된다.
+
+```
+python3 tools/make_icon.py <원본.png> status_poison        # ② 아이콘
+python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.build_die('<원본.png>','lock')"   # ① 덮개
+```
+
+---
+
+# 1부 · 주사위 덮개 (①)
+
+## 지금 상태 — 13종 있음, 손볼 것 5종
+
+| 상태 | 현재 | 판정 |
+|---|---|---|
+| 출혈·독·저주·축복·부패·결속·약탈 | 가장자리 모티프, 눈 잘 보임 | ✅ 그대로 |
+| 혼란 | 보라 소용돌이가 칸 전체를 덮음 | ✅ 의도대로 (규칙이 "눈을 가린다") |
+| **봉인** | 밀랍이 칸을 전부 덮어 **눈이 안 보임** | ⚠ 규칙은 "굴리기 전엔 값이 없다"지 가리는 게 아님 → **재제작** |
+| **포박** | 가는 실 낙서처럼 보임 | ⚠ 가는 선 문제 → **재제작** |
+| **기절** | 가는 흰 금 — 잘 안 보임 | ⚠ **재제작** |
+| **마비** | 가는 파란 번개 여러 줄 — 어수선함 | ⚠ **재제작** |
+| **잠식** | 아래쪽 검은 촉수, 가늘다 | 🔸 여유되면 재제작 |
+| **물림(신규)** | **없음** — 지금은 CSS 사슬 기호로 때움 | ❌ **신규 필요** |
+
+## 덮개 규격
+
+- **비율·크기**: Square 1:1, 1024×1024로 뽑으면 256으로 줄여 쓴다
+- **배경**: 중간 회색 단색 (내가 키잉해서 투명으로 만든다). "transparent background"라고 쓰면 분홍
+  체커보드가 나온다 (ART_PROMPTS 규칙 1)
+- **가운데를 비운다**: 주사위 눈이 읽혀야 한다. 모티프는 **위·아래·좌우 가장자리와 모서리**에만.
+  가운데 56% 영역은 비워둘 것 (혼란처럼 "가리는 게 규칙"인 것만 예외)
+- **선**: 굵은 덩어리로. 가는 선·해칭·잔가닥 금지 (규칙 3 — 성권 피드백)
+- **금지**: 주사위 자체를 그리지 말 것(덮개만), 글자·숫자, 사실주의·3D, 프레임
+
+### 덮개 공통 머리 블록
+
+```
+Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXACT painting style,
+angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art.
+SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture,
+no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorealistic, NOT 3D.
+Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard.
+Do NOT draw a die or any object underneath — draw ONLY the effect itself.
+The effect clings to the EDGES and CORNERS of the square frame and the CENTER of the image is
+completely EMPTY (nothing in the middle 60 percent). The effect: {묘사}.
+No text, no letters, no watermark.
+```
+
+## 덮개 프롬프트
+
+| 파일명 | 상태 | 효과 묘사 |
+|---|---|---|
+| `status_die_lock.png` | **물림** (신규) | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` |
+| `status_die_seal.png` | **봉인** (재제작) | `a wide dark-red wax seal blob sitting on the bottom edge with two thick parchment ribbons crossing only the lower corners` |
+| `status_die_bind.png` | **포박** (재제작) | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` |
+| `status_die_stun.png` | **기절** (재제작) | `heavy grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle still open` |
+| `status_die_numb.png` | **마비** (재제작) | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
+| `status_die_devour.png` | 잠식 (선택) | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim` |
+
+---
+
+# 2부 · 배지 아이콘 (②)
+
+## 지금 상태 — 8종 완성, 11종 임시, 11종 신규 필요
 
 | 구분 | 파일 | 상태 |
 |---|---|---|
 | 기존 정식 8종 | `status_{bleed,block,confuse,focus,regen,strength,vulnerable,weak}.png` | ✅ 완성 (기준 아트) |
 | 상태이상 11종 | `status_{poison,bind,stun,curse,blessing,seal,rot,chain,numb,plunder,devour}.png` | ⚠ 임시 — 주사위 오버레이 아트를 메달에 얹어 자동 합성. **A절 프롬프트로 교체 필요** |
-| 새 효과 10종 | 전용 파일 없음 — 뜻이 가까운 기존 아이콘을 임시로 돌려 씀 | ⚠ **B절 프롬프트로 신규 제작 필요** |
+| 새 효과 11종 | 전용 파일 없음 — 뜻이 가까운 기존 아이콘을 임시로 돌려 씀 | ⚠ **B절 프롬프트로 신규 제작 필요** |
 
 임시로 돌려 쓰는 매핑 (`js/main.js`의 `FX_ICON`): 리롤 세금·홀드 세금→bleed / 굳음→stun / 물기→bind /
 어둠→confuse / 족보 봉인→seal / 문턱·상한→block / 격노→strength / 반사→vulnerable / 불사·재생→regen.

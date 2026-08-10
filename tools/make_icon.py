@@ -46,3 +46,16 @@ def build(src, name, fill=0.66):
 
 if __name__ == '__main__':
     build(sys.argv[1], sys.argv[2], float(sys.argv[3]) if len(sys.argv) > 3 else 0.66)
+
+# ---------- 주사위 덮개 ----------
+def build_die(src, name, keep_center=True):
+    """회색 배경을 키잉해 주사위 덮개(256px, 알파)로 저장. 중앙 가림률을 재서 경고한다."""
+    im = key_out(Image.open(src)).resize((256, 256), Image.LANCZOS)
+    a = im.getchannel('A')
+    c = a.crop((56, 56, 200, 200))
+    center = sum(c.getdata()) / (c.size[0] * c.size[1] * 255) * 100
+    p = f'assets/ui/status_die_{name}.png'
+    im.save(p)
+    flag = '' if (center < 25 or not keep_center) else '  ⚠ 중앙을 덮어 눈이 안 보인다'
+    print(f'{p} · 중앙 가림 {center:.0f}%{flag}')
+    return im
