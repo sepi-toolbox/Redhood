@@ -1910,7 +1910,7 @@
       "amount": 3
      }
     ],
-    "cooldown": 2,
+    "cooldown": 3,
     "minTurn": 1
    },
    "drown": {
@@ -2890,7 +2890,7 @@
      {
       "op": "status",
       "kind": "stun",
-      "amount": 2
+      "amount": 1
      }
     ],
     "minTurn": 5,
@@ -2952,7 +2952,7 @@
    }
   ],
   "start": {
-   "undying": 0.35
+   "undying": 0.25
   }
  },
  {
@@ -3104,7 +3104,7 @@
      {
       "op": "petrify",
       "face": 6,
-      "turns": 3
+      "turns": 2
      }
     ],
     "followUp": {
@@ -3209,7 +3209,7 @@
    }
   ],
   "start": {
-   "cap": 18
+   "cap": 14
   }
  },
  {
@@ -3390,11 +3390,11 @@
      },
      {
       "op": "lockHigh",
-      "turns": 2
+      "turns": 1
      }
     ],
     "minTurn": 6,
-    "cooldown": 2
+    "cooldown": 3
    },
    "surge": {
     "name": "삽자루를 고쳐 쥔다",
@@ -4727,7 +4727,7 @@
    }
   ],
   "start": {
-   "ward": 8
+   "ward": 5
   }
  },
  {
