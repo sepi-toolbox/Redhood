@@ -88,9 +88,9 @@ export function chooseWeapon(run, weaponId) {
   const w = DB.weaponById[weaponId];
   if (!w) return false;
   run.weapon = weaponId;
-  // 아홉 족보 자리는 처음부터 전부 열려 있다. 무기가 그중 몇 자리를 채워준다.
+  // v3.1 족보 수집제 복원 — 가진 족보(run.categories 에 키가 있는 것)만 쓸 수 있다.
+  // 무기가 시작 족보 3종을 준다. 나머지는 보상·이벤트로 하나씩 모은다.
   run.categories = {};
-  for (const c of DB.scoring.categories) run.categories[c.id] = null;
   for (const [cid, vid] of Object.entries(w.start)) run.categories[cid] = vid;
   return true;
 }
@@ -185,9 +185,10 @@ export function applyEventEffects(run, effects) {
         }
         if (pool.length === 0) { messages.push('더 얻을 족보가 없다'); break; }
         const { c, v } = pool[Math.floor(rng.next() * pool.length)];
-        const before = run.categories[c.id];
+        const had = c.id in run.categories;
+        const before = had ? run.categories[c.id] : null;
         run.categories[c.id] = v.id;
-        messages.push(`📜 ${c.name} 자리에 ${v.name}${before ? ' (앞의 것을 대신한다)' : ''}`);
+        messages.push(had ? `📜 ${c.name} 자리에 ${v.name}${before ? ' (앞의 것을 대신한다)' : ''}` : `✨ 새 족보 — ${c.name}: ${v.name}`);
         break;
       }
       case 'gainDie': {
@@ -358,11 +359,12 @@ function rewardPoolOf(run, kind, allowedTiers = null) {
   }
   const pool = [];
   for (const c of DB.scoring.categories) {
-    const cur = run.categories[c.id] || null;
+    const has = c.id in run.categories;                  // v3.1 족보 소유 여부
+    const cur = has ? (run.categories[c.id] || null) : null;
     for (const v of (c.variants || [])) {
       if (cur === v.id) continue;
       if (allowedTiers && !allowedTiers.has(v.tier)) continue;
-      pool.push({ id: `${c.id}:${v.id}`, tier: v.tier, cat: c, variant: v, owned: !!cur,
+      pool.push({ id: `${c.id}:${v.id}`, tier: v.tier, cat: c, variant: v, owned: !!cur, newCat: !has,
                   replaces: cur ? (c.variants || []).find(x => x.id === cur) || null : null });
     }
   }
@@ -458,10 +460,11 @@ export function bossRelicChoices(run) {
 export function bossLegendaryChoices(run) {
   const pool = [];
   for (const c of DB.scoring.categories) {
-    const cur = run.categories[c.id] || null;
+    const has = c.id in run.categories;
+    const cur = has ? (run.categories[c.id] || null) : null;
     for (const v of (c.variants || [])) {
       if (v.tier !== 'epic' || cur === v.id) continue;
-      pool.push({ kind: 'category', item: { id: `${c.id}:${v.id}`, tier: 'epic', cat: c, variant: v, owned: !!cur,
+      pool.push({ kind: 'category', item: { id: `${c.id}:${v.id}`, tier: 'epic', cat: c, variant: v, owned: !!cur, newCat: !has,
                   replaces: cur ? (c.variants || []).find(x => x.id === cur) || null : null } });
     }
   }
@@ -572,7 +575,7 @@ export function loadRun() {
     if (!s.categories || typeof s.categories !== 'object') { clearSave(); return null; }
     // v1.34 이전 저장본: 변형 배열 -> 첫 칸을 끼운 것으로 옮긴다
     for (const [cid, v] of Object.entries(s.categories)) if (Array.isArray(v)) s.categories[cid] = v[0] || null;
-    for (const c of DB.scoring.categories) if (!(c.id in s.categories)) s.categories[c.id] = null;
+    // v3.1: 없는 키는 채우지 않는다 — 키가 있는 족보만 소유한 것이다
     // v2.0: 감정 카드 덱 — 없거나 깨진 저장본은 시작 덱으로
     if (!Array.isArray(s.cards) || s.cards.length === 0 || !s.cards.every(id => DB.cardById[id])) {
       s.cards = DB.cards.starterDeck.slice();

@@ -1021,13 +1021,17 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const mkS = (cats) => eng.createBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics: [],
     dice: ['normal','normal','normal','normal','normal'], categories: cats }, ['crow'], 'battle');
 
-  // 아무것도 안 끼워도 아홉 자리가 다 열려 있다
+  // v3.1 수집제: 가진 족보만 보인다 — 다 모으면 전부 보인다
   {
-    const b = mkS({});
+    const b0 = mkS({});
     eng.rng.next = () => 0.5;
+    eng.initialRoll(b0);
+    eq('미보유면 족보 줄이 없다', eng.previewAll(b0).length, 0);
+    const all = Object.fromEntries(DB.scoring.categories.map(c => [c.id, null]));
+    const b = mkS(all);
     eng.initialRoll(b);
     const pv = eng.previewAll(b);
-    eq('족보 줄은 언제나 아홉 개', pv.length, DB.scoring.categories.length);
+    eq('다 모으면 전부 보인다', pv.length, DB.scoring.categories.length);
     eq('빈 자리는 기본 족보', pv.every(p => p.variant.base || p.variant.id === b.categories[p.cat.id]), true);
     eq('기본 족보는 부가 능력이 없다', pv.filter(p => p.variant.base).every(p => (p.variant.ability || []).length === 0), true);
     eq('기본 족보는 일격이 아니다', pv.filter(p => p.variant.base).every(p => !p.variant.burst), true);
@@ -1053,20 +1057,21 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eq('끼운 변형은 확정된다', !!r, true);
     eng.rng.next = Math.random;
   }
-  // 기본 족보도 그냥 확정된다 (배수만 있는 값)
+  // 기본 족보도 그냥 확정된다 (배수만 있는 값) — 단, 소유해야
   {
-    const b = mkS({});
+    const b = mkS({ onePair: null });
     eng.rng.next = () => 0.5;
     eng.initialRoll(b);
     const r = eng.confirmCategory(b, 'onePair', eng.baseIdOf('onePair'), b.enemies[0].uid);
     eq('기본 족보로도 때릴 수 있다', r && r.total > 0, true);
+    eq('미보유 족보는 확정 불가', eng.confirmCategory(b, 'chance', eng.baseIdOf('chance'), b.enemies[0].uid), null);
     eng.rng.next = Math.random;
   }
   // 옛 저장본(변형 배열)도 첫 칸을 끼운 것으로 받아준다
   {
     const b = mkS({ onePair: ['red_shoes', 'clash'] });
     eq('배열이면 첫 칸을 끼운 것으로 본다', b.categories.onePair, 'red_shoes');
-    eq('안 적힌 자리는 비어 있다', b.categories.yahtzee, null);
+    eq('안 적힌 족보는 미보유다', 'yahtzee' in b.categories, false);
   }
   // 무기 여섯은 저마다 벼름 원천과 일격을 하나씩 쥐고 시작한다
   {
@@ -1102,7 +1107,8 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const { DB } = await import('../js/data.js');
   eng.rng.next = () => 0.5;
   const RUN = () => ({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
-    dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: {} });
+    dice: ['normal', 'normal', 'normal', 'normal', 'normal'],
+    categories: { onePair: null, twoPair: null, threeKind: null, chance: null } });
   const mk = (ids) => eng.createBattle(RUN(), ids, 'battle');
   const setFaces = (b, fs) => { b.dice.forEach((d, i) => { d.face = fs[i]; d.held = true; d.st = null; d.sigLock = false; }); b.rolled = true; };
 
