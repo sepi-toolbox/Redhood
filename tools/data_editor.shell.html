@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v3.7 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v3.8 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -297,8 +297,10 @@ const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['stat
   ['rollTax','🩸 리롤 세금 — 리롤마다 피해 (방어 무시)'],['holdTax','🩸 홀드 세금 — 지킨 주사위 2개당 1'],
   ['petrify','🗿 굳음 — 그 눈이 나오면 기절'],['lockHigh','🧲 물기 — 매 굴림 최고 눈 잠금'],
   ['blind','🌫 어둠 — 족보 위력 미리보기 숨김'],
+  ['regen','💗 재생 — 자기 차례마다 회복'],['enrage','💢 격노 — 맞을 때마다 힘 +'],
+  ['reflect','🌵 반사 — 맞으면 되돌려준다 (방어도로 막힘)'],
   ['drainWhet','🌀 벼름 흡수'],['unpin','💨 새김 흩기']];
-const MOD_OPS=new Set(['sealLast','sealCat','rollTax','holdTax','petrify','lockHigh','blind']);   // 턴 지속 방해
+const MOD_OPS=new Set(['sealLast','sealCat','rollTax','holdTax','petrify','lockHigh','blind','regen','reflect']);   // 턴 지속 (방해·자기 버프)
 const ST_OPS=(DB.statuses.list||[]).map(s=>[s.id,s.name]);
 const DB_statusById={}; (DB.statuses.list||[]).forEach(s=>DB_statusById[s.id]=s); DB.statusById2=DB_statusById;
 const NO_POWER=new Set(['onUseFaceDamage','onUseFaceCoin','noReroll','zeroValue','hideFace','needReroll','linked','spread','faceLow','faceHigh','rerollCost']); // 세기를 적 행동에서 정하는 건 부패뿐
@@ -422,7 +424,7 @@ function rangeF(p,label){ const w=document.createElement('div'); w.style.display
   w.appendChild(field(p+'.1',label+' 최대')); return w; }
 
 function tabEnemy(v){
-  const tb=table(v,['id','이름','격','막','테마','HP 최소','HP 최대','시작 버프 (문턱·상한·방어·힘)','기본 행동','행동 수','연계']);
+  const tb=table(v,['id','이름','격','막','테마','HP 최소','HP 최대','시작 버프 (🪨문턱 ⛓상한 🛡방어 💪힘 💗재생 💢격노 🌵반사 💀불사=부활비율)','기본 행동','행동 수','연계']);
   ENEMIES.forEach(([e,i])=>{
     const tr=document.createElement('tr'); tr.className='t-'+e.tier;
     tr.dataset.k=(e.id+' '+e.name).toLowerCase();
@@ -434,7 +436,7 @@ function tabEnemy(v){
     {
       // 시작 버프 — 문턱·상한은 별도 시스템이 아니라 그냥 버프다 (v3.3)
       const sb=document.createElement('div'); sb.style.cssText='display:flex;gap:4px;align-items:center;flex-wrap:wrap';
-      [['ward','🪨'],['cap','⛓'],['block','🛡'],['power','💪']].forEach(([kk,ic])=>{
+      [['ward','🪨'],['cap','⛓'],['block','🛡'],['power','💪'],['regen','💗'],['enrage','💢'],['reflect','🌵'],['undying','💀']].forEach(([kk,ic])=>{
         const l=document.createElement('span'); l.className='sub'; l.textContent=ic;
         const f=field(`enemies:${i}.start.${kk}`, e.name+' 시작 '+kk, {num:true, def:0});
         f.style.maxWidth='42px'; sb.appendChild(l); sb.appendChild(f);

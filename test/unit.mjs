@@ -977,18 +977,18 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
   // 데이터: 정예·보스는 전부 기믹을 하나씩 가진다
   {
-    const GIM = new Set(['ward', 'cap', 'drainWhet', 'unpin',
+    const GIM = new Set(['ward', 'cap', 'drainWhet', 'unpin', 'status', 'regen', 'enrage', 'reflect',
       'sealLast', 'sealCat', 'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']);
     const missing = DB.enemies.filter(e => !e.final && (e.tier === 'elite' || e.tier === 'boss'))
-      .filter(e => !e.signature && !Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
+      .filter(e => !e.start && !Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
       .map(e => e.name);
-    // 2·3막 넷은 요구 제거로 기믹이 비었다 — 2·3막 시그니처 배치 때 채운다 (알려진 대기)
-    eq('정예·보스 기믹/시그니처 공백은 2·3막 대기 4종뿐', missing, ['목 없는 기사', '늪의 왕', '언덕의 촉수', '자각몽의 왕']);
-    // v3.3: 테마 행동은 일반 적도 가진다 — 1막 테마 보유 5종 (상태이상형 테마는 status op 라 여기 안 잡힘)
-    const normalsWithGim = DB.enemies.filter(e => e.tier === 'normal')
-      .filter(e => Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
+    eq('정예·보스는 전원 기믹(테마 행동·시작 버프)을 가진다', missing, []);
+    // v3.8: 44종 전원이 테마(상태이상·지속 방해·버프 중 하나)를 가진다
+    const noTheme = DB.enemies
+      .filter(e => !e.start && !Object.values({ ...e.moves, ...(e.uniqueMoves || {}) })
+        .some(m => (m.effects || []).some(f => GIM.has(f.op))))
       .map(e => e.name);
-    eq('일반 적의 테마 행동 보유 목록', normalsWithGim, ['굶주린 까마귀', '들개', '가시덤불', '옹이 골렘', '거머리']);
+    eq('테마 없는 적은 없다 (44종 전원)', noTheme, []);
   }
 }
 
@@ -1165,6 +1165,43 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eq('도사림: 어둠이 깔린다', !!eng.modOf(b, 'blind'), true);
     cast(b, e, [{ op: 'rest' }]);   // 한 턴 더 → 감쇠로 소멸
     eq('도사림: 턴이 지나면 걷힌다', eng.modOf(b, 'blind'), null);
+  }
+  // v3.8 적 자기 버프 — 재생·격노·반사·불사
+  {
+    const b = mk(['skeleton']); const e = b.enemies[0];
+    eq('불사: 해골은 시작부터 지니고 있다', e.undying > 0, true);
+    e.hp = 5; b.lastResult = { bonusHits: [] };
+    eng.__test_deal(b, e, 40);
+    eq('불사: 처음 쓰러질 때 되살아난다', e.hp > 0, true);
+    eq('불사: 한 번뿐', e.undying, 0);
+    eng.__test_deal(b, e, 9999);
+    eq('불사: 두 번째는 없다', e.hp <= 0, true);
+  }
+  {
+    const b = mk(['crow']); const e = b.enemies[0]; e.hp = 200; e.maxHpInit = 200;
+    e.enrage = 1; b.lastResult = { bonusHits: [] };
+    eng.__test_deal(b, e, 10);
+    eq('격노: 맞으면 힘이 오른다', e.power, 1);
+    e.reflect = 3; e.reflectLeft = 2; b.player.block = 1;
+    const hp0 = b.player.hp;
+    eng.__test_deal(b, e, 10);
+    eq('반사: 방어도 1을 뚫고 2가 박힌다', hp0 - b.player.hp, 2);
+  }
+  {
+    const b = mk(['crow']); const e = b.enemies[0]; e.hp = 50; e.maxHpInit = 200;
+    e.regen = 4; e.regenLeft = 2;
+    e.nextMove = { id: 't', name: '가만히', effects: [{ op: 'rest' }] };
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('재생: 자기 차례에 아문다', e.hp, 54);
+    eq('재생: 턴이 줄어든다', e.regenLeft, 1);
+  }
+  // 2·3막 배치 검증 — 13종 상태이상 전원 등판
+  {
+    const used = new Set();
+    for (const e of DB.enemies) for (const m of Object.values({ ...e.moves, ...(e.uniqueMoves || {}) }))
+      for (const f of (m.effects || [])) if (f.op === 'status') used.add(f.kind);
+    const all = DB.statuses.list.map(x => x.id).filter(id => !used.has(id));
+    eq('상태이상 13종 전원 등판 (미사용 없음)', all, []);
   }
   // 시작 버프 — 문턱·상한은 그냥 버프다 (enemies.json start 로 시작 부여)
   {
