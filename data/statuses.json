@@ -129,7 +129,19 @@
   "selfDamageMult": 1
  },
  "fxColors": {
-  "lock": "#8a6a3f"
+  "lock": "#8a6a3f",
+  "rollTax": "#9e2f2f",
+  "holdTax": "#7a3a2a",
+  "blind": "#2f3a52",
+  "ward": "#6b7a5a",
+  "cap": "#55606b",
+  "enrage": "#e0521a",
+  "reflect": "#2fa39a",
+  "undying": "#7fe0a0",
+  "regen": "#e5468f",
+  "petrify": "#c9c2b0",
+  "sealCat": "#3a52c8",
+  "sealLast": "#3a52c8"
  },
  "_comment_color": "색은 아이콘·덮개를 잇는 첫째 단서다 (v3.11 재배치: 최소 ΔE 22.5). fxColors 는 상태이상이 아닌 지속 효과의 색."
 }

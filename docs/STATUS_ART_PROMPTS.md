@@ -206,21 +206,28 @@ A 3x2 grid of six symbols, equal cells, equal spacing` 로 바꾸고 `IN ORDER �
 | `status_plunder.png` | 약탈 | `a bony hand clenching one big dull gold coin, thick fingers gripping tight` (덮개의 움켜쥐는 손과 같은 모티프) |
 | `status_devour.png` | 잠식 | `a solid black void blob eating into the frame, one row of blunt teeth at its edge` |
 
-## B. 새 효과 10종 (신규 제작) — 물기는 위 A절이 아니라 여기 있었다 → 한 쌍 표에서 찾는 게 빠르다
+## B. 새 효과 11종 (신규 제작) — 물기 포함
 
-| 파일명 | 이름 | 뜻 | Symbol 프롬프트 |
-|---|---|---|---|
-| `fx_rolltax.png` | 이빨 자국 | 다시 굴릴 때마다 피해 | `two round fang puncture holes on pale skin with one thick red drop below` |
-| `fx_holdtax.png` | 가시 | 지킨 주사위마다 피해 | `a closed fist gripping one thick thorned stem, three big thorns` |
-| `fx_petrify.png` | 굳음 | 그 눈이 돌이 된다 | `a wooden die half turned to solid grey stone, split down the middle` |
-| `status_lock.png` | 물기 | 가장 높은 눈이 물린다 | `a round sucker mouth seen face-on, one ring of blunt teeth around a dark center` |
-| `fx_blind.png` | 어둠 | 위력이 보이지 않는다 | `one thick curl of smoke covering a dim closed eye` |
-| `fx_seal_cat.png` | 족보 봉인 | 그 족보를 못 쓴다 | `a heavy blocky iron padlock over a folded parchment, big keyhole` |
-| `fx_ward.png` | 문턱 | 얕은 타격은 안 통함 | `a squat mossy boundary stone with one blade glancing off its face` |
-| `fx_cap.png` | 상한 | 한 번에 이 이상 못 줌 | `a thick iron shackle clamped around a raised fist, one taut chain link` |
-| `fx_enrage.png` | 격노 | 맞을수록 사나워짐 | `one snarling beast eye with a hot red glow rising under it` |
-| `fx_reflect.png` | 반사 | 때리면 되받음 | `a hide shield with three big outward thorns, one thorn tipped red` |
-| `fx_undying.png` | 불사 | 한 번 다시 일어남 | `a cracked skull with one green soul-flame burning in an eye socket` |
+**머리 블록은 2부의 아이콘 공통 머리 블록을 그대로 쓴다** (덮개 블록 아님). `{색코드}` 자리에 아래 색 열을 넣는다.
+
+색 배정 원칙 — 같은 자리에 안 뜨는 것끼리는 색을 아껴 쓴다:
+· **내 칸에 뜨는 것**(이빨 자국·가시·어둠)은 상태이상 14색과 반드시 구분 (최소 ΔE 24.8)
+· **적 몸에만 뜨는 것**(문턱·상한·격노·반사·불사)은 자기들끼리만 구분되면 된다 (최소 ΔE 27.1)
+· **뜻이 같은 것은 색을 물려받는다** — 굳음=기절색, 족보 봉인=봉인색 (새 색을 늘리지 않는다)
+
+| 파일명 | 이름 | 뜻 | 색코드 | Symbol 프롬프트 |
+|---|---|---|---|---|
+| `fx_rolltax.png` | 이빨 자국 | 다시 굴릴 때마다 피해 | `#9e2f2f` | `two round fang puncture holes on pale skin with one thick red drop below` |
+| `fx_holdtax.png` | 가시 | 지킨 주사위마다 피해 | `#7a3a2a` | `a closed fist gripping one thick thorned stem, three big thorns` |
+| `fx_petrify.png` | 굳음 | 그 눈이 돌이 된다 | `#c9c2b0` | `a wooden die half turned to solid grey stone, split down the middle` |
+| `status_lock.png` | 물기 | 가장 높은 눈이 물린다 | `#8a6a3f` | `a round sucker mouth seen face-on, one ring of blunt teeth around a dark center` |
+| `fx_blind.png` | 어둠 | 위력이 보이지 않는다 | `#2f3a52` | `one thick curl of smoke covering a dim closed eye` |
+| `fx_seal_cat.png` | 족보 봉인 | 그 족보를 못 쓴다 | `#3a52c8` | `a heavy blocky iron padlock over a folded parchment, big keyhole` |
+| `fx_ward.png` | 문턱 | 얕은 타격은 안 통함 | `#6b7a5a` | `a squat mossy boundary stone with one blade glancing off its face` |
+| `fx_cap.png` | 상한 | 한 번에 이 이상 못 줌 | `#55606b` | `a thick iron shackle clamped around a raised fist, one taut chain link` |
+| `fx_enrage.png` | 격노 | 맞을수록 사나워짐 | `#e0521a` | `one snarling beast eye with a hot red glow rising under it` |
+| `fx_reflect.png` | 반사 | 때리면 되받음 | `#2fa39a` | `a hide shield with three big outward thorns, one thorn tipped red` |
+| `fx_undying.png` | 불사 | 한 번 다시 일어남 | `#7fe0a0` | `a cracked skull with one green soul-flame burning in an eye socket` |
 
 ## C. 선택 — 남은 이모지 (급하지 않음)
 
