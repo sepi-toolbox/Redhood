@@ -45,11 +45,34 @@ python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.bui
 | 포박 | `#2f9e5c` | 굵은 밧줄 매듭 | 좌우를 감은 밧줄, 왼쪽에 매듭 | 밧줄 매듭 | 덮개 새로 |
 | 기절 | `#c9c2b0` | 돌처럼 굳은 균열 | 모서리에서 번지는 돌 껍질 | 갈라진 돌 주사위 | 덮개 새로 |
 | 마비 | `#3aa8e6` | 얼어붙은 번개 | 좌우 가장자리의 굵은 번개 | 번개와 굳은 손바닥 | 덮개 새로 |
-| 물림 | `#8a6a3f` | **빨판 입** | 왼쪽에서 물어붙은 빨판 입 | 주사위를 문 빨판 입 | 둘 다 신규 |
+| 물기 | `#8a6a3f` | **빨판 입** | 왼쪽에서 물어붙은 빨판 입 | 주사위를 문 빨판 입 | 둘 다 신규 |
 
 > **작업 순서 권장**: 한 상태를 골라 **덮개와 아이콘을 한 번에 뽑는다.** 따로 뽑으면 또 어긋난다.
 > 덮개는 14종 전량 새로 만들고, 아이콘은 이미 나온 독(송곳니)만 확정 — 나머지는 임시다.
 
+
+## 상태별 한 쌍 — 덮개 + 아이콘 (작업용)
+
+한 상태를 고르면 이 줄에서 **덮개와 아이콘 프롬프트를 함께** 가져간다. 문구는 아래 1·2부 표와 같은 것이다.
+
+| 상태 | 색코드 | 덮개 `The effect:` | 아이콘 `The symbol:` |
+|---|---|---|---|
+| **물기** | `#8a6a3f` | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` | `a round sucker mouth seen face-on, one ring of blunt teeth around a dark center` |
+| **봉인** | `#3a52c8` | `a wide dark-red wax seal blob sitting on the bottom edge with two thick parchment ribbons crossing only the lower corners` | `one deep-red wax seal blob stamped over a folded parchment corner` |
+| **포박** | `#2f9e5c` | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` | `one thick rope loop pulled into a tight knot, chunky twisted strands` |
+| **기절** | `#c9c2b0` | `heavy grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle still open` | `a grey stone die split by one heavy jagged crack` |
+| **마비** | `#3aa8e6` | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` | `one thick pale-blue lightning bolt over a stiff open palm` |
+| **잠식** | `#17bfae` | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim` | `a solid black void blob eating into the frame, one row of blunt teeth at its edge` |
+| **출혈** | `#e83b2e` | `thick crimson blood running down from the top edge in three fat streaks, one heavy drop hanging at the end of each` | `three fat crimson blood drops falling` <sub>(정식 아이콘 이미 있음 — 새로 뽑을 때만)</sub> |
+| **독** | `#a8d63a` | `thick green venom running down from the top edge in two fat streaks, a fat pool of green slime along the bottom edge` | `two fat green venom droplets falling, one thick slime blob below them` |
+| **저주** | `#c33ad6` | `thick violet flames burning upward along the bottom edge, solid blocky tongues of fire, dark smoke curling at the lower corners` | `one thick violet flame burning upward, solid blocky tongues of fire` |
+| **축복** | `#ffd257` | `a wide pale ivory crown resting on the top edge, thick blunt points, one broad warm glow behind it` | `a small solid pale-gold crown with one broad halo of warm light behind it` |
+| **혼란** | `#8b4de8` | `a thick violet whirlpool filling the WHOLE square and covering the center completely — this one is the exception, it must hide what is underneath` | `one thick violet spiral whirlpool` <sub>(정식 아이콘 이미 있음 — 새로 뽑을 때만)</sub> |
+| **부패** | `#e5468f` | `a swollen pink-purple pustule mass bulging up from the bottom edge, two glowing embers on its surface, one short fat fuse` | `a swollen dark pustule with one short lit fuse and a bright ember tip` |
+| **결속** | `#8fa0b0` | `one heavy iron chain of thick blocky links crossing from the left edge to the right edge, cold steel highlights` | `two thick iron chain links interlocked, heavy blocky shapes` |
+| **약탈** | `#e08a2a` | `a bony hand reaching in from the left edge with thick fingers clenching, one dull gold coin caught between them` | `a bony hand clenching one big dull gold coin, thick fingers gripping tight` |
+
+---
 
 # 1부 · 주사위 덮개 (①)
 
@@ -103,7 +126,7 @@ No text, no letters, no watermark.
 
 | # | 파일명 | 상태 | 색 | 효과 묘사 (머리 블록의 `The effect:` 뒤에) |
 |---|---|---|---|---|
-| 1 | `status_die_lock.png` | **물림** (신규) ✅확정 | `#8a6a3f` | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` |
+| 1 | `status_die_lock.png` | **물기** (신규) ✅확정 | `#8a6a3f` | `one thick pale sucker mouth clamped onto the left edge, a ring of blunt teeth biting in, two heavy tendrils gripping the top and bottom edges` |
 | 2 | `status_die_seal.png` | 봉인 ✅확정 | `#3a52c8` | `a wide dark-red wax seal blob sitting on the bottom edge with two thick parchment ribbons crossing only the lower corners` |
 | 3 | `status_die_bind.png` | 포박 ✅확정 | `#2f9e5c` | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` |
 | 4 | `status_die_stun.png` | 기절 ✅확정 | `#c9c2b0` | `heavy grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle still open` |
@@ -183,7 +206,7 @@ A 3x2 grid of six symbols, equal cells, equal spacing` 로 바꾸고 `IN ORDER �
 | `status_plunder.png` | 약탈 | `a bony hand clenching one big dull gold coin, thick fingers gripping tight` (덮개의 움켜쥐는 손과 같은 모티프) |
 | `status_devour.png` | 잠식 | `a solid black void blob eating into the frame, one row of blunt teeth at its edge` |
 
-## B. 새 효과 10종 (신규 제작)
+## B. 새 효과 10종 (신규 제작) — 물기는 위 A절이 아니라 여기 있었다 → 한 쌍 표에서 찾는 게 빠르다
 
 | 파일명 | 이름 | 뜻 | Symbol 프롬프트 |
 |---|---|---|---|
