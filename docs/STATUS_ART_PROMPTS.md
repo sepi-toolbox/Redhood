@@ -16,6 +16,37 @@ python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.bui
 
 ---
 
+# 0부 · 모티프 사전 (가장 중요)
+
+**덮개와 아이콘은 같은 모티프여야 한다.** 플레이어가 주사위에 낀 것과 체력바 위 배지를 같은 것으로
+읽어야 하기 때문이다. 지금은 이게 안 맞는 게 있다 — 독은 덮개가 초록 점액인데 아이콘은 송곳니다.
+
+묶는 방법은 셋이다.
+1. **같은 모티프** — 덮개는 그 모티프를 가장자리에 펼치고, 아이콘은 같은 모티프를 하나로 압축한다
+2. **같은 색** — `statuses.json`의 색을 두 계열이 공유한다 (아래 표의 색 코드)
+3. **같은 화풍** — 굵은 외곽선·넓은 색면 (ART_PROMPTS 규칙 3·4)
+
+| 상태 | 색 | **핵심 모티프** | 덮개 (가장자리에 펼침) | 아이콘 (하나로 압축) | 현재 |
+|---|---|---|---|---|---|
+| 출혈 | `#ff5a4a` | 붉은 핏방울 | 위 모서리에서 흘러내리는 핏줄기 | 굵은 핏방울 세 개 | ✅ 맞음 |
+| 혼란 | `#c68cff` | 보라 소용돌이 | 칸 전체를 덮는 소용돌이 | 보라 나선 | ✅ 맞음 |
+| 독 | `#b8e04a` | **송곳니 + 초록 점액** | 위에서 물어내리는 송곳니, 아래에 고인 점액 | 송곳니와 떨어지는 점액 방울 | ⚠ 덮개에 송곳니 없음 → **덮개 보강** |
+| 저주 | `#c78cff` | **보라 불꽃** | 아래 가장자리에서 타오르는 보라 불 | 보라 불꽃 한 덩이 | ⚠ 아이콘이 초승달+눈 → **아이콘 수정** |
+| 약탈 | `#d9a05a` | **움켜쥐는 손** | 왼쪽에서 뻗어와 움켜쥐는 뼈손 | 동전을 움켜쥔 손 | ⚠ 아이콘이 동전 주머니 → **아이콘 수정** |
+| 축복 | `#f3ecdd` | 흰 왕관 | 위 가장자리에 얹힌 왕관 | 왕관 하나 | ✅ 맞음 |
+| 결속 | `#a8c2d8` | 쇠사슬 | 좌우를 가로지르는 사슬 | 사슬 두 칸 | ✅ 맞음 |
+| 부패 | `#d98cc0` | 부푼 종기 + 불씨 | 아래에 부푼 종기 덩어리, 불씨 | 종기와 짧은 심지 | ✅ 맞음 |
+| 잠식 | `#9fd8f0` | 삼키는 검은 공허 | 아래·왼쪽을 먹어드는 검은 덩어리 | 이빨 달린 검은 덩어리 | ✅ 맞음 |
+| 봉인 | `#8fa8e0` | 붉은 밀랍 | 아래 가장자리의 밀랍과 끈 | 밀랍 봉인 | 🔧 덮개만 재제작 |
+| 포박 | `#7fbf8a` | 굵은 밧줄 매듭 | 좌우를 감은 밧줄, 왼쪽에 매듭 | 밧줄 매듭 | 🔧 덮개만 재제작 |
+| 기절 | `#dfe6ee` | 돌처럼 굳은 균열 | 모서리에서 번지는 돌 껍질 | 갈라진 돌 주사위 | 🔧 덮개만 재제작 |
+| 마비 | `#8fd4ff` | 얼어붙은 번개 | 좌우 가장자리의 굵은 번개 | 번개와 굳은 손바닥 | 🔧 덮개만 재제작 |
+| 물림 | (신규) | **빨판 입** | 왼쪽에서 물어붙은 빨판 입 | 주사위를 문 빨판 입 | ❌ 둘 다 신규 |
+
+> **작업 순서 권장**: 한 상태를 골라 **덮개와 아이콘을 한 번에 뽑는다.** 따로 뽑으면 또 어긋난다.
+> 이미 뽑은 독 아이콘(송곳니)은 그대로 쓰고, 덮개에 송곳니를 더해 맞추는 쪽으로 정리했다.
+
+
 # 1부 · 주사위 덮개 (①)
 
 ## 지금 상태 — 13종 있음, 손볼 것 5종
@@ -64,6 +95,7 @@ No text, no letters, no watermark.
 | `status_die_bind.png` | **포박** (재제작) | `one very thick coarse rope wrapped once around the left and right edges, a fat knot bulging at the left, chunky twisted fibers` |
 | `status_die_stun.png` | **기절** (재제작) | `heavy grey stone crust creeping in from all four corners, thick blunt fracture wedges, the middle still open` |
 | `status_die_numb.png` | **마비** (재제작) | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
+| `status_die_poison.png` | **독** (아이콘과 맞추려면) | `one thick pale fang biting down from the top edge with heavy green venom running off it, a fat pool of green slime along the bottom edge` |
 | `status_die_devour.png` | 잠식 (선택) | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim` |
 
 ---
@@ -117,16 +149,16 @@ A 3x2 grid of six symbols, equal cells, equal spacing` 로 바꾸고 `IN ORDER �
 
 | 파일명 | 이름 | Symbol 프롬프트 |
 |---|---|---|
-| `status_poison.png` | 독 | `two fat sickly-green venom droplets falling from one thick curved fang` |
+| `status_poison.png` | 독 | ✅ **완료** — 송곳니 + 초록 점액 방울 (덮개를 여기 맞춘다) |
 | `status_bind.png` | 포박 | `one thick rope loop pulled into a tight knot, chunky twisted strands` |
 | `status_stun.png` | 기절 | `a grey stone die split by one heavy jagged crack` |
-| `status_curse.png` | 저주 | `a black downward crescent with one weeping eye at its center` |
+| `status_curse.png` | 저주 | `one thick violet flame burning upward, solid blocky tongues of fire` (덮개의 보라 불꽃과 같은 모티프) |
 | `status_blessing.png` | 축복 | `a small solid pale-gold crown with one broad halo of warm light behind it` |
 | `status_seal.png` | 봉인 | `one deep-red wax seal blob stamped over a folded parchment corner` |
 | `status_rot.png` | 부패 | `a swollen dark pustule with one short lit fuse and a bright ember tip` |
 | `status_chain.png` | 결속 | `two thick iron chain links interlocked, heavy blocky shapes` |
 | `status_numb.png` | 마비 | `one thick pale-blue lightning bolt over a stiff open palm` |
-| `status_plunder.png` | 약탈 | `a tipped-over leather pouch with two big dull gold coins spilling out` |
+| `status_plunder.png` | 약탈 | `a bony hand clenching one big dull gold coin, thick fingers gripping tight` (덮개의 움켜쥐는 손과 같은 모티프) |
 | `status_devour.png` | 잠식 | `a solid black void blob eating into the frame, one row of blunt teeth at its edge` |
 
 ## B. 새 효과 10종 (신규 제작)
