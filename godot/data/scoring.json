@@ -1,0 +1,504 @@
+{
+  "_version": 12,
+  "rerollsPerTurn": 2,
+  "categories": [
+    {
+      "id": "chance",
+      "name": "노페어",
+      "kind": "chance",
+      "score": "highestDie",
+      "tier": "common",
+      "ruleText": "언제나 성립 — 피해: 가장 높은 눈 하나 (보험)",
+      "example": [
+        6,
+        4,
+        3,
+        2,
+        1
+      ],
+      "fx": "slash",
+      "variants": [
+        {
+          "id": "instinct",
+          "name": "들짐승 눈",
+          "ability": [],
+          "abilityText": "부가 없음 — 언제나 성립하는 보험",
+          "tier": "common"
+        },
+        {
+          "id": "whisper",
+          "name": "숲의 속삭임",
+          "ability": [
+            {
+              "op": "focus",
+              "amount": 1
+            }
+          ],
+          "abilityText": "🎲 집중 +1 (스택마다 리롤 +1, 매 턴 1씩 소멸)",
+          "tier": "uncommon"
+        },
+        {
+          "id": "catch_breath",
+          "name": "숨 고르기",
+          "ability": [
+            {
+              "op": "whet",
+              "amount": 1
+            }
+          ],
+          "abilityText": "🔥 벼름 +1 — 약하게 흘리고 다음 한 방을 벼린다",
+          "tier": "common"
+        }
+      ],
+      "short": "노페어"
+    },
+    {
+      "id": "onePair",
+      "name": "원페어",
+      "kind": "ofKind",
+      "count": 2,
+      "score": "matchedSum",
+      "mult": 1,
+      "tier": "common",
+      "fx": "slash",
+      "ruleText": "같은 눈 2개 이상 — 피해: 같은 눈들의 합",
+      "example": [
+        5,
+        5,
+        4,
+        2,
+        1
+      ],
+      "variants": [
+        {
+          "id": "clasped_hands",
+          "name": "맞잡은 손",
+          "ability": [
+            {
+              "op": "regen",
+              "amount": 1
+            },
+            {
+              "op": "block",
+              "amount": 3
+            },
+            {
+              "op": "whet",
+              "amount": 1
+            }
+          ],
+          "abilityText": "❤️ 재생 1 · 🛡 방어 3 · 🔥 벼름 +1",
+          "tier": "common"
+        },
+        {
+          "id": "red_shoes",
+          "name": "붉은 구두",
+          "ability": [
+            {
+              "op": "strength",
+              "amount": 2
+            }
+          ],
+          "abilityText": "🗡️ 힘 +2 (족보 피해 +2, 매 턴 1씩 소멸)",
+          "tier": "uncommon"
+        },
+        {
+          "id": "clash",
+          "name": "맞부딪기",
+          "ability": [],
+          "burst": true,
+          "abilityText": "⚡ 일격 — 쌓아둔 🔥벼름을 전부 태운다",
+          "tier": "common"
+        }
+      ],
+      "short": "원페어"
+    },
+    {
+      "id": "twoPair",
+      "name": "투페어",
+      "kind": "twoPair",
+      "score": "matchedSum",
+      "mult": 1.25,
+      "tier": "common",
+      "fx": "slash2",
+      "ruleText": "서로 다른 눈 2쌍 — 피해: 두 쌍(주사위 4개)의 합 ×1.25 (내림)",
+      "example": [
+        5,
+        5,
+        3,
+        3,
+        1
+      ],
+      "variants": [
+        {
+          "id": "twin_sisters",
+          "name": "쌍둥이 자매",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 5
+            }
+          ],
+          "abilityText": "방어도 +5",
+          "tier": "common"
+        },
+        {
+          "id": "two_moons",
+          "name": "두 개의 달",
+          "ability": [
+            {
+              "op": "vulnerable",
+              "amount": 2
+            }
+          ],
+          "abilityText": "🎯 맞은 적 취약 +2 (받는 피해 +2)",
+          "tier": "uncommon"
+        }
+      ],
+      "short": "투페어"
+    },
+    {
+      "id": "threeKind",
+      "name": "트리플",
+      "kind": "ofKind",
+      "count": 3,
+      "score": "matchedSum",
+      "tier": "common",
+      "ruleText": "같은 눈 3개 이상 — 피해: 같은 눈들의 합 ×1.5 (내림)",
+      "example": [
+        4,
+        4,
+        4
+      ],
+      "fx": "slash2",
+      "variants": [
+        {
+          "id": "triple_axe",
+          "name": "세 번 도끼",
+          "ability": [
+            {
+              "op": "strength",
+              "amount": 2
+            }
+          ],
+          "abilityText": "🗡️ 힘 +2",
+          "tier": "common"
+        },
+        {
+          "id": "woodsman_breath",
+          "name": "나무꾼 숨",
+          "ability": [
+            {
+              "op": "weakEnemy",
+              "amount": 2
+            }
+          ],
+          "abilityText": "🔻 맞은 적 약화 +2 (공격력 -2)",
+          "tier": "uncommon"
+        },
+        {
+          "id": "chopping",
+          "name": "장작 패기",
+          "ability": [
+            {
+              "op": "whet",
+              "amount": 1
+            },
+            {
+              "op": "strength",
+              "amount": 1
+            }
+          ],
+          "abilityText": "🔥 벼름 +1 · 🗡️ 힘 +1",
+          "tier": "uncommon"
+        },
+        {
+          "id": "downstroke",
+          "name": "내리찍기",
+          "ability": [
+            {
+              "op": "strength",
+              "amount": 1
+            }
+          ],
+          "burst": true,
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🗡️ 힘 +1",
+          "tier": "uncommon"
+        }
+      ],
+      "mult": 1.5,
+      "short": "트리플"
+    },
+    {
+      "id": "fullHouse",
+      "name": "풀하우스",
+      "kind": "fullHouse",
+      "score": 35,
+      "tier": "uncommon",
+      "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25.",
+      "example": [
+        5,
+        5,
+        5,
+        2,
+        2
+      ],
+      "fx": "ring",
+      "variants": [
+        {
+          "id": "cottage",
+          "name": "오두막",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 15
+            }
+          ],
+          "abilityText": "방어도 +15",
+          "tier": "uncommon"
+        },
+        {
+          "id": "hearth",
+          "name": "따뜻한 화덕",
+          "ability": [
+            {
+              "op": "regen",
+              "amount": 2
+            },
+            {
+              "op": "block",
+              "amount": 8
+            }
+          ],
+          "abilityText": "❤️ 재생 +2 + 방어도 8",
+          "tier": "rare"
+        },
+        {
+          "id": "wedge",
+          "name": "쐐기",
+          "ability": [
+            {
+              "op": "vulnerable",
+              "amount": 2
+            }
+          ],
+          "burst": true,
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🎯 취약 2",
+          "tier": "rare"
+        }
+      ],
+      "short": "풀하우스"
+    },
+    {
+      "id": "largeStraight",
+      "name": "스트레이트",
+      "kind": "straight",
+      "length": 5,
+      "score": 60,
+      "tier": "rare",
+      "ruleText": "다섯 눈이 이어진다 — 피해 60 (전체 공격)",
+      "target": "allEnemies",
+      "example": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "fx": "bigwave",
+      "variants": [
+        {
+          "id": "moonpath",
+          "name": "달빛 오솔길",
+          "ability": [
+            {
+              "op": "vulnerable",
+              "amount": 3
+            },
+            {
+              "op": "focus",
+              "amount": 1
+            }
+          ],
+          "abilityText": "🎯 맞은 모든 적 취약 +3 + 🎲 집중 +1",
+          "tier": "rare"
+        },
+        {
+          "id": "storm_run",
+          "name": "폭풍 질주",
+          "ability": [
+            {
+              "op": "strength",
+              "amount": 4
+            },
+            {
+              "op": "weakEnemy",
+              "amount": 2
+            }
+          ],
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🗡️ 힘 +4 · 🔻 약화 2",
+          "tier": "epic",
+          "burst": true
+        },
+        {
+          "id": "windpath",
+          "name": "바람길",
+          "ability": [
+            {
+              "op": "weakEnemy",
+              "amount": 2
+            },
+            {
+              "op": "whet",
+              "amount": 1
+            }
+          ],
+          "abilityText": "🔻 적 약화 2 · 🔥 벼름 +1",
+          "tier": "uncommon"
+        },
+        {
+          "id": "hunt_drive",
+          "name": "몰이사냥",
+          "ability": [
+            {
+              "op": "block",
+              "amount": 10
+            }
+          ],
+          "abilityText": "방어도 +10",
+          "tier": "common"
+        },
+        {
+          "id": "snare",
+          "name": "덫 놓기",
+          "ability": [
+            {
+              "op": "weakEnemy",
+              "amount": 2
+            }
+          ],
+          "burst": true,
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🔻 적 약화 2",
+          "tier": "rare"
+        }
+      ],
+      "short": "스트레이트"
+    },
+    {
+      "id": "fourKind",
+      "name": "포카드",
+      "kind": "ofKind",
+      "count": 4,
+      "score": "matchedSum",
+      "tier": "rare",
+      "ruleText": "같은 눈 4개 이상 — 피해: 같은 눈들의 합 ×3",
+      "example": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "fx": "smash",
+      "variants": [
+        {
+          "id": "four_fangs",
+          "name": "네 송곳니",
+          "ability": [
+            {
+              "op": "bleed",
+              "amount": 4
+            }
+          ],
+          "abilityText": "🩸 맞은 적 출혈 +4 (행동마다 피해, 점차 감소)",
+          "tier": "rare"
+        },
+        {
+          "id": "heavy_blow",
+          "name": "묵직한 일격",
+          "ability": [
+            {
+              "op": "strength",
+              "amount": 3
+            }
+          ],
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🗡️ 힘 +3",
+          "tier": "uncommon",
+          "burst": true
+        },
+        {
+          "id": "hunger",
+          "name": "굶주림",
+          "ability": [
+            {
+              "op": "whet",
+              "amount": 2
+            }
+          ],
+          "abilityText": "🔥 벼름 +2 — 크게 벼려 다음을 노린다",
+          "tier": "rare"
+        }
+      ],
+      "mult": 3,
+      "short": "포카드"
+    },
+    {
+      "id": "yahtzee",
+      "name": "야찌",
+      "kind": "ofKind",
+      "count": 5,
+      "score": 70,
+      "tier": "epic",
+      "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50.",
+      "example": [
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "fx": "judgment",
+      "variants": [
+        {
+          "id": "judgment_night",
+          "name": "심판의 밤",
+          "ability": [
+            {
+              "op": "bleed",
+              "amount": 6
+            },
+            {
+              "op": "weakEnemy",
+              "amount": 4
+            },
+            {
+              "op": "block",
+              "amount": 12
+            }
+          ],
+          "abilityText": "⚡ 일격 — 🔥벼름을 전부 태운다 · 🩸 출혈 6 · 🔻 약화 4 · 🛡 방어 12",
+          "tier": "epic",
+          "burst": true
+        },
+        {
+          "id": "blood_moon",
+          "name": "핏빛 만월",
+          "ability": [
+            {
+              "op": "strength",
+              "amount": 6
+            },
+            {
+              "op": "bleed",
+              "amount": 5
+            }
+          ],
+          "abilityText": "🗡️ 힘 +6 + 🩸 출혈 +5",
+          "tier": "epic"
+        }
+      ],
+      "short": "야찌"
+    }
+  ],
+  "whetStep": 0.5,
+  "whetCap": 6
+}

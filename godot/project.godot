@@ -1,0 +1,17 @@
+; REDHOOD — Godot 4.3 (모바일 세로)
+config_version=5
+
+[application]
+config/name="REDHOOD"
+config/features=PackedStringArray("4.3")
+
+[display]
+window/size/viewport_width=390
+window/size/viewport_height=844
+window/handheld/orientation=1
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

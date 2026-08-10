@@ -1,0 +1,153 @@
+{
+  "_version": 4,
+  "player": {
+    "maxHp": 60,
+    "startDice": [
+      "normal",
+      "normal",
+      "normal",
+      "normal",
+      "normal"
+    ]
+  },
+  "map": {
+    "floors": 11,
+    "choicesMin": 2,
+    "choicesMax": 3,
+    "nodeWeights": {
+      "battle": 3,
+      "event": 1,
+      "elite": 1.6,
+      "shop": 0.8,
+      "rest": 0.5
+    },
+    "eliteFloors": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "fixed": {
+      "1": "battle",
+      "10": "rest",
+      "11": "boss"
+    }
+  },
+  "hpScalePerFloor": 0.11,
+  "encounters": {
+    "easyFloors": [
+      1,
+      2,
+      3
+    ],
+    "easy": [
+      [
+        "crow"
+      ],
+      [
+        "will_o_wisp"
+      ],
+      [
+        "forest_spider"
+      ],
+      [
+        "crow",
+        "crow"
+      ]
+    ],
+    "hard": [
+      [
+        "stray_dog"
+      ],
+      [
+        "thorn_bush"
+      ],
+      [
+        "twig_golem"
+      ],
+      [
+        "crow",
+        "stray_dog"
+      ],
+      [
+        "will_o_wisp",
+        "forest_spider"
+      ]
+    ],
+    "elite": [
+      [
+        "alpha_dog"
+      ]
+    ],
+    "boss": [
+      [
+        "wolf"
+      ]
+    ]
+  },
+  "rewards": {
+    "battle": {
+      "choices": 3,
+      "pool": {
+        "category": 55,
+        "dice": 45
+      },
+      "tierWeights": {
+        "common": 62,
+        "uncommon": 38
+      }
+    },
+    "elite": {
+      "choices": 3,
+      "pool": {
+        "category": 55,
+        "dice": 45
+      },
+      "tierWeights": {
+        "uncommon": 60,
+        "rare": 40
+      }
+    },
+    "boss": {
+      "choices": 0
+    }
+  },
+  "rest": {
+    "healRatio": 0.3
+  },
+  "diceShift": {
+    "perVariant": 4,
+    "freeVariants": 3,
+    "maxRatio": 0.7
+  },
+  "coins": {
+    "battle": [
+      12,
+      18
+    ],
+    "elite": [
+      25,
+      35
+    ]
+  },
+  "shop": {
+    "stockDice": 3,
+    "stockRelics": 2,
+    "dieTierWeights": {
+      "common": 50,
+      "uncommon": 35,
+      "rare": 15
+    },
+    "prices": {
+      "diceByTier": {
+        "common": 25,
+        "uncommon": 40,
+        "rare": 60
+      },
+      "relic": 45
+    }
+  }
+}
