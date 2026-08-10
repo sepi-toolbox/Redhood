@@ -98,7 +98,11 @@ function spawnEnemy(id, idx, scale) {
     // v1.30 정예·보스 기믹 — 머리를 써서 풀라고 거는 조건들
     ward: (def.start || {}).ward || 0, wardLeft: (def.start || {}).ward ? ((def.start || {}).wardTurns || 99) : 0,
     cap: (def.start || {}).cap || 0, capLeft: (def.start || {}).cap ? ((def.start || {}).capTurns || 99) : 0,
-    // 문턱·상한은 별도 시스템이 아니라 버프다 — 행동으로도, 시작 버프(enemies.json start)로도 얻는다
+    // 적 자기 버프(v3.8) — 문턱·상한과 같은 문법: 행동으로도, 시작 버프로도 얻는다
+    regen: (def.start || {}).regen || 0, regenLeft: (def.start || {}).regen ? 99 : 0,   // 매 행동 회복
+    enrage: (def.start || {}).enrage || 0,                                              // 맞을 때마다 힘 +N (전투 내)
+    reflect: (def.start || {}).reflect || 0, reflectLeft: (def.start || {}).reflect ? 99 : 0, // 맞으면 반사 (방어도로 막힘)
+    undying: (def.start || {}).undying || 0,                                            // 죽으면 1회 부활 (비율)
   };
 }
 
@@ -617,8 +621,29 @@ function dealToEnemy(battle, t, amount) {
   t.block -= absorbed;
   const dealt = total - absorbed;
   t.hp -= dealt;
+  // 불사 — 처음 쓰러지는 순간 한 번은 뼈를 다시 맞춘다
+  if (t.hp <= 0 && t.undying > 0) {
+    t.hp = Math.max(1, Math.round(t.maxHpInit * t.undying));
+    t.undying = 0;
+    if (battle.lastResult) battle.lastResult.bonusHits.push('💀다시 일어선다!');
+  }
   battle.lastHits.push({ uid: t.uid, amount: dealt, absorbed, killed: t.hp <= 0 });
-  if (t.hp > 0 && dealt > 0) interrupt(t, dealt);
+  if (t.hp > 0 && dealt > 0) {
+    // 격노 — 맞을 때마다 사나워진다 (잔펀치가 벌을 받는다)
+    if (t.enrage > 0) {
+      t.power = (t.power || 0) + t.enrage;
+      if (battle.lastResult) battle.lastResult.bonusHits.push(`💢격노 +${t.enrage}`);
+    }
+    // 반사 — 되받아친다. 방어도로 막힌다 (막을 수 있는 세금)
+    if (t.reflectLeft > 0 && t.reflect > 0) {
+      const ab = Math.min(battle.player.block, t.reflect);
+      battle.player.block -= ab;
+      battle.player.hp -= (t.reflect - ab);
+      if (battle.lastResult) battle.lastResult.bonusHits.push(`🌵반사 ${t.reflect}`);
+      if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; }
+    }
+    interrupt(t, dealt);
+  }
 }
 
 // HP에 실제로 들어간 피해만 받아서 국면 전환과 파쇄를 판정한다 (방어도로 막힌 몫은 넘어오지 않는다)
@@ -840,6 +865,12 @@ export function enemyPhase(battle) {
       if (e.hp <= 0) continue; // 출혈사 — 행동 없이 쓰러진다
     }
     if (e.wardLeft > 0) { e.wardLeft -= 1; if (e.wardLeft <= 0) e.ward = 0; }
+    if (e.reflectLeft > 0) { e.reflectLeft -= 1; if (e.reflectLeft <= 0) e.reflect = 0; }
+    // 재생 — 자기 차례마다 아문다. 순 피해가 이걸 못 넘으면 영원히 못 잡는다
+    if (e.regenLeft > 0 && e.regen > 0 && e.hp > 0) {
+      e.hp = Math.min(e.maxHpInit, e.hp + e.regen);
+      e.regenLeft -= 1; if (e.regenLeft <= 0) e.regen = 0;
+    }
     if (e.capLeft > 0) { e.capLeft -= 1; if (e.capLeft <= 0) e.cap = 0; }
     if (e.stunned) { e.stunned = false; chooseMove(e, battle.turn + 1); continue; }
     // v1.06 연타(hits): 피해 효과에만 적용된다. 다른 효과에서는 무시되므로 0이나 1을 적어두면 된다.
@@ -912,6 +943,15 @@ export function enemyPhase(battle) {
           break;
         case 'blind':                                      // 🌫 족보 위력 미리보기 숨김 (스멀거림)
           battle.mods.blind = { left: (ef.turns || 1) + 1, name: e.nextMove.name };
+          break;
+        case 'regen':                                      // 💗 재생 — 자기 차례마다 amount 회복
+          e.regen = ef.amount; e.regenLeft = Math.max(1, ef.turns || 3);
+          break;
+        case 'enrage':                                     // 💢 격노 — 맞을 때마다 힘 +amount (전투 내)
+          e.enrage = ef.amount || 1;
+          break;
+        case 'reflect':                                    // 🌵 반사 — 맞으면 amount 되돌려준다
+          e.reflect = ef.amount; e.reflectLeft = Math.max(1, ef.turns || 3);
           break;
         case 'ward':                                       // 🪨 문턱 — amount 이하의 단발 피해를 무시한다
           e.ward = ef.amount; e.wardLeft = Math.max(1, ef.turns || 2);
@@ -1095,6 +1135,9 @@ export function intentOf(enemy) {
     else if (['sealLast', 'sealCat', 'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind', 'drainWhet', 'unpin'].includes(ef.op)) debuff = true;
     else if (ef.op === 'ward') parts.push(`🪨${ef.amount}`);
     else if (ef.op === 'cap') parts.push(`⛓${ef.amount}`);
+    else if (ef.op === 'regen') parts.push(`💗${ef.amount}`);
+    else if (ef.op === 'enrage') parts.push('💢');
+    else if (ef.op === 'reflect') parts.push(`🌵${ef.amount}`);
   }
   if (debuff) parts.push('🌀');
   // 파쇄 기준치(🔨N)는 예고에 내보내지 않는다 — 적을 길게 눌러 여는 치트 창에서만 보인다

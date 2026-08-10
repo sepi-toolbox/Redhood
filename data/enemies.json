@@ -2444,6 +2444,11 @@
      {
       "op": "damage",
       "amount": 8
+     },
+     {
+      "op": "status",
+      "kind": "poison",
+      "amount": 2
      }
     ],
     "minTurn": 5,
@@ -2532,9 +2537,15 @@
      {
       "op": "heal",
       "amount": 3
+     },
+     {
+      "op": "rollTax",
+      "amount": 1,
+      "turns": 2
      }
     ],
-    "minTurn": 5
+    "minTurn": 5,
+    "cooldown": 2
    },
    "buzz": {
     "name": "윙윙거림",
@@ -2660,6 +2671,11 @@
      {
       "op": "confuse",
       "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 2
      }
     ],
     "minTurn": 5,
@@ -2753,13 +2769,19 @@
      {
       "op": "empower",
       "amount": 3
+     },
+     {
+      "op": "status",
+      "kind": "curse",
+      "amount": 2
      }
     ],
     "hidden": true,
     "followUp": {
      "move": "trample",
      "chance": 0.5
-    }
+    },
+    "cooldown": 2
    },
    "trample": {
     "name": "짓밟기",
@@ -2864,6 +2886,11 @@
      {
       "op": "damage",
       "amount": 11
+     },
+     {
+      "op": "status",
+      "kind": "stun",
+      "amount": 2
      }
     ],
     "minTurn": 5,
@@ -2923,7 +2950,10 @@
     "op": "heal",
     "weight": 1
    }
-  ]
+  ],
+  "start": {
+   "undying": 0.35
+  }
  },
  {
   "id": "grave_worm",
@@ -2951,6 +2981,11 @@
      {
       "op": "empower",
       "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "devour",
+      "amount": 1
      }
     ],
     "hidden": true,
@@ -3065,6 +3100,11 @@
       "op": "status",
       "kind": "chain",
       "amount": 3
+     },
+     {
+      "op": "petrify",
+      "face": 6,
+      "turns": 3
      }
     ],
     "followUp": {
@@ -3167,7 +3207,10 @@
     "op": "armor",
     "weight": 2
    }
-  ]
+  ],
+  "start": {
+   "cap": 18
+  }
  },
  {
   "id": "headless_knight",
@@ -3199,6 +3242,10 @@
      {
       "op": "block",
       "amount": 6
+     },
+     {
+      "op": "sealLast",
+      "turns": 2
      }
     ],
     "followUp": {
@@ -3289,7 +3336,10 @@
     "op": "armor",
     "weight": 1
    }
-  ]
+  ],
+  "start": {
+   "ward": 12
+  }
  },
  {
   "id": "grave_keeper",
@@ -3337,6 +3387,10 @@
       "kind": "rot",
       "amount": 2,
       "power": 12
+     },
+     {
+      "op": "lockHigh",
+      "turns": 2
      }
     ],
     "minTurn": 6,
@@ -3365,6 +3419,11 @@
       "op": "status",
       "kind": "rot",
       "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "seal",
+      "amount": 1
      }
     ],
     "cooldown": 2,
@@ -3487,8 +3546,14 @@
      {
       "op": "heal",
       "amount": 14
+     },
+     {
+      "op": "regen",
+      "amount": 4,
+      "turns": 3
      }
-    ]
+    ],
+    "cooldown": 2
    },
    "surge": {
     "name": "늪이 끓어오른다",
@@ -3508,6 +3573,15 @@
       "op": "status",
       "kind": "bind",
       "amount": 3
+     },
+     {
+      "op": "sealCat",
+      "cats": [
+       "fourKind",
+       "largeStraight",
+       "yahtzee"
+      ],
+      "turns": 2
      }
     ],
     "cooldown": 3,
@@ -3626,6 +3700,10 @@
      {
       "op": "block",
       "amount": 14
+     },
+     {
+      "op": "blind",
+      "turns": 2
      }
     ],
     "followUp": {
@@ -3656,8 +3734,14 @@
      {
       "op": "empower",
       "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "bind",
+      "amount": 2
      }
-    ]
+    ],
+    "cooldown": 2
    },
    "surge": {
     "name": "숨을 깊이 들이쉰다",
@@ -3827,8 +3911,14 @@
      {
       "op": "heal",
       "amount": 10
+     },
+     {
+      "op": "status",
+      "kind": "rot",
+      "amount": 2
      }
-    ]
+    ],
+    "cooldown": 2
    },
    "surge": {
     "name": "흙을 밀어낸다",
@@ -3853,6 +3943,11 @@
       "op": "status",
       "kind": "poison",
       "amount": 3
+     },
+     {
+      "op": "holdTax",
+      "per": 1,
+      "turns": 2
      }
     ],
     "cooldown": 2,
@@ -3975,9 +4070,20 @@
      {
       "op": "confuse",
       "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "chain",
+      "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 1
      }
     ],
-    "minTurn": 5
+    "minTurn": 5,
+    "cooldown": 2
    },
    "surge": {
     "name": "귀를 세운다",
@@ -4055,6 +4161,16 @@
      {
       "op": "confuse",
       "amount": 3
+     },
+     {
+      "op": "status",
+      "kind": "stun",
+      "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "curse",
+      "amount": 1
      }
     ],
     "followUp": {
@@ -4164,8 +4280,13 @@
      {
       "op": "confuse",
       "amount": 2
+     },
+     {
+      "op": "blind",
+      "turns": 2
      }
-    ]
+    ],
+    "cooldown": 2
    },
    "wing": {
     "name": "날개치기",
@@ -4306,6 +4427,16 @@
      {
       "op": "damage",
       "amount": 12
+     },
+     {
+      "op": "status",
+      "kind": "devour",
+      "amount": 1
+     },
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 1
      }
     ],
     "minTurn": 5,
@@ -4413,9 +4544,15 @@
      {
       "op": "damage",
       "amount": 14
+     },
+     {
+      "op": "status",
+      "kind": "plunder",
+      "amount": 2
      }
     ],
-    "minTurn": 5
+    "minTurn": 5,
+    "cooldown": 2
    },
    "surge": {
     "name": "기도를 삼킨다",
@@ -4511,6 +4648,11 @@
      {
       "op": "block",
       "amount": 12
+     },
+     {
+      "op": "petrify",
+      "face": 6,
+      "turns": 3
      }
     ],
     "followUp": {
@@ -4583,7 +4725,10 @@
     "op": "armor",
     "weight": 2
    }
-  ]
+  ],
+  "start": {
+   "ward": 8
+  }
  },
  {
   "id": "sandman",
@@ -4626,6 +4771,16 @@
      {
       "op": "empower",
       "amount": 4
+     },
+     {
+      "op": "status",
+      "kind": "numb",
+      "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "bind",
+      "amount": 1
      }
     ],
     "followUp": {
@@ -4766,6 +4921,16 @@
      {
       "op": "confuse",
       "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "chain",
+      "amount": 3
+     },
+     {
+      "op": "status",
+      "kind": "bind",
+      "amount": 1
      }
     ],
     "cooldown": 3
@@ -4871,7 +5036,10 @@
     "op": "heal",
     "weight": 1
    }
-  ]
+  ],
+  "start": {
+   "reflect": 2
+  }
  },
  {
   "id": "bell_ringer",
@@ -4908,6 +5076,10 @@
       "op": "status",
       "kind": "plunder",
       "amount": 2
+     },
+     {
+      "op": "sealLast",
+      "turns": 2
      }
     ],
     "hidden": true,
@@ -4923,6 +5095,11 @@
      {
       "op": "damage",
       "amount": 18
+     },
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 2
      }
     ],
     "minTurn": 6,
@@ -5040,6 +5217,14 @@
      {
       "op": "empower",
       "amount": 3
+     },
+     {
+      "op": "sealLast",
+      "turns": 2
+     },
+     {
+      "op": "blind",
+      "turns": 2
      }
     ],
     "hidden": true,
@@ -5092,6 +5277,11 @@
       "op": "status",
       "kind": "seal",
       "amount": 3
+     },
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 5
      }
     ],
     "cooldown": 3,
@@ -5109,7 +5299,7 @@
       "nightmare": 0,
       "surge": 1.5,
       "wake_false": 0,
-      "whole_dream": 2
+      "whole_dream": 0
      }
     }
    },
@@ -5204,6 +5394,11 @@
      {
       "op": "empower",
       "amount": 4
+     },
+     {
+      "op": "status",
+      "kind": "devour",
+      "amount": 1
      }
     ],
     "followUp": {
@@ -5223,8 +5418,14 @@
      {
       "op": "block",
       "amount": 12
+     },
+     {
+      "op": "lockHigh",
+      "heal": true,
+      "turns": 2
      }
-    ]
+    ],
+    "cooldown": 2
    },
    "crush": {
     "name": "짓씹기",
@@ -5338,7 +5539,10 @@
     "op": "heal",
     "weight": 1
    }
-  ]
+  ],
+  "start": {
+   "enrage": 1
+  }
  },
  {
   "id": "false_saint",
@@ -5361,6 +5565,11 @@
      {
       "op": "empower",
       "amount": 3
+     },
+     {
+      "op": "status",
+      "kind": "blessing",
+      "amount": 2
      }
     ],
     "cooldown": 2
@@ -5389,12 +5598,18 @@
      {
       "op": "block",
       "amount": 10
+     },
+     {
+      "op": "status",
+      "kind": "blessing",
+      "amount": 3
      }
     ],
     "followUp": {
      "move": "judgment",
      "chance": 0.7
-    }
+    },
+    "cooldown": 2
    },
    "judgment": {
     "name": "심판",
@@ -5434,6 +5649,15 @@
       "op": "status",
       "kind": "curse",
       "amount": 3
+     },
+     {
+      "op": "sealCat",
+      "cats": [
+       "chance",
+       "onePair",
+       "twoPair"
+      ],
+      "turns": 2
      }
     ],
     "cooldown": 2,
@@ -5580,6 +5804,11 @@
      {
       "op": "confuse",
       "amount": 1
+     },
+     {
+      "op": "status",
+      "kind": "devour",
+      "amount": 2
      }
     ],
     "minTurn": 6,
@@ -5692,6 +5921,11 @@
      {
       "op": "block",
       "amount": 6
+     },
+     {
+      "op": "status",
+      "kind": "blessing",
+      "amount": 2
      }
     ],
     "cooldown": 2
@@ -5779,8 +6013,14 @@
      {
       "op": "confuse",
       "amount": 2
+     },
+     {
+      "op": "status",
+      "kind": "numb",
+      "amount": 2
      }
-    ]
+    ],
+    "cooldown": 2
    },
    "crescendo": {
     "name": "크레셴도",
@@ -5910,6 +6150,11 @@
      {
       "op": "damage",
       "amount": 12
+     },
+     {
+      "op": "status",
+      "kind": "rot",
+      "amount": 2
      }
     ],
     "minTurn": 5,

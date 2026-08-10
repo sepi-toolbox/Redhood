@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.7'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.8'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -823,6 +823,10 @@ function renderBattle(opts = {}) {
               return ' ' + badgeRow('enemy-buffs', [
                 e.block > 0 ? badge('bad', 'intent_defend', e.block, { title: '적 방어도' }) : '',
                 e.power > 0 ? badge('bad', 'intent_empower', '+' + e.power, { title: '적 강화' }) : '',
+                e.regenLeft > 0 && e.regen > 0 ? badge('bad', '💗', e.regen, { title: `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)` }) : '',
+                e.enrage > 0 ? badge('bad', '💢', '+' + e.enrage, { title: '격노 — 맞을 때마다 힘이 오른다' }) : '',
+                e.reflectLeft > 0 && e.reflect > 0 ? badge('bad', '🌵', e.reflect, { title: `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힘)` }) : '',
+                e.undying > 0 ? badge('bad', '💀', '', { title: '불사 — 한 번은 다시 일어선다' }) : '',
                 // 적에게 불리한 것 = 내게 유리한 것
                 d.weak > 0 ? badge('good', 'status_weak', d.weak, { title: '약화' }) : '',
                 d.bleed > 0 ? badge('good', 'status_bleed', d.bleed, { title: '출혈' }) : '',
@@ -1054,6 +1058,9 @@ function enemyEffectText(e, ef) {
     case 'lockHigh': return `🧲 물기 — ${ef.turns || 1}턴간 매 굴림 가장 높은 눈이 물린다${ef.heal ? ' (그만큼 회복)' : ''}`;
     case 'blind': return `🌫 어둠 — ${ef.turns || 1}턴간 족보 위력이 보이지 않는다`;
     case 'ward': return `🪨 문턱 ${ef.amount} — 한 번에 넘겨야 뚫린다`;
+    case 'regen': return `💗 재생 ${ef.amount} — ${ef.turns || 3}턴간 자기 차례마다 회복`;
+    case 'enrage': return `💢 격노 — 맞을 때마다 힘 +${ef.amount || 1} (전투 내 누적)`;
+    case 'reflect': return `🌵 반사 ${ef.amount} — ${ef.turns || 3}턴간 때리면 되받는다`;
     case 'cap': return `⛓ 상한 ${ef.amount} — 한 번에 이 이상 안 들어간다`;
     case 'rest': return `💤 휴식`;
     case 'drainWhet': return `🌀 벼름을 빼앗는다`;
@@ -1103,6 +1110,10 @@ function showEnemyInfo(uid) {
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
     d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable} · 매 턴 1 소멸</li>` : '',
     e.wardLeft > 0 ? `<li>🪨 문턱 ${e.ward} — 한 번에 ${e.ward} 이하로 때리면 아예 안 통한다 (${e.wardLeft}턴)</li>` : '',
+    e.regenLeft > 0 && e.regen > 0 ? `<li>💗 재생 ${e.regen} — 자기 차례마다 회복 (${e.regenLeft}턴). 이보다 세게 때려야 줄어든다</li>` : '',
+    e.enrage > 0 ? `<li>💢 격노 — 피해를 받을 때마다 힘 +${e.enrage} (전투 내 누적). 잔펀치가 벌을 받는다</li>` : '',
+    e.reflectLeft > 0 && e.reflect > 0 ? `<li>🌵 반사 ${e.reflect} — 때릴 때마다 되받는다 (${e.reflectLeft}턴, 방어도로 막힘)</li>` : '',
+    e.undying > 0 ? `<li>💀 불사 — 처음 쓰러질 때 한 번 다시 일어선다</li>` : '',
     e.capLeft > 0 ? `<li>⛓ 상한 ${e.cap} — 한 번에 ${e.cap}을 넘겨 줄 수 없다 (${e.capLeft}턴)</li>` : '',
     e.stunned ? '<li>💫 다음 행동 취소됨</li>' : '',
   ].filter(Boolean).join('');
