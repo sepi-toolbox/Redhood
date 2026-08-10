@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.13'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.14'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -96,7 +96,7 @@ const ENLIGHT_DESC = [
   '엘리트가 더 자주 나타난다', '모든 일반 적 공격력 +15%', '모든 엘리트 공격력 +15%', '보스 공격력 +15%',
   '보스 처치 회복 50% → 15%', 'HP 30%를 잃은 채 시작', '모든 일반 적 체력 +20%', '모든 엘리트 체력 +20%',
   '모든 보스 체력 +20%', '주사위 하나가 저주 주사위로', '휴식 회복량 -50%',
-  '일반의 언커먼·엘리트의 레어 확률 절반', '적이 주는 🪙 -25%', '최대 HP -10%',
+  '일반의 언커먼·엘리트의 레어 확률 절반', '적이 주는 돈 -25%', '최대 HP -10%',
   '이벤트의 대가가 가혹해진다', '상점 가격 증가', '일반 적에게 계몽 패턴', '엘리트에게 계몽 패턴',
   '보스에게 계몽 패턴', '최종 보스가 두 마리',
 ];
@@ -247,7 +247,7 @@ function eventFrame(npc, linesHtml, choicesHtml) {
       <header class="topbar">
         <span>💬 ${run.floor > 0 ? `${run.floor}층 · ` : ''}만남</span>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
-        <span>${run.floor > 0 ? `🪙${run.coins}` : ''}</span>
+        <span>${run.floor > 0 ? `${uiIco("coin")}${run.coins}` : ''}</span>
       </header>
       <div class="npc-stage">
         ${npcArtHtml(npc)}
@@ -391,11 +391,11 @@ function showShop() {
       const isSold = sold.has(i);
       const afford = run.coins >= s.price;
       const tierTag = TIER_KO[s.item.tier] || s.item.tier;
-      const name = s.kind === 'die' ? `🎲 ${s.item.name}` : `${s.item.icon} ${s.item.name}`;
+      const name = s.kind === 'die' ? `${uiIco("roll")} ${s.item.name}` : `${s.item.icon} ${s.item.name}`;
       const sub = s.kind === 'die' ? `[${s.item.faces.join(',')}] ${s.item.desc}` : s.item.desc;
       return `
         <button class="sheet-row choice-row shop-item ${isSold || !afford ? 'used' : ''}" data-idx="${i}" ${isSold || !afford ? 'disabled' : ''}>
-          <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(tierTag)}</small><span class="shop-price">${isSold ? '판매됨' : `🪙${s.price}`}</span></span>
+          <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(tierTag)}</small><span class="shop-price">${isSold ? '판매됨' : `${uiIco("coin")}${s.price}`}</span></span>
           <span class="choice-sub">${esc(sub)}</span>
         </button>`;
     }).join('') + `<button class="btn ghost" id="shop-leave">🌲 떠난다</button>`;
@@ -452,7 +452,7 @@ function afterBossVictory() {
       <div class="screen center end-screen">
         <div class="rest-art">${theme.icon}</div>
         <h2>${run.act}막 — ${esc(theme.name)}</h2>
-        <p>상처를 여미고 다시 걷는다. <b class="coin-gain">+${healed} HP</b> (❤️ ${run.hp}/${run.maxHp})</p>
+        <p>상처를 여미고 다시 걷는다. <b class="coin-gain">+${healed} HP</b> (${uiIco("heart")} ${run.hp}/${run.maxHp})</p>
         <button class="btn primary" id="next-act-btn">더 깊은 곳으로</button>
       </div>`));
     document.getElementById('next-act-btn').addEventListener('click', showMap);
@@ -504,11 +504,11 @@ function showFinalEnd(turns) {
  *   rule  규칙·제약       (정예/보스 기믹)
  * 아이콘은 그림이 있으면 그림, 없으면 글자 — 담는 틀은 어느 쪽이든 같다.
  * ------------------------------------------------------------------------ */
-const ICON_ASSET = new Set(['status_bleed', 'status_block', 'status_confuse', 'status_focus',
-  'status_regen', 'status_strength', 'status_vulnerable', 'status_weak',
-  'intent_attack', 'intent_defend', 'intent_confuse', 'intent_empower', 'intent_heal']);
+// v3.14: 손으로 적던 흰 목록이 fx_*·ui_* 를 몰라 배지에 파일 이름이 그대로 찍혔다.
+// 접두사로 판별한다 — 새 아이콘을 넣을 때마다 여기를 고칠 일이 없게.
+const ICON_ASSET = /^(status|intent|fx|ui|node|doodle)_/;
 function badgeIcon(icon) {
-  return ICON_ASSET.has(icon)
+  return ICON_ASSET.test(icon)
     ? `<img class="bdg-ico" src="assets/icons/${icon}.png" alt="" draggable="false">`
     : `<span class="bdg-ico glyph">${icon}</span>`;
 }
@@ -527,6 +527,9 @@ const badgeRow = (cls, list) => {
 function ico(name, cls = '') {
   return `<img class="ico ${cls}" src="assets/icons/${name}.png" alt="" draggable="false">`;
 }
+// v3.14: 전투·상점·지도에 남아 있던 이모지를 정식 표식 아트로 (C절 — 메달 없이 심볼만)
+const UI_ICO = { coin: 'ui_coin', unknown: 'ui_unknown', heart: 'ui_heart', roll: 'ui_roll', burst: 'ui_burst', whet: 'ui_whet' };
+const uiIco = (key, cls = 'ico-ui') => ico(UI_ICO[key], cls);
 // 적 의도 문자열(engine.intentOf)의 이모지를 그림으로 치환
 function iconifyIntent(s) {
   return s
@@ -558,7 +561,8 @@ const NODE_META = {
 let mapResizeObs = null; // v0.29: 캔버스 크기 변화 시 잉크길 재작도 (노드-선 어긋남 근본 해결)
 // v0.86: 보스 노드는 테마별 전용 낙서 아이콘을 쓴다 — 보스만 보고도 어느 구역인지 알 수 있게.
 // 자산이 준비된 보스만 여기에 추가하면 자동 교체되고, 없으면 공용 보스 낙서로 표시된다.
-const BOSS_ICON_READY = new Set([]);
+const BOSS_ICON_READY = new Set(['wolf', 'river_hag', 'old_teddy', 'swamp_king', 'fog_mother',
+  'the_buried', 'lucid_king', 'the_maw', 'false_saint']); // v3.14: 9종 전량 도착
 function nodeDoodle(type) {
   if (type !== 'boss') return 'doodle_' + type;
   const bossId = run && run.act <= 3 ? themeOf(run).boss : null;
@@ -596,7 +600,7 @@ function showMap() {
         ${ico(nodeDoodle(nd.type), 'ico-node')}
       </button>`;
     }).join('');
-    return `<div class="map-row2">${cells}</div>`;
+    return `<div class="map-row2 ${fl.some(nd => nd.type === 'boss') ? 'boss-row' : ''}">${cells}</div>`;
   }).reverse().join(''); // 화면에서는 위가 보스, 아래가 1층
   app.innerHTML = '';
   app.append(h(`
@@ -604,7 +608,7 @@ function showMap() {
       <header class="topbar map-top">
         <button class="btn ghost tiny" id="abandon-btn">런 포기</button>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
-        <span class="coin-slot">🪙${run.coins}</span>
+        <span class="coin-slot">${uiIco("coin")}${run.coins}</span>
         <button class="mute-mini" id="map-mute">${isMuted() ? '🔇' : '🔊'}</button>
       </header>
       <div class="map-scroll parchment">
@@ -614,7 +618,7 @@ function showMap() {
         </div>
       </div>
       <div class="player-bar map-foot">
-        <button class="btn ghost tiny" id="bag-btn">🎲 가방</button>
+        <button class="btn ghost tiny" id="bag-btn">${uiIco("roll")} 가방</button>
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${Math.max(0, run.hp / run.maxHp * 100)}%"></div>
           <span class="hp-text">${run.hp} / ${run.maxHp}</span>
@@ -695,7 +699,7 @@ function showBagModal() {
   const catItems = DB.scoring.categories.filter(c => c.id in run.categories).map(c => {
     const v = variantOf(c, run.categories[c.id]);
     return `<li${v.base ? ' class="slot-empty"' : ''}><b>${esc(v.name)}</b> <small class="cat-tag${v.base ? ' t-slot' : ''}">${v.base ? '빈 자리' : esc(c.name)}</small>`
-      + `${v.burst ? ' <small class="cat-tag t-burst">⚡일격</small>' : ''}`
+      + `${v.burst ? ` <small class="cat-tag t-burst">${uiIco('burst')}일격</small>` : ''}`
       + `${isAoE(c) ? ' <small class="aoe-tag">전체</small>' : ''} `
       + `<span class="modal-text">${esc(v.abilityText || '')}</span></li>`;
   }).join('');
@@ -743,7 +747,7 @@ function showRest() {
   document.getElementById('rest-btn').addEventListener('click', () => {
     const healed = applyRest(run); saveRun(run);
     app.querySelector('.rest-screen').innerHTML =
-      `<div class="rest-art">✨</div><h2>+${healed} HP</h2><p>❤️ ${run.hp}/${run.maxHp}</p>
+      `<div class="rest-art">✨</div><h2>+${healed} HP</h2><p>${uiIco("heart")} ${run.hp}/${run.maxHp}</p>
        <button class="btn primary" id="rest-done">숲으로</button>`;
     document.getElementById('rest-done').addEventListener('click', showMap);
   });
@@ -803,7 +807,7 @@ function renderBattle(opts = {}) {
       <header class="topbar">
         <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
         <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
-        <span class="coin-slot">🪙${run.coins} <span class="hp">❤️</span></span>
+        <span class="coin-slot">${uiIco("coin")}${run.coins} <span class="hp">${uiIco("heart")}</span></span>
       </header>
       <div class="enemy-zone ${multi ? 'multi' : ''}">
         ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
@@ -861,15 +865,15 @@ function renderBattle(opts = {}) {
               : `<img class="pip-art" src="${dieFaceSrc(def.id, d.face)}" alt="${d.face}" draggable="false">`}
             ${st ? `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>${st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''}` : ''}
             ${pinned && !st ? '<span class="st-tint"></span><span class="st-rim"></span>' : ''}
-            ${d.sigLock ? '<span class="st-tint"></span><span class="st-rim"></span>' : ''}
+            ${d.sigLock ? '<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_bite.png" alt="" draggable="false"><span class="st-rim"></span>' : ''}
             <small>${d.sigLock ? esc((modOf(battle, 'lockHigh') || {}).name || '물림') : st ? esc(st.name) : marked ? '다시' : pinned ? '새김' : ''}</small>
           </button>`;
         }).join('')}
       </div>
       <div class="roll-bar">
         ${!battle.rolled
-          ? `<button class="btn primary roll-btn" id="roll-btn">🎲 굴림</button>`
-          : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft < rerollCost(battle) || battle.await || battle.dice.every(d => d.held) ? 'disabled' : ''}>🎲 리롤 (${battle.rollsLeft})${rerollCost(battle) > 1 ? ` <span class="cost">-${rerollCost(battle)}</span>` : ''}</button>`}
+          ? `<button class="btn primary roll-btn" id="roll-btn">${uiIco("roll")} 굴림</button>`
+          : `<button class="btn primary roll-btn" id="reroll-btn" ${battle.rollsLeft < rerollCost(battle) || battle.await || battle.dice.every(d => d.held) ? 'disabled' : ''}>${uiIco("roll")} 리롤 (${battle.rollsLeft})${rerollCost(battle) > 1 ? ` <span class="cost">-${rerollCost(battle)}</span>` : ''}</button>`}
       </div>
       <div class="hint-line">${hintHtml()}</div>
       <div class="sheet-zone combo-list ${battle.rolled ? '' : 'dim'}">
@@ -879,7 +883,7 @@ function renderBattle(opts = {}) {
             ${COMBO_PLATE_READY.has(variant.id) ? `style="border-image-source: url('assets/ui/paper_${variant.id}.png')"` : ''}>
             <span class="row-body">
               <span class="sheet-name">${esc(variant.name)}</span>
-              <small class="cat-tag${variant.base ? ' t-slot' : ''}">${burst ? '<b class="burst-mark">⚡일격</b> · ' : ''}${variant.base ? '빈 자리' : esc(cat.short || cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
+              <small class="cat-tag${variant.base ? ' t-slot' : ''}">${burst ? `<b class="burst-mark">${uiIco('burst')}일격</b> · ` : ''}${variant.base ? '빈 자리' : esc(cat.short || cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
             </span>
             <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
           </button>`).join('')}
@@ -888,8 +892,8 @@ function renderBattle(opts = {}) {
         // 내 버프 칩 — 체력바 위, 길게 눌러 상세 (v0.19)
         const b = battle.buffs;
         const row = badgeRow('badge-row', [
-          battle.whet > 0 ? badge('good', '🔥', battle.whet,
-            { sub: '×' + whetMultOf(battle.whet).toFixed(1), cls: 'whet', title: '벼름 — ⚡일격 족보로만 터뜨린다' }) : '',
+          battle.whet > 0 ? badge('good', UI_ICO.whet, battle.whet,
+            { sub: '×' + whetMultOf(battle.whet).toFixed(1), cls: 'whet', title: '벼름 — 일격 족보로만 터뜨린다' }) : '',
           b.strength > 0 ? badge('good', 'status_strength', b.strength, { title: '힘 — 확정마다 피해 +' }) : '',
           b.focus > 0 ? badge('good', 'status_focus', '+' + b.focus, { title: '집중 — 리롤 +' }) : '',
           b.regen > 0 ? badge('good', 'status_regen', '+' + b.regen, { title: '재생 — 턴마다 회복' }) : '',
@@ -915,7 +919,7 @@ function renderBattle(opts = {}) {
           ${p.block > 0 ? `<div class="hp-shield" style="left:${hpPct}%; width:${shieldPct}%"></div>` : ''}
           <span class="hp-text">${p.hp} / ${p.maxHp}${p.block > 0 ? `<span class="shield-num">${ico('status_block')}${p.block}</span>` : ''}${p.dot > 0 ? `<span class="dot-num">${DOT_KO[p.dotKind] || '독'} ${p.dot}</span>` : ''}</span>
         </div>
-        <span class="pb-side">${battle.pendingBuff > 0 ? `⚡+${battle.pendingBuff}` : ''}</span>
+        <span class="pb-side">${battle.pendingBuff > 0 ? `${uiIco('burst')}+${battle.pendingBuff}` : ''}</span>
       </div>
     </div>`));
 
@@ -1033,7 +1037,7 @@ const DOT_KO = { poison: '독', bleed: '출혈' };   // v1.14: 같은 장치, �
 // v3.10 상태/버프 아이콘 — 이모지 금지. (임시) 표시가 붙은 것은 전용 아트 대기 중
 const FX_ICON = {          // v3.13 전량 정식 아트
   rollTax: 'fx_rolltax', holdTax: 'fx_holdtax', petrify: 'fx_petrify',
-  lockHigh: 'status_lock', blind: 'fx_blind', sealLast: 'fx_seal_cat', sealCat: 'fx_seal_cat',
+  lockHigh: 'fx_bite', blind: 'fx_blind', sealLast: 'fx_seal_cat', sealCat: 'fx_seal_cat',
   ward: 'fx_ward', cap: 'fx_cap', enrage: 'fx_enrage',
   reflect: 'fx_reflect', undying: 'fx_undying', regen: 'status_regen',
 };
@@ -1059,7 +1063,7 @@ function enemyEffectText(e, ef) {
     }
     case 'poison':
     case 'bleed': return `${ico('intent_confuse')} ${DOT_KO[ef.op]} ${ef.amount} — 내 행동이 끝날 때마다 쌓인 만큼 피해, 그 뒤 1 감소 (방어도로 막힘)`;
-    case 'selfDamage': return `❓ 자해 — 스스로 ${ef.amount} 피해를 입는다 (방어도 무시)`;
+    case 'selfDamage': return `${uiIco('unknown')} 자해 — 스스로 ${ef.amount} 피해를 입는다 (방어도 무시)`;
     case 'block': return `${ico('intent_defend')} 방어 ${ef.amount} 획득`;
     case 'confuse': return `${ico('intent_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
     case 'empower': return `${ico('intent_empower')} 강화 — 공격력 +${ef.amount} (전투 내 누적)`;
@@ -1092,7 +1096,7 @@ function showPlayerBuffs() {
     b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 모든 족보 피해 +${b.strength} · 매 턴 1 소멸</li>` : '',
     b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus} — 매 턴 리롤 +${b.focus} · 매 턴 1 소멸</li>` : '',
     b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen} · 매 턴 1 소멸</li>` : '',
-    battle.whet > 0 ? `<li>🔥 벼름 ${battle.whet} — <b>⚡일격</b> 족보로 터뜨리면 피해 <b>×${whetMultOf(battle.whet).toFixed(1)}</b>. 일격이 아닌 족보로는 쓰이지도 깎이지도 않는다</li>` : '',
+    battle.whet > 0 ? `<li>${uiIco('whet')} 벼름 ${battle.whet} — <b>${uiIco('burst')}일격</b> 족보로 터뜨리면 피해 <b>×${whetMultOf(battle.whet).toFixed(1)}</b>. 일격이 아닌 족보로는 쓰이지도 깎이지도 않는다</li>` : '',
     battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
     confusedNow > 0 ? `<li>${ico('status_confuse')} 혼란 — 이번 턴 주사위 ${confusedNow}개가 뒤틀려 다시 굴릴 수 없음</li>` : '',
     battle.pendingConfuse > 0 ? `<li>${ico('status_confuse')} 혼란 예고 — 다음 턴 주사위 ${battle.pendingConfuse}개가 뒤틀린다</li>` : '',
@@ -1137,7 +1141,7 @@ function showEnemyInfo(uid) {
         <h3>${e.art} ${esc(e.name)} <small class="cat-tag">${ENEMY_TIER_KO[e.tier] || e.tier}${e.final ? ' · 무한' : ''}</small></h3>
         <p class="modal-text">${e.final ? '체력 ∞' : `HP ${e.hp}/${e.maxHpInit}`}</p>
         ${status ? `<p class="info-ability">걸린 효과</p><ul class="deck-list">${status}</ul>` : ''}
-        <p class="info-ability">🔍 예고 행동: <b>${esc(mv.name)}</b>${mv.hidden ? ' <small class="cat-tag">(❓ 의문 — 치트로 공개)</small>' : ''}${mv.phaseShift ? ' <small class="cat-tag">(국면 전환)</small>' : ''}${mv.broken ? ' <small class="cat-tag">(파쇄됨)</small>' : ''}</p>
+        <p class="info-ability">🔍 예고 행동: <b>${esc(mv.name)}</b>${mv.hidden ? ` <small class="cat-tag">(${uiIco('unknown')} 의문 — 치트로 공개)</small>` : ''}${mv.phaseShift ? ' <small class="cat-tag">(국면 전환)</small>' : ''}${mv.broken ? ' <small class="cat-tag">(파쇄됨)</small>' : ''}</p>
         <ul class="deck-list">${effects || '<li class="modal-text">아무것도 하지 않는다</li>'}</ul>
         ${(() => {
           const br = mv.break;
@@ -1148,7 +1152,7 @@ function showEnemyInfo(uid) {
         })()}
         ${e.escalation ? `<p class="modal-text">⚠ 매 턴 공격력 +${e.escalation} 누적 — 점점 강해진다</p>` : ''}
         ${e.enlightened ? `<p class="modal-text">🔮 계몽 상태 — 3번째 행동마다 강화 기술 사용</p>` : ''}
-        <p class="hint">⚠ 치트 보기 — 숨겨진 정보(❓)까지 공개된다</p>
+        <p class="hint">⚠ 치트 보기 — 숨겨진 정보(${uiIco('unknown')})까지 공개된다</p>
         <button class="btn primary" id="enemy-info-close">닫기</button>
       </div>
     </div>`));
@@ -1251,7 +1255,7 @@ function updateAfterRoll() {
     const disabled = battle.rollsLeft < rerollCost(battle) || battle.await || battle.dice.every(d => d.held);
     let rb = document.getElementById('reroll-btn');
     if (!rb) {
-      bar.innerHTML = `<button class="btn primary roll-btn" id="reroll-btn">🎲 리롤 (${battle.rollsLeft})</button>`;
+      bar.innerHTML = `<button class="btn primary roll-btn" id="reroll-btn">${uiIco("roll")} 리롤 (${battle.rollsLeft})</button>`;
       rb = document.getElementById('reroll-btn');
       rb.addEventListener('click', () => {
         if (busy) return;
@@ -1260,7 +1264,7 @@ function updateAfterRoll() {
         if (reroll(battle)) animateRoll(rerolled);
       });
     } else {
-      rb.textContent = `🎲 리롤 (${battle.rollsLeft})`;
+      rb.innerHTML = `${uiIco('roll')} 리롤 (${battle.rollsLeft})`;
     }
     rb.disabled = disabled;
   }
@@ -1649,7 +1653,7 @@ function showLootModal(gi) {
               <button class="sheet-row choice-row loot-choice t-${c.item.tier}" data-idx="${i}">
                 ${rowIcon(`<span class="row-ico-emoji">${LOOT_META[c.kind].icon}</span>`)}
                 <span class="row-body">
-                  <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(TIER_KO[c.item.tier] || '')}</small>${isCat && c.item.variant.burst ? '<small class="cat-tag t-burst">⚡일격</small>' : ''}</span>
+                  <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(TIER_KO[c.item.tier] || '')}</small>${isCat && c.item.variant.burst ? `<small class="cat-tag t-burst">${uiIco('burst')}일격</small>` : ''}</span>
                   <span class="choice-sub">${esc(sub)}</span>
                 </span>
               </button>`;
@@ -1750,7 +1754,7 @@ function renderCardBattle() {
       <header class="topbar">
         <span id="cb-top">${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
         <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
-        <span class="coin-slot">🪙${run.coins} <span class="hp">❤️</span></span>
+        <span class="coin-slot">${uiIco("coin")}${run.coins} <span class="hp">${uiIco("heart")}</span></span>
       </header>
       <div class="enemy-zone ${multi ? 'multi' : ''}">
         ${battle.enemies.filter(e => e.hp > 0).map(e => `
@@ -1758,7 +1762,7 @@ function renderCardBattle() {
             <span class="target-pin">▼</span>
             <span class="enemy-name">${esc(e.name)}</span>
             <span class="bar t-${e.tier}"><i style="width:${e.final ? 100 : Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
-            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${e.block > 0 ? ` <b class="fshield">🛡${e.block}</b>` : ''}${e.rage > 0 ? ` <b class="frage">🔥+${e.rage}</b>` : ''}</span>
+            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${e.block > 0 ? ` <b class="fshield">🛡${e.block}</b>` : ''}${e.rage > 0 ? ` <b class="frage">${fxIco('enrage')}+${e.rage}</b>` : ''}</span>
             <span class="cb-intent" data-uid="${e.uid}"></span>
             ${enemyArtHtml(e)}
             <span class="fdice" data-uid="${e.uid}"></span>
@@ -1796,7 +1800,7 @@ function renderCardBattle() {
     requestAnimationFrame(cbRollFx);
     // 격앙이 막 시작된 턴 — 한 번만 알린다
     const raged = battle.enemies.filter(e => e.hp > 0 && e.rage > 0);
-    if (raged.length && !cbRageWarned) { cbRageWarned = true; setTimeout(() => cbBanner('🔥 적이 격앙한다 — 끌수록 주사위가 커진다!', 1800), 500); }
+    if (raged.length && !cbRageWarned) { cbRageWarned = true; setTimeout(() => cbBanner('적이 격앙한다 — 끌수록 주사위가 커진다!', 1800), 500); }
   }
   // 적: 탭 = 표적, 길게 = 정보
   app.querySelectorAll('.enemy').forEach(el => {
@@ -2296,8 +2300,8 @@ function cbRageInfo(e) {
   if (!r.start) return '';
   const amt = r.amount ?? cfg.amount ?? 1;
   const ev = Math.max(1, r.every ?? 1);
-  const now = e.rage > 0 ? ` — 지금 <b class="frage">🔥+${e.rage}</b>` : '';
-  return `<p class="modal-text">🔥 격앙: ${r.start}턴부터 ${ev > 1 ? `${ev}턴마다` : '매 턴'} 주사위 +${amt}${now}</p>`;
+  const now = e.rage > 0 ? ` — 지금 <b class="frage">${fxIco('enrage')}+${e.rage}</b>` : '';
+  return `<p class="modal-text">${fxIco('enrage')} 격앙: ${r.start}턴부터 ${ev > 1 ? `${ev}턴마다` : '매 턴'} 주사위 +${amt}${now}</p>`;
 }
 
 const CB_MOVE_KO = {
@@ -2313,7 +2317,7 @@ function cbFoeInfo(uid) {
       <div class="modal">
         <h3>${e.art} ${esc(e.name)} <small class="cat-tag">${ENEMY_TIER_KO[e.tier] || e.tier}${e.final ? ' · 무한' : ''}</small></h3>
         <p class="modal-text">${e.final ? '체력 ∞ — 쓰러지지 않는다' : `HP ${e.hp}/${e.maxHpInit}`}</p>
-        <p class="modal-text">🎲 매 턴 주사위 ${e.dice.length || e.diceN}개 ${e.faces ? `— 나오는 눈: ${e.faces.join(', ')}${battle.actBonus ? ` (+${battle.actBonus})` : ''}` : `(${e.dmin + battle.actBonus}~${e.dmax + battle.actBonus})`}${e.final ? ' — 시간이 갈수록 늘어난다' : ''}</p>
+        <p class="modal-text">${uiIco("roll")} 매 턴 주사위 ${e.dice.length || e.diceN}개 ${e.faces ? `— 나오는 눈: ${e.faces.join(', ')}${battle.actBonus ? ` (+${battle.actBonus})` : ''}` : `(${e.dmin + battle.actBonus}~${e.dmax + battle.actBonus})`}${e.final ? ' — 시간이 갈수록 늘어난다' : ''}</p>
         <ul class="deck-list">${(e.moves || []).map(m => `<li>${esc(m.name)} — ${CB_MOVE_KO[m.op] || m.op}${m.op === 'bleed' ? ` ${m.amount ?? 2}` : ''}</li>`).join('')}</ul>
         ${cbRageInfo(e)}
         <p class="hint">예고한 행동의 위력 = 남은 주사위 합. 내 주사위로 부딪쳐 깎을수록 약해진다.</p>

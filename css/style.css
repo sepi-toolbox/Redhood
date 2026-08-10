@@ -162,7 +162,8 @@ body {
   width: 46px; height: 46px;
   color: #6a4c33; cursor: default;
 }
-.map-node2.boss-node { width: 60px; height: 60px; }
+/* v3.14: 보스는 지도 맨 위 가운데 한 칸을 통째로 쓴다 — 크게 박아 이번 판의 얼굴로 (성권) */
+.map-node2.boss-node { width: 104px; height: 104px; }
 /* 낙서 아이콘 가독성 — 어두운 후광으로 양피지에서 분리 */
 .map-node2::before {
   content: ''; position: absolute; left: 50%; top: 50%; width: 58px; height: 58px;
@@ -171,7 +172,18 @@ body {
   pointer-events: none;
 }
 .map-node2 .ico-node { width: 42px; height: 42px; display: block; position: relative; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .7)); }
-.map-node2.boss-node .ico-node { width: 56px; height: 56px; }
+/* 보스 낙서는 짙은 잉크선이라 검은 후광에 묻힌다 — 낡은 종이 얼룩처럼 밝게 깔아준다 */
+.map-node2.boss-node::before {
+  width: 112px; height: 112px;
+  background: radial-gradient(circle, rgba(226, 205, 165, .88) 0%, rgba(216, 193, 152, .7) 40%,
+    rgba(200, 174, 132, .4) 60%, rgba(180, 152, 110, .14) 76%, transparent 90%);
+}
+.map-node2.boss-node .ico-node {
+  width: 96px; height: 96px;
+  filter: drop-shadow(0 1px 1px rgba(60, 34, 18, .45));
+}
+/* 보스가 들어앉는 맨 윗줄은 키를 준다 */
+.map-row2.boss-row { height: 120px; }
 .map-node2.reachable { cursor: pointer; filter: drop-shadow(0 0 6px rgba(190, 60, 45, .55)); }
 .map-node2.reachable:active { filter: brightness(1.25); }
 .map-node2.trodden { opacity: .85; filter: sepia(.25); }
@@ -577,14 +589,24 @@ span.enemy-art {
 }
 
 /* 시그니처 봉인 족보 — 필터로 덮어 봉인을 몸으로 알게 한다 */
-.sheet-row.sig-sealed { position: relative; filter: saturate(.35) brightness(.6); }
+/* v3.14: 봉인된 족보 = 줄을 딤 처리하고 밀랍 봉인 띠를 가로로 붙인다 (성권) */
+.sheet-row.sig-sealed { position: relative; }
+/* 딤은 줄 전체가 아니라 글자에만 건다 — 띠까지 어두워지면 봉인이 안 보인다 */
+.sheet-row.sig-sealed .row-body,
+.sheet-row.sig-sealed .sheet-preview { filter: saturate(.22) brightness(.46); }
+.sheet-row.sig-sealed::before {
+  /* 종이 판때기는 border-image라 테두리 밖까지 그려진다 — 딤도 그만큼 넓혀야 얼룩이 안 진다 */
+  content: ''; position: absolute; inset: -11px -17px; z-index: 3;
+  background: rgba(16, 10, 6, .66);
+  pointer-events: none;
+}
 .sheet-row.sig-sealed::after {
-  /* v3.13: 자물쇠 아이콘 + 빗금. 전용 봉인 프레임 아트가 오면 SEAL_FRAME_READY 로 교체된다 */
-  content: ''; position: absolute; inset: 0; z-index: 3;
-  background:
-    url('../assets/icons/fx_seal_cat.png') center / 26px 26px no-repeat,
-    repeating-linear-gradient(-45deg, rgba(20, 12, 8, .42) 0 10px, rgba(20, 12, 8, .20) 10px 20px);
-  border-radius: inherit; pointer-events: none;
+  /* 봉인 씰 띠 — 줄을 가로질러 묶인 밀랍 도장 */
+  content: ''; position: absolute; left: -12px; right: -12px; top: 50%; height: 40px;
+  transform: translateY(-50%); z-index: 4;
+  background: url('../assets/ui/seal_frame.png') center / 100% 100% no-repeat;
+  filter: saturate(.72) brightness(.86) sepia(.14) drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
+  pointer-events: none;
 }
 
 /* 갉기 등 리롤 비용 증가 — 버튼에 붉게 */
@@ -607,11 +629,23 @@ span.enemy-art {
 .sig-note b { color: #ffcf9a; }
 .sig-note b.dmg { color: #ff9d7e; }
 .badge.sig, .rule-row .badge.sig { border-color: rgba(214, 168, 96, .65); color: #ffd9a0; }
-.die.siglocked { filter: grayscale(.55) brightness(.72); }
+/* 죽이는 건 눈(면)만. 덮개까지 회색이 되면 무엇에 물렸는지가 안 보인다 */
+.die.siglocked .pip-art { filter: grayscale(.55) brightness(.72); }
 .die.siglocked small { color: #d8b48a; }
-.die.siglocked::after {
-  content: '⛓'; position: absolute; top: 2px; right: 4px; font-size: 13px;
-  text-shadow: 0 1px 2px #000; z-index: 3;
+/* v3.14: 물기는 이제 전용 덮개가 있다 — 모서리 이모지 대신 빨판 입이 물고 들어온다 */
+.die.siglocked .st-tint, .die.siglocked .st-rim {
+  position: absolute; left: 8px; right: 8px; top: 12px; bottom: 12px;
+  border-radius: 6px; pointer-events: none; animation: stPulse 2.4s ease-in-out infinite;
+}
+.die.siglocked .st-tint {
+  mix-blend-mode: multiply; z-index: 2;
+  background: radial-gradient(ellipse at 8% 50%, rgba(92, 68, 38, .72) 0%, rgba(64, 46, 26, .44) 55%, rgba(36, 26, 14, .18) 100%);
+}
+.die.siglocked .st-rim { z-index: 4; box-shadow: inset 9px 0 12px -6px rgba(214, 172, 108, .75); }
+.die.siglocked .st-art {
+  position: absolute; left: 8px; top: 12px; width: 46px; height: 46px;
+  object-fit: contain; z-index: 3; pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .75));
 }
 /* v0.64: 족보 선택 시 뜨는 설명 — 설명은 밝게, 확정 안내는 눌러서 */
 .hint-desc { color: #e8b64b; font-weight: 700; }
@@ -1132,6 +1166,11 @@ span.enemy-art {
 
 /* ---------- v0.24 아이콘 아트 (이모지 → 그림) ---------- */
 .ico { width: 17px; height: 17px; object-fit: contain; vertical-align: -3px; }
+/* v3.14: 이모지를 대신하는 표식 — 메달이 없어 같은 크기면 작아 보인다. 한 급 키운다 */
+.ico-ui { width: 19px; height: 19px; vertical-align: -4px; margin-right: 1px; }
+.btn .ico-ui, .roll-btn .ico-ui { width: 21px; height: 21px; vertical-align: -5px; margin-right: 3px; }
+.coin-slot .ico-ui { width: 18px; height: 18px; vertical-align: -4px; margin-right: 0; }
+.cat-tag .ico-ui, .burst-mark .ico-ui { width: 14px; height: 14px; vertical-align: -3px; margin-right: 0; }
 .intent .ico-intent { width: 19px; height: 19px; vertical-align: -4px; }
 .map-node .ico-node { width: 30px; height: 30px; display: block; margin: 0 auto 2px; }
 .topbar .ico-node { width: 16px; height: 16px; vertical-align: -3px; }
