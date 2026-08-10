@@ -1083,27 +1083,20 @@ export function intentOf(enemy) {
     const per = hitDamage(enemy, ef), n = hitCount(ef);
     if (per * n > 0) parts.push(n > 1 ? `⚔️${per}×${n}` : `⚔️${per}`);
   }
+  // 방해 효과는 종류를 뭉뚱그려 🌀 하나로만 예고한다 — 행동의 정체는 이름이 말하고,
+  // 무슨 장치인지(결속×2 따위)는 길게 눌러 상세에서 본다. (성권: 예고는 '행동'이다)
+  let debuff = false;
   for (const ef of mv.effects) {
     if (ef.op === 'block') parts.push(`🛡${ef.amount}`);
-    else if (ef.op === 'confuse' || ef.op === 'poison' || ef.op === 'bleed') parts.push('🌀');
-    else if (ef.op === 'status') {
-      const st = DB.statusById[ef.kind];
-      const pw = ef.power || (st ? st.amount : 0);       // 세기를 안 쓰는 규칙이면 0이라 안 붙는다
-      parts.push(`🎲${st ? st.name : '?'}${pw > 0 ? pw : ''}${(ef.amount || 1) > 1 ? '×' + ef.amount : ''}`);
-    }
+    else if (ef.op === 'confuse' || ef.op === 'poison' || ef.op === 'bleed') debuff = true;
+    else if (ef.op === 'status') debuff = true;
     else if (ef.op === 'empower') parts.push('💪');
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
-    else if (ef.op === 'sealLast' || ef.op === 'sealCat') parts.push('🎲봉인');
-    else if (ef.op === 'rollTax') parts.push('🎲이빨');
-    else if (ef.op === 'holdTax') parts.push('🎲가시');
-    else if (ef.op === 'petrify') parts.push(`🎲굳음${ef.face || 6}`);
-    else if (ef.op === 'lockHigh') parts.push('🎲물기');
-    else if (ef.op === 'blind') parts.push('🎲어둠');
+    else if (['sealLast', 'sealCat', 'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind', 'drainWhet', 'unpin'].includes(ef.op)) debuff = true;
     else if (ef.op === 'ward') parts.push(`🪨${ef.amount}`);
     else if (ef.op === 'cap') parts.push(`⛓${ef.amount}`);
-    else if (ef.op === 'drainWhet') parts.push('🌀벼름');
-    else if (ef.op === 'unpin') parts.push('💨새김');
   }
+  if (debuff) parts.push('🌀');
   // 파쇄 기준치(🔨N)는 예고에 내보내지 않는다 — 적을 길게 눌러 여는 치트 창에서만 보인다
   return parts.join(' ') || '💤';
 }
