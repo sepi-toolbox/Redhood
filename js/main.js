@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.9'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.10'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -535,7 +535,12 @@ function iconifyIntent(s) {
     .replaceAll('🌀', ico('intent_confuse', 'ico-intent'))
     .replaceAll('💪', ico('intent_empower', 'ico-intent'))
     .replaceAll('💚', ico('intent_heal', 'ico-intent'))
-    .replaceAll('❓', ico('intent_unknown', 'ico-intent'));
+    .replaceAll('❓', ico('intent_unknown', 'ico-intent'))
+    .replaceAll('🪨', ico('status_block', 'ico-intent'))
+    .replaceAll('⛓', ico('status_block', 'ico-intent'))
+    .replaceAll('💗', ico('status_regen', 'ico-intent'))
+    .replaceAll('💢', ico('status_strength', 'ico-intent'))
+    .replaceAll('🌵', ico('status_vulnerable', 'ico-intent'));
 }
 
 // ---------- 맵 ----------
@@ -807,8 +812,8 @@ function renderBattle(opts = {}) {
             <span class="target-pin">▼</span>
             <span class="intent ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.chained ? 'chained' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
             ${badgeRow('rule-row', [
-              e.wardLeft > 0 ? badge('rule', '🪨', e.ward, { title: `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다` }) : '',
-              e.capLeft > 0 ? badge('rule', '⛓', e.cap, { title: `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다` }) : '',
+              e.wardLeft > 0 ? badge('rule', FX_ICON.ward, e.ward, { title: `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다` }) : '',
+              e.capLeft > 0 ? badge('rule', FX_ICON.cap, e.cap, { title: `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다` }) : '',
             ])}
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
@@ -823,10 +828,10 @@ function renderBattle(opts = {}) {
               return ' ' + badgeRow('enemy-buffs', [
                 e.block > 0 ? badge('bad', 'intent_defend', e.block, { title: '적 방어도' }) : '',
                 e.power > 0 ? badge('bad', 'intent_empower', '+' + e.power, { title: '적 강화' }) : '',
-                e.regenLeft > 0 && e.regen > 0 ? badge('bad', '💗', e.regen, { title: `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)` }) : '',
-                e.enrage > 0 ? badge('bad', '💢', '+' + e.enrage, { title: '격노 — 맞을 때마다 힘이 오른다' }) : '',
-                e.reflectLeft > 0 && e.reflect > 0 ? badge('bad', '🌵', e.reflect, { title: `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힘)` }) : '',
-                e.undying > 0 ? badge('bad', '💀', '', { title: '불사 — 한 번은 다시 일어선다' }) : '',
+                e.regenLeft > 0 && e.regen > 0 ? badge('bad', FX_ICON.regen, e.regen, { title: `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)` }) : '',
+                e.enrage > 0 ? badge('bad', FX_ICON.enrage, '+' + e.enrage, { title: '격노 — 맞을 때마다 힘이 오른다' }) : '',
+                e.reflectLeft > 0 && e.reflect > 0 ? badge('bad', FX_ICON.reflect, e.reflect, { title: `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힘)` }) : '',
+                e.undying > 0 ? badge('bad', FX_ICON.undying, '', { title: '불사 — 한 번은 다시 일어선다' }) : '',
                 // 적에게 불리한 것 = 내게 유리한 것
                 d.weak > 0 ? badge('good', 'status_weak', d.weak, { title: '약화' }) : '',
                 d.bleed > 0 ? badge('good', 'status_bleed', d.bleed, { title: '출혈' }) : '',
@@ -892,9 +897,7 @@ function renderBattle(opts = {}) {
             { title: (DOT_KO[battle.player.dotKind] || '독') + ' — 내 행동 뒤에 피해' }) : '',
           ...['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind'].map(k => {
             const m = modOf(battle, k);
-            if (!m) return '';
-            const ic = { rollTax: '🩸', holdTax: '🩸', petrify: '🗿', lockHigh: '🧲', blind: '🌫' }[k];
-            return badge('bad', ic, m.left, { title: `${m.name} — ${CB_MOD_KO[k]}` });
+            return m ? badge('bad', FX_ICON[k], m.left, { title: `${m.name} — ${CB_MOD_KO[k]}` }) : '';
           }),
         ]);
         return row ? `<div class="buff-strip" id="buff-strip">${row}</div>` : '';
@@ -932,6 +935,8 @@ function renderBattle(opts = {}) {
   app.querySelectorAll('.die').forEach(el => {
     el.addEventListener('click', () => {
       if (busy || !battle.rolled) return;
+      // 새 동작을 시작하면 앞의 동작은 취소한다 — 족보를 골라둔 채 주사위를 만지면 선택이 풀린다
+      if (selectedCat) { selectedCat = null; updateSheetSelection(); }
       toggleHold(battle, parseInt(el.dataset.idx, 10));
       updateDiceMarks();
     });
@@ -1025,6 +1030,15 @@ function updateComboHint() {
 // ---------- 적 행동 상세 (치트): 적 길게 눌러 예고 행동의 실제 내용 확인 — ❓ 의문도 공개 ----------
 const ENEMY_TIER_KO = { normal: '일반', elite: '정예', boss: '보스' };
 const DOT_KO = { poison: '독', bleed: '출혈' };   // v1.14: 같은 장치, 이름만 다르다
+// v3.10 상태/버프 아이콘 — 이모지 금지. (임시) 표시가 붙은 것은 전용 아트 대기 중
+const FX_ICON = {
+  rollTax: 'status_bleed', holdTax: 'status_bleed', petrify: 'status_stun',
+  lockHigh: 'status_bind', blind: 'status_confuse', sealLast: 'status_seal', sealCat: 'status_seal',
+  ward: 'status_block', cap: 'status_block', enrage: 'status_strength',
+  reflect: 'status_vulnerable', undying: 'status_regen', regen: 'status_regen',
+};
+const fxIco = (key, cls = '') => ico(FX_ICON[key] || 'status_block', cls);
+
 const CB_MOD_KO = {
   rollTax: '리롤할 때마다 피해 (방어도 무시)', holdTax: '리롤 시 지킨 주사위 2개당 피해 1',
   petrify: '그 눈이 나오면 굳는다 (기절)', lockHigh: '매 굴림 가장 높은 눈이 물린다', blind: '족보 위력이 보이지 않는다',
@@ -1050,22 +1064,22 @@ function enemyEffectText(e, ef) {
     case 'confuse': return `${ico('intent_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
     case 'empower': return `${ico('intent_empower')} 강화 — 공격력 +${ef.amount} (전투 내 누적)`;
     case 'heal': return `${ico('intent_heal')} 자신 HP ${ef.amount} 회복`;
-    case 'sealLast': return `🔒 흉내 — 직전에 쓴 족보를 ${ef.turns || 1}턴 봉인`;
-    case 'sealCat': return `🔒 봉인 — ${(ef.cats || []).join('·')} 족보를 ${ef.turns || 1}턴 봉인`;
-    case 'rollTax': return `🩸 이빨 자국 — ${ef.turns || 1}턴간 리롤할 때마다 피해 ${ef.amount || 1} (방어도 무시)`;
-    case 'holdTax': return `🩸 가시 — ${ef.turns || 1}턴간 리롤 시 지킨 주사위 2개당 피해 1`;
-    case 'petrify': return `🗿 굳음 — ${ef.turns || 1}턴간 ${ef.face || 6}이 나오면 굳는다(기절)`;
-    case 'lockHigh': return `🧲 물기 — ${ef.turns || 1}턴간 매 굴림 가장 높은 눈이 물린다${ef.heal ? ' (그만큼 회복)' : ''}`;
-    case 'blind': return `🌫 어둠 — ${ef.turns || 1}턴간 족보 위력이 보이지 않는다`;
-    case 'ward': return `🪨 문턱 ${ef.amount} — 한 번에 넘겨야 뚫린다`;
-    case 'regen': return `💗 재생 ${ef.amount} — ${ef.turns || 3}턴간 자기 차례마다 회복`;
-    case 'enrage': return `💢 격노 — 맞을 때마다 힘 +${ef.amount || 1} (전투 내 누적)`;
-    case 'reflect': return `🌵 반사 ${ef.amount} — ${ef.turns || 3}턴간 때리면 되받는다`;
-    case 'cap': return `⛓ 상한 ${ef.amount} — 한 번에 이 이상 안 들어간다`;
+    case 'sealLast': return `${fxIco('sealLast')} 흉내 — 직전에 쓴 족보를 ${ef.turns || 1}턴 봉인`;
+    case 'sealCat': return `${fxIco('sealCat')} 봉인 — ${(ef.cats || []).join('·')} 족보를 ${ef.turns || 1}턴 봉인`;
+    case 'rollTax': return `${fxIco('rollTax')} 이빨 자국 — ${ef.turns || 1}턴간 리롤할 때마다 피해 ${ef.amount || 1} (방어도 무시)`;
+    case 'holdTax': return `${fxIco('holdTax')} 가시 — ${ef.turns || 1}턴간 리롤 시 지킨 주사위 2개당 피해 1`;
+    case 'petrify': return `${fxIco('petrify')} 굳음 — ${ef.turns || 1}턴간 ${ef.face || 6}이 나오면 굳는다(기절)`;
+    case 'lockHigh': return `${fxIco('lockHigh')} 물기 — ${ef.turns || 1}턴간 매 굴림 가장 높은 눈이 물린다${ef.heal ? ' (그만큼 회복)' : ''}`;
+    case 'blind': return `${fxIco('blind')} 어둠 — ${ef.turns || 1}턴간 족보 위력이 보이지 않는다`;
+    case 'ward': return `${fxIco('ward')} 문턱 ${ef.amount} — 한 번에 넘겨야 뚫린다`;
+    case 'regen': return `${fxIco('regen')} 재생 ${ef.amount} — ${ef.turns || 3}턴간 자기 차례마다 회복`;
+    case 'enrage': return `${fxIco('enrage')} 격노 — 맞을 때마다 힘 +${ef.amount || 1} (전투 내 누적)`;
+    case 'reflect': return `${fxIco('reflect')} 반사 ${ef.amount} — ${ef.turns || 3}턴간 때리면 되받는다`;
+    case 'cap': return `${fxIco('cap')} 상한 ${ef.amount} — 한 번에 이 이상 안 들어간다`;
     case 'rest': return `💤 휴식`;
     case 'drainWhet': return `🌀 벼름을 빼앗는다`;
     case 'unpin': return `💨 새김을 흩는다`;
-    case 'status': { const st = DB.statusById[ef.kind]; return `🎲 ${st ? st.name : ef.kind} ×${ef.amount || 1} — ${st ? st.text : ''}`; }
+    case 'status': { const st = DB.statusById[ef.kind]; return `${ico('status_' + ef.kind)} ${st ? st.name : ef.kind} ×${ef.amount || 1} — ${st ? st.text : ''}`; }
     default: return ef.op;
   }
 }
@@ -1109,12 +1123,12 @@ function showEnemyInfo(uid) {
     d.weak > 0 ? `<li>${ico('status_weak')} 약화 ${d.weak} — 공격력 -${d.weak} · 매 턴 1 소멸</li>` : '',
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
     d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable} · 매 턴 1 소멸</li>` : '',
-    e.wardLeft > 0 ? `<li>🪨 문턱 ${e.ward} — 한 번에 ${e.ward} 이하로 때리면 아예 안 통한다 (${e.wardLeft}턴)</li>` : '',
-    e.regenLeft > 0 && e.regen > 0 ? `<li>💗 재생 ${e.regen} — 자기 차례마다 회복 (${e.regenLeft}턴). 이보다 세게 때려야 줄어든다</li>` : '',
-    e.enrage > 0 ? `<li>💢 격노 — 피해를 받을 때마다 힘 +${e.enrage} (전투 내 누적). 잔펀치가 벌을 받는다</li>` : '',
-    e.reflectLeft > 0 && e.reflect > 0 ? `<li>🌵 반사 ${e.reflect} — 때릴 때마다 되받는다 (${e.reflectLeft}턴, 방어도로 막힘)</li>` : '',
-    e.undying > 0 ? `<li>💀 불사 — 처음 쓰러질 때 한 번 다시 일어선다</li>` : '',
-    e.capLeft > 0 ? `<li>⛓ 상한 ${e.cap} — 한 번에 ${e.cap}을 넘겨 줄 수 없다 (${e.capLeft}턴)</li>` : '',
+    e.wardLeft > 0 ? `<li>${fxIco('ward')} 문턱 ${e.ward} — 한 번에 ${e.ward} 이하로 때리면 아예 안 통한다 (${e.wardLeft}턴)</li>` : '',
+    e.regenLeft > 0 && e.regen > 0 ? `<li>${fxIco('regen')} 재생 ${e.regen} — 자기 차례마다 회복 (${e.regenLeft}턴). 이보다 세게 때려야 줄어든다</li>` : '',
+    e.enrage > 0 ? `<li>${fxIco('enrage')} 격노 — 피해를 받을 때마다 힘 +${e.enrage} (전투 내 누적). 잔펀치가 벌을 받는다</li>` : '',
+    e.reflectLeft > 0 && e.reflect > 0 ? `<li>${fxIco('reflect')} 반사 ${e.reflect} — 때릴 때마다 되받는다 (${e.reflectLeft}턴, 방어도로 막힘)</li>` : '',
+    e.undying > 0 ? `<li>${fxIco('undying')} 불사 — 처음 쓰러질 때 한 번 다시 일어선다</li>` : '',
+    e.capLeft > 0 ? `<li>${fxIco('cap')} 상한 ${e.cap} — 한 번에 ${e.cap}을 넘겨 줄 수 없다 (${e.capLeft}턴)</li>` : '',
     e.stunned ? '<li>💫 다음 행동 취소됨</li>' : '',
   ].filter(Boolean).join('');
   app.append(h(`

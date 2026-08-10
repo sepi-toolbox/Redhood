@@ -826,7 +826,7 @@
     "mist_veil": 1,
     "torrent": 99,
     "surge": 0,
-    "move1": 0
+    "move1": 1
    }
   },
   "enlightenedMove": {
@@ -1366,7 +1366,7 @@
      "weights": {
       "bite": 2,
       "howl": 1,
-      "frenzy": 0,
+      "frenzy": 1.5,
       "surge": 3,
       "pack_rule": 2
      }
@@ -1379,7 +1379,7 @@
      "weights": {
       "bite": 2,
       "howl": 1,
-      "frenzy": 0,
+      "frenzy": 1.5,
       "surge": 3,
       "pack_rule": 2
      }
@@ -2471,7 +2471,7 @@
    "weights": {
     "tongue": 1,
     "bloat": 1,
-    "spit": 0,
+    "spit": 1.5,
     "surge": 3
    }
   },
@@ -2698,7 +2698,7 @@
    "weights": {
     "chill": 1,
     "fade": 1,
-    "wail": 0,
+    "wail": 1.5,
     "surge": 3
    }
   },
@@ -2913,7 +2913,7 @@
    "weights": {
     "slash": 1,
     "guard": 1,
-    "bone_throw": 0,
+    "bone_throw": 1.5,
     "surge": 3
    }
   },
@@ -3435,7 +3435,7 @@
    "weights": {
     "shovel": 1,
     "toll": 1,
-    "inter": 0,
+    "inter": 1,
     "surge": 3,
     "cover_soil": 2
    }
@@ -4459,7 +4459,7 @@
    "weights": {
     "whisper": 1,
     "lash": 1,
-    "pulse": 0,
+    "pulse": 1.5,
     "surge": 3
    }
   },
@@ -5139,7 +5139,7 @@
    "weights": {
     "toll": 1,
     "silence": 1,
-    "peal": 0,
+    "peal": 1,
     "surge": 3,
     "toll_cage": 2
    }
@@ -5821,7 +5821,7 @@
     "watch": 1,
     "whisper": 1,
     "reach": 1,
-    "unmake": 0
+    "unmake": 1
    }
   },
   "enlightenedMove": {
@@ -6177,7 +6177,7 @@
    "weights": {
     "singe": 1,
     "waver": 1,
-    "flareup": 0,
+    "flareup": 1.5,
     "surge": 3
    }
   },
