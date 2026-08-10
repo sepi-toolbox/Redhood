@@ -1093,11 +1093,12 @@ export function intentOf(enemy) {
     }
     else if (ef.op === 'empower') parts.push('💪');
     else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
-    else if (ef.op === 'sealLast' || ef.op === 'sealCat') parts.push('🔒족보');
-    else if (ef.op === 'rollTax' || ef.op === 'holdTax') parts.push('🩸리롤');
-    else if (ef.op === 'petrify') parts.push(`🗿${ef.face || 6}`);
-    else if (ef.op === 'lockHigh') parts.push('🧲');
-    else if (ef.op === 'blind') parts.push('🌫');
+    else if (ef.op === 'sealLast' || ef.op === 'sealCat') parts.push('🎲봉인');
+    else if (ef.op === 'rollTax') parts.push('🎲이빨');
+    else if (ef.op === 'holdTax') parts.push('🎲가시');
+    else if (ef.op === 'petrify') parts.push(`🎲굳음${ef.face || 6}`);
+    else if (ef.op === 'lockHigh') parts.push('🎲물기');
+    else if (ef.op === 'blind') parts.push('🎲어둠');
     else if (ef.op === 'ward') parts.push(`🪨${ef.amount}`);
     else if (ef.op === 'cap') parts.push(`⛓${ef.amount}`);
     else if (ef.op === 'drainWhet') parts.push('🌀벼름');
