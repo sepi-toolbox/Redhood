@@ -75,7 +75,7 @@
 <script>
 const DB = __DB__;
 const ORIG = JSON.parse(JSON.stringify(DB));
-document.getElementById('ver').textContent = 'v3.0 기준 · data/*.json';
+document.getElementById('ver').textContent = 'v3.7 기준 · data/*.json';
 
 /* ---------- 경로 읽기·쓰기 ---------- */
 const get = (p) => p.split('.').reduce((o,k)=>o==null?o:o[k], DB[p.split(':')[0]] !== undefined ? null : null);
@@ -293,9 +293,12 @@ function cell(tr, node, ro){ const td=document.createElement('td'); if(ro) td.cl
 /* ---------- 공통 도우미 ---------- */
 const ENEMY_OPS=[['damage','피해'],['block','방어'],['empower','힘'],['status','상태이상 부여'],['confuse','혼란(구)'],['heal','회복'],['rest','휴식'],['poison','독(🌀)'],['bleed','출혈(🌀)'],['selfDamage','자해(❓)'],
   ['ward','🪨 문턱 — 이 값 이하 단발은 무시'],['cap','⛓ 상한 — 단발 피해를 이 값으로'],
-  ['demand','📜 요구 — 정한 족보를 안 내면 벌'],['drainWhet','🌀 벼름 흡수'],['unpin','💨 새김 흩기']];
-const DEMAND_TARGETS=[['ofKind','같은 눈 (원페어·트리플·포카드·야찌)'],['straight','스트레이트 (스몰·라지)'],
-  ['fullHouse','풀하우스'],['twoPair','투페어'],['chance','노페어']];
+  ['sealLast','🔒 흉내 — 직전 사용 족보 봉인'],['sealCat','🔒 족보 봉인 — 지정 족보들'],
+  ['rollTax','🩸 리롤 세금 — 리롤마다 피해 (방어 무시)'],['holdTax','🩸 홀드 세금 — 지킨 주사위 2개당 1'],
+  ['petrify','🗿 굳음 — 그 눈이 나오면 기절'],['lockHigh','🧲 물기 — 매 굴림 최고 눈 잠금'],
+  ['blind','🌫 어둠 — 족보 위력 미리보기 숨김'],
+  ['drainWhet','🌀 벼름 흡수'],['unpin','💨 새김 흩기']];
+const MOD_OPS=new Set(['sealLast','sealCat','rollTax','holdTax','petrify','lockHigh','blind']);   // 턴 지속 방해
 const ST_OPS=(DB.statuses.list||[]).map(s=>[s.id,s.name]);
 const DB_statusById={}; (DB.statuses.list||[]).forEach(s=>DB_statusById[s.id]=s); DB.statusById2=DB_statusById;
 const NO_POWER=new Set(['onUseFaceDamage','onUseFaceCoin','noReroll','zeroValue','hideFace','needReroll','linked','spread','faceLow','faceHigh','rerollCost']); // 세기를 적 행동에서 정하는 건 부패뿐
@@ -331,7 +334,7 @@ function listEditor(path, label, options, arr){
     mark(path, `${label}에 추가`); redraw(); }));
   return box;
 }
-const NO_AMOUNT=new Set(['rest','unpin']);   // 수치가 없는 효과
+const NO_AMOUNT=new Set(['rest','unpin','sealLast','sealCat','holdTax','petrify','lockHigh','blind']);   // 수치가 없는 효과 (rollTax 는 amount=피해)
 const ABILITY_OPS=[['strength','힘'],['focus','집중'],['regen','재생'],['block','방어'],['heal','회복'],
   ['weakEnemy','적 약화'],['bleed','출혈'],['vulnerable','취약'],['stun','기절'],['dodge','회피'],
   ['rerollNext','다음 턴 리롤'],['buffNext','다음 족보 강화'],['cleanse','정화'],['selfDamage','자해'],
@@ -345,7 +348,7 @@ const DIE_OPS_ED={
   contribute:[['selfDamage','자해'],['heal','회복'],['block','방어'],['split','쪼개기 — 같은 눈 족보에서 두 번']],
   idle:[['whet','벼름']],
 };
-const OPN={rest:'휴식',selfDamage:'자해',whet:'벼름',per:'간격',ratio:'비율',ward:'문턱',cap:'상한',demand:'요구 벌 피해',drainWhet:'벼름 흡수',unpin:'새김 흩기',poison:'독',bleed:'출혈',damage:'피해',block:'방어',empower:'힘',confuse:'혼란',heal:'회복',weaken:'약화',
+const OPN={rest:'휴식',selfDamage:'자해',whet:'벼름',per:'간격',ratio:'비율',ward:'문턱',cap:'상한',rollTax:'리롤당 피해',drainWhet:'벼름 흡수',unpin:'새김 흩기',poison:'독',bleed:'출혈',damage:'피해',block:'방어',empower:'힘',confuse:'혼란',heal:'회복',weaken:'약화',
   vulnerable:'취약',bleed:'출혈',regen:'재생',focus:'집중',strength:'힘',weakEnemy:'적 약화',
   loseHp:'HP 감소',gainRelic:'유물 획득',drain:'흡혈'};
 const EN = {}; DB.enemies.forEach((e,i)=>EN[e.id]={e,i});
@@ -370,8 +373,9 @@ const VNAME={}; DB.scoring.categories.forEach(c=>c.variants.forEach(v=>VNAME[v.i
 const TABS=[
  ['개요','바뀐 값은 초록으로 표시된다. 다 고쳤으면 오른쪽 위 [내보내기]를 눌러 바뀐 JSON을 받아 나에게 주면 반영해서 배포한다.',ovw],
  ['적','HP와 기본 행동. 기본 행동은 쓸 수 있는 수가 하나도 없을 때 제약을 전부 무시하고 시동하는 예외 처리 장치다 — 유니크 행동과는 별개이며 아무 행동이나 지정할 수 있다. 개별 행동은 [적행동] 탭에서 고친다.',tabEnemy],
- ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. [상태이상 부여]는 종류를 효과 칸에서 고르고 [수치] 칸에 몇 칸에 거는지를 적는다. 그 외에 적마다 다를 수 있는 건 부패의 폭발 피해 하나뿐이고, 지속 턴을 포함한 나머지는 전부 상태이상 탭의 값으로 고정이다. 발동 조건 네 가지 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터"(0=제한 없음), 쿨다운은 "쓰고 나서 몇 턴 쉰다"(0=제한 없음, 2면 한 칸 걸러 나온다), 락 턴은 "이 턴이 되면 더 안 씀"(0=제한 없음), 연계는 "앞 행동 다음에 확률로 확정". 파쇄는 그 행동이 예고된 동안 HP에 그만큼 피해를 받으면 유니크 행동으로 무너지는 것 — 방어도로 막힌 피해는 안 센다. 유니크 행동은 추첨에 안 들어가고 파쇄되지도 않는다. 유니크가 나오는 길은 국면 전환과 파쇄 둘뿐이다. 타수는 피해를 몇 대로 나눠 때리는가(기본 1) — 강화·약화가 한 대마다 적용되고 방어도 한 대씩 갉힌다. 피해가 아닌 효과에서는 무시되니 0을 적어두면 된다. 순서 패턴을 쓰는 적은 가중치 대신 순서가 표시된다.',tabMoves],
- ['족보','배수(mult)와 변형의 부가 능력 수치.',tabScore],
+ ['적행동','효과 종류·수치·연계 대상까지 전부 고칠 수 있다. [상태이상 부여]는 종류를 효과 칸에서 고르고 [수치] 칸에 몇 칸에 거는지를 적는다. v3.3부터 몬스터의 테마도 그냥 행동이다 — 🔒족보 봉인·🩸리롤/홀드 세금·🗿굳음·🧲물기·🌫어둠은 [지속 턴]만큼 가는 방해를 남기고, 예고에는 🌀 하나로 뭉뚱그려 뜬다. 발동 조건 — 가중치는 뽑힐 확률(0이면 추첨에서 빠지고 연계로만 나온다), 해금 턴은 "이 턴부터", 쿨다운은 "쓰고 나서 몇 턴 쉰다"(2면 한 칸 걸러), 락 턴은 "이 턴이 되면 더 안 씀", 연계는 "앞 행동 다음에 확률로 확정". 파쇄는 그 행동이 예고된 동안 HP 피해를 그만큼 받으면 유니크 행동으로 무너지는 것. 타수는 피해를 몇 대로 나눠 때리는가(기본 1).',tabMoves],
+ ['무기','시작 족보 3종 — 족보 수집제(v3.1)에서는 무기가 곧 시작 빌드다. 나머지 족보는 보상·이벤트로 모은다.',tabWeapon],
+ ['족보','배수(mult)와 변형의 부가 능력 수치. 수집제: 플레이어는 무기의 시작 족보만 들고 출발한다.',tabScore],
  ['주사위','여섯 면을 직접 고친다. 면 구성이 곧 성능이다.',tabDice],
  ['유물','효과 수치는 hook.amount 하나로 정해진다.',tabRelic],
  ['국면','보스의 국면 전환. HP가 임계 아래로 떨어지는 순간 진입 행동(유니크)이 현재 예고를 밀어내고 강제로 나온다.',tabPhase],
@@ -418,7 +422,7 @@ function rangeF(p,label){ const w=document.createElement('div'); w.style.display
   w.appendChild(field(p+'.1',label+' 최대')); return w; }
 
 function tabEnemy(v){
-  const tb=table(v,['id','이름','격','막','테마','HP 최소','HP 최대','기본 행동','행동 수','연계']);
+  const tb=table(v,['id','이름','격','막','테마','HP 최소','HP 최대','시작 버프 (문턱·상한·방어·힘)','기본 행동','행동 수','연계']);
   ENEMIES.forEach(([e,i])=>{
     const tr=document.createElement('tr'); tr.className='t-'+e.tier;
     tr.dataset.k=(e.id+' '+e.name).toLowerCase();
@@ -427,6 +431,16 @@ function tabEnemy(v){
     const a=ACT[e.id]||['—','—']; cell(tr,a[0],1); cell(tr,a[1],1);
     cell(tr, field(`enemies:${i}.hp.0`,e.name+' HP 최소'));
     cell(tr, field(`enemies:${i}.hp.1`,e.name+' HP 최대'));
+    {
+      // 시작 버프 — 문턱·상한은 별도 시스템이 아니라 그냥 버프다 (v3.3)
+      const sb=document.createElement('div'); sb.style.cssText='display:flex;gap:4px;align-items:center;flex-wrap:wrap';
+      [['ward','🪨'],['cap','⛓'],['block','🛡'],['power','💪']].forEach(([kk,ic])=>{
+        const l=document.createElement('span'); l.className='sub'; l.textContent=ic;
+        const f=field(`enemies:${i}.start.${kk}`, e.name+' 시작 '+kk, {num:true, def:0});
+        f.style.maxWidth='42px'; sb.appendChild(l); sb.appendChild(f);
+      });
+      cell(tr, sb);
+    }
     const all=[...Object.entries(e.moves), ...Object.entries(e.uniqueMoves||{})];
     cell(tr, select(`enemies:${i}.defaultMove`, e.name+' 기본 행동',
       [['','— 없음 —'], ...all.map(([k,mm])=>[k,mm.name])],
@@ -513,34 +527,56 @@ function tabMoves(v){
         row.appendChild(select(`${base}.effects.${k}.op`, e.name+' '+m.name+' 효과'+(k+1), ENEMY_OPS, {after:(v)=>{
           // 상태이상으로 바꾸면 종류를 채워 넣는다 — 비워두면 데이터가 반쪽이 된다
           if(v==='status' && !x.kind){ writeP(`${base}.effects.${k}.kind`, ST_OPS[0][0]); mark(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 상태이상 종류'); }
-          if(v!=='status' && v!=='demand'){ if(x.kind!==undefined) removeP(`${base}.effects.${k}.kind`); }
-          if(v!=='status'){ if(x.power!==undefined) removeP(`${base}.effects.${k}.power`); }
-          if(v!=='demand'){ if(x.category!==undefined) removeP(`${base}.effects.${k}.category`); }
-          if(v==='demand' && !x.kind && !x.category){ writeP(`${base}.effects.${k}.kind`, DEMAND_TARGETS[0][0]); mark(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 요구 족보'); }
-          if((v==='ward'||v==='cap'||v==='demand') && x.turns===undefined){ writeP(`${base}.effects.${k}.turns`, v==='demand'?2:3); mark(`${base}.effects.${k}.turns`, e.name+' '+m.name+' 지속 턴'); }
-          if(v!=='ward'&&v!=='cap'&&v!=='demand'){ if(x.turns!==undefined) removeP(`${base}.effects.${k}.turns`); }
+          if(v!=='status'){ if(x.kind!==undefined) removeP(`${base}.effects.${k}.kind`); if(x.power!==undefined) removeP(`${base}.effects.${k}.power`); }
+          // 턴 지속 방해(테마)·문턱·상한은 지속 턴을 쓴다
+          if((v==='ward'||v==='cap'||MOD_OPS.has(v)) && x.turns===undefined){ writeP(`${base}.effects.${k}.turns`, 2); mark(`${base}.effects.${k}.turns`, e.name+' '+m.name+' 지속 턴'); }
+          if(v!=='ward'&&v!=='cap'&&!MOD_OPS.has(v)){ if(x.turns!==undefined) removeP(`${base}.effects.${k}.turns`); }
+          // 전용 파라미터 기본값 채우기 / 안 쓰는 건 정리
+          if(v==='sealCat' && !x.cats){ writeP(`${base}.effects.${k}.cats`, ['chance']); mark(`${base}.effects.${k}.cats`, e.name+' '+m.name+' 봉인 족보'); }
+          if(v!=='sealCat' && x.cats!==undefined) removeP(`${base}.effects.${k}.cats`);
+          if(v==='petrify' && x.face===undefined){ writeP(`${base}.effects.${k}.face`, 6); mark(`${base}.effects.${k}.face`, e.name+' '+m.name+' 굳는 눈'); }
+          if(v!=='petrify' && x.face!==undefined) removeP(`${base}.effects.${k}.face`);
+          if(v==='holdTax' && x.per===undefined){ writeP(`${base}.effects.${k}.per`, 0.5); mark(`${base}.effects.${k}.per`, e.name+' '+m.name+' 주사위당 피해'); }
+          if(v!=='holdTax' && x.per!==undefined) removeP(`${base}.effects.${k}.per`);
+          if(v!=='lockHigh' && x.heal!==undefined) removeP(`${base}.effects.${k}.heal`);
           redraw();
         }}));
-        // 요구 — 어떤 족보를 내야 하는가 + 몇 턴 안에
-        if(x.op==='demand'){
-          row.appendChild(select(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 요구 족보',
-            [...DEMAND_TARGETS, ...DB.scoring.categories.map(c=>['cat:'+c.id, c.name+' (딱 이것만)'])],
-            {def:DEMAND_TARGETS[0][0], after:(v)=>{
-              if(v.startsWith('cat:')){ writeP(`${base}.effects.${k}.category`, v.slice(4)); removeP(`${base}.effects.${k}.kind`); }
-              else { writeP(`${base}.effects.${k}.kind`, v); if(x.category!==undefined) removeP(`${base}.effects.${k}.category`); }
-              redraw();
-            }}));
-        }
-        // 문턱·상한·요구는 몇 턴 가는지가 따로 있다
-        if(x.op==='demand'){
-          const l2=document.createElement('span'); l2.className='sub'; l2.textContent='실패 시 적 힘';
-          const pf=field(`${base}.effects.${k}.power`, e.name+' '+m.name+' 실패 시 적 강화', {num:true, def:0});
-          pf.style.maxWidth='44px'; row.appendChild(l2); row.appendChild(pf);
-        }
-        if(x.op==='ward'||x.op==='cap'||x.op==='demand'){
+        // 문턱·상한·턴 지속 방해(테마)는 지속 턴이 따로 있다
+        if(x.op==='ward'||x.op==='cap'||MOD_OPS.has(x.op)){
           const l=document.createElement('span'); l.className='sub'; l.textContent='턴';
-          const tf=field(`${base}.effects.${k}.turns`, e.name+' '+m.name+' 지속 턴', {num:true, def:x.op==='demand'?2:3});
+          const tf=field(`${base}.effects.${k}.turns`, e.name+' '+m.name+' 지속 턴', {num:true, def:2});
           tf.style.maxWidth='44px'; row.appendChild(l); row.appendChild(tf);
+        }
+        if(x.op==='sealCat'){
+          // 봉인할 족보들 — 체크로 고른다
+          const box=document.createElement('div'); box.style.cssText='display:flex;gap:5px;flex-wrap:wrap;align-items:center';
+          DB.scoring.categories.forEach(c=>{
+            const lab=document.createElement('label'); lab.className='sub'; lab.style.cssText='display:flex;gap:2px;align-items:center;cursor:pointer';
+            const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=(x.cats||[]).includes(c.id);
+            cb.onchange=()=>{ const cats=new Set(x.cats||[]); cb.checked?cats.add(c.id):cats.delete(c.id);
+              if(!cats.size){ cb.checked=true; return; }
+              writeP(`${base}.effects.${k}.cats`, [...cats]); mark(`${base}.effects.${k}.cats`, e.name+' '+m.name+' 봉인 족보'); };
+            lab.appendChild(cb); lab.appendChild(document.createTextNode(c.name)); box.appendChild(lab);
+          });
+          row.appendChild(box);
+        }
+        if(x.op==='petrify'){
+          const l=document.createElement('span'); l.className='sub'; l.textContent='눈';
+          const ff=field(`${base}.effects.${k}.face`, e.name+' '+m.name+' 굳는 눈', {num:true, def:6});
+          ff.style.maxWidth='40px'; row.appendChild(l); row.appendChild(ff);
+        }
+        if(x.op==='holdTax'){
+          const l=document.createElement('span'); l.className='sub'; l.textContent='개당';
+          const pf=field(`${base}.effects.${k}.per`, e.name+' '+m.name+' 주사위당 피해', {num:true, def:0.5});
+          pf.style.maxWidth='44px'; row.appendChild(l); row.appendChild(pf);
+        }
+        if(x.op==='lockHigh'){
+          const lab=document.createElement('label'); lab.className='sub'; lab.style.cssText='display:flex;gap:3px;align-items:center;cursor:pointer';
+          const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!x.heal;
+          cb.onchange=()=>{ if(cb.checked){ writeP(`${base}.effects.${k}.heal`, true); } else removeP(`${base}.effects.${k}.heal`);
+            mark(`${base}.effects.${k}.heal`, e.name+' '+m.name+' 흡수 회복'); };
+          lab.appendChild(cb); lab.appendChild(document.createTextNode('물린 값만큼 회복'));
+          row.appendChild(lab);
         }
         if(x.op==='status'){
           row.appendChild(select(`${base}.effects.${k}.kind`, e.name+' '+m.name+' 상태이상 종류', ST_OPS, {def:ST_OPS[0][0], after:(v)=>{
@@ -642,6 +678,43 @@ function tabMoves(v){
       mark(`enemies:${i}.uniqueMoves`, `${e.name} 유니크 행동 추가`); redraw();
     }));
     td.appendChild(box); add.appendChild(td); tb.appendChild(add);
+  });
+}
+function tabWeapon(v){
+  const CATV=[]; DB.scoring.categories.forEach(c=>(c.variants||[]).forEach(vv=>CATV.push([c.id+':'+vv.id, c.name+' — '+vv.name])));
+  const tb=table(v,['id','무기','시작 족보 (족보 수집제의 시작 빌드)']);
+  (DB.events.weapons||[]).forEach((w,wi)=>{
+    const tr=document.createElement('tr'); tr.dataset.k=(w.id+' '+(w.name||'')).toLowerCase();
+    cell(tr,w.id,1);
+    cell(tr, field(`events:weapons.${wi}.name`, w.id+' 이름'));
+    const box=document.createElement('div'); box.style.cssText='display:flex;flex-direction:column;gap:4px';
+    Object.entries(w.start).forEach(([cid,vid])=>{
+      const rrow=document.createElement('div'); rrow.className='efrow';
+      const sel=document.createElement('select');
+      CATV.forEach(([val,lab])=>{ const op=document.createElement('option'); op.value=val; op.textContent=lab;
+        if(val===cid+':'+vid) op.selected=true; sel.appendChild(op); });
+      sel.onchange=()=>{
+        const [nc,nv]=sel.value.split(':');
+        if(nc!==cid) removeP(`events:weapons.${wi}.start.${cid}`);
+        writeP(`events:weapons.${wi}.start.${nc}`, nv);
+        mark(`events:weapons.${wi}.start`, (w.name||w.id)+' 시작 족보 변경'); redraw();
+      };
+      rrow.appendChild(sel);
+      rrow.appendChild(miniBtn('×','이 시작 족보 빼기',()=>{
+        if(Object.keys(w.start).length<=1){ alert('시작 족보가 하나뿐이라 뺄 수 없어요.'); return; }
+        removeP(`events:weapons.${wi}.start.${cid}`); mark(`events:weapons.${wi}.start`, (w.name||w.id)+' 시작 족보 삭제'); redraw();
+      }));
+      box.appendChild(rrow);
+    });
+    box.appendChild(miniBtn('+ 시작 족보','이 무기에 시작 족보를 하나 더 준다',()=>{
+      const owned=new Set(Object.keys(w.start));
+      const c=DB.scoring.categories.find(x=>!owned.has(x.id));
+      if(!c){ alert('모든 족보를 이미 가진 무기예요.'); return; }
+      writeP(`events:weapons.${wi}.start.${c.id}`, c.variants[0].id);
+      mark(`events:weapons.${wi}.start`, (w.name||w.id)+' 시작 족보 추가'); redraw();
+    }));
+    cell(tr, box);
+    tb.appendChild(tr);
   });
 }
 function tabScore(v){
