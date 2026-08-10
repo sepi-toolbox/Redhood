@@ -229,17 +229,36 @@ A 3x2 grid of six symbols, equal cells, equal spacing` 로 바꾸고 `IN ORDER �
 | `fx_reflect.png` | 반사 | 때리면 되받음 | `#2fa39a` | `a hide shield with three big outward thorns, one thorn tipped red` |
 | `fx_undying.png` | 불사 | 한 번 다시 일어남 | `#7fe0a0` | `a cracked skull with one green soul-flame burning in an eye socket` |
 
-## C. 선택 — 남은 이모지 (급하지 않음)
+## C. 남은 이모지 — UI 표식 6종
 
-전투 화면에 아직 이모지로 남은 것: 🪙 코인 · ❤ 체력 · 🎲 굴림 단추 · ⚡ 일격 표식.
-상태이상이 아니라 UI 장식이라 급하진 않지만, 같은 메달 화풍으로 뽑아두면 화면이 완전히 통일된다.
+전투·지도 화면에 아직 이모지로 남은 것들. 상태이상이 아니라 UI 장식이라 색 규칙에 안 묶이고,
+**메달 테 없이 심볼만** 받는다 (게임이 그냥 작은 그림으로 얹는다).
 
-| 파일명 | Symbol 프롬프트 |
-|---|---|
-| `ui_coin.png` | `one worn gold coin face-on with a simple wolf head shape on it` |
-| `ui_heart.png` | `a solid deep-crimson heart with one thick thorn wrapped across it` |
-| `ui_roll.png` | `a wooden die tilted mid-tumble, warm light on its top face` |
-| `ui_burst.png` | `one sharp bright wedge of light, a struck spark` |
+### C절 전용 머리 블록 (2부 아이콘 블록에서 메달·색 지정만 뺀 것)
+
+```
+Stylized dark fairytale UI symbol for the dice game REDHOOD. Match the EXACT painting style, angular
+brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
+shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
+no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
+ONE single symbol centered, filling about 80 percent of the frame, on one plain flat mid-grey
+background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
+decoration. Bold silhouette, readable at 16px. The symbol: {묘사}. No text, no letters, no watermark.
+```
+
+**첨부**: `docs/keyart/keyart_stilllife.jpg`
+
+| 파일명 | 쓰이는 곳 | Symbol 프롬프트 |
+|---|---|---|
+| `ui_coin.png` | 🪙 상단바 코인 (7곳) | `one worn gold coin face-on with a simple wolf head shape on it` |
+| `ui_heart.png` | ❤️ 상단바·체력 (4곳) | `a solid deep-crimson heart with one thick thorn wrapped across it` |
+| `ui_roll.png` | 🎲 굴림·리롤 단추 (7곳) | `a wooden die tilted mid-tumble, warm light on its top face` |
+| `ui_burst.png` | ⚡ 일격 표식 (6곳) | `one sharp bright wedge of light, a struck spark` |
+| `ui_whet.png` | 🔥 벼름 자원 (6곳) | `one thick curling flame, solid blocky tongues, hot orange core` |
+| `ui_unknown.png` | ❓ 숨겨진 예고 (5곳) | `one fat question mark shape made of rough torn parchment` |
+
+> 이미 그림이 있는 것 — 🌀(intent_confuse) · 🪨/⛓(status_block) · 💨(없음, 새김 흩기 · 드묾).
+> 위 6종만 채우면 전투 화면에서 이모지가 사라진다.
 
 ---
 
