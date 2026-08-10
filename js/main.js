@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.11'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.12'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1033,7 +1033,7 @@ const DOT_KO = { poison: '독', bleed: '출혈' };   // v1.14: 같은 장치, �
 // v3.10 상태/버프 아이콘 — 이모지 금지. (임시) 표시가 붙은 것은 전용 아트 대기 중
 const FX_ICON = {
   rollTax: 'status_bleed', holdTax: 'status_bleed', petrify: 'status_stun',
-  lockHigh: 'status_bind', blind: 'status_confuse', sealLast: 'status_seal', sealCat: 'status_seal',
+  lockHigh: 'status_lock', blind: 'status_confuse', sealLast: 'status_seal', sealCat: 'status_seal',
   ward: 'status_block', cap: 'status_block', enrage: 'status_strength',
   reflect: 'status_vulnerable', undying: 'status_regen', regen: 'status_regen',
 };

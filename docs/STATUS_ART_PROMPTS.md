@@ -34,7 +34,7 @@ python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.bui
 |---|---|---|---|---|---|
 | 출혈 | `#e83b2e` | 붉은 핏방울 | 위 모서리에서 흘러내리는 핏줄기 | 굵은 핏방울 세 개 | 덮개 새로 |
 | 혼란 | `#8b4de8` | 보라 소용돌이 | 칸 전체를 덮는 소용돌이 | 보라 나선 | 덮개 새로 |
-| 독 | `#a8d63a` | **송곳니 + 초록 점액** | 위에서 물어내리는 송곳니, 아래에 고인 점액 | 송곳니와 떨어지는 점액 방울 | 아이콘 완료 · 덮개 새로 |
+| 독 | `#a8d63a` | **초록 독액** | 위 가장자리에서 흘러내려 아래에 고이는 초록 점액 | 초록 독액 방울 | 둘 다 새로 (송곳니 안 씀) |
 | 저주 | `#c33ad6` | **보라 불꽃** | 아래 가장자리에서 타오르는 보라 불 | 보라 불꽃 한 덩이 | 둘 다 새로 |
 | 약탈 | `#e08a2a` | **움켜쥐는 손** | 왼쪽에서 뻗어와 움켜쥐는 뼈손 | 동전을 움켜쥔 손 | 둘 다 새로 |
 | 축복 | `#ffd257` | 흰 왕관 | 위 가장자리에 얹힌 왕관 | 왕관 하나 | 덮개 새로 |
@@ -110,7 +110,7 @@ No text, no letters, no watermark.
 | 5 | `status_die_numb.png` | 마비 ✅확정 | `#3aa8e6` | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
 | 6 | `status_die_devour.png` | 잠식 ✅확정 | `#17bfae` | `a solid black void swallowing the bottom and left edges, one row of blunt teeth along its rim` |
 | 7 | `status_die_bleed.png` | 출혈 ＋추가 | `#e83b2e` | `thick crimson blood running down from the top edge in three fat streaks, one heavy drop hanging at the end of each` |
-| 8 | `status_die_poison.png` | 독 ＋추가 | `#a8d63a` | `one thick pale fang biting down from the top edge with heavy green venom running off it, a fat pool of green slime along the bottom edge` |
+| 8 | `status_die_poison.png` | 독 ＋추가 | `#a8d63a` | `thick green venom running down from the top edge in two fat streaks, a fat pool of green slime along the bottom edge` |
 | 9 | `status_die_curse.png` | 저주 ＋추가 | `#c33ad6` | `thick violet flames burning upward along the bottom edge, solid blocky tongues of fire, dark smoke curling at the lower corners` |
 | 10 | `status_die_blessing.png` | 축복 ＋추가 | `#ffd257` | `a wide pale ivory crown resting on the top edge, thick blunt points, one broad warm glow behind it` |
 | 11 | `status_die_confuse.png` | 혼란 ＋추가 | `#8b4de8` | `a thick violet whirlpool filling the WHOLE square and covering the center completely — this one is the exception, it must hide what is underneath` |
@@ -171,7 +171,7 @@ A 3x2 grid of six symbols, equal cells, equal spacing` 로 바꾸고 `IN ORDER �
 
 | 파일명 | 이름 | Symbol 프롬프트 |
 |---|---|---|
-| `status_poison.png` | 독 | ✅ **완료** — 송곳니 + 초록 점액 방울 (덮개를 여기 맞춘다) |
+| `status_poison.png` | 독 | `two fat green venom droplets falling, one thick slime blob below them` (송곳니 쓰지 않는다) |
 | `status_bind.png` | 포박 | `one thick rope loop pulled into a tight knot, chunky twisted strands` |
 | `status_stun.png` | 기절 | `a grey stone die split by one heavy jagged crack` |
 | `status_curse.png` | 저주 | `one thick violet flame burning upward, solid blocky tongues of fire` (덮개의 보라 불꽃과 같은 모티프) |
@@ -190,7 +190,7 @@ A 3x2 grid of six symbols, equal cells, equal spacing` 로 바꾸고 `IN ORDER �
 | `fx_rolltax.png` | 이빨 자국 | 다시 굴릴 때마다 피해 | `two round fang puncture holes on pale skin with one thick red drop below` |
 | `fx_holdtax.png` | 가시 | 지킨 주사위마다 피해 | `a closed fist gripping one thick thorned stem, three big thorns` |
 | `fx_petrify.png` | 굳음 | 그 눈이 돌이 된다 | `a wooden die half turned to solid grey stone, split down the middle` |
-| `fx_lockhigh.png` | 물기 | 가장 높은 눈이 물린다 | `a round sucker mouth clamped onto a wooden die, one ring of blunt teeth` |
+| `status_lock.png` | 물기 | 가장 높은 눈이 물린다 | `a round sucker mouth seen face-on, one ring of blunt teeth around a dark center` |
 | `fx_blind.png` | 어둠 | 위력이 보이지 않는다 | `one thick curl of smoke covering a dim closed eye` |
 | `fx_seal_cat.png` | 족보 봉인 | 그 족보를 못 쓴다 | `a heavy blocky iron padlock over a folded parchment, big keyhole` |
 | `fx_ward.png` | 문턱 | 얕은 타격은 안 통함 | `a squat mossy boundary stone with one blade glancing off its face` |
