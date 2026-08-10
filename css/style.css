@@ -579,12 +579,12 @@ span.enemy-art {
 /* 시그니처 봉인 족보 — 필터로 덮어 봉인을 몸으로 알게 한다 */
 .sheet-row.sig-sealed { position: relative; filter: saturate(.35) brightness(.6); }
 .sheet-row.sig-sealed::after {
-  content: '⚜️ 봉인'; position: absolute; inset: 0; z-index: 3;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; color: #ffd9a0; letter-spacing: 2px;
-  background: repeating-linear-gradient(-45deg, rgba(20, 12, 8, .38) 0 10px, rgba(20, 12, 8, .18) 10px 20px);
-  border-radius: inherit; text-shadow: 0 1px 3px #000;
-  pointer-events: none;
+  /* v3.13: 자물쇠 아이콘 + 빗금. 전용 봉인 프레임 아트가 오면 SEAL_FRAME_READY 로 교체된다 */
+  content: ''; position: absolute; inset: 0; z-index: 3;
+  background:
+    url('../assets/icons/fx_seal_cat.png') center / 26px 26px no-repeat,
+    repeating-linear-gradient(-45deg, rgba(20, 12, 8, .42) 0 10px, rgba(20, 12, 8, .20) 10px 20px);
+  border-radius: inherit; pointer-events: none;
 }
 
 /* 갉기 등 리롤 비용 증가 — 버튼에 붉게 */
