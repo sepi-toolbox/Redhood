@@ -6,7 +6,7 @@
 |---|---|---|---|
 | 1 | **유물** | 32 | `keyart_stilllife` |
 | 2 | **보물상자** | 3 | `keyart_stilllife` |
-| 3 | **앱 아이콘** | 1 | `keyart_stilllife` |
+| 3 | ~~앱 아이콘~~ | 1 | ✅ 완료 — 빨간망토 삽화에서 잘라 씀 |
 | 4 | 감정 카드 (카드판 · 잠자는 중) | 6 | `keyart_redhood` |
 
 키아트 원본은 `docs/keyart/`에 있다. **프롬프트를 복사할 때 그 계열 키아트를 반드시 같이 첨부한다** —
@@ -120,13 +120,12 @@ Stylized dark fairytale object for the dice game REDHOOD. Match the EXACT painti
 
 ---
 
-# 3. 앱 아이콘 1종
+# 3. 앱 아이콘 ✅ 완료 (v3.18)
 
-```
-Stylized dark fairytale app icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LOW detail density. NOT photorealistic, NOT 3D. Square 1:1 image, bold and readable at 48px. A red hood silhouette merged with a single ivory die showing five pips, on a near-black forest background, thin antique gold ring border. No text, no letters, no watermark.
-```
+새로 뽑지 않고 **「낯익은 환영」 이벤트의 빨간망토 삽화**(`assets/npc/redhood.png`)에서
+초상 부분을 잘라 썼다. 프롬프트 불필요.
 
-파일: `assets/icon-192.png` · `assets/icon-512.png` (한 장 주면 두 크기로 내가 굽는다)
+파일: `assets/icon-192.png` · `assets/icon-512.png`
 
 ---
 

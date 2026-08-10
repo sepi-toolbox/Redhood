@@ -1,23 +1,32 @@
-# REDHOOD 보스 낙서 아이콘 9종 (복사용)
+# REDHOOD 보스 낙서 아이콘 9종 (복사용 · 재생성판)
 
-> ✅ **9/9 완료 (v3.14).** 시트 2장으로 전량 들어왔고 지도에 연동되어 있습니다.
-> 원본이 밝은 잉크/어두운 배경으로 나와서, 붙일 때 **짙은 세피아 잉크로 톤을 뒤집고 붉은 강조만 남겼습니다.**
-> 다시 뽑을 일이 있으면 아래 프롬프트를 그대로 쓰면 됩니다.
+> **1차분은 폐기.** 프롬프트는 기존 노드 6종과 같은 걸 썼는데, 결과가 **가는 해칭 선화**로 나와서
+> 지도의 다른 아이콘(굵은 획·넓은 색면)과 전혀 다른 물건이 됐다. 붙이는 쪽에서 손볼 수 있는
+> 문제가 아니었다 — **다시 뽑는 게 맞다.**
 
-지도의 보스 노드를 테마별로 다르게 표시하기 위한 아이콘입니다. **보스만 보고도 이번 판이 어느 구역인지 알 수 있게** 하는 게 목적입니다.
+## 반드시 첨부할 것
 
-**규칙 8 적용** — 이건 완성 일러스트가 아니라 빨간망토가 자기 여정을 적은 낡은 수첩의 **잉크 낙서**입니다. gouache·painting 계열 문구를 쓰면 지도 위에서 혼자 튀어 다른 노드 아이콘과 안 맞습니다. 기존 노드 낙서 6종(전투·정예·휴식·만남·상점·보스)과 같은 결이어야 합니다.
+**`node_ref.png`** (기존 노드 낙서 6종을 한 장에 모은 것 — 이 문서와 함께 보냈다).
+말로 설명하는 것보다 이 한 장이 정확하다. 여기 6개와 **같은 물건으로 보여야** 한다.
 
-**한 장에 6칸씩 뽑는 게 편합니다.** 아래 두 블록이 1막+2막 / 3막+예비입니다. 낱장으로 뽑고 싶으면 맨 아래 단품 템플릿을 쓰세요.
+## 1차분이 어긋난 지점 (프롬프트에 반영됨)
 
-**참고 이미지로 기존 `doodle_boss.png`(늑대 머리)를 첨부**하면 선 굵기와 붉은 강조 양이 맞습니다.
+| | 기존 6종 (맞음) | 1차 보스 9종 (틀림) |
+|---|---|---|
+| 획 | 굵고 뭉툭하다 | 가늘고 잘다 |
+| 채움 | **넓은 크림색 색면**으로 꽉 찬다 | 속이 비고 해칭으로 명암을 낸다 |
+| 외곽선 | **굵은 검은 테**가 있다 | 없다 |
+| 밀도 | 낮다 — 42px에서 읽힌다 | 높다 — 42px에서 뭉갠다 |
+| 잉크 색 | 밝은 크림 `#f2b862` | 칙칙한 회갈 `(143,118,86)` |
+
+마지막 줄이 특히 컸다. 잉크가 지도 양피지와 명도가 같아서 얹으면 사라졌다.
 
 ---
 
 ## 시트 1 — 1막·2막 보스 6종
 
 ```
-Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown ink on parchment, deep blood red accents. NOT photorealistic, NOT 3D, NOT finished painted illustrations, no gouache shading. Landscape 3:2. A 3x2 grid of six doodle icons on one plain flat very dark brown background. Each icon is a scratchy quill-ink doodle, as if a little girl sketched her own journey in a worn journal — wobbly uneven lines, childlike shapes, no circular frames, each with exactly one tiny accent of deep blood red ink. Each doodle is a simple head or silhouette, bold and readable at 42px, filling its cell. IN ORDER — a snarling wolf head with pricked ears / a lumpy troll head under a broken bridge plank / a teddy bear head with one button eye dangling // a crowned crocodile head with a rotten wooden crown / a faceless motherly head made of swirling fog with two dot eyes / a wrapped revenant head crowned with soil and roots. No text, no letters, no watermark.
+Rough hand-drawn map doodle icons for REDHOOD, in the EXACT same style as the attached reference sheet — match its stroke weight, its fill treatment and its palette. Landscape 3:2. A 3x2 grid of six doodle icons on one plain flat very dark brown background. Each icon is a quill-ink doodle as if a little girl sketched it in a worn journal: THICK BLUNT wobbly strokes, LARGE FLAT PALE-CREAM filled shapes, a HEAVY BLACK OUTLINE around the whole silhouette, and exactly one tiny accent of deep blood red. LOW detail density — NO fine hatching, NO cross-hatching, NO engraving lines, NO pencil shading, NO grey midtones. The cream fill must be BRIGHT, much lighter than parchment. Simple childlike shapes, bold silhouette, must stay readable at 42px. Each icon is a head or a simple object filling its own cell, no circular frames, no borders. IN ORDER — a snarling wolf head with pricked ears / a lumpy troll head under a broken bridge plank / a teddy bear head with one button eye dangling // a crowned crocodile head with a rotten wooden crown / a faceless motherly head made of swirling fog with two dot eyes / a wrapped revenant head crowned with soil and roots. NOT photorealistic, NOT 3D, NOT a finished painted illustration, no gouache shading. No text, no letters, no watermark.
 ```
 
 | 순서 | 파일명 | 보스 | 구역 |
@@ -31,10 +40,10 @@ Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown i
 
 ---
 
-## 시트 2 — 3막 보스 3종 (3칸만 채우고 나머지는 비워도 됨)
+## 시트 2 — 3막 보스 3종
 
 ```
-Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown ink on parchment, deep blood red accents. NOT photorealistic, NOT 3D, NOT finished painted illustrations, no gouache shading. Landscape 3:2. A 1x3 row of three doodle icons on one plain flat very dark brown background, equal cells, equal spacing. Each icon is a scratchy quill-ink doodle, as if a little girl sketched her own journey in a worn journal — wobbly uneven lines, childlike shapes, no circular frames, each with exactly one tiny accent of deep blood red ink. Each doodle is a simple head or silhouette, bold and readable at 42px, filling its cell. IN ORDER — a melting crowned head with a crescent moon for a face / a round pit ringed with jagged teeth seen head-on / a serene masked head with a tilted halo above it. No text, no letters, no watermark.
+Rough hand-drawn map doodle icons for REDHOOD, in the EXACT same style as the attached reference sheet — match its stroke weight, its fill treatment and its palette. Landscape 3:2. A 1x3 row of three doodle icons on one plain flat very dark brown background, equal cells, equal spacing. Each icon is a quill-ink doodle as if a little girl sketched it in a worn journal: THICK BLUNT wobbly strokes, LARGE FLAT PALE-CREAM filled shapes, a HEAVY BLACK OUTLINE around the whole silhouette, and exactly one tiny accent of deep blood red. LOW detail density — NO fine hatching, NO cross-hatching, NO engraving lines, NO pencil shading, NO grey midtones. The cream fill must be BRIGHT, much lighter than parchment. Simple childlike shapes, bold silhouette, must stay readable at 42px. Each icon fills its own cell, no circular frames, no borders. IN ORDER — a melting crowned head with a crescent moon for a face / a round pit ringed with jagged teeth seen head-on / a serene masked head with a tilted halo above it. NOT photorealistic, NOT 3D, NOT a finished painted illustration, no gouache shading. No text, no letters, no watermark.
 ```
 
 | 순서 | 파일명 | 보스 | 구역 |
@@ -48,7 +57,7 @@ Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown i
 ## 단품 템플릿 (하나씩 다시 뽑을 때)
 
 ```
-A rough hand-drawn map doodle icon for REDHOOD. Muted palette: dark sepia brown ink on parchment, one tiny accent of deep blood red ink. NOT photorealistic, NOT 3D, NOT a finished painted illustration, no gouache shading. Square 1:1 image. A single scratchy quill-ink doodle centered on one plain flat very dark brown background — wobbly uneven lines, childlike shapes, no circular frame, no border. Bold and readable at 42px, filling most of the frame. The doodle: {묘사}. No text, no letters, no watermark.
+A rough hand-drawn map doodle icon for REDHOOD, in the EXACT same style as the attached reference sheet — match its stroke weight, its fill treatment and its palette. Square 1:1 image. A single quill-ink doodle centered on one plain flat very dark brown background: THICK BLUNT wobbly strokes, LARGE FLAT PALE-CREAM filled shapes, a HEAVY BLACK OUTLINE around the whole silhouette, and exactly one tiny accent of deep blood red. LOW detail density — NO fine hatching, NO cross-hatching, NO engraving lines, NO pencil shading, NO grey midtones. The cream fill must be BRIGHT, much lighter than parchment. Simple childlike shape, bold silhouette, readable at 42px, filling most of the frame, no circular frame, no border. The doodle: {묘사}. NOT photorealistic, NOT 3D, NOT a finished painted illustration, no gouache shading. No text, no letters, no watermark.
 ```
 
 | 보스 | 묘사 |
@@ -60,15 +69,13 @@ A rough hand-drawn map doodle icon for REDHOOD. Muted palette: dark sepia brown 
 | 안개의 어머니 | `a faceless motherly head made of swirling fog with two dot eyes` |
 | 파묻힌 자 | `a wrapped revenant head crowned with soil and roots` |
 | 자각몽의 왕 | `a melting crowned head with a crescent moon for a face` |
-| 벌어진 아가리 | `a round pit ringed with jagged teeth, seen head-on` |
-| 거짓 성인 | `a serene masked head with a tilted halo floating above it` |
+| 벌어진 아가리 | `a round pit ringed with jagged teeth seen head-on` |
+| 거짓 성인 | `a serene masked head with a tilted halo above it` |
 
 ---
 
-## 연동
+## 받은 뒤
 
-파일: `assets/icons/doodle_boss_{bossId}.png`
-
-올려주시면 `main.js`의 `BOSS_ICON_READY`에 id를 추가합니다. 등록 안 된 보스는 기존 공용 보스 낙서(늑대 머리)로 표시되므로 **한두 개만 먼저 올려도 됩니다.**
-
-기존 `doodle_boss.png`는 1막 늑대와 그림이 겹치니, `doodle_boss_wolf`가 준비되면 공용 폴백은 그대로 두고 늑대만 전용으로 교체하면 됩니다.
+시트째 올려주면 칸 나누고 배경 빼서 `assets/icons/doodle_boss_{id}.png` 로 넣는다.
+**색은 절대 안 건드린다** — 뽑힌 그대로 쓴다. 이번처럼 색이 안 맞으면 붙이는 쪽이 아니라
+프롬프트로 다시 잡는다.
