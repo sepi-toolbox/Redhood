@@ -1547,3 +1547,46 @@ span.enemy-art {
 .card-battle.loot-mode .cb-hintline { position: absolute; top: calc(var(--cb-lootTop, 430px) - 28px); width: 100%; text-align: center; z-index: 45; }
 
 
+
+/* ==========================================================================
+   v3.5 — v1.35 압축 줄 복원 (성권 지정): 족보판은 세로 일렬·스크롤 없이 한 화면
+   줄 33px·메달 26px·테두리 8px. 수집제라 줄 수가 3~8로 변하지만 문법은 동일.
+   ========================================================================== */
+.combo-row {
+  gap: 6px; padding-left: 13px; font-size: 13.5px;
+  border-width: 8px 14px; padding-top: 0; padding-bottom: 0; min-height: 0;
+}
+.combo-row.has-plate { padding-left: 4px; }
+.combo-row.has-plate .row-icon { display: none; }
+.combo-row .row-icon {
+  position: absolute; left: -13px; top: 50%; margin: -13px 0 0 0;
+  width: 26px; height: 26px; border-width: 1.5px;
+}
+.combo-row .row-icon .row-ico-tmp { font-size: 15px; }
+.combo-row .row-body { flex-direction: row; align-items: baseline; gap: 5px; line-height: 16px; }
+.combo-row .sheet-name { flex: none; max-width: 62%; line-height: 16px; }
+.combo-row .cat-tag { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 10px; line-height: 16px; }
+.combo-row .sheet-name .cat-tag.t-burst { line-height: 13px; font-size: 9.5px; padding: 0 3px; }
+.combo-row .sheet-preview { font-size: 16px; min-width: 32px; line-height: 16px; }
+.sheet-zone .combo-row { flex: 1 1 0; min-height: 26px; max-height: 33px; }
+.sheet-zone .combo-row.sig-sealed::after { font-size: 11px; letter-spacing: 1px; }
+
+@media (max-height: 800px) {
+  .enemy-zone { height: 140px; }
+  .enemy .enemy-art, .enemy .art-img { max-height: 96px; }
+  .dice-zone { padding: 4px 12px 2px; }
+  .roll-bar { padding-top: 3px; padding-bottom: 3px; }
+  .roll-bar .roll-btn { padding-top: 7px; padding-bottom: 7px; font-size: 15px; }
+  .hint-line { display: none; }
+  .sheet-zone { padding: 5px 13px; gap: 3px; }
+  .sheet-zone .combo-row { min-height: 24px; }
+}
+@media (max-height: 700px) {
+  .enemy-zone { height: 118px; }
+  .enemy .enemy-art, .enemy .art-img { max-height: 78px; }
+  .mid-line { display: none; }
+  .sheet-zone .combo-row { min-height: 22px; font-size: 12.5px; }
+  .sheet-zone .combo-row .row-body,
+  .sheet-zone .combo-row .sheet-name,
+  .sheet-zone .combo-row .cat-tag { line-height: 14px; }
+}
