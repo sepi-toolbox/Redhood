@@ -35,12 +35,11 @@
     "name": "흉내내기",
     "effects": [
      {
-      "op": "status",
-      "amount": 3,
-      "kind": "confuse"
+      "op": "sealLast",
+      "turns": 2
      }
     ],
-    "cooldown": 1
+    "cooldown": 2
    },
    "surge": {
     "name": "마구 쪼기",
@@ -106,12 +105,7 @@
     "weight": 1,
     "amount": 1
    }
-  ],
-  "signature": {
-   "op": "echo",
-   "name": "흉내내기",
-   "desc": "직전에 사용한 족보를 봉인한다 — 같은 족보를 연달아 쓸 수 없다."
-  }
+  ]
  },
  {
   "id": "will_o_wisp",
@@ -192,6 +186,17 @@
      "damage": 1,
      "move": "ashes"
     }
+   },
+   "lure": {
+    "name": "홀림",
+    "effects": [
+     {
+      "op": "status",
+      "kind": "confuse",
+      "amount": 2
+     }
+    ],
+    "cooldown": 1
    }
   },
   "pattern": {
@@ -201,7 +206,8 @@
     "flicker": 1,
     "flare": 0,
     "surge": 1,
-    "move1": 0
+    "move1": 0,
+    "lure": 2
    }
   },
   "enlightenedMove": {
@@ -248,13 +254,7 @@
     "op": "heal",
     "weight": 2
    }
-  ],
-  "signature": {
-   "op": "haze",
-   "name": "홀림",
-   "count": 1,
-   "desc": "매 턴 주사위 1개의 눈이 보이지 않는다."
-  }
+  ]
  },
  {
   "id": "forest_spider",
@@ -287,8 +287,8 @@
     "effects": [
      {
       "op": "status",
-      "amount": 3,
-      "kind": "bind"
+      "kind": "chain",
+      "amount": 2
      }
     ],
     "cooldown": 1
@@ -369,13 +369,7 @@
     "op": "armor",
     "weight": 1
    }
-  ],
-  "signature": {
-   "op": "web",
-   "name": "거미줄",
-   "count": 2,
-   "desc": "매 턴 주사위 2개가 거미줄로 결속된다 — 항상 같이 굴러간다."
-  }
+  ]
  },
  {
   "id": "stray_dog",
@@ -432,6 +426,21 @@
     ],
     "minTurn": 5,
     "cooldown": 5
+   },
+   "mark": {
+    "name": "이빨 박기",
+    "effects": [
+     {
+      "op": "rollTax",
+      "amount": 1,
+      "turns": 2
+     },
+     {
+      "op": "damage",
+      "amount": 5
+     }
+    ],
+    "cooldown": 2
    }
   },
   "pattern": {
@@ -440,7 +449,8 @@
     "bite": 2,
     "growl": 2,
     "maul": 1,
-    "surge": 3
+    "surge": 3,
+    "mark": 2
    },
    "noRepeat": 2
   },
@@ -491,13 +501,7 @@
     "op": "lifesteal",
     "weight": 1
    }
-  ],
-  "signature": {
-   "op": "rollTax",
-   "name": "이빨 자국",
-   "amount": 1,
-   "desc": "다시 굴릴 때마다 피해 1 — 물린 자국이 벌어진다."
-  }
+  ]
  },
  {
   "id": "thorn_bush",
@@ -510,15 +514,15 @@
   ],
   "moves": {
    "scratch": {
-    "name": "가시 뿜기",
+    "name": "가시 돋기",
     "effects": [
      {
-      "op": "damage",
-      "amount": 1,
-      "hits": 5
+      "op": "holdTax",
+      "per": 0.5,
+      "turns": 2
      }
     ],
-    "cooldown": 1
+    "cooldown": 2
    },
    "coil": {
     "name": "줄기 방패",
@@ -600,13 +604,7 @@
     "op": "armor",
     "weight": 2
    }
-  ],
-  "signature": {
-   "op": "holdTax",
-   "name": "가시",
-   "per": 0.5,
-   "desc": "다시 굴릴 때, 지킨 주사위 2개당 피해 1 — 움켜쥘수록 찔린다."
-  }
+  ]
  },
  {
   "id": "twig_golem",
@@ -673,6 +671,17 @@
     ],
     "minTurn": 4,
     "cooldown": 3
+   },
+   "petrify": {
+    "name": "굳히기",
+    "effects": [
+     {
+      "op": "petrify",
+      "face": 6,
+      "turns": 2
+     }
+    ],
+    "cooldown": 2
    }
   },
   "pattern": {
@@ -682,7 +691,8 @@
     "root": 1,
     "crush": 0,
     "mend": 1,
-    "surge": 3
+    "surge": 3,
+    "petrify": 2
    }
   },
   "enlightenedMove": {
@@ -723,17 +733,7 @@
     "op": "heal",
     "weight": 1
    }
-  ],
-  "signature": {
-   "op": "petrify",
-   "name": "굳음",
-   "face": 6,
-   "break": {
-    "face": 5,
-    "count": 3
-   },
-   "desc": "6은 항상 0으로 굳는다. 5를 3개 채운 족보를 확정하면 부서진다."
-  }
+  ]
  },
  {
   "id": "brook_sprite",
@@ -756,16 +756,16 @@
     "cooldown": 1
    },
    "mist_veil": {
-    "name": "물안개",
+    "name": "물수제비",
     "effects": [
+     {
+      "op": "status",
+      "kind": "chain",
+      "amount": 2
+     },
      {
       "op": "block",
       "amount": 6
-     },
-     {
-      "op": "status",
-      "kind": "confuse",
-      "amount": 3
      }
     ],
     "followUp": {
@@ -870,13 +870,7 @@
     "weight": 1,
     "mult": 0.25
    }
-  ],
-  "signature": {
-   "op": "web",
-   "name": "물수제비",
-   "count": 2,
-   "desc": "매 턴 주사위 2개가 물살에 묶여 같이 굴러간다."
-  }
+  ]
  },
  {
   "id": "leech",
@@ -910,11 +904,12 @@
     }
    },
    "cling": {
-    "name": "들러붙기",
+    "name": "흡착",
     "effects": [
      {
-      "op": "rest",
-      "amount": 5
+      "op": "lockHigh",
+      "heal": true,
+      "turns": 2
      }
     ],
     "minTurn": 0,
@@ -922,7 +917,7 @@
      "move": "suck",
      "chance": 1
     },
-    "cooldown": 1
+    "cooldown": 2
    },
    "swell": {
     "name": "대량의 피 빨기",
@@ -1018,13 +1013,7 @@
     "op": "damage",
     "weight": 1
    }
-  ],
-  "signature": {
-   "op": "lockHigh",
-   "name": "흡착",
-   "heal": true,
-   "desc": "매 턴 가장 높은 눈에 달라붙는다 — 그 주사위는 쓸 수 없고, 그 값만큼 회복한다."
-  }
+  ]
  },
  {
   "id": "rat_swarm",
@@ -1078,6 +1067,17 @@
     ],
     "minTurn": 4,
     "cooldown": 3
+   },
+   "sollgi": {
+    "name": "쏠기",
+    "effects": [
+     {
+      "op": "status",
+      "kind": "numb",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2
    }
   },
   "pattern": {
@@ -1086,7 +1086,8 @@
     "gnaw": 3,
     "swarm": 2,
     "squeak": 1,
-    "surge": 3
+    "surge": 3,
+    "sollgi": 2
    },
    "noRepeat": 2
   },
@@ -1120,16 +1121,7 @@
     "op": "damage",
     "weight": 2
    }
-  ],
-  "signature": {
-   "op": "gnaw",
-   "name": "쏠기",
-   "mult": 2,
-   "break": {
-    "count": 3
-   },
-   "desc": "이빨이 리롤을 쏠아먹는다 — 리롤 비용 2배. 같은 눈 3개를 채운 족보를 확정하면 흩어진다."
-  }
+  ]
  },
  {
   "id": "living_broom",
@@ -1186,6 +1178,17 @@
     ],
     "minTurn": 4,
     "cooldown": 3
+   },
+   "brush": {
+    "name": "쓸어담기",
+    "effects": [
+     {
+      "op": "status",
+      "kind": "seal",
+      "amount": 2
+     }
+    ],
+    "cooldown": 2
    }
   },
   "pattern": {
@@ -1194,7 +1197,8 @@
     "sweep": 2,
     "dust": 1,
     "stand": 1,
-    "surge": 3
+    "surge": 3,
+    "brush": 2
    }
   },
   "enlightenedMove": {
@@ -1226,13 +1230,7 @@
     "op": "armor",
     "weight": 2
    }
-  ],
-  "signature": {
-   "op": "sealDie",
-   "name": "쓸어내기",
-   "count": 1,
-   "desc": "매 턴 주사위 1개가 쓸려나간 채 시작한다 — 한 번 굴리기 전엔 값이 없다."
-  }
+  ]
  },
  {
   "id": "alpha_dog",
@@ -1309,6 +1307,11 @@
    "pack_rule": {
     "name": "무리의 규칙",
     "effects": [
+     {
+      "op": "rollTax",
+      "amount": 1,
+      "turns": 2
+     },
      {
       "op": "status",
       "kind": "bleed",
@@ -1420,13 +1423,7 @@
     "op": "armor",
     "weight": 1
    }
-  ],
-  "signature": {
-   "op": "rollTax",
-   "name": "무리의 이빨",
-   "amount": 1,
-   "desc": "다시 굴릴 때마다 피해 1 — 무리에게 물어뜯긴 자국이 벌어진다."
-  }
+  ]
  },
  {
   "id": "old_pike",
@@ -1449,15 +1446,16 @@
     "cooldown": 1
    },
    "dive": {
-    "name": "잠수",
+    "name": "물어채기",
     "effects": [
      {
-      "op": "rest",
-      "amount": 10
+      "op": "lockHigh",
+      "heal": false,
+      "turns": 2
      }
     ],
     "hidden": true,
-    "cooldown": 1,
+    "cooldown": 2,
     "break": {
      "damage": 14,
      "move": "unique1"
@@ -1558,13 +1556,7 @@
     "op": "armor",
     "weight": 1
    }
-  ],
-  "signature": {
-   "op": "lockHigh",
-   "name": "물어채기",
-   "heal": false,
-   "desc": "매 턴 가장 높은 눈을 물고 잠수한다 — 그 주사위는 이번 턴 쓸 수 없다."
-  }
+  ]
  },
  {
   "id": "cellar_thing",
@@ -1589,6 +1581,10 @@
    "lurk": {
     "name": "도사림",
     "effects": [
+     {
+      "op": "blind",
+      "turns": 2
+     },
      {
       "op": "empower",
       "amount": 3
@@ -1701,12 +1697,7 @@
     "weight": 1,
     "mult": 0.25
    }
-  ],
-  "signature": {
-   "op": "blind",
-   "name": "스멀거림",
-   "desc": "어둠 속에서는 족보의 위력을 미리 알 수 없다."
-  }
+  ]
  },
  {
   "id": "wolf",
@@ -1774,12 +1765,21 @@
     "cooldown": 1
    },
    "match_fang": {
-    "name": "송곳니를 맞춰라",
+    "name": "피의 사냥",
     "effects": [
+     {
+      "op": "rollTax",
+      "amount": 1,
+      "turns": 2
+     },
+     {
+      "op": "sealLast",
+      "turns": 2
+     },
      {
       "op": "status",
       "kind": "bleed",
-      "amount": 4
+      "amount": 3
      }
     ],
     "cooldown": 3,
@@ -1889,14 +1889,7 @@
     "weight": 1,
     "mult": 0.3
    }
-  ],
-  "signature": {
-   "op": "bloodhunt",
-   "name": "피의 사냥",
-   "amount": 1,
-   "fromPhase": 1,
-   "desc": "상처 입은 늑대 — 다시 굴릴 때마다 피해 1, 직전 족보 봉인."
-  }
+  ]
  },
  {
   "id": "river_hag",
@@ -1909,15 +1902,15 @@
   ],
   "moves": {
    "grasp": {
-    "name": "지진",
+    "name": "물풀 휘감기",
     "effects": [
      {
       "op": "status",
-      "amount": 3,
-      "kind": "stun"
+      "kind": "chain",
+      "amount": 3
      }
     ],
-    "cooldown": 3,
+    "cooldown": 2,
     "minTurn": 1
    },
    "drown": {
@@ -2238,13 +2231,7 @@
     "weight": 1,
     "mult": 0.3
    }
-  ],
-  "signature": {
-   "op": "web",
-   "name": "물풀",
-   "count": 3,
-   "desc": "매 턴 주사위 3개가 물풀에 엉킨다 — 항상 같이 굴러간다."
-  }
+  ]
  },
  {
   "id": "old_teddy",
@@ -2301,14 +2288,19 @@
     "name": "솜 채우기",
     "effects": [
      {
-      "op": "heal",
-      "amount": 10
+      "op": "sealCat",
+      "cats": [
+       "chance",
+       "onePair"
+      ],
+      "turns": 2
      },
      {
-      "op": "block",
-      "amount": 8
+      "op": "heal",
+      "amount": 10
      }
-    ]
+    ],
+    "cooldown": 3
    },
    "surge": {
     "name": "솜이 팽팽해진다",
@@ -2410,16 +2402,7 @@
     "weight": 1,
     "mult": 0.3
    }
-  ],
-  "signature": {
-   "op": "minRank",
-   "name": "솜 채우기",
-   "cats": [
-    "chance",
-    "onePair"
-   ],
-   "desc": "노페어·원페어는 솜에 파묻혀 통하지 않는다."
-  }
+  ]
  },
  {
   "id": "bog_toad",

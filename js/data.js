@@ -62,16 +62,6 @@ function validate() {
       }
     }
     if (e.faceAbilities) throw new Error(`enemies.json: ${e.id} faceAbilities 는 v2.17에서 폐기 — battleMoves 로 옮기세요`);
-    // v3.0 시그니처 방해
-    if (e.signature) {
-      const SIG_OPS = new Set(['echo', 'web', 'haze', 'sealDie', 'rollTax', 'holdTax', 'petrify',
-        'lockHigh', 'gnaw', 'blind', 'minRank', 'bloodhunt']);
-      const s = e.signature;
-      if (!SIG_OPS.has(s.op)) throw new Error(`enemies.json: ${e.id} 미지원 시그니처 "${s.op}"`);
-      if (!s.name || !s.desc) throw new Error(`enemies.json: ${e.id} 시그니처에 name/desc 가 필요합니다`);
-      if (s.break && !(s.break.count >= 2)) throw new Error(`enemies.json: ${e.id} 시그니처 해제 count 는 2 이상`);
-      if (s.op === 'minRank' && !(Array.isArray(s.cats) && s.cats.length)) throw new Error(`enemies.json: ${e.id} minRank 는 cats 목록 필요`);
-    }
     if (e.battleMoves) {
       if (!Array.isArray(e.battleMoves) || !e.battleMoves.length) throw new Error(`enemies.json: ${e.id} battleMoves 는 비어있지 않은 목록이어야 합니다`);
       const seen = new Set();
@@ -106,7 +96,8 @@ function validate() {
   }
   // 적 행동 효과 검증 (v1.08: 휴식 추가, 유니크 행동·기본 행동·파쇄 대상까지 함께 본다)
   const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal', 'rest', 'selfDamage', 'poison', 'bleed', 'status',
-  'ward', 'cap', 'drainWhet', 'unpin']);
+  'ward', 'cap', 'drainWhet', 'unpin',
+  'sealLast', 'sealCat', 'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']);   // v3.3 테마 행동 — 별도 시스템 아님
   for (const e of DB.enemies) {
     const all = { ...e.moves, ...(e.uniqueMoves || {}) };
     for (const [mid, mv] of Object.entries(all)) {
