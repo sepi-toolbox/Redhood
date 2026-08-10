@@ -233,7 +233,7 @@
       "id": "fullHouse",
       "name": "풀하우스",
       "kind": "fullHouse",
-      "score": 35,
+      "score": "sumAll",
       "tier": "uncommon",
       "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25.",
       "example": [
@@ -287,7 +287,8 @@
           "tier": "rare"
         }
       ],
-      "short": "풀하우스"
+      "short": "풀하우스",
+      "mult": 1.8
     },
     {
       "id": "largeStraight",
@@ -446,7 +447,7 @@
       "name": "야찌",
       "kind": "ofKind",
       "count": 5,
-      "score": 70,
+      "score": "matchedSum",
       "tier": "epic",
       "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50.",
       "example": [
@@ -496,7 +497,8 @@
           "tier": "epic"
         }
       ],
-      "short": "야찌"
+      "short": "야찌",
+      "mult": 4
     }
   ],
   "whetStep": 0.5,

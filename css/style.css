@@ -1264,6 +1264,25 @@ span.enemy-art {
 @keyframes stGrab    { 0%, 100% { transform: translate(1px, 1.5px) rotate(1.6deg) } 50% { transform: translate(-.8px, -1px) rotate(-1.6deg) } }
 @keyframes stRise    { 0%, 100% { transform: translateY(1.4px) scaleY(.94) } 50% { transform: translateY(-1.4px) scaleY(1.07) } }
 
+/* v3.23: 봉인은 테두리만으로는 "이 칸이 죽었다"가 안 읽힌다.
+   면을 밀랍으로 덮고 가운데에 도장을 찍는다 — 한 번 굴리면 둘 다 사라진다 */
+.die.sealed-off .seal-veil {
+  position: absolute; left: 8px; right: 8px; top: 12px; bottom: 12px;
+  border-radius: 7px; z-index: 3; pointer-events: none;
+  background: linear-gradient(160deg, rgba(96, 26, 26, .86) 0%, rgba(62, 16, 18, .92) 55%, rgba(40, 12, 14, .95) 100%);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, .55);
+}
+.die.sealed-off .seal-stamp {
+  position: absolute; left: 50%; top: 50%; width: 40px; height: 40px;
+  transform: translate(-50%, -54%) rotate(-7deg); z-index: 5; pointer-events: none;
+  object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
+  animation: sealPress 2.6s ease-in-out infinite;
+}
+@keyframes sealPress {
+  0%, 100% { transform: translate(-50%, -54%) rotate(-7deg) scale(1); }
+  50%      { transform: translate(-50%, -54%) rotate(-7deg) scale(1.07); }
+}
+
 /* 혼란만 사각 윤곽을 고정하고 안쪽 안개를 돌린다 (사각형을 통째로 돌리면 모서리가 삐져나온다) */
 .st-swirlbox { position: absolute; left: 8px; top: 12px; width: 46px; height: 46px;
   border-radius: 7px; overflow: hidden; z-index: 3; pointer-events: none; }

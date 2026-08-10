@@ -86,9 +86,16 @@ static func eval_category(cat: Dictionary, faces: Array, zeroed = null) -> Dicti
 				cs.append(int(c))
 			cs.sort()
 			var ok := (cs.size() == 2 and cs[0] == 2 and cs[1] == 3) or (cs.size() >= 1 and cs[0] == 5)
-			if ok:
-				return { "valid": true, "base": int(cat.get("score", 0)), "contributing": all }
-			return _fail()
+			if not ok:
+				return _fail()
+			# v3.23: 고정 점수 대신 눈의 합 × 배수 (js/yahtzee.js 와 동일)
+			var fscore = cat.get("score", 0)
+			if fscore is String and fscore == "sumAll":
+				var fs := 0
+				for i in all:
+					fs += _val(faces, zeroed, i)
+				return { "valid": true, "base": int(floor(fs * float(cat.get("mult", 1)))), "contributing": all }
+			return { "valid": true, "base": int(fscore), "contributing": all }
 
 		"straight":
 			var uniq_d := {}

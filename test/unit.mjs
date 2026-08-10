@@ -12,10 +12,10 @@ const C = {
   onePair: { id: 'onePair', kind: 'ofKind', count: 2, score: 'matchedSum', mult: 1 },
   threeKind: { id: 'threeKind', kind: 'ofKind', count: 3, score: 'matchedSum', mult: 1.5 },
   fourKind: { id: 'fourKind', kind: 'ofKind', count: 4, score: 'matchedSum', mult: 3 },
-  fullHouse: { id: 'fullHouse', kind: 'fullHouse', score: 35 },
+  fullHouse: { id: 'fullHouse', kind: 'fullHouse', score: 'sumAll', mult: 1.8 },  // v3.23 눈 합 기반
   small: { id: 'smallStraight', kind: 'straight', length: 4, score: 28 },
   large: { id: 'largeStraight', kind: 'straight', length: 5, score: 60 },
-  yahtzee: { id: 'yahtzee', kind: 'ofKind', count: 5, score: 70 },
+  yahtzee: { id: 'yahtzee', kind: 'ofKind', count: 5, score: 'matchedSum', mult: 4 }, // v3.23
   chance: { id: 'chance', kind: 'chance', score: 'sumTop3' },
   chanceD: { id: 'chance', kind: 'chance', score: 'sumTop3Distinct' },
   noPair: { id: 'chance', kind: 'chance', score: 'highestDie' },
@@ -26,10 +26,12 @@ const G = { faces: [1, 2, 3, 4, 5, 6], gold: true };
 const plain5 = [N, N, N, N, N];
 
 // 판정
-eq('야찌 [3,3,3,3,3]', evalCategory(C.yahtzee, [3, 3, 3, 3, 3]).base, 70);
-eq('풀하우스 [2,2,3,3,3]', evalCategory(C.fullHouse, [2, 2, 3, 3, 3]).base, 35);
+eq('야찌 [3,3,3,3,3] = 15×4', evalCategory(C.yahtzee, [3, 3, 3, 3, 3]).base, 60);
+eq('야찌 [6,6,6,6,6] = 30×4', evalCategory(C.yahtzee, [6, 6, 6, 6, 6]).base, 120);
+eq('풀하우스 [2,2,3,3,3] = 13×1.8', evalCategory(C.fullHouse, [2, 2, 3, 3, 3]).base, 23);
+eq('풀하우스 [6,6,5,5,5] = 27×1.8', evalCategory(C.fullHouse, [6, 6, 5, 5, 5]).base, 48);
 eq('풀하우스 실패 [2,2,3,3,4]', evalCategory(C.fullHouse, [2, 2, 3, 3, 4]).valid, false);
-eq('풀하우스=야찌 인정 [4,4,4,4,4]', evalCategory(C.fullHouse, [4, 4, 4, 4, 4]).base, 35);
+eq('풀하우스=야찌 인정 [4,4,4,4,4] = 20×1.8', evalCategory(C.fullHouse, [4, 4, 4, 4, 4]).base, 36);
 eq('스몰 [1,2,3,4,6]', evalCategory(C.small, [1, 2, 3, 4, 6]).base, 28);
 eq('스몰 실패 [1,2,4,5,6]는 4연속? (2,4,5,6→3연속)', evalCategory(C.small, [1, 2, 4, 5, 6]).valid, false);
 eq('라지 [2,3,4,5,6]', evalCategory(C.large, [2, 3, 4, 5, 6]).base, 60);
@@ -71,7 +73,7 @@ eq('은탄환+금박+이빨 포카드', computeDamage(C.fourKind, [4, 4, 4, 4, 1
 // 금박이 4번(눈1, 포카드 비기여) → (48)×2+3 = 99
 eq('금박 비기여 시 미적용', computeDamage(C.fourKind, [4, 4, 4, 4, 1], [N, N, N, N, G], [silver, fang]).total, 99);
 // 풀하우스 35 + 부적15 + 이빨3 = 53
-eq('풀하우스+부적+이빨', computeDamage(C.fullHouse, [2, 2, 5, 5, 5], plain5, [charm, fang]).total, 53);
+eq('풀하우스+부적+이빨', computeDamage(C.fullHouse, [2, 2, 5, 5, 5], plain5, [charm, fang]).total, 52);
 // 0점 버리기: 원페어인데 쌍 없음 → total 0, isZero (이빨 미적용)
 const zero = computeDamage(C.onePair, [2, 3, 4, 5, 6], plain5, [fang]);
 eq('0점 버리기 total', zero.total, 0);
@@ -1428,3 +1430,21 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
+
+// v3.23: 같은 손에서 풀하우스·야찌가 더 쉬운 족보를 반드시 이기는가
+for (const [a, b] of [[1, 2], [2, 6], [6, 1], [3, 3], [5, 4]]) {
+  const hand = [a, a, a, b, b];
+  const fh = evalCategory(C.fullHouse, hand).base;
+  const tp = evalCategory(C.twoPair, hand);
+  const tk = evalCategory(C.threeKind, hand);
+  const op = evalCategory(C.onePair, hand);
+  const worse = Math.max(tp.valid ? tp.base : 0, tk.valid ? tk.base : 0, op.valid ? op.base : 0);
+  eq(`풀하우스 [${hand}] 가 더 쉬운 족보보다 셈`, fh > worse, true);
+}
+for (const f of [1, 2, 3, 4, 5, 6]) {
+  const hand = [f, f, f, f, f];
+  const y = evalCategory(C.yahtzee, hand).base;
+  const fk = evalCategory(C.fourKind, hand).base;
+  const fh = evalCategory(C.fullHouse, hand).base;
+  eq(`야찌 [${f}×5] 가 포카드·풀하우스보다 셈`, y > fk && y > fh, true);
+}
