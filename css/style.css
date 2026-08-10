@@ -698,19 +698,19 @@ span.enemy-art {
 .sheet-row .sheet-preview { flex: none; min-width: 40px; text-align: right; font-weight: 700; color: #8f2a20; font-size: 20px; padding-right: 2px; }
 .sheet-row .lv { color: #8a6516; font-size: 11px; }
 .cat-tag { color: #8a7d68; font-size: 10.5px; font-weight: 400; }
-.sheet-row .cat-tag { color: #7a6850; }
+.sheet-row .cat-tag { color: #5a4b39; }
 /* 등급 4체계 — 종이 위 이름색: common 갈색 / uncommon 청색 / rare 보라 / epic 금색 */
 .sheet-row.t-uncommon .sheet-name { color: #2e5876; }
 .sheet-row.t-rare .sheet-name { color: #5d3f86; }
 .sheet-row.t-epic .sheet-name { color: #8a6516; }
 /* v0.89: 족보 줄은 등급을 '판 그림'이 말한다 — 글자색은 통일해 어떤 판 위에서도 같게 읽힌다 */
-.sheet-row.combo-row .sheet-name { color: #3a2a1c; }
-/* v0.94: 판마다 바탕 밝기가 달라 어떤 판에서는 짙은 글자가 묻힌다.
-   글자 아래에 밝은 1px 양각을 깔아 중간 톤 판(가죽·벨벳·점판암)에서도 획이 떠 보이게 한다. */
+.sheet-row.combo-row .sheet-name { color: #2a1c0e; font-weight: 800; letter-spacing: -.2px; }
+/* v3.10: 밝은 양각(흰 테두리)이 오히려 획을 갉아먹어 글자가 흐려 보였다 — 걷어내고
+   잉크를 진하게 눌러 대비로 승부한다 (종이 판 위 7:1 이상). */
 .sheet-row.combo-row.has-plate .sheet-name,
-.sheet-row.combo-row.has-plate .cat-tag { text-shadow: 0 1px 0 rgba(255, 244, 218, .5); }
-/* 종류 꼬리표는 #7a6850이라 밝은 판 위에서 대비가 2.4:1까지 떨어졌다. 한 단계 낮춰 3.7:1로 올린다. */
-.sheet-row.combo-row.has-plate .cat-tag { color: #5f5140; }
+.sheet-row.combo-row.has-plate .cat-tag { text-shadow: none; }
+.sheet-row.combo-row.has-plate .sheet-name { color: #241708; }
+.sheet-row.combo-row.has-plate .cat-tag { color: #4a3d2c; }
 .sheet-row.selected { filter: brightness(1.12) saturate(1.06); } /* v0.59: 발광 제거, 배경만 밝게 */
 .sheet-row.used { opacity: .32; filter: grayscale(.6); }
 .sheet-row.used .sheet-preview { color: #6f6353; }
@@ -1071,7 +1071,10 @@ span.enemy-art {
 /* ---------- 버프/디버프 (v0.19) ---------- */
 .buff-strip {
   flex: none; display: flex; gap: 6px; justify-content: center; align-items: center;
-  padding: 3px 12px 1px; min-height: 20px;
+  padding: 4px 12px 3px; min-height: 20px;
+  /* v3.10: 족보판과 같은 나무 탁자를 이어 붙인다 — 띠만 검게 뚫려 보이던 것 수정 */
+  background: #171210 url('../assets/ui/tex_wood.jpg') center / cover;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, .35);
 }
 .buff-chip {
   font-size: 12px; font-weight: 800; color: #e8dcc8;
@@ -1239,7 +1242,7 @@ span.enemy-art {
 
 /* ---------- v1.31 일격(⚡) 족보 ---------- */
 .sheet-row.combo-row.burst{position:relative}
-.sheet-row.combo-row.burst:not(.used) .sheet-preview{color:#b06a12;text-shadow:0 1px 0 rgba(255,244,218,.5)}
+.sheet-row.combo-row.burst:not(.used) .sheet-preview{color:#8a4f08}
 
 /* ==========================================================================
    표식(badge) — v1.33: 화면의 '아이콘 + 값' 은 전부 이 하나로 그린다
