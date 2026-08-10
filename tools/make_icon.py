@@ -5,10 +5,24 @@ import sys, os
 from PIL import Image, ImageDraw, ImageFilter, ImageChops
 
 S = 96
-def medallion():
+import json
+STATUS_COLOR = {x['id']: x['color'] for x in json.load(open('data/statuses.json'))['list']}
+# 아이콘·덮개를 잇는 첫째 단서는 색이다 (성권). 메달 안판을 그 상태의 색으로 물들여
+# 13px 배지에서 형태가 안 보여도 색만으로 구분되게 한다.
+def _hex(c):
+    c = c.lstrip('#')
+    return tuple(int(c[i:i+2], 16) for i in (0, 2, 4))
+
+def medallion(tint=None, mix=0.42):
     im = Image.new('RGBA', (S*4, S*4), (0,0,0,0)); d = ImageDraw.Draw(im)
-    d.ellipse([6,6,S*4-6,S*4-6], fill=(58,42,30,255), outline=(122,90,58,255), width=14)
-    d.ellipse([34,34,S*4-34,S*4-34], fill=(34,25,19,255), outline=(78,57,38,255), width=6)
+    plate = (34, 25, 19)
+    rim = (122, 90, 58)
+    if tint:
+        t = _hex(tint) if isinstance(tint, str) else tint
+        plate = tuple(int(plate[i] * (1 - mix) + t[i] * mix * 0.55) for i in range(3))
+        rim = tuple(int(rim[i] * (1 - mix * .7) + t[i] * mix * .7) for i in range(3))
+    d.ellipse([6,6,S*4-6,S*4-6], fill=(58,42,30,255), outline=rim + (255,), width=14)
+    d.ellipse([34,34,S*4-34,S*4-34], fill=plate + (255,), outline=(78,57,38,255), width=6)
     hi = Image.new('RGBA', (S*4,S*4), (0,0,0,0))
     ImageDraw.Draw(hi).ellipse([40,34,S*4-40,S*4-120], fill=(255,236,200,26))
     im.alpha_composite(hi.filter(ImageFilter.GaussianBlur(26)))
@@ -29,7 +43,7 @@ def key_out(im, tol=34):
                 o[x,y] = (r,g,b,int(a * (d-tol)/(tol*1.2)))
     return out
 
-def build(src, name, fill=0.66):
+def build(src, name, fill=0.66, tint=None):
     im = key_out(Image.open(src))
     bb = im.getchannel('A').point(lambda a: 255 if a > 24 else 0).getbbox()
     if bb: im = im.crop(bb)
@@ -37,7 +51,9 @@ def build(src, name, fill=0.66):
     target = S * fill
     w,h = im.size; sc = min(target/w, target/h)
     im = im.resize((max(1,round(w*sc)), max(1,round(h*sc))), Image.LANCZOS)
-    out = medallion()
+    if tint is None and name.startswith('status_'):
+        tint = STATUS_COLOR.get(name[len('status_'):])
+    out = medallion(tint)
     out.alpha_composite(im, ((S-im.size[0])//2, (S-im.size[1])//2))
     p = f'assets/icons/{name}.png'
     out.save(p)
