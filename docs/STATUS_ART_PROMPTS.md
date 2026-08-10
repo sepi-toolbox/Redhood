@@ -40,7 +40,7 @@ python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.bui
 | 결속 | `#a8c2d8` | 쇠사슬 | 좌우를 가로지르는 사슬 | 사슬 두 칸 | 덮개 새로 |
 | 부패 | `#d98cc0` | 부푼 종기 + 불씨 | 아래에 부푼 종기 덩어리, 불씨 | 종기와 짧은 심지 | 덮개 새로 |
 | 잠식 | `#9fd8f0` | 삼키는 검은 공허 | 아래·왼쪽을 먹어드는 검은 덩어리 | 이빨 달린 검은 덩어리 | 덮개 새로 |
-| 봉인 | `#8fa8e0` | **청회색 밀랍 봉인** | 아래 가장자리의 밀랍 덩이와 굵은 끈 | 밀랍 봉인 하나 | 둘 다 새로 |
+| 봉인 | `#8fa8e0` | 붉은 밀랍 | 아래 가장자리의 밀랍과 끈 | 밀랍 봉인 | 덮개 새로 |
 | 포박 | `#7fbf8a` | 굵은 밧줄 매듭 | 좌우를 감은 밧줄, 왼쪽에 매듭 | 밧줄 매듭 | 덮개 새로 |
 | 기절 | `#dfe6ee` | 돌처럼 굳은 균열 | 모서리에서 번지는 돌 껍질 | 갈라진 돌 주사위 | 덮개 새로 |
 | 마비 | `#8fd4ff` | 얼어붙은 번개 | 좌우 가장자리의 굵은 번개 | 번개와 굳은 손바닥 | 덮개 새로 |
@@ -106,7 +106,7 @@ No text, no letters, no watermark.
 | 5 | `status_die_curse.png` | 저주 | `#c78cff` | `thick violet flames burning upward along the bottom edge, solid blocky tongues of fire, dark smoke curling at the lower corners` |
 | 6 | `status_die_blessing.png` | 축복 | `#f3ecdd` | `a wide pale ivory crown resting on the top edge, thick blunt points, one broad warm glow behind it` |
 | 7 | `status_die_confuse.png` | 혼란 | `#c68cff` | `a thick violet whirlpool filling the WHOLE square and covering the center completely — this one is the exception, it must hide what is underneath` |
-| 8 | `status_die_seal.png` | 봉인 | `#8fa8e0` | `a wide blue-grey wax seal blob sitting on the bottom edge with two thick pale ribbons crossing only the lower corners, center left open` |
+| 8 | `status_die_seal.png` | 봉인 | `#8fa8e0` | `a wide dark-red wax seal blob sitting on the bottom edge with two thick blue-grey ribbons crossing only the lower corners, center left open` |
 | 9 | `status_die_rot.png` | 부패 | `#d98cc0` | `a swollen pink-purple pustule mass bulging up from the bottom edge, two glowing embers on its surface, one short fat fuse` |
 | 10 | `status_die_chain.png` | 결속 | `#a8c2d8` | `one heavy iron chain of thick blocky links crossing from the left edge to the right edge, cold steel highlights` |
 | 11 | `status_die_numb.png` | 마비 | `#8fd4ff` | `two fat pale-blue frozen lightning bolts hugging the left and right edges, thick blocky forks, frost crust at the corners` |
@@ -172,7 +172,7 @@ A 3x2 grid of six symbols, equal cells, equal spacing` 로 바꾸고 `IN ORDER �
 | `status_stun.png` | 기절 | `a grey stone die split by one heavy jagged crack` |
 | `status_curse.png` | 저주 | `one thick violet flame burning upward, solid blocky tongues of fire` (덮개의 보라 불꽃과 같은 모티프) |
 | `status_blessing.png` | 축복 | `a small solid pale-gold crown with one broad halo of warm light behind it` |
-| `status_seal.png` | 봉인 | `one thick blue-grey wax seal blob stamped over a folded parchment corner` |
+| `status_seal.png` | 봉인 | `one deep-red wax seal blob stamped over a folded parchment corner` |
 | `status_rot.png` | 부패 | `a swollen dark pustule with one short lit fuse and a bright ember tip` |
 | `status_chain.png` | 결속 | `two thick iron chain links interlocked, heavy blocky shapes` |
 | `status_numb.png` | 마비 | `one thick pale-blue lightning bolt over a stiff open palm` |
