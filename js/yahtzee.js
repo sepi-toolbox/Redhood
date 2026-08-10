@@ -50,8 +50,12 @@ export function evalCategory(cat, faces, zeroed = null) {
     case 'fullHouse': {
       const cs = Object.values(counts).sort((a, b) => a - b);
       const ok = (cs.length === 2 && cs[0] === 2 && cs[1] === 3) || cs[0] === 5;
-      return ok ? { valid: true, base: cat.score, contributing: all }
-                : { valid: false, base: 0, contributing: [] };
+      if (!ok) return { valid: false, base: 0, contributing: [] };
+      // v3.23: 고정 점수를 버리고 눈의 합 × 배수로 간다 — 큰 눈으로 만든 오두막이 더 세야 한다
+      const base = cat.score === 'sumAll'
+        ? Math.floor(all.reduce((a, i) => a + val(i), 0) * (cat.mult || 1))
+        : cat.score;
+      return { valid: true, base, contributing: all };
     }
     case 'straight': {
       const uniq = [...new Set(faces)].sort((a, b) => a - b);

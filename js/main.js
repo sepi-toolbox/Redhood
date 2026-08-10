@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.22'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.23'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -858,11 +858,12 @@ function renderBattle(opts = {}) {
           const hidden = st && st.rule === 'hideFace';
           const sealedOff = st && st.rule === 'needReroll' && !d.st.opened;
           const pinned = !!d.pinned && def.effect && def.effect.op === 'pin';
-          return `<button class="die art ${d.sigLock ? 'siglocked' : ''} ${pinned ? 'pinned' : ''} ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''} ${st ? 'st t-' + st.id : ''}"
+          return `<button class="die art ${sealedOff ? 'sealed-off' : ''} ${d.sigLock ? 'siglocked' : ''} ${pinned ? 'pinned' : ''} ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''} ${st ? 'st t-' + st.id : ''}"
             data-idx="${i}" title="${esc(def.name)}${st ? ' · ' + st.name + ' — ' + st.text : ''}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
             ${blank || hidden || sealedOff
               ? '<span class="pip-art empty"></span>'
               : `<img class="pip-art" src="${dieFaceSrc(def.id, d.face)}" alt="${d.face}" draggable="false">`}
+            ${sealedOff ? '<span class="seal-veil"></span><img class="seal-stamp" src="assets/ui/seal_stamp.png" alt="" draggable="false">' : ''}
             ${st ? `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>${st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''}` : ''}
             ${pinned && !st ? '<span class="st-tint"></span><span class="st-rim"></span>' : ''}
             ${d.sigLock ? '<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_bite.png" alt="" draggable="false"><span class="st-rim"></span>' : ''}
@@ -1004,7 +1005,13 @@ function updateDiceMarks() {
     const marked = battle.rolled && !d.held;
     el.classList.toggle('mark-reroll', marked);
     const sm = el.querySelector('small');
-    if (sm) sm.textContent = marked ? '다시' : '';
+    // v3.23: 여기서 라벨을 덮어써서 상태이상 이름이 굴림 직후 한 번 보이고 사라졌다.
+    //        상태이상·물림이 붙은 칸은 그 이름이 '다시'보다 우선한다.
+    if (!sm) return;
+    const st = d.st ? DB.statusById[d.st.kind] : null;
+    if (d.sigLock) sm.textContent = (modOf(battle, 'lockHigh') || {}).name || '물림';
+    else if (st) sm.textContent = st.name;
+    else sm.textContent = marked ? '다시' : (d.pinned ? '새김' : '');
   });
   const rb = document.getElementById('reroll-btn');
   if (rb) rb.disabled = battle.rollsLeft < rerollCost(battle) || battle.await || battle.dice.every(d => d.held);
