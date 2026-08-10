@@ -872,9 +872,10 @@
    }
   ],
   "signature": {
-   "op": "forceReroll",
+   "op": "web",
    "name": "물수제비",
-   "desc": "다시 굴릴 때마다, 지킨 주사위 하나가 물살에 씻겨 같이 굴러간다."
+   "count": 2,
+   "desc": "매 턴 주사위 2개가 물살에 묶여 같이 굴러간다."
   }
  },
  {
@@ -1122,12 +1123,12 @@
   ],
   "signature": {
    "op": "gnaw",
-   "name": "갉기",
+   "name": "쏠기",
    "mult": 2,
    "break": {
     "count": 3
    },
-   "desc": "리롤 비용이 2배. 같은 눈 3개를 채운 족보를 확정하면 흩어진다."
+   "desc": "이빨이 리롤을 쏠아먹는다 — 리롤 비용 2배. 같은 눈 3개를 채운 족보를 확정하면 흩어진다."
   }
  },
  {
@@ -1309,13 +1310,6 @@
     "name": "무리의 규칙",
     "effects": [
      {
-      "op": "demand",
-      "turns": 2,
-      "amount": 18,
-      "category": "twoPair",
-      "power": 2
-     },
-     {
       "op": "status",
       "kind": "bleed",
       "amount": 3
@@ -1431,7 +1425,7 @@
    "op": "rollTax",
    "name": "무리의 이빨",
    "amount": 1,
-   "desc": "다시 굴릴 때마다 피해 1. 무리의 규칙(요구)은 따로 온다."
+   "desc": "다시 굴릴 때마다 피해 1 — 무리에게 물어뜯긴 자국이 벌어진다."
   }
  },
  {
@@ -1782,13 +1776,6 @@
    "match_fang": {
     "name": "송곳니를 맞춰라",
     "effects": [
-     {
-      "op": "demand",
-      "turns": 2,
-      "amount": 40,
-      "category": "fourKind",
-      "power": 3
-     },
      {
       "op": "status",
       "kind": "bleed",
@@ -3263,13 +3250,6 @@
     "name": "길을 열어라",
     "effects": [
      {
-      "op": "demand",
-      "kind": "straight",
-      "turns": 2,
-      "amount": 18,
-      "power": 2
-     },
-     {
       "op": "status",
       "kind": "bind",
       "amount": 2
@@ -3541,13 +3521,6 @@
    "cross_bog": {
     "name": "늪을 건너라",
     "effects": [
-     {
-      "op": "demand",
-      "kind": "straight",
-      "turns": 2,
-      "amount": 40,
-      "power": 3
-     },
      {
       "op": "status",
       "kind": "bind",
@@ -4858,13 +4831,6 @@
     "name": "형태를 갖춰라",
     "effects": [
      {
-      "op": "demand",
-      "kind": "fullHouse",
-      "turns": 2,
-      "amount": 18,
-      "power": 2
-     },
-     {
       "op": "status",
       "kind": "bind",
       "amount": 3
@@ -5139,13 +5105,6 @@
    "whole_dream": {
     "name": "완전한 꿈",
     "effects": [
-     {
-      "op": "demand",
-      "category": "fullHouse",
-      "turns": 2,
-      "amount": 40,
-      "power": 3
-     },
      {
       "op": "status",
       "kind": "seal",
