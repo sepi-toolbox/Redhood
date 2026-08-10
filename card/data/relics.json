@@ -1,0 +1,368 @@
+[
+  {
+    "id": "wolf_fang",
+    "name": "늑대 이빨",
+    "icon": "🦷",
+    "tier": "normal",
+    "desc": "족보를 확정할 때마다 추가 피해 +3.",
+    "hook": {
+      "type": "flatDamage",
+      "amount": 3
+    }
+  },
+  {
+    "id": "breadcrumbs",
+    "name": "빵부스러기",
+    "icon": "🍞",
+    "tier": "normal",
+    "desc": "전투에서 승리하면 HP 4 회복.",
+    "hook": {
+      "type": "healOnVictory",
+      "amount": 4
+    }
+  },
+  {
+    "id": "spool",
+    "name": "붉은 실타래",
+    "icon": "🧵",
+    "tier": "normal",
+    "desc": "노페어 피해 +4.",
+    "hook": {
+      "type": "categoryBonus",
+      "category": "chance",
+      "bonus": 4
+    }
+  },
+  {
+    "id": "warm_milk",
+    "name": "따뜻한 우유",
+    "icon": "🥛",
+    "tier": "normal",
+    "desc": "매 턴 시작 시 HP 1 회복.",
+    "hook": {
+      "type": "turnHeal",
+      "amount": 1
+    }
+  },
+  {
+    "id": "firewood",
+    "name": "마른 장작",
+    "icon": "🪵",
+    "tier": "normal",
+    "desc": "매 턴 시작 시 방어 2.",
+    "hook": {
+      "type": "turnBlock",
+      "amount": 2
+    }
+  },
+  {
+    "id": "leather_gloves",
+    "name": "가죽 장갑",
+    "icon": "🧤",
+    "tier": "normal",
+    "desc": "투페어 피해 +6.",
+    "hook": {
+      "type": "categoryBonus",
+      "category": "twoPair",
+      "bonus": 6
+    }
+  },
+  {
+    "id": "crow_feather",
+    "name": "까마귀 깃털",
+    "icon": "🪶",
+    "tier": "normal",
+    "desc": "스트레이트 피해 +8.",
+    "hook": {
+      "type": "categoryBonus",
+      "category": "largeStraight",
+      "bonus": 8
+    }
+  },
+  {
+    "id": "hunters_charm",
+    "name": "사냥꾼의 부적",
+    "icon": "🪬",
+    "tier": "normal",
+    "desc": "풀하우스 피해 +15.",
+    "hook": {
+      "type": "categoryBonus",
+      "category": "fullHouse",
+      "bonus": 15
+    }
+  },
+  {
+    "id": "ledger",
+    "name": "가계부",
+    "icon": "📒",
+    "tier": "normal",
+    "desc": "상점 가격 -20%.",
+    "hook": {
+      "type": "shopDiscount",
+      "mult": 0.8
+    }
+  },
+  {
+    "id": "moss_compass",
+    "name": "이끼 나침반",
+    "icon": "🧭",
+    "tier": "normal",
+    "desc": "전체 공격 족보 피해 +6.",
+    "hook": {
+      "type": "aoeBonus",
+      "bonus": 6
+    }
+  },
+  {
+    "id": "silver_scale",
+    "name": "은저울",
+    "icon": "⚖️",
+    "tier": "normal",
+    "desc": "전투에서 얻는 🪙 +25%.",
+    "hook": {
+      "type": "coinBonus",
+      "mult": 1.25
+    }
+  },
+  {
+    "id": "tallow_candle",
+    "name": "수지 양초",
+    "icon": "🕯️",
+    "tier": "normal",
+    "desc": "혼란(🌀)에 면역 — 주사위가 뒤틀리지 않는다.",
+    "hook": {
+      "type": "confuseImmune"
+    }
+  },
+  {
+    "id": "old_bone",
+    "name": "오래된 뼈",
+    "icon": "🦴",
+    "tier": "normal",
+    "desc": "같은 눈 족보(원페어·트리플·포카드·야찌) 피해 +6.",
+    "hook": {
+      "type": "kindBonus",
+      "kind": "ofKind",
+      "bonus": 6
+    }
+  },
+  {
+    "id": "glass_jar",
+    "name": "유리병 속 반딧불",
+    "icon": "🫙",
+    "tier": "normal",
+    "desc": "얻는 즉시 최대 HP +10.",
+    "hook": {
+      "type": "maxHp",
+      "amount": 10
+    }
+  },
+  {
+    "id": "wolf_pelt",
+    "name": "늑대 가죽",
+    "icon": "🐺",
+    "tier": "normal",
+    "desc": "적을 처치할 때마다 HP 3 회복.",
+    "hook": {
+      "type": "healOnKill",
+      "amount": 3
+    }
+  },
+  {
+    "id": "poison_apple",
+    "name": "독사과 조각",
+    "icon": "🍎",
+    "tier": "normal",
+    "desc": "HP가 절반 이하일 때 모든 족보 피해 +5.",
+    "hook": {
+      "type": "lowHpDamage",
+      "ratio": 0.5,
+      "amount": 5
+    }
+  },
+  {
+    "id": "honey_pot",
+    "name": "꿀단지",
+    "icon": "🍯",
+    "tier": "normal",
+    "desc": "전투에서 승리하면 HP 8 회복.",
+    "hook": {
+      "type": "healOnVictory",
+      "amount": 8
+    }
+  },
+  {
+    "id": "red_cloak",
+    "name": "붉은 망토",
+    "icon": "🧣",
+    "tier": "elite",
+    "desc": "매 턴 리롤 +1.",
+    "hook": {
+      "type": "extraReroll",
+      "amount": 1
+    }
+  },
+  {
+    "id": "acorn_charm",
+    "name": "도토리 부적",
+    "icon": "🌰",
+    "tier": "elite",
+    "desc": "풀하우스 피해 2배.",
+    "hook": {
+      "type": "categoryMult",
+      "category": "fullHouse",
+      "mult": 2
+    }
+  },
+  {
+    "id": "gate_bar",
+    "name": "문지기의 빗장",
+    "icon": "🚪",
+    "tier": "elite",
+    "desc": "턴이 지나도 방어도의 절반이 남는다.",
+    "hook": {
+      "type": "blockKeep",
+      "ratio": 0.5
+    }
+  },
+  {
+    "id": "clover",
+    "name": "네잎클로버",
+    "icon": "🍀",
+    "tier": "elite",
+    "desc": "보상에서 레어·에픽이 나올 확률 2배.",
+    "hook": {
+      "type": "luck",
+      "mult": 2
+    }
+  },
+  {
+    "id": "silver_knife",
+    "name": "은식칼",
+    "icon": "🗡️",
+    "tier": "elite",
+    "desc": "스트레이트 족보 피해 +10.",
+    "hook": {
+      "type": "kindBonus",
+      "kind": "straight",
+      "bonus": 10
+    }
+  },
+  {
+    "id": "silver_bullet",
+    "name": "은탄환",
+    "icon": "🔫",
+    "tier": "elite",
+    "desc": "포카드 피해 2배.",
+    "hook": {
+      "type": "categoryMult",
+      "category": "fourKind",
+      "mult": 2
+    }
+  },
+  {
+    "id": "fate_thimble",
+    "name": "운명의 골무",
+    "icon": "🪡",
+    "tier": "elite",
+    "desc": "매 턴 리롤 +2.",
+    "hook": {
+      "type": "extraReroll",
+      "amount": 2
+    }
+  },
+  {
+    "id": "wolfmoon_pendant",
+    "name": "늑대달 목걸이",
+    "icon": "🌕",
+    "tier": "elite",
+    "desc": "족보를 확정할 때마다 추가 피해 +6.",
+    "hook": {
+      "type": "flatDamage",
+      "amount": 6
+    }
+  },
+  {
+    "id": "grandma_book",
+    "name": "할머니의 동화책",
+    "icon": "📕",
+    "tier": "elite",
+    "desc": "야찌 피해 2배.",
+    "hook": {
+      "type": "categoryMult",
+      "category": "yahtzee",
+      "mult": 2
+    }
+  },
+  {
+    "id": "whetstone",
+    "name": "숫돌",
+    "icon": "🪨",
+    "tier": "normal",
+    "desc": "매 턴 시작 시 🔥벼름 +1.",
+    "hook": {
+      "type": "turnWhet",
+      "amount": 1
+    }
+  },
+  {
+    "id": "hunters_eye",
+    "name": "사냥꾼의 눈",
+    "icon": "👁",
+    "tier": "normal",
+    "desc": "같은 눈이 3개 이상 나온 판을 확정하면 🔥벼름 +1.",
+    "hook": {
+      "type": "whetOnKind",
+      "count": 3,
+      "amount": 1
+    }
+  },
+  {
+    "id": "waymark",
+    "name": "길표",
+    "icon": "🪧",
+    "tier": "normal",
+    "desc": "스트레이트 족보를 확정하면 다음 턴 리롤 +2 · 🔥벼름 +1.",
+    "hook": {
+      "type": "rerollOnCategory",
+      "kind": "straight",
+      "amount": 2,
+      "whet": 1
+    }
+  },
+  {
+    "id": "bears_back",
+    "name": "곰의 등",
+    "icon": "🐻",
+    "tier": "elite",
+    "desc": "두르고 있는 방어도 10마다 모든 족보 피해 +3.",
+    "hook": {
+      "type": "blockScaleDamage",
+      "per": 10,
+      "amount": 3
+    }
+  },
+  {
+    "id": "dried_heart",
+    "name": "말라붙은 심장",
+    "icon": "🫀",
+    "tier": "elite",
+    "desc": "HP가 3분의 1 이하면 모든 족보 피해 1.5배.",
+    "hook": {
+      "type": "lowHpMult",
+      "ratio": 0.34,
+      "mult": 1.5
+    }
+  },
+  {
+    "id": "leech_ring",
+    "name": "거머리 반지",
+    "icon": "💍",
+    "tier": "elite",
+    "desc": "주사위 때문에 자해할 때마다 🔥벼름 +2.",
+    "hook": {
+      "type": "whetOnSelfDamage",
+      "amount": 2
+    }
+  }
+]
