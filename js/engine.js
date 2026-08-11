@@ -373,6 +373,7 @@ export function initialRoll(battle) {
       if (hi >= 0) {
         const d = battle.dice[hi];
         d.sigLock = true;
+        fxPush(battle, 'added', { i: hi, kind: 'bite' });   // 무는 순간도 연출한다
         if (m.heal) {
           const e = battle.enemies.find(x => x.uid === m.from);
           if (e && e.hp > 0) e.hp = Math.min(e.maxHpInit, e.hp + d.face);

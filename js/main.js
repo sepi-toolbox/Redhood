@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.33'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.34'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1235,6 +1235,20 @@ for (let f = 1; f <= 6; f++) {
 const ST_KO = () => Object.fromEntries(DB.statuses.list.map(x => [x.id, x.name]));
 function dieEl(i) { return app.querySelectorAll('.die')[i] || null; }
 
+// 흰색 한 색으로 그린 연출 그림에 상태색을 입혀 얹는다.
+//   그림 자체를 마스크로 써서 색만 갈아끼우므로 한 장으로 13종에 다 돌려 쓴다.
+function fxSprite(el, name, color, cls, ms) {
+  const sp = document.createElement('span');
+  sp.className = `fx-sprite ${cls}`;
+  const url = `url('assets/ui/${name}.png')`;
+  sp.style.webkitMaskImage = url;
+  sp.style.maskImage = url;
+  sp.style.background = color;
+  el.appendChild(sp);
+  setTimeout(() => sp.remove(), ms);
+  return sp;
+}
+
 function stFloat(el, text, cls) {
   if (!el) return;
   const f = document.createElement('span');
@@ -1247,16 +1261,14 @@ function stFloat(el, text, cls) {
 function playStatusFx(fx) {
   if (!fx) return;
   const names = ST_KO();
-  const colorOf = (k) => (DB.statusById[k] || {}).color || '#c9a86a';
+  const FXC = (DB.statuses && DB.statuses.fxColors) || {};
+  const colorOf = (k) => (DB.statusById[k] || {}).color || FXC[k === 'bite' ? 'lock' : k] || '#c9a86a';
+  const nameOf = (k) => (k === 'bite' ? '물림' : (names[k] || ''));
 
   fx.removed.forEach(({ i, kind }, n) => setTimeout(() => {
     const el = dieEl(i); if (!el) return;
     // 뜯긴 자국 — 그 자리에 잠깐 파편이 남았다 흩어진다
-    const s = document.createElement('span');
-    s.className = 'st-break';
-    s.style.setProperty('--stc', colorOf(kind));
-    el.appendChild(s);
-    setTimeout(() => s.remove(), 620);
+    fxSprite(el, 'fx_break_shards', colorOf(kind), 'sp-break', 620);
     el.classList.remove('st-hit');
     void el.offsetWidth;
     el.classList.add('st-free');
@@ -1275,7 +1287,9 @@ function playStatusFx(fx) {
     ring.style.setProperty('--stc', colorOf(kind));
     el.appendChild(ring);
     setTimeout(() => ring.remove(), 640);
-    stFloat(el, names[kind] || '', 'bad');
+    fxSprite(el, kind === 'bite' ? 'fx_bite_snap' : 'fx_stamp_burst', colorOf(kind),
+      kind === 'bite' ? 'sp-bite' : 'sp-stamp', 620);
+    stFloat(el, nameOf(kind), 'bad');
     shakeScreen(120);
   }, n * 90));
 
