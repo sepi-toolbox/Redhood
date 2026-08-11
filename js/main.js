@@ -1,11 +1,11 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
-import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf, modOf } from './engine.js';
+import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf, modOf, takeFx } from './engine.js';
 import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.31'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.32'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1221,6 +1221,96 @@ for (let f = 1; f <= 6; f++) {
 //   덮개·이름표가 DOM 에 남아 "리롤해도 안 풀린다"로 보였다. 굴러간 칸만 상태 표시를 다시 맞춘다.
 // v3.31: 눈이 안 보이는 칸은 굴리는 시늉을 하지 않는다 (성권).
 //   혼란은 어차피 안 보이고, 봉인은 실제로 구르지도 않는다.
+
+// ---------- v3.32: 상태이상 연출 ----------
+// 게임 톤(양피지·나무·잉크·붉은 밀랍)에 맞춰 "찍힌다 / 뜯긴다 / 터진다" 셋으로 나눈다.
+//  · 걸림 — 밀랍 도장처럼 위에서 쿵 찍히고 이름이 떠오른다
+//  · 풀림 — 봉인이 뜯기듯 부서져 흩어진다
+//  · 터짐 — 그 칸이 붉게 번쩍하고 대가(피해·코인)가 숫자로 튄다
+const ST_KO = () => Object.fromEntries(DB.statuses.list.map(x => [x.id, x.name]));
+function dieEl(i) { return app.querySelectorAll('.die')[i] || null; }
+
+function stFloat(el, text, cls) {
+  if (!el) return;
+  const f = document.createElement('span');
+  f.className = `st-float ${cls}`;
+  f.textContent = text;
+  el.appendChild(f);
+  setTimeout(() => f.remove(), 1500);
+}
+
+function playStatusFx(fx) {
+  if (!fx) return;
+  const names = ST_KO();
+  const colorOf = (k) => (DB.statusById[k] || {}).color || '#c9a86a';
+
+  fx.removed.forEach(({ i, kind }, n) => setTimeout(() => {
+    const el = dieEl(i); if (!el) return;
+    // 뜯긴 자국 — 그 자리에 잠깐 파편이 남았다 흩어진다
+    const s = document.createElement('span');
+    s.className = 'st-break';
+    s.style.setProperty('--stc', colorOf(kind));
+    el.appendChild(s);
+    setTimeout(() => s.remove(), 620);
+    el.classList.remove('st-hit');
+    void el.offsetWidth;
+    el.classList.add('st-free');
+    setTimeout(() => el.classList.remove('st-free'), 620);
+  }, n * 70));
+
+  fx.added.forEach(({ i, kind }, n) => setTimeout(() => {
+    const el = dieEl(i); if (!el) return;
+    syncDieStatusDom(i);
+    const art = el.querySelector('.st-art');
+    if (art) { art.classList.remove('st-stamp'); void art.offsetWidth; art.classList.add('st-stamp'); }
+    el.classList.remove('st-hit'); void el.offsetWidth; el.classList.add('st-hit');
+    setTimeout(() => el.classList.remove('st-hit'), 640);
+    const ring = document.createElement('span');
+    ring.className = 'st-ring';
+    ring.style.setProperty('--stc', colorOf(kind));
+    el.appendChild(ring);
+    setTimeout(() => ring.remove(), 640);
+    stFloat(el, names[kind] || '', 'bad');
+    shakeScreen(120);
+  }, n * 90));
+
+  fx.burst.forEach(({ i, kind, amount, coin }, n) => setTimeout(() => {
+    const el = dieEl(i); if (!el) return;
+    el.classList.remove('st-burst'); void el.offsetWidth; el.classList.add('st-burst');
+    setTimeout(() => el.classList.remove('st-burst'), 700);
+    const sp = document.createElement('span');
+    sp.className = 'st-splat';
+    sp.style.setProperty('--stc', colorOf(kind));
+    el.appendChild(sp);
+    setTimeout(() => sp.remove(), 700);
+    stFloat(el, coin ? `-${amount}` : `-${amount}`, coin ? 'coin' : 'hurt');
+  }, 120 + n * 130));
+}
+
+function shakeScreen(ms) {
+  const sc = app.querySelector('.battle-screen');
+  if (!sc) return;
+  sc.classList.add('screen-nudge');
+  setTimeout(() => sc.classList.remove('screen-nudge'), ms);
+}
+
+// 체력바 아래 칩 — 새로 생긴 것만 튀어 오른다
+let prevChipKeys = new Set();
+function popNewChips() {
+  const chips = [...app.querySelectorAll('.buff-strip .badge')];
+  const now = new Set();
+  chips.forEach(c => {
+    const img = c.querySelector('img.bdg-ico');
+    const key = (img ? img.getAttribute('src') : c.textContent) || '';
+    now.add(key);
+    if (!prevChipKeys.has(key)) {
+      c.classList.add('chip-in');
+      setTimeout(() => c.classList.remove('chip-in'), 700);
+    }
+  });
+  prevChipKeys = now;
+}
+
 function faceShown(i) {
   const d = battle.dice[i];
   if (!d || !d.st) return true;
@@ -1395,7 +1485,12 @@ function tryConfirm(catId, variantId, uid) {
   const res = (variantId === 'void_call') ? confirmVoidCall(battle) : confirmCategory(battle, catId, variantId, uid);
   if (!res) { busy = false; renderBattle(); return; }
   syncTarget(); // 표적이 죽었으면 다음 적으로
+  const useFx = takeFx(battle);          // 출혈·독·약탈·부패·잠식이 확정 순간에 무는 대가
   renderBattle();
+  popNewChips();
+  if (useFx.burst.length || useFx.added.length || useFx.removed.length) {
+    setTimeout(() => playStatusFx(useFx), 90);
+  }
   const fxTotal = playAttackSequence(); // 기여 주사위 발광 → 타격
 
   setTimeout(() => {
@@ -1422,7 +1517,10 @@ function tryConfirm(catId, variantId, uid) {
         playerDeathFx(); return; // 사망 연출
       }
       syncTarget();
+      const stfx = takeFx(battle);
       renderBattle();
+      popNewChips();
+      setTimeout(() => playStatusFx(stfx), 120);
       const hits = (battle.enemyHits || []).filter(h => h.taken > 0 || h.blocked > 0);
       if (hits.length > 1) { playMultiHit(hits, hpBefore); busy = false; return; }
       const dmgTaken = hpBefore - battle.player.hp;

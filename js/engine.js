@@ -132,6 +132,18 @@ const stAmount = (d) => {
 
 // 적 행동이 정할 수 있는 건 부패의 폭발 피해(power) 하나뿐이다.
 // 지속 턴은 상태이상 탭의 값으로 전부 고정 — 같은 걸 두 군데서 정하지 않는다.
+// v3.32: 상태이상이 붙고·풀리고·터지는 순간을 화면이 알아야 연출을 건다.
+//   엔진은 "무슨 일이 어느 칸에서 일어났는가"만 남기고, 그림은 main.js 가 그린다.
+function fxPush(battle, bucket, item) {
+  if (!battle.fx) battle.fx = { added: [], removed: [], burst: [] };
+  battle.fx[bucket].push(item);
+}
+export function takeFx(battle) {
+  const f = battle.fx || { added: [], removed: [], burst: [] };
+  battle.fx = { added: [], removed: [], burst: [] };
+  return f;
+}
+
 export function applyStatus(battle, kind, count = 1, power = 0) {
   if (!stDef(kind)) return 0;
   const def = stDef(kind);
@@ -145,6 +157,7 @@ export function applyStatus(battle, kind, count = 1, power = 0) {
     battle.dice[i].st = { kind, power: power > 0 ? power : 0,
       left: def.rule === 'fuse' ? 0 : life,
       fuse: def.rule === 'fuse' ? (life || 1) : 0, opened: false, fresh: true };
+    fxPush(battle, 'added', { i, kind });
     put++;
   }
   return put;
@@ -152,7 +165,9 @@ export function applyStatus(battle, kind, count = 1, power = 0) {
 
 export function clearStatuses(battle, kind = null) {
   let n = 0;
-  for (const d of battle.dice) if (d.st && (!kind || d.st.kind === kind)) { d.st = null; n++; }
+  battle.dice.forEach((d, i) => {
+    if (d.st && (!kind || d.st.kind === kind)) { fxPush(battle, 'removed', { i, kind: d.st.kind }); d.st = null; n++; }
+  });
   battle.voidLocked = false;
   return n;
 }
@@ -261,7 +276,7 @@ function applyMirror(battle, rolled) {
 
 function statusTurn(battle) {
   battle.stEvents = [];
-  battle.dice.forEach((d) => {
+  battle.dice.forEach((d, i) => {
     if (!d.st) return;
     if (stRule(d, 'fuse')) {
       if (d.st.fresh) { d.st.fresh = false; return; }
@@ -269,6 +284,8 @@ function statusTurn(battle) {
       if (d.st.fuse <= 0) {                       // 터진다
         const dmg = stAmount(d);
         d.st = null;
+        fxPush(battle, 'burst', { i, kind: 'rot', amount: dmg });
+        fxPush(battle, 'removed', { i, kind: 'rot' });
         battle.stEvents.push({ kind: 'rot', amount: dmg });
         battle.player.hp -= dmg;
         if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; }
@@ -276,7 +293,10 @@ function statusTurn(battle) {
       return;
     }
     if (d.st.fresh) { d.st.fresh = false; return; }   // 걸린 턴에는 안 깎인다 (최소 한 턴은 겪는다)
-    if (d.st.left > 0) { d.st.left -= 1; if (d.st.left <= 0) d.st = null; }
+    if (d.st.left > 0) {
+      d.st.left -= 1;
+      if (d.st.left <= 0) { fxPush(battle, 'removed', { i, kind: d.st.kind }); d.st = null; }
+    }
   });
   if (stRule(battle.dice[0], 'spread') && battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;
 }
@@ -387,7 +407,10 @@ export function reroll(battle) {
       d.pinned = false;                                   // 다시 굴리면 새김이 풀린다
       // v3.30: 봉인은 한 번 굴리면 할 일이 끝난다. 표식을 남겨두면 "아직 봉인"으로 읽히므로
       //        상태 자체를 걷어낸다 — 덮개도 이름표도 같이 사라져야 풀린 게 보인다 (성권).
-      if (d.st) { if (stRule(d, 'needReroll')) d.st = null; else d.st.opened = true; }
+      if (d.st) {
+        if (stRule(d, 'needReroll')) { fxPush(battle, 'removed', { i, kind: d.st.kind }); d.st = null; }
+        else d.st.opened = true;
+      }
     }
     d.held = true; // 선택 초기화
   });
@@ -784,9 +807,9 @@ function applyStatusCost(battle, bd) {
     if (!d.st) return;
     if (used.has(i)) {
       // 눈금 그대로다. 세기라는 손잡이를 두지 않는다 — 적이 조절하는 건 몇 칸에 거는가뿐.
-      if (stRule(d, 'onUseFaceDamage')) hurt += d.face;
-      if (stRule(d, 'onUseFaceCoin'))   coin += d.face;
-      if (stRule(d, 'fuse')) d.st = null;                 // 부패는 쓰면 해제된다
+      if (stRule(d, 'onUseFaceDamage')) { hurt += d.face; fxPush(battle, 'burst', { i, kind: d.st.kind, amount: d.face }); }
+      if (stRule(d, 'onUseFaceCoin'))   { coin += d.face; fxPush(battle, 'burst', { i, kind: d.st.kind, amount: d.face, coin: true }); }
+      if (stRule(d, 'fuse')) { fxPush(battle, 'removed', { i, kind: d.st.kind }); d.st = null; }   // 부패는 쓰면 해제된다
     }
   });
   // 잠식 — 쓰지 않은 것만 양옆으로 번진다
@@ -796,7 +819,10 @@ function applyStatusCost(battle, bd) {
   });
   for (const j of grow) {
     const t = battle.dice[j];
-    if (t && !stRule(t, 'spread')) t.st = { kind: 'devour', power: 0, left: 0, fuse: 0, opened: false };
+    if (t && !stRule(t, 'spread')) {
+      t.st = { kind: 'devour', power: 0, left: 0, fuse: 0, opened: false };
+      fxPush(battle, 'added', { i: j, kind: 'devour' });
+    }
   }
   if (battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;
   if (coin > 0) { battle.coinsLost += coin; battle.lastResult.bonusHits.push(`🪙-${coin}`); }

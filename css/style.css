@@ -1621,3 +1621,95 @@ span.enemy-art {
 .sheet-row.pressing { filter: brightness(1.12); }
 .roll-btn.pressing, .btn.pressing { filter: brightness(1.15); transform: translateY(1px); }
 .enemy.pressing { filter: brightness(1.1); }
+
+/* ==========================================================================
+   v3.32 상태이상 연출 — 톤: 밀랍 도장이 찍히고, 봉인이 뜯기고, 자국이 번진다
+   ========================================================================== */
+/* 걸림 — 위에서 쿵 찍힌다 */
+@keyframes stStamp {
+  0%   { transform: scale(1.9) rotate(-9deg); opacity: 0; }
+  38%  { transform: scale(.9) rotate(2deg);  opacity: 1; }
+  62%  { transform: scale(1.06) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.die .st-art.st-stamp { animation: stStamp .34s cubic-bezier(.2, .9, .3, 1.4) both; }
+@keyframes stHit {
+  0%   { transform: translateY(-5px) scale(1.07); }
+  30%  { transform: translateY(2px)  scale(.95); }
+  60%  { transform: translateY(-1px) scale(1.02); }
+  100% { transform: none; }
+}
+.die.st-hit { animation: stHit .3s ease-out; }
+/* 찍힌 자리에서 퍼지는 테 */
+@keyframes stRing {
+  0%   { transform: scale(.5); opacity: .95; border-width: 4px; }
+  100% { transform: scale(1.7); opacity: 0; border-width: 1px; }
+}
+.die .st-ring {
+  position: absolute; left: 8px; right: 8px; top: 12px; bottom: 12px;
+  border: 3px solid var(--stc, #c9a86a); border-radius: 8px;
+  pointer-events: none; z-index: 7; animation: stRing .5s ease-out forwards;
+}
+/* 풀림 — 뜯겨 흩어진다 */
+@keyframes stBreak {
+  0%   { transform: scale(1); opacity: .9; filter: blur(0); }
+  100% { transform: scale(1.5) rotate(8deg); opacity: 0; filter: blur(3px); }
+}
+.die .st-break {
+  position: absolute; left: 10px; right: 10px; top: 14px; bottom: 14px;
+  border-radius: 7px; pointer-events: none; z-index: 7;
+  background:
+    linear-gradient(48deg, transparent 44%, var(--stc, #c9a86a) 46%, transparent 49%),
+    linear-gradient(-38deg, transparent 52%, var(--stc, #c9a86a) 54%, transparent 57%);
+  animation: stBreak .5s ease-out forwards;
+}
+@keyframes stFree { 0% { filter: brightness(1.6) } 100% { filter: none } }
+.die.st-free { animation: stFree .5s ease-out; }
+/* 터짐 — 대가를 무는 순간 */
+@keyframes stBurst {
+  0%   { transform: scale(1); }
+  22%  { transform: scale(1.16) rotate(-3deg); }
+  46%  { transform: scale(.94) rotate(2deg); }
+  100% { transform: none; }
+}
+.die.st-burst { animation: stBurst .38s ease-out; }
+@keyframes stSplat {
+  0%   { transform: scale(.3); opacity: 0; }
+  25%  { transform: scale(1.15); opacity: .95; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+.die .st-splat {
+  position: absolute; inset: 4px; border-radius: 50%;
+  pointer-events: none; z-index: 7;
+  background: radial-gradient(circle, var(--stc, #c9302f) 0%, transparent 68%);
+  animation: stSplat .5s ease-out forwards;
+}
+/* 떠오르는 글자 */
+@keyframes stFloatUp {
+  0%   { transform: translate(-50%, 4px) scale(.8); opacity: 0; }
+  20%  { transform: translate(-50%, -8px) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -34px) scale(1); opacity: 0; }
+}
+.die .st-float {
+  position: absolute; left: 50%; top: -4px; z-index: 9; pointer-events: none;
+  font-size: 13px; font-weight: 800; white-space: nowrap;
+  text-shadow: 0 1px 3px #000, 0 0 8px rgba(0, 0, 0, .8);
+  animation: stFloatUp 1.1s ease-out forwards;
+}
+.die .st-float.bad  { color: #ffd0a8; }
+.die .st-float.hurt { color: #ff6a55; }
+.die .st-float.coin { color: #ffd257; }
+/* 화면 잔떨림 — 상태이상이 붙는 순간의 무게 */
+@keyframes screenNudge { 0%,100% { transform: none } 40% { transform: translateY(2px) } }
+.battle-screen.screen-nudge { animation: screenNudge .12s ease-out; }
+/* 체력바 아래 칩이 새로 생길 때 */
+@keyframes chipIn {
+  0%   { transform: translateY(10px) scale(.6); opacity: 0; }
+  45%  { transform: translateY(-3px) scale(1.18); opacity: 1; }
+  70%  { transform: translateY(0) scale(.97); }
+  100% { transform: none; }
+}
+.buff-strip .badge.chip-in {
+  animation: chipIn .46s cubic-bezier(.2, .9, .3, 1.5) both;
+  box-shadow: 0 0 0 2px rgba(255, 210, 140, .5), 0 0 12px rgba(255, 180, 90, .55);
+}
