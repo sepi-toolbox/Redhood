@@ -19,7 +19,7 @@ DB.eventById = Object.fromEntries(DB.events.events.map(e => [e.id, e]));
 
 const eng = await import('../js/engine.js');
 const run_ = await import('../js/run.js');
-const { previewAll, createBattle, initialRoll, reroll, confirmCategory, enemyPhase, aliveEnemies, toggleHold } = eng;
+const { previewAll, createBattle, initialRoll, reroll, confirmCategory, enemyPhase, aliveEnemies, toggleHold, confirmVoidCall } = eng;
 
 const RUNS = parseInt(process.argv[2] || '500', 10);
 const stats = { bossFights: 0, bossWins: 0, deathFloor: [], relicsGained: 0, diceGained: 0, catsGained: 0, runs: 0, wins: 0, deaths: {}, floorReached: [], acts: [], turns: [], dmg: [], catUse: {}, killedBy: {}, enlight: 0 };
@@ -94,7 +94,7 @@ function playBattle(run, nodeType) {
       if (!reroll(battle)) break;
     }
     const pv = previewAll(battle).filter(p => !p.locked && p.bd.total > 0);
-    if (pv.length === 0) { battle.await = 'enemy'; enemyPhase(battle); continue; }
+    if (pv.length === 0) { if (battle.voidLocked && confirmVoidCall(battle)) { if (battle.over) break; enemyPhase(battle); continue; } battle.await = 'enemy'; enemyPhase(battle); continue; }
     const best = pv.sort((a, b) => scoreChoice(battle, b) - scoreChoice(battle, a))[0];
     stats.catUse[best.variant.id] = (stats.catUse[best.variant.id] || 0) + 1;
     stats.dmg.push(best.bd.total);

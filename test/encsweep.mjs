@@ -17,7 +17,7 @@ DB.enemyById = Object.fromEntries(DB.enemies.map(e => [e.id, e]));
 DB.weaponById = Object.fromEntries(DB.events.weapons.map(w => [w.id, w]));
 DB.eventById = Object.fromEntries(DB.events.events.map(e => [e.id, e]));
 const eng = await import('../js/engine.js');
-const { previewAll, createBattle, initialRoll, reroll, confirmCategory, enemyPhase, aliveEnemies, toggleHold } = eng;
+const { previewAll, createBattle, initialRoll, reroll, confirmCategory, enemyPhase, aliveEnemies, toggleHold, confirmVoidCall } = eng;
 
 function gimAdjust(battle, p, v) {
   for (const e of aliveEnemies(battle)) {
@@ -72,7 +72,7 @@ function fight(ids, run0) {
       if (!reroll(battle)) break;
     }
     const pv = previewAll(battle).filter(p => !p.locked && p.bd.total > 0);
-    if (pv.length === 0) { enemyPhaseSafe(battle); continue; }
+    if (pv.length === 0) { if (battle.voidLocked && confirmVoidCall(battle)) { if (battle.over) break; enemyPhase(battle); continue; } enemyPhaseSafe(battle); continue; }
     const best = pv.sort((a, b) => scoreChoice(battle, b) - scoreChoice(battle, a))[0];
     const alive = aliveEnemies(battle);
     confirmCategory(battle, best.cat.id, best.variant.id, alive[0]?.uid);
@@ -99,7 +99,7 @@ function stripTheme(id) {
 const CATS1 = { chance:'instinct', threeKind:'chopping', onePair:'clash' };
 const CATS2 = { ...CATS1, twoPair:null, fullHouse:null };
 const CATS3 = { ...CATS2, largeStraight:null, fourKind:null };
-const RUNBASE = (act, floor, cats, hp=60) => ({ hp, maxHp: hp, act, floor, enlight: 0, relics: [],
+const RUNBASE = (act, floor, cats, hp=70) => ({ hp, maxHp: hp, act, floor, enlight: 0, relics: [],
   dice: ['normal','normal','normal','normal','normal'], categories: cats });
 
 const N = Number(process.argv[2] || 150);
@@ -122,7 +122,7 @@ for (const e of DB.enemies) {
   const act = ACTOF[e.id] || 1;
   const cats = STRONG ? CATS_STRONG : (act===1?CATS1:act===2?CATS2:CATS3);
   const floor = e.tier==='boss'?11:e.tier==='elite'?7:3;
-  const hp = STRONG ? 75 : (act===3?65:60);
+  const hp = STRONG ? 85 : 70;   // act1.json 의 player.maxHp 와 맞춘다
   const run = RUNBASE(act, floor, cats, hp);
   if (STRONG) run.dice = ['gold','gold','normal','normal','normal'].map(x => DB.diceById[x]?x:'normal');
   const measure = (ids) => {
