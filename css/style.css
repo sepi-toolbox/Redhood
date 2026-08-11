@@ -595,12 +595,16 @@ span.enemy-art {
   pointer-events: none;
 }
 .sheet-row.sig-sealed::after {
-  /* 봉인 씰 띠 — 줄을 가로질러 묶인 밀랍 도장 */
-  content: ''; position: absolute; left: -12px; right: -12px; top: 50%; height: 40px;
-  transform: translateY(-50%); z-index: 4;
-  background: url('../assets/ui/seal_frame.png') center / 100% 100% no-repeat;
-  filter: saturate(.72) brightness(.86) sepia(.14) drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
-  pointer-events: none;
+  /* 봉인 씰 띠 — 도장 둘은 크기 고정, 가운데 끈만 늘어난다.
+     한 장을 통째로 늘리면 밀랍까지 옆으로 퍼져 납작해진다 (성권) */
+  content: ''; position: absolute; left: -14px; right: -14px; top: 50%; height: 46px;
+  transform: translateY(-50%); z-index: 4; pointer-events: none;
+  background:
+    url('../assets/ui/seal_end.png')  left   center / auto 100% no-repeat,
+    url('../assets/ui/seal_end.png')  right  center / auto 100% no-repeat,
+    url('../assets/ui/seal_rope.png') center center / auto 100% repeat-x;
+  /* 딤은 글자에만 건다 — 봉인 자체가 어두워지면 무엇에 막혔는지 안 보인다 */
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .85));
 }
 
 /* 갉기 등 리롤 비용 증가 — 버튼에 붉게 */
