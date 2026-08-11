@@ -385,7 +385,9 @@ export function reroll(battle) {
       if (dieOp(battle, i) === 'nudge' && d.face > 0) nudgeFace(battle, i);   // 길잡이 — 굴리지 않고 한 칸 올린다
       else { d.face = rollWith(battle.diceDefs[i], d); rolled.push(i); }
       d.pinned = false;                                   // 다시 굴리면 새김이 풀린다
-      if (d.st) d.st.opened = true;
+      // v3.30: 봉인은 한 번 굴리면 할 일이 끝난다. 표식을 남겨두면 "아직 봉인"으로 읽히므로
+      //        상태 자체를 걷어낸다 — 덮개도 이름표도 같이 사라져야 풀린 게 보인다 (성권).
+      if (d.st) { if (stRule(d, 'needReroll')) d.st = null; else d.st.opened = true; }
     }
     d.held = true; // 선택 초기화
   });
