@@ -335,6 +335,10 @@ export function initialRoll(battle) {
   const rolled = [];
   battle.dice.forEach((d, i) => {
     if (dieOp(battle, i) === 'pin' && d.pinned && d.face > 0) { d.held = true; return; }  // 새겨둔 눈은 그대로
+    // v3.29: 봉인된 칸은 턴 첫 굴림에 아예 안 굴러간다. 밀랍이 붙들고 있다.
+    //   푸는 길은 리롤 하나뿐이라는 게 이 상태이상의 값이다 (엔진은 예전부터 그랬는데
+    //   화면에서는 같이 굴러가는 것처럼 보여 "풀린 줄 알았는데 안 풀린다"가 됐다).
+    if (stRule(d, 'needReroll') && !d.st.opened) { d.held = true; return; }
     d.face = rollWith(battle.diceDefs[i], d); d.held = true; rolled.push(i);
   });
   applyMirror(battle, battle.dice.map((_, i) => i));

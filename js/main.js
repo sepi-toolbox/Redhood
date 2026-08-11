@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.28'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.29'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -808,6 +808,10 @@ function hintHtml() {
     const desc = v.abilityText || cat?.ruleText || '';
     return `<b class="hint-desc">${esc(desc)}</b>${desc ? ' ' : ''}<span class="hint-confirm">· 한 번 더 탭 = 확정</span>`;
   }
+  // v3.29: 봉인이 붙어 있으면 그걸 먼저 알린다 — 굴림으로는 안 열린다는 게 안 보였다
+  const sealed = battle.dice.filter(d => d.st && DB.statusById[d.st.kind]
+    && DB.statusById[d.st.kind].rule === 'needReroll' && !d.st.opened).length;
+  if (sealed > 0) return `<b class="hint-desc">봉인된 주사위 ${sealed}개는 굴림으로 안 열린다</b> <span class="hint-confirm">· 탭해서 리롤로 뜯는다</span>`;
   return aliveEnemies(battle).length > 1
     ? '주사위 탭=다시 굴릴 것 선택 · 적 탭=표적 변경'
     : '주사위 탭=다시 굴릴 것 선택 · 족보 길게 눌러 설명';
@@ -984,7 +988,11 @@ function renderBattle(opts = {}) {
   const rollBtn = document.getElementById('roll-btn');
   if (rollBtn) onTap(rollBtn, () => {
     if (busy) return;
-    if (initialRoll(battle)) animateRoll([0, 1, 2, 3, 4]);
+    // 봉인된 칸은 구르지 않으므로 텀블에서도 뺀다
+    if (initialRoll(battle)) {
+      animateRoll(battle.dice.map((d, i) => (d.st && DB.statusById[d.st.kind]
+        && DB.statusById[d.st.kind].rule === 'needReroll' && !d.st.opened) ? -1 : i).filter(i => i >= 0));
+    }
   });
   const rerollBtn = document.getElementById('reroll-btn');
   if (rerollBtn) onTap(rerollBtn, () => {
