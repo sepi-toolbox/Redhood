@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.23'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.24'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -54,10 +54,44 @@ const PIPS = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' };
 const TIER_KO = { common: '커먼', uncommon: '언커먼', rare: '레어', epic: '전설', normal: '일반', elite: '정예' };
 const SHINY = { uncommon: 'shiny-un', rare: 'shiny-rare', epic: 'shiny-epic', elite: 'shiny-epic', normal: '' };
 
+// v3.24: 손가락을 뗀 순간에 동작한다 (성권). 누른 채 밖으로 끌면 취소된다.
+//   click 만 쓰면 브라우저마다 누르는 순간 반응한 것처럼 느껴지고, 끌어서 무르기가 안 된다.
+//   포인터를 직접 다뤄 "누름 → 손가락 안에 머무름 → 뗌" 셋이 다 맞을 때만 실행한다.
+function onTap(el, fn) {
+  let id = null, inside = false;
+  const within = (e) => {
+    const r = el.getBoundingClientRect();
+    return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  };
+  const end = (ok, e) => {
+    if (id === null) return;
+    el.releasePointerCapture && el.hasPointerCapture && el.hasPointerCapture(id) && el.releasePointerCapture(id);
+    id = null; el.classList.remove('pressing');
+    if (el.__longFired) { el.__longFired = false; return; }   // 길게 누르기가 이미 처리했다
+    if (ok) fn(e);
+  };
+  el.addEventListener('pointerdown', (e) => {
+    if (e.button != null && e.button !== 0) return;
+    id = e.pointerId; inside = true;
+    el.classList.add('pressing');
+    el.setPointerCapture && el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (id !== e.pointerId) return;
+    const now = within(e);
+    if (now !== inside) { inside = now; el.classList.toggle('pressing', now); }
+  });
+  el.addEventListener('pointerup', (e) => { if (id === e.pointerId) end(inside && within(e), e); });
+  el.addEventListener('pointercancel', () => end(false));
+  el.addEventListener('lostpointercapture', () => end(false));
+  // 포인터로 이미 처리했으므로 뒤따라오는 합성 click 은 버린다
+  el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
+}
+
 // 길게 누르기(450ms) → onLong 실행. 발동 시 이어지는 click은 무시된다.
 function addLongPress(el, onLong) {
   let timer = null, fired = false;
-  const start = () => { fired = false; timer = setTimeout(() => { fired = true; onLong(); }, 450); };
+  const start = () => { fired = false; el.__longFired = false; timer = setTimeout(() => { fired = true; el.__longFired = true; onLong(); }, 450); };
   const cancel = () => clearTimeout(timer);
   el.addEventListener('touchstart', start, { passive: true });
   el.addEventListener('touchend', cancel);
@@ -889,24 +923,6 @@ function renderBattle(opts = {}) {
             <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
           </button>`).join('')}
       </div>
-      ${(() => {
-        // 내 버프 칩 — 체력바 위, 길게 눌러 상세 (v0.19)
-        const b = battle.buffs;
-        const row = badgeRow('badge-row', [
-          battle.whet > 0 ? badge('good', UI_ICO.whet, battle.whet,
-            { sub: '×' + whetMultOf(battle.whet).toFixed(1), cls: 'whet', title: '벼름 — 일격 족보로만 터뜨린다' }) : '',
-          b.strength > 0 ? badge('good', 'status_strength', b.strength, { title: '힘 — 확정마다 피해 +' }) : '',
-          b.focus > 0 ? badge('good', 'status_focus', '+' + b.focus, { title: '집중 — 리롤 +' }) : '',
-          b.regen > 0 ? badge('good', 'status_regen', '+' + b.regen, { title: '재생 — 턴마다 회복' }) : '',
-          battle.player.dot > 0 ? badge('bad', 'status_bleed', battle.player.dot,
-            { title: (DOT_KO[battle.player.dotKind] || '독') + ' — 내 행동 뒤에 피해' }) : '',
-          ...['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind'].map(k => {
-            const m = modOf(battle, k);
-            return m ? badge('bad', FX_ICON[k], m.left, { title: `${m.name} — ${CB_MOD_KO[k]}` }) : '';
-          }),
-        ]);
-        return row ? `<div class="buff-strip" id="buff-strip">${row}</div>` : '';
-      })()}
       <div class="player-bar ${opts.playerHit ? 'hurt' : ''}">
         <span class="pb-side"></span>
         <div class="hp-gauge">
@@ -922,6 +938,24 @@ function renderBattle(opts = {}) {
         </div>
         <span class="pb-side">${battle.pendingBuff > 0 ? `${uiIco('burst')}+${battle.pendingBuff}` : ''}</span>
       </div>
+      ${(() => {
+        // 내 버프 칩 — v3.24: 체력바 아래로 내렸다 (성권). 길게 눌러 상세
+        const b = battle.buffs;
+        const row = badgeRow('badge-row', [
+          battle.whet > 0 ? badge('good', UI_ICO.whet, battle.whet,
+            { cls: 'whet', title: `벼름 ${battle.whet} — 일격 족보로만 터뜨린다 (지금 ×${whetMultOf(battle.whet).toFixed(1)})` }) : '',
+          b.strength > 0 ? badge('good', 'status_strength', b.strength, { title: '힘 — 확정마다 피해 +' }) : '',
+          b.focus > 0 ? badge('good', 'status_focus', '+' + b.focus, { title: '집중 — 리롤 +' }) : '',
+          b.regen > 0 ? badge('good', 'status_regen', '+' + b.regen, { title: '재생 — 턴마다 회복' }) : '',
+          battle.player.dot > 0 ? badge('bad', 'status_bleed', battle.player.dot,
+            { title: (DOT_KO[battle.player.dotKind] || '독') + ' — 내 행동 뒤에 피해' }) : '',
+          ...['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind'].map(k => {
+            const m = modOf(battle, k);
+            return m ? badge('bad', FX_ICON[k], m.left, { title: `${m.name} — ${CB_MOD_KO[k]}` }) : '';
+          }),
+        ]);
+        return row ? `<div class="buff-strip" id="buff-strip">${row}</div>` : '';
+      })()}
     </div>`));
 
   // 족보 목록 스크롤 복원 (v0.27) — 늦게 오는 리셋 대비 짧게 두 번 더 고정
@@ -938,7 +972,7 @@ function renderBattle(opts = {}) {
 
   // 주사위 — v0.28: 탭 시 전체 재렌더 대신 제자리 갱신 (이미지 재생성 깜빡임 제거)
   app.querySelectorAll('.die').forEach(el => {
-    el.addEventListener('click', () => {
+    onTap(el, () => {
       if (busy || !battle.rolled) return;
       // 새 동작을 시작하면 앞의 동작은 취소한다 — 족보를 골라둔 채 주사위를 만지면 선택이 풀린다
       if (selectedCat) { selectedCat = null; updateSheetSelection(); }
@@ -948,12 +982,12 @@ function renderBattle(opts = {}) {
   });
   // 굴림 / 리롤
   const rollBtn = document.getElementById('roll-btn');
-  if (rollBtn) rollBtn.addEventListener('click', () => {
+  if (rollBtn) onTap(rollBtn, () => {
     if (busy) return;
     if (initialRoll(battle)) animateRoll([0, 1, 2, 3, 4]);
   });
   const rerollBtn = document.getElementById('reroll-btn');
-  if (rerollBtn) rerollBtn.addEventListener('click', () => {
+  if (rerollBtn) onTap(rerollBtn, () => {
     if (busy) return;
     selectedCat = null;
     const hpBefore = battle.player.hp;
@@ -968,7 +1002,7 @@ function renderBattle(opts = {}) {
   // 적 탭 = 표적 변경 (언제든, 확정과 무관) / 길게 누르면 행동 상세 (치트)
   app.querySelectorAll('.enemy').forEach(el => {
     addLongPress(el, () => showEnemyInfo(el.dataset.uid));
-    el.addEventListener('click', () => {
+    onTap(el, () => {
       if (busy) return;
       const uid = el.dataset.uid;
       const alive = aliveEnemies(battle);
@@ -988,7 +1022,7 @@ function renderBattle(opts = {}) {
     const variantId = el.dataset.variant;
     const key = `${catId}:${variantId}`;
     addLongPress(el, () => showCategoryInfo(catId, variantId));
-    el.addEventListener('click', () => {
+    onTap(el, () => {
       if (busy || el.dataset.locked === '1') return;
       if (selectedCat !== key) { selectedCat = key; updateSheetSelection(); return; } // v0.28: 제자리 갱신
       tryConfirm(catId, variantId, targetUid);
