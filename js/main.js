@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.29'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.30'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1221,6 +1221,34 @@ for (let f = 1; f <= 6; f++) {
   for (const s of DIE_SKINS) { const i2 = new Image(); i2.src = `assets/dice/${s}${f}.png`; }
 }
 
+// v3.30: 굴림·리롤은 깜빡임을 피하려고 전체 재렌더를 안 한다. 그 바람에 풀린 상태이상의
+//   덮개·이름표가 DOM 에 남아 "리롤해도 안 풀린다"로 보였다. 굴러간 칸만 상태 표시를 다시 맞춘다.
+function syncDieStatusDom(i) {
+  const el = app.querySelectorAll('.die')[i];
+  const d = battle.dice[i];
+  if (!el || !d) return;
+  const st = d.st ? DB.statusById[d.st.kind] : null;
+  const sealedOff = !!(st && st.rule === 'needReroll' && !d.st.opened);
+  el.querySelectorAll('.st-tint, .st-art, .st-rim, .st-swirlbox, .seal-veil, .seal-stamp').forEach(n => n.remove());
+  [...el.classList].filter(c => c.startsWith('t-')).forEach(c => el.classList.remove(c));
+  el.classList.toggle('sealed-off', sealedOff);
+  el.classList.toggle('siglocked', !!d.sigLock);
+  el.classList.toggle('st', !!st);
+  if (st) el.classList.add('t-' + st.id);
+  if (sealedOff) {
+    el.insertAdjacentHTML('beforeend',
+      '<span class="seal-veil"></span><img class="seal-stamp" src="assets/ui/seal_stamp.png" alt="" draggable="false">');
+  }
+  if (st) {
+    el.insertAdjacentHTML('beforeend',
+      `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>`
+      + (st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''));
+  } else if (d.sigLock) {
+    el.insertAdjacentHTML('beforeend',
+      '<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_bite.png" alt="" draggable="false"><span class="st-rim"></span>');
+  }
+}
+
 function animateRoll(indices) {
   busy = true;
   updateRollStart(); // v0.63: 여기서 renderBattle()을 부르던 것이 굴림마다 화면 전체가 깜빡이던 원인
@@ -1233,6 +1261,7 @@ function animateRoll(indices) {
     dieTilts[idx] = 0;
     el.style.setProperty('--tilt', '0deg');
     el.classList.remove('blank', 'landed');
+    syncDieStatusDom(idx);          // 풀린 봉인 등 남아 있던 표시를 걷어낸다
     // 시작 타이밍·텀블 속도에 개별 편차 (일제히 던져도 제각각 구르는 느낌)
     el.style.animationDelay = `${-Math.random() * 0.4}s`;
     el.style.animationDuration = `${0.34 + Math.random() * 0.14}s`;
