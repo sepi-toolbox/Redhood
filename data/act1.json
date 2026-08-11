@@ -1,7 +1,7 @@
 {
   "_version": 4,
   "player": {
-    "maxHp": 60,
+    "maxHp": 70,
     "startDice": [
       "normal",
       "normal",
@@ -17,9 +17,9 @@
     "nodeWeights": {
       "battle": 3,
       "event": 1,
-      "elite": 1.6,
+      "elite": 1.2,
       "shop": 0.8,
-      "rest": 0.5
+      "rest": 0.9
     },
     "eliteFloors": [
       3,
@@ -36,7 +36,7 @@
       "11": "boss"
     }
   },
-  "hpScalePerFloor": 0.11,
+  "hpScalePerFloor": 0.06,
   "encounters": {
     "easyFloors": [
       1,
@@ -116,7 +116,7 @@
     }
   },
   "rest": {
-    "healRatio": 0.3
+    "healRatio": 0.45
   },
   "diceShift": {
     "perVariant": 4,
