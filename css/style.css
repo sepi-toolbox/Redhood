@@ -1281,13 +1281,14 @@ span.enemy-art {
 .die.sealed-off .seal-veil {
   position: absolute; left: 8px; right: 8px; top: 12px; bottom: 12px;
   border-radius: 7px; z-index: 3; pointer-events: none;
-  background: linear-gradient(160deg, rgba(96, 26, 26, .86) 0%, rgba(62, 16, 18, .92) 55%, rgba(40, 12, 14, .95) 100%);
+  /* 봉인 색(#3a52c8) 계열로 덮고 그 위에 붉은 밀랍을 찍는다 — 덮개 테두리와 같은 색줄기 */
+  background: linear-gradient(160deg, rgba(38, 52, 122, .9) 0%, rgba(24, 32, 78, .94) 55%, rgba(14, 19, 48, .96) 100%);
   box-shadow: inset 0 0 10px rgba(0, 0, 0, .55);
 }
 .die.sealed-off .seal-stamp {
-  position: absolute; left: 50%; top: 50%; width: 40px; height: 40px;
+  position: absolute; left: 50%; top: 50%; width: 33px; height: 33px;
   transform: translate(-50%, -54%) rotate(-7deg); z-index: 5; pointer-events: none;
-  object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
+  object-fit: contain; filter: brightness(1.25) saturate(1.15) drop-shadow(0 2px 3px rgba(0, 0, 0, .85));
   animation: sealPress 2.6s ease-in-out infinite;
 }
 @keyframes sealPress {
