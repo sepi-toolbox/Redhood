@@ -217,13 +217,26 @@ export function generateMap(enlight = 0) {
   const walkCount = 3 + Math.floor(rng.next() * 2);
   const starts = [];
   for (let k = 0; k < walkCount; k++) starts.push(Math.floor(rng.next() * MAP_LANES));
+  // v3.26: 길이 서로 엇갈리면 안 된다 (성권). 같은 층에 이미 그어 둔 줄과 교차하는 이동은 막는다.
+  //   같은 층의 두 줄 (a→b), (a'→b') 는 a<a' 인데 b>b' 이면 (또는 그 반대면) 반드시 교차한다.
+  //   세로줄(a→a)도 (a-1→a+1) 같은 대각선과는 교차하므로 똑같이 검사한다.
+  const drawn = Array.from({ length: F }, () => []);   // drawn[f] = [[a,b], ...]
+  const crosses = (f, a, b) => drawn[f].some(([x, y]) =>
+    (x < a && y > b) || (x > a && y < b));
+  const already = (f, a, b) => drawn[f].some(([x, y]) => x === a && y === b);
   for (const s of starts) {
     let lane = s;
     for (let f = 0; f < F - 1; f++) {
       laneSet[f].add(lane);
       if (f === F - 2) break;                 // 보스 직전 층까지
-      const moves = [lane - 1, lane, lane + 1].filter(l => l >= 0 && l < MAP_LANES);
-      const next = moves[Math.floor(rng.next() * moves.length)];
+      const all = [lane - 1, lane, lane + 1].filter(l => l >= 0 && l < MAP_LANES);
+      // ① 이미 있는 줄을 그대로 타면 새 교차가 생길 수 없다 — 가장 안전
+      const reuse = all.filter(l => already(f, lane, l));
+      // ② 없으면 교차하지 않는 것 중에서 고른다
+      const free = all.filter(l => !crosses(f, lane, l));
+      const pool = free.length ? free : (reuse.length ? reuse : [lane]);
+      const next = pool[Math.floor(rng.next() * pool.length)];
+      if (!already(f, lane, next)) drawn[f].push([lane, next]);
       edgePairs.add(`${f}:${lane}>${next}`);
       lane = next;
     }

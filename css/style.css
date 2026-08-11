@@ -477,12 +477,16 @@ span.enemy-art {
   -webkit-backdrop-filter: blur(1.2px);
   animation: hurtVeil .62s ease-out forwards;
 }
+/* v3.26: 연타는 숫자가 겹치지 않게 --nudge 만큼 좌우로 흩어 띄운다 */
 @keyframes pdmgFloat {
-  0% { transform: translate(-50%, 8px) scale(.85); opacity: 0; }
-  14% { transform: translate(-50%, -4px) scale(1.18); opacity: 1; }
-  70% { transform: translate(-50%, -26px) scale(1); opacity: .95; }
-  100% { transform: translate(-50%, -44px) scale(.98); opacity: 0; }
+  0% { transform: translate(calc(-50% + var(--nudge, 0px)), 8px) scale(.85); opacity: 0; }
+  14% { transform: translate(calc(-50% + var(--nudge, 0px)), -4px) scale(1.18); opacity: 1; }
+  70% { transform: translate(calc(-50% + var(--nudge, 0px)), -26px) scale(1); opacity: .95; }
+  100% { transform: translate(calc(-50% + var(--nudge, 0px)), -44px) scale(.98); opacity: 0; }
 }
+/* 다 막힌 한 대 — 방패가 튕긴다 */
+@keyframes blkPop { 0%,100% { filter: none } 40% { filter: brightness(1.9) saturate(1.3) } }
+.hp-shield.blk-pop { animation: blkPop .22s ease-out; }
 .player-bar { position: relative; }
 .pdmg-float {
   position: absolute; left: 50%; top: -16px; z-index: 41;

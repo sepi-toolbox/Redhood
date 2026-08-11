@@ -855,6 +855,7 @@ function decayStatuses(battle) {
 export function enemyPhase(battle) {
   if (battle.over || battle.await !== 'enemy') return;
   battle.lastHits = []; // 사체 연출 종료 — 다음 렌더부터 죽은 적 제거
+  battle.enemyHits = [];  // v3.26: 연타를 한 대씩 기록한다 — 화면에서 따로따로 때려야 한다
   for (const e of aliveEnemies(battle)) {
     if (battle.over) break;
     e.block = 0; // 자기 차례가 돌아오면 이전 방어는 소멸
@@ -886,6 +887,7 @@ export function enemyPhase(battle) {
             const absorbed = Math.min(battle.player.block, dmg);
             battle.player.block -= absorbed;
             dmg -= absorbed;
+            battle.enemyHits.push({ uid: e.uid, blocked: absorbed, taken: Math.max(0, dmg) });
             if (dmg > 0) {
               battle.player.hp -= dmg;
               if (battle.player.hp <= 0) {
