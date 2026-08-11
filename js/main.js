@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.30'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.31'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -988,11 +988,7 @@ function renderBattle(opts = {}) {
   const rollBtn = document.getElementById('roll-btn');
   if (rollBtn) onTap(rollBtn, () => {
     if (busy) return;
-    // 봉인된 칸은 구르지 않으므로 텀블에서도 뺀다
-    if (initialRoll(battle)) {
-      animateRoll(battle.dice.map((d, i) => (d.st && DB.statusById[d.st.kind]
-        && DB.statusById[d.st.kind].rule === 'needReroll' && !d.st.opened) ? -1 : i).filter(i => i >= 0));
-    }
+    if (initialRoll(battle)) animateRoll([0, 1, 2, 3, 4]);
   });
   const rerollBtn = document.getElementById('reroll-btn');
   if (rerollBtn) onTap(rerollBtn, () => {
@@ -1223,6 +1219,18 @@ for (let f = 1; f <= 6; f++) {
 
 // v3.30: 굴림·리롤은 깜빡임을 피하려고 전체 재렌더를 안 한다. 그 바람에 풀린 상태이상의
 //   덮개·이름표가 DOM 에 남아 "리롤해도 안 풀린다"로 보였다. 굴러간 칸만 상태 표시를 다시 맞춘다.
+// v3.31: 눈이 안 보이는 칸은 굴리는 시늉을 하지 않는다 (성권).
+//   혼란은 어차피 안 보이고, 봉인은 실제로 구르지도 않는다.
+function faceShown(i) {
+  const d = battle.dice[i];
+  if (!d || !d.st) return true;
+  const st = DB.statusById[d.st.kind];
+  if (!st) return true;
+  if (st.rule === 'hideFace') return false;
+  if (st.rule === 'needReroll' && !d.st.opened) return false;
+  return true;
+}
+
 function syncDieStatusDom(i) {
   const el = app.querySelectorAll('.die')[i];
   const d = battle.dice[i];
@@ -1252,7 +1260,20 @@ function syncDieStatusDom(i) {
 function animateRoll(indices) {
   busy = true;
   updateRollStart(); // v0.63: 여기서 renderBattle()을 부르던 것이 굴림마다 화면 전체가 깜빡이던 원인
+  battle.dice.forEach((_, i) => syncDieStatusDom(i));   // 풀린 봉인 등 남은 표시부터 걷어낸다
   const dieEls = [...app.querySelectorAll('.die')];
+  // 눈이 안 보이는 칸은 구르지 않는다 — 굴림 전 '빈 칸' 모습만 벗겨 제자리에 앉힌다
+  indices.filter(i => !faceShown(i)).forEach(i => {
+    const el = dieEls[i];
+    if (!el) return;
+    el.classList.remove('blank', 'spinning');
+    el.classList.add('landed');
+    el.style.setProperty('--tilt', '0deg');
+    dieTilts[i] = 0;
+    const img = el.querySelector('img.pip-art');
+    if (img) img.replaceWith(Object.assign(document.createElement('span'), { className: 'pip-art empty' }));
+  });
+  indices = indices.filter(i => faceShown(i));
   const stopped = new Set();
 
   indices.forEach((idx) => {
@@ -1261,7 +1282,6 @@ function animateRoll(indices) {
     dieTilts[idx] = 0;
     el.style.setProperty('--tilt', '0deg');
     el.classList.remove('blank', 'landed');
-    syncDieStatusDom(idx);          // 풀린 봉인 등 남아 있던 표시를 걷어낸다
     // 시작 타이밍·텀블 속도에 개별 편차 (일제히 던져도 제각각 구르는 느낌)
     el.style.animationDelay = `${-Math.random() * 0.4}s`;
     el.style.animationDuration = `${0.34 + Math.random() * 0.14}s`;
