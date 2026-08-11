@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.25'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.26'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1366,6 +1366,8 @@ function tryConfirm(catId, variantId, uid) {
       }
       syncTarget();
       renderBattle();
+      const hits = (battle.enemyHits || []).filter(h => h.taken > 0 || h.blocked > 0);
+      if (hits.length > 1) { playMultiHit(hits, hpBefore); busy = false; return; }
       const dmgTaken = hpBefore - battle.player.hp;
       if (dmgTaken > 0) playPlayerHitFx(dmgTaken);
       busy = false;
@@ -1447,7 +1449,38 @@ function flashScreen(screen, tone) {
 }
 
 // 피격 연출: 화면 흔들림 + 붉은 블러 비네트 + 체력바 위 피해 수치
-function playPlayerHitFx(dmg) {
+// v3.26: 연타는 한 대씩 보여준다. 체력 게이지도 한 대마다 한 칸씩 내려간다.
+//        엔진은 이미 hits 만큼 따로 때리고 있었는데 화면에서만 뭉쳐 나왔다.
+function playMultiHit(hits, hpBefore) {
+  const p = battle.player;
+  const fill = app.querySelector('.hp-fill');
+  const text = app.querySelector('.hp-text');
+  const setBar = (hp) => {
+    if (fill) fill.style.width = `${Math.max(0, hp / p.maxHp * 100)}%`;
+    if (text) text.firstChild && (text.firstChild.nodeValue = `${Math.max(0, hp)} / ${p.maxHp}`);
+  };
+  let hp = hpBefore;
+  setBar(hp);                                   // 맞기 전으로 되돌려 놓고 시작
+  const STEP = 190;
+  hits.forEach((h, i) => {
+    setTimeout(() => {
+      hp = Math.max(0, hp - h.taken);
+      setBar(hp);
+      if (h.taken > 0) playPlayerHitFx(h.taken, i);
+      else blockedHitFx();
+      if (i === hits.length - 1) setBar(p.hp);   // 마지막에 엔진 값과 정확히 맞춘다
+    }, i * STEP);
+  });
+}
+
+// 방어도로 다 막힌 한 대 — 아프지 않으니 흔들지 않고 방패만 튕긴다
+function blockedHitFx() {
+  const sh = app.querySelector('.hp-shield');
+  if (!sh) return;
+  sh.classList.remove('blk-pop'); void sh.offsetWidth; sh.classList.add('blk-pop');
+}
+
+function playPlayerHitFx(dmg, idx = 0) {
   const screen = app.querySelector('.battle-screen');
   if (!screen) return;
   screen.classList.add('screen-shake');
@@ -1459,6 +1492,8 @@ function playPlayerHitFx(dmg) {
     bar.classList.add('hurt');
     const f = document.createElement('span');
     f.className = 'pdmg-float';
+    f.style.setProperty('--nudge', `${(idx % 3 - 1) * 26}px`);
+    f.style.animationDelay = `${idx * 40}ms`;
     f.textContent = `-${dmg}`;
     bar.appendChild(f);
     setTimeout(() => { f.remove(); bar.classList.remove('hurt'); }, 2100);
@@ -2278,6 +2313,8 @@ function cbShowPlayerHit(dmg, hpShown) {
     g.querySelector('.hp-text').textContent = `${hpShown} / ${battle.player.maxHp}`;
     const f = document.createElement('span');
     f.className = 'pdmg-float';
+    f.style.setProperty('--nudge', `${(idx % 3 - 1) * 26}px`);
+    f.style.animationDelay = `${idx * 40}ms`;
     f.textContent = `-${dmg}`;
     g.appendChild(f);
     setTimeout(() => f.remove(), 1900);
