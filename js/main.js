@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.32'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.33'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1028,6 +1028,11 @@ function renderBattle(opts = {}) {
     addLongPress(el, () => showCategoryInfo(catId, variantId));
     onTap(el, () => {
       if (busy || el.dataset.locked === '1') return;
+      // v3.33: 주사위 탭이 족보 선택을 푸는 것과 짝. 족보를 누르면 골라둔 리롤 표시가 풀린다.
+      if (battle.rolled && battle.dice.some(d => !d.held)) {
+        battle.dice.forEach(d => { d.held = true; });
+        updateDiceMarks();
+      }
       if (selectedCat !== key) { selectedCat = key; updateSheetSelection(); return; } // v0.28: 제자리 갱신
       tryConfirm(catId, variantId, targetUid);
     });
