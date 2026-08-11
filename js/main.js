@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.37'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.38'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -170,7 +170,13 @@ function showTitle() {
 // v0.65: 로컬에서만 열리는 테스트 훅 — 보스 전리품처럼 손으로 도달하기 어려운 화면 검증용
 if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
   window.__dev = { showBossReward: (cb) => showBossReward(cb || (() => showMap())), get run() { return run; },
-    get battle() { return battle; }, redraw: () => (battle && battle.myDice ? renderCardBattle() : renderBattle()), DB };
+    get battle() { return battle; }, redraw: () => (battle && battle.myDice ? renderCardBattle() : renderBattle()), DB,
+    // v3.38: 화면 검증용 — 지도를 거치지 않고 곧장 전투로 들어간다
+    fight: (type = 'battle', weapon) => {
+      if (!run) run = newRun();
+      if (!run.weapon) chooseWeapon(run, weapon || DB.events.weapons[0].id);
+      enterNode(type);
+    } };
 }
 
 // v0.81: 배경 층 — 화면 위쪽 띠에만 그린다.
@@ -1015,11 +1021,11 @@ function renderBattle(opts = {}) {
       updateTargetMark(); // v0.58: 전체 재렌더 없이 표적 표시만 갱신
     });
   });
-  // 내 버프 — 체력바(또는 버프 칩) 길게 눌러 상세
+  // 내 버프 — v3.38: 체력바·버프 칩은 그냥 탭하면 상세가 뜬다 (길게 누를 필요 없다)
   const pbEl = app.querySelector('.player-bar');
-  if (pbEl) addLongPress(pbEl, showPlayerBuffs);
+  if (pbEl) onTap(pbEl, () => { if (!busy) showPlayerBuffs(); });
   const bsEl = document.getElementById('buff-strip');
-  if (bsEl) addLongPress(bsEl, showPlayerBuffs);
+  if (bsEl) onTap(bsEl, () => { if (!busy) showPlayerBuffs(); });
   // 족보 — 선택 키는 (족보:변형) 조합, 같은 족보의 다른 변형은 별개 버튼
   app.querySelectorAll('.sheet-row').forEach(el => {
     const catId = el.dataset.cat;
@@ -1148,15 +1154,34 @@ function showPlayerBuffs() {
     b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen} · 매 턴 1 소멸</li>` : '',
     battle.whet > 0 ? `<li>${uiIco('whet')} 벼름 ${battle.whet} — <b>${uiIco('burst')}일격</b> 족보로 터뜨리면 피해 <b>×${whetMultOf(battle.whet).toFixed(1)}</b>. 일격이 아닌 족보로는 쓰이지도 깎이지도 않는다</li>` : '',
     battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
+    // v3.38: 칩에는 뜨는데 상세에는 없던 것들 — 지속 피해와 기믹 제약
+    battle.player.dot > 0 ? `<li>${ico('status_bleed')} ${DOT_KO[battle.player.dotKind] || '독'} ${battle.player.dot} — 내 행동이 끝날 때마다 ${battle.player.dot} 피해 (방어도로 막힌다)</li>` : '',
+    ...['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind'].map(k => {
+      const m = modOf(battle, k);
+      return m ? `<li>${fxIco(k)} ${esc(m.name)} — ${CB_MOD_KO[k]} <small class="cat-tag">${m.left}턴</small></li>` : '';
+    }),
     confusedNow > 0 ? `<li>${ico('status_confuse')} 혼란 — 이번 턴 주사위 ${confusedNow}개가 뒤틀려 다시 굴릴 수 없음</li>` : '',
     battle.pendingConfuse > 0 ? `<li>${ico('status_confuse')} 혼란 예고 — 다음 턴 주사위 ${battle.pendingConfuse}개가 뒤틀린다</li>` : '',
   ].filter(Boolean).join('');
+  // v3.38: 주사위에 붙은 상태이상도 같은 창에서 읽힌다 — 종류별로 묶어 몇 칸인지까지
+  const stCount = {};
+  battle.dice.forEach(d => { if (d.st) stCount[d.st.kind] = (stCount[d.st.kind] || 0) + 1; });
+  const stItems = Object.entries(stCount).map(([k, n]) => {
+    const def = DB.statusById[k];
+    if (!def) return '';
+    const amt = battle.dice.find(d => d.st && d.st.kind === k);
+    const num = amt && amt.st.power > 0 ? amt.st.power : def.amount;
+    const txt = esc(def.text).replace('수치', num > 0 ? `<b>${num}</b>` : '수치');
+    return `<li><span class="st-dot" style="background:${def.color}"></span>${ico('status_' + k)} ${esc(def.name)}`
+      + ` <small class="cat-tag">주사위 ${n}칸</small> — ${txt}</li>`;
+  }).filter(Boolean).join('');
   app.append(h(`
     <div class="modal-back" id="pbuff-info">
       <div class="modal">
         <h3>🧣 빨간 두건 <small class="cat-tag">걸린 효과</small></h3>
         <ul class="deck-list">${items || '<li class="modal-text">걸린 효과 없음</li>'}</ul>
-        <p class="hint">힘·집중·재생은 이번 전투가 끝날 때까지 유지된다</p>
+        ${stItems ? `<p class="info-ability">주사위에 붙은 상태이상</p><ul class="deck-list">${stItems}</ul>` : ''}
+        <p class="hint">힘·집중·재생은 이번 전투가 끝날 때까지 유지된다${stItems ? ' · 주사위 한 칸에는 상태이상이 하나만 붙는다. 새로 걸리면 앞의 것이 밀려나 풀린다' : ''}</p>
         <button class="btn primary" id="pbuff-close">닫기</button>
       </div>
     </div>`));
@@ -1265,7 +1290,11 @@ function playStatusFx(fx) {
   const colorOf = (k) => (DB.statusById[k] || {}).color || FXC[k === 'bite' ? 'lock' : k] || '#c9a86a';
   const nameOf = (k) => (k === 'bite' ? '물림' : (names[k] || ''));
 
-  fx.removed.forEach(({ i, kind }, n) => setTimeout(() => {
+  // v3.38: 한 칸에 상태이상은 하나. 나중 것이 앞의 것을 밀어낸 칸은
+  //   '앞의 것이 부서진다 → 새것이 찍힌다' 순서로 시차를 둬야 두 사건으로 읽힌다.
+  const evicted = new Set(fx.removed.filter(r => r.evicted).map(r => r.i));
+
+  fx.removed.forEach(({ i, kind, evicted: ev }, n) => setTimeout(() => {
     const el = dieEl(i); if (!el) return;
     // 뜯긴 자국 — 그 자리에 잠깐 파편이 남았다 흩어진다
     fxSprite(el, 'fx_break_shards', colorOf(kind), 'sp-break', 620);
@@ -1273,6 +1302,7 @@ function playStatusFx(fx) {
     void el.offsetWidth;
     el.classList.add('st-free');
     setTimeout(() => el.classList.remove('st-free'), 620);
+    if (ev) stFloat(el, nameOf(kind), 'gone');   // 밀려난 쪽 이름을 흐리게 흘린다
   }, n * 70));
 
   fx.added.forEach(({ i, kind }, n) => setTimeout(() => {
@@ -1291,7 +1321,7 @@ function playStatusFx(fx) {
       kind === 'bite' ? 'sp-bite' : 'sp-stamp', 620);
     stFloat(el, nameOf(kind), 'bad');
     shakeScreen(120);
-  }, n * 90));
+  }, n * 90 + (evicted.has(i) ? 220 : 0)));
 
   // 대가 자국은 색이 들어간 그림이라 마스크가 아니라 그대로 얹는다 — 뭘 물었는지가 보여야 한다
   const SPLAT = { bleed: 'fx_splat_blood', poison: 'fx_splat_venom', rot: 'fx_splat_blood', plunder: 'fx_splat_coin' };

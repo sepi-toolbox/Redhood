@@ -1,147 +1,147 @@
 {
- "rules": {
-  "note": "상태이상은 주사위 한 칸에 하나씩 붙는다. 새로 걸 때는 빈 칸을 먼저 채우고, 빈 칸이 없으면 아무 칸이나 덮어쓴다.",
-  "preferEmpty": true,
-  "overwrite": true
- },
- "list": [
-  {
-   "id": "bleed",
-   "name": "출혈",
-   "color": "#e83b2e",
-   "rule": "onUseFaceDamage",
-   "amount": 0,
-   "turns": 1,
-   "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다 (세기 없음)"
+  "rules": {
+    "note": "상태이상은 주사위 한 칸에 하나뿐이다. 새로 걸 때는 빈 칸을 먼저 채우고, 빈 칸이 없으면 아무 칸이나 덮어쓴다 — 나중에 건 것이 먼저 건 것을 밀어내고, 밀려난 쪽은 그 자리에서 풀린다.",
+    "preferEmpty": true,
+    "overwrite": true
   },
-  {
-   "id": "poison",
-   "name": "독",
-   "color": "#a8d63a",
-   "rule": "onUseFaceDamage",
-   "amount": 0,
-   "turns": 1,
-   "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다 (세기 없음)"
+  "list": [
+    {
+      "id": "bleed",
+      "name": "출혈",
+      "color": "#e83b2e",
+      "rule": "onUseFaceDamage",
+      "amount": 0,
+      "turns": 1,
+      "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다 (세기 없음)"
+    },
+    {
+      "id": "poison",
+      "name": "독",
+      "color": "#a8d63a",
+      "rule": "onUseFaceDamage",
+      "amount": 0,
+      "turns": 1,
+      "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다 (세기 없음)"
+    },
+    {
+      "id": "bind",
+      "name": "포박",
+      "color": "#2f9e5c",
+      "rule": "noReroll",
+      "amount": 0,
+      "turns": 1,
+      "text": "이 주사위는 다시 굴릴 수 없다"
+    },
+    {
+      "id": "stun",
+      "name": "기절",
+      "color": "#c9c2b0",
+      "rule": "zeroValue",
+      "amount": 0,
+      "turns": 1,
+      "text": "족보에는 들어가지만 눈금이 0으로 계산된다"
+    },
+    {
+      "id": "curse",
+      "name": "저주",
+      "color": "#c33ad6",
+      "rule": "faceLow",
+      "amount": 3,
+      "turns": 1,
+      "text": "이 주사위는 수치 이하의 눈만 나온다"
+    },
+    {
+      "id": "blessing",
+      "name": "축복",
+      "color": "#ffd257",
+      "rule": "faceHigh",
+      "amount": 4,
+      "turns": 1,
+      "text": "이 주사위는 수치 이상의 눈만 나온다"
+    },
+    {
+      "id": "confuse",
+      "name": "혼란",
+      "color": "#8b4de8",
+      "rule": "hideFace",
+      "amount": 0,
+      "turns": 1,
+      "text": "눈이 보이지 않는다 (족보에는 그대로 들어간다)"
+    },
+    {
+      "id": "seal",
+      "name": "봉인",
+      "color": "#3a52c8",
+      "rule": "needReroll",
+      "amount": 0,
+      "turns": 1,
+      "text": "한 번 다시 굴리기 전에는 값이 없다 — 족보에도 안 들어간다"
+    },
+    {
+      "id": "rot",
+      "name": "부패",
+      "color": "#e5468f",
+      "rule": "fuse",
+      "amount": 10,
+      "turns": 1,
+      "text": "턴이 다 차면 터져 수치만큼 피해. 그 전에 족보에 쓰면 해제된다"
+    },
+    {
+      "id": "chain",
+      "name": "결속",
+      "color": "#8fa0b0",
+      "rule": "linked",
+      "amount": 0,
+      "turns": 1,
+      "text": "결속된 주사위끼리 항상 같이 굴러간다"
+    },
+    {
+      "id": "numb",
+      "name": "마비",
+      "color": "#3aa8e6",
+      "rule": "rerollCost",
+      "amount": 2,
+      "turns": 1,
+      "text": "이 주사위를 다시 굴리면 리롤을 수치만큼 쓴다"
+    },
+    {
+      "id": "plunder",
+      "name": "약탈",
+      "color": "#e08a2a",
+      "rule": "onUseFaceCoin",
+      "amount": 0,
+      "turns": 1,
+      "text": "이 주사위를 족보에 쓰면 눈금만큼 코인을 뺏긴다 (세기 없음)"
+    },
+    {
+      "id": "devour",
+      "name": "잠식",
+      "color": "#17bfae",
+      "rule": "spread",
+      "amount": 0,
+      "turns": 0,
+      "text": "쓰지 않으면 양옆으로 번진다. 다 잠식되면 공허의 부름만 남는다"
+    }
+  ],
+  "voidCall": {
+    "name": "공허의 부름",
+    "text": "잠식을 전부 걷어내는 대신 주사위 눈의 총합만큼 내가 피해를 받는다",
+    "selfDamageMult": 1
   },
-  {
-   "id": "bind",
-   "name": "포박",
-   "color": "#2f9e5c",
-   "rule": "noReroll",
-   "amount": 0,
-   "turns": 1,
-   "text": "이 주사위는 다시 굴릴 수 없다"
+  "fxColors": {
+    "lock": "#8a6a3f",
+    "rollTax": "#9e2f2f",
+    "holdTax": "#7a3a2a",
+    "blind": "#2f3a52",
+    "ward": "#6b7a5a",
+    "cap": "#55606b",
+    "enrage": "#e0521a",
+    "reflect": "#2fa39a",
+    "undying": "#7fe0a0",
+    "regen": "#e5468f",
+    "petrify": "#c9c2b0",
+    "sealCat": "#3a52c8",
+    "sealLast": "#3a52c8"
   },
-  {
-   "id": "stun",
-   "name": "기절",
-   "color": "#c9c2b0",
-   "rule": "zeroValue",
-   "amount": 0,
-   "turns": 1,
-   "text": "족보에는 들어가지만 눈금이 0으로 계산된다"
-  },
-  {
-   "id": "curse",
-   "name": "저주",
-   "color": "#c33ad6",
-   "rule": "faceLow",
-   "amount": 3,
-   "turns": 1,
-   "text": "이 주사위는 수치 이하의 눈만 나온다"
-  },
-  {
-   "id": "blessing",
-   "name": "축복",
-   "color": "#ffd257",
-   "rule": "faceHigh",
-   "amount": 4,
-   "turns": 1,
-   "text": "이 주사위는 수치 이상의 눈만 나온다"
-  },
-  {
-   "id": "confuse",
-   "name": "혼란",
-   "color": "#8b4de8",
-   "rule": "hideFace",
-   "amount": 0,
-   "turns": 1,
-   "text": "눈이 보이지 않는다 (족보에는 그대로 들어간다)"
-  },
-  {
-   "id": "seal",
-   "name": "봉인",
-   "color": "#3a52c8",
-   "rule": "needReroll",
-   "amount": 0,
-   "turns": 1,
-   "text": "한 번 다시 굴리기 전에는 값이 없다 — 족보에도 안 들어간다"
-  },
-  {
-   "id": "rot",
-   "name": "부패",
-   "color": "#e5468f",
-   "rule": "fuse",
-   "amount": 10,
-   "turns": 1,
-   "text": "턴이 다 차면 터져 수치만큼 피해. 그 전에 족보에 쓰면 해제된다"
-  },
-  {
-   "id": "chain",
-   "name": "결속",
-   "color": "#8fa0b0",
-   "rule": "linked",
-   "amount": 0,
-   "turns": 1,
-   "text": "결속된 주사위끼리 항상 같이 굴러간다"
-  },
-  {
-   "id": "numb",
-   "name": "마비",
-   "color": "#3aa8e6",
-   "rule": "rerollCost",
-   "amount": 2,
-   "turns": 1,
-   "text": "이 주사위를 다시 굴리면 리롤을 수치만큼 쓴다"
-  },
-  {
-   "id": "plunder",
-   "name": "약탈",
-   "color": "#e08a2a",
-   "rule": "onUseFaceCoin",
-   "amount": 0,
-   "turns": 1,
-   "text": "이 주사위를 족보에 쓰면 눈금만큼 코인을 뺏긴다 (세기 없음)"
-  },
-  {
-   "id": "devour",
-   "name": "잠식",
-   "color": "#17bfae",
-   "rule": "spread",
-   "amount": 0,
-   "turns": 0,
-   "text": "쓰지 않으면 양옆으로 번진다. 다 잠식되면 공허의 부름만 남는다"
-  }
- ],
- "voidCall": {
-  "name": "공허의 부름",
-  "text": "잠식을 전부 걷어내는 대신 주사위 눈의 총합만큼 내가 피해를 받는다",
-  "selfDamageMult": 1
- },
- "fxColors": {
-  "lock": "#8a6a3f",
-  "rollTax": "#9e2f2f",
-  "holdTax": "#7a3a2a",
-  "blind": "#2f3a52",
-  "ward": "#6b7a5a",
-  "cap": "#55606b",
-  "enrage": "#e0521a",
-  "reflect": "#2fa39a",
-  "undying": "#7fe0a0",
-  "regen": "#e5468f",
-  "petrify": "#c9c2b0",
-  "sealCat": "#3a52c8",
-  "sealLast": "#3a52c8"
- },
- "_comment_color": "색은 아이콘·덮개를 잇는 첫째 단서다 (v3.11 재배치: 최소 ΔE 22.5). fxColors 는 상태이상이 아닌 지속 효과의 색."
+  "_comment_color": "색은 아이콘·덮개를 잇는 첫째 단서다 (v3.11 재배치: 최소 ΔE 22.5). fxColors 는 상태이상이 아닌 지속 효과의 색."
 }

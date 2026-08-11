@@ -144,20 +144,34 @@ export function takeFx(battle) {
   return f;
 }
 
+/* 주사위 한 칸에 상태이상은 언제나 하나뿐 (v3.38).
+   이미 붙어 있으면 나중에 건 것이 먼저 건 것을 밀어낸다 — 밀려난 쪽은 '풀림' 연출을 받고 사라진다.
+   상태이상을 붙이는 길은 전부 이 함수 하나를 지난다. */
+function setStatus(battle, i, st) {
+  const d = battle.dice[i];
+  if (!d) return false;
+  if (d.st) fxPush(battle, 'removed', { i, kind: d.st.kind, evicted: true });   // 덮어쓰기 = 먼저 것이 풀린다
+  d.st = st;
+  fxPush(battle, 'added', { i, kind: st.kind });
+  return true;
+}
+
 export function applyStatus(battle, kind, count = 1, power = 0) {
   if (!stDef(kind)) return 0;
   const def = stDef(kind);
   if (def.rule !== 'fuse') power = 0;        // 폭발 피해를 정할 수 있는 건 부패뿐
   const life = def.turns || 0;
   let put = 0;
+  const touched = new Set();                 // 같은 한 방이 같은 칸을 두 번 덮지 않게
   for (let k = 0; k < count; k++) {
-    const empty = battle.dice.map((d, i) => (d.st ? -1 : i)).filter(i => i >= 0);
-    const pool = empty.length ? empty : battle.dice.map((_, i) => i);
+    const free = battle.dice.map((d, i) => (!d.st && !touched.has(i) ? i : -1)).filter(i => i >= 0);
+    const rest = battle.dice.map((_, i) => (touched.has(i) ? -1 : i)).filter(i => i >= 0);
+    const pool = free.length ? free : (rest.length ? rest : battle.dice.map((_, i) => i));
     const i = pool[Math.floor(rng.next() * pool.length)];
-    battle.dice[i].st = { kind, power: power > 0 ? power : 0,
+    touched.add(i);
+    setStatus(battle, i, { kind, power: power > 0 ? power : 0,
       left: def.rule === 'fuse' ? 0 : life,
-      fuse: def.rule === 'fuse' ? (life || 1) : 0, opened: false, fresh: true };
-    fxPush(battle, 'added', { i, kind });
+      fuse: def.rule === 'fuse' ? (life || 1) : 0, opened: false, fresh: true });
     put++;
   }
   return put;
@@ -205,7 +219,7 @@ function modAfterRoll(battle, idxs) {
   for (const i of idxs) {
     const d = battle.dice[i];
     if (d.face === (m.face ?? 6) && !stRule(d, 'zeroValue')) {
-      d.st = { kind: 'stun', power: 0, left: 1, fuse: 0, opened: false, fresh: false };
+      setStatus(battle, i, { kind: 'stun', power: 0, left: 1, fuse: 0, opened: false, fresh: false });
     }
   }
 }
@@ -821,8 +835,7 @@ function applyStatusCost(battle, bd) {
   for (const j of grow) {
     const t = battle.dice[j];
     if (t && !stRule(t, 'spread')) {
-      t.st = { kind: 'devour', power: 0, left: 0, fuse: 0, opened: false };
-      fxPush(battle, 'added', { i: j, kind: 'devour' });
+      setStatus(battle, j, { kind: 'devour', power: 0, left: 0, fuse: 0, opened: false });
     }
   }
   if (battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;

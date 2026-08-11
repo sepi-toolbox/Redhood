@@ -85,7 +85,7 @@ function playBattle(run, nodeType) {
   while (!battle.over && guard++ < 200) {
     initialRoll(battle);
     // 간단 AI: 최고 피해 족보 확정, 리롤 여유 있으면 1회 리롤
-    for (let rr = 0; rr < 2 && battle.rollsLeft > 0; rr++) {
+    for (let rr = 0; rr < 6 && battle.rollsLeft > 0; rr++) {
       const pv = previewAll(battle).filter(p => !p.locked && p.bd.total > 0);
       const best = pv.sort((a, b) => scoreChoice(battle, b) - scoreChoice(battle, a))[0];
       if (best && scoreChoice(battle, best) >= 32) break;      // 충분하면 확정
@@ -94,11 +94,11 @@ function playBattle(run, nodeType) {
       if (!reroll(battle)) break;
     }
     const pv = previewAll(battle).filter(p => !p.locked && p.bd.total > 0);
-    if (pv.length === 0) { battle.over = true; battle.result = 'defeat'; break; }
+    if (pv.length === 0) { battle.await = 'enemy'; enemyPhase(battle); continue; }
     const best = pv.sort((a, b) => scoreChoice(battle, b) - scoreChoice(battle, a))[0];
     stats.catUse[best.variant.id] = (stats.catUse[best.variant.id] || 0) + 1;
     stats.dmg.push(best.bd.total);
-    const alive = aliveEnemies(battle);
+    const alive = [...aliveEnemies(battle)].sort((a, b) => a.hp - b.hp);
     confirmCategory(battle, best.cat.id, best.variant.id, alive[0]?.uid);
     if (battle.over) break;
     enemyPhase(battle);

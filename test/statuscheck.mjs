@@ -143,6 +143,39 @@ for (const k of ['curse', 'blessing']) {
   ok('devour', '안 쓰면 양옆으로 번진다', n1 > n0, `${n0} → ${n1}칸`);
 }
 
+
+// --- 한 칸 한 개 규칙 (v3.38) ---
+{
+  const b = mkBattle(); setFaces(b, [1, 2, 3, 4, 5]);
+  E.applyStatus(b, 'bleed', 5);                 // 다섯 칸을 채우고
+  E.takeFx(b);
+  const before = b.dice.map(d => d.st && d.st.kind);
+  E.applyStatus(b, 'seal', 2);                  // 빈 칸이 없는데 둘을 더 건다
+  const fx = E.takeFx(b);
+  const one = b.dice.every(d => !d.st || typeof d.st.kind === 'string');
+  ok('seal', '한 칸에 하나만 (덮어쓰기)', one && b.dice.filter(d => d.st).length === 5,
+     `붙은 칸 ${b.dice.filter(d => d.st).length}/5`);
+  const sealed = b.dice.filter(d => d.st && d.st.kind === 'seal').length;
+  ok('seal', '나중 것이 먼저 것을 밀어낸다', sealed === 2, `봉인 ${sealed}칸 (기대 2)`);
+  const ev = fx.removed.filter(r => r.evicted);
+  ok('seal', '밀려난 쪽은 풀림 신호를 낸다', ev.length === 2 && ev.every(r => r.kind === 'bleed'),
+     `evicted ${ev.length}건 ${ev.map(r => r.kind).join(',')}`);
+  ok('seal', '같은 한 방이 같은 칸을 두 번 덮지 않는다',
+     new Set(fx.added.map(a => a.i)).size === fx.added.length,
+     `덮은 칸 ${fx.added.map(a => a.i).join(',')}`);
+  void before;
+}
+{
+  const b = mkBattle(); setFaces(b, [1, 2, 3, 4, 5]);
+  E.applyStatus(b, 'bind', 1); E.takeFx(b);
+  const i = b.dice.findIndex(d => d.st);
+  b.dice.forEach((d, j) => { if (j !== i) d.st = { kind: 'stun', power: 0, left: 9, fuse: 0, opened: true, fresh: false }; });
+  E.applyStatus(b, 'curse', 1);                 // 빈 칸이 없다 → 아무 칸이나 덮어쓴다
+  ok('curse', '빈 칸이 없어도 반드시 하나는 붙는다',
+     b.dice.filter(d => d.st && d.st.kind === 'curse').length === 1,
+     `저주 ${b.dice.filter(d => d.st && d.st.kind === 'curse').length}칸`);
+}
+
 // ---------- B. 도달 검사 ----------
 const reach = Object.fromEntries(S.map(x => [x.id, []]));
 for (const e of DB.enemies) {
