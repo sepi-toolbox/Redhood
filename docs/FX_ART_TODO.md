@@ -1,4 +1,6 @@
-# 연출용 리소스 요청 — 프롬프트 6장 (v3.32)
+# 연출용 리소스 요청 — 프롬프트 6장 (v3.34)
+
+> **1·2·3번은 v3.34 에 들어갔다.** 남은 건 4·5·6번(대가 자국 3종)뿐이다.
 
 **이 파일 하나로 끝난다.** 아래 프롬프트는 전부 조립이 끝난 것이라 통째로 복사해서 그대로 넣으면 된다.
 다른 문서를 찾아볼 필요 없다.
@@ -17,7 +19,7 @@ v3.32에서 상태이상 연출을 **전부 CSS 도형으로만** 넣었다. 지
 
 ---
 
-## 1. 찍히는 자국 — `fx_stamp_burst` ★가장 급함
+## 1. 찍히는 자국 — `fx_stamp_burst` ✅ 완료 (v3.34)
 
 상태이상이 걸리는 순간 덮개 뒤에서 한 번 퍼진다. **매 전투마다 여러 번 오는 순간이고 지금이 제일 밋밋하다.**
 색은 코드에서 상태색으로 물들이므로 **흰색 계열 한 색으로만** 그려야 한다.
@@ -26,7 +28,7 @@ v3.32에서 상태이상 연출을 **전부 CSS 도형으로만** 넣었다. 지
 Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorealistic, NOT 3D. Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard. Do NOT draw a die or any object underneath — draw ONLY the effect itself. The effect: one ragged ring of thick wax splatter blown outward from the centre, chunky uneven blobs and a few flung droplets, filling most of the square. Pure off-white only — NO colour, NO gradient, one flat tone so it can be tinted later. No text, no letters, no watermark.
 ```
 
-## 2. 뜯긴 파편 — `fx_break_shards`
+## 2. 뜯긴 파편 — `fx_break_shards` ✅ 완료 (v3.34)
 
 상태이상이 풀리는 순간 흩어진다. 이것도 **흰색 한 색**.
 
@@ -34,7 +36,7 @@ Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXAC
 Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorealistic, NOT 3D. Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard. Do NOT draw a die or any object underneath — draw ONLY the effect itself. The effect: five or six chunky angular shards of a broken wax seal flying apart from the centre, thick blunt edges, one small puff of dust between them. Pure off-white only — NO colour, NO gradient, one flat tone so it can be tinted later. No text, no letters, no watermark.
 ```
 
-## 3. 무는 순간 — `fx_bite_snap`
+## 3. 무는 순간 — `fx_bite_snap` ✅ 완료 (v3.34)
 
 물기(흡착)가 붙는 순간이 지금 특히 안 보인다. **흰색 한 색**.
 
@@ -81,4 +83,4 @@ Landscape 3:1 image. A 1x3 row of three effects, equal cells, equal spacing, eac
 
 ## 우선순위
 
-**1번 하나만 있어도 체감이 크게 는다.** 그다음이 4·5번(출혈·독)이고, 3번과 6번은 나중에 해도 된다.
+1·2·3은 끝났다. **남은 건 4·5번(출혈·독)이 먼저고 6번(약탈)은 나중에 해도 된다.**

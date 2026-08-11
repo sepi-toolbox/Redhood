@@ -1713,3 +1713,32 @@ span.enemy-art {
   animation: chipIn .46s cubic-bezier(.2, .9, .3, 1.5) both;
   box-shadow: 0 0 0 2px rgba(255, 210, 140, .5), 0 0 12px rgba(255, 180, 90, .55);
 }
+
+/* v3.34: 흰 그림 한 장에 상태색을 입혀 쓰는 연출 스프라이트 */
+.die .fx-sprite {
+  position: absolute; left: -3px; right: -3px; top: -1px; bottom: -1px;
+  pointer-events: none; z-index: 8; opacity: .9;
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, .55));
+}
+@keyframes spStamp {
+  0%   { transform: scale(.35) rotate(-14deg); opacity: 0; }
+  26%  { transform: scale(1) rotate(3deg);     opacity: .95; }
+  55%  { transform: scale(1.14) rotate(0deg);  opacity: .5; }
+  100% { transform: scale(1.34) rotate(2deg);  opacity: 0; }
+}
+.die .fx-sprite.sp-stamp { animation: spStamp .5s cubic-bezier(.2, .85, .3, 1) forwards; }
+@keyframes spBreak {
+  0%   { transform: scale(.6) rotate(0deg);  opacity: 0; }
+  22%  { transform: scale(.95) rotate(6deg); opacity: 1; }
+  100% { transform: scale(1.75) rotate(22deg); opacity: 0; }
+}
+.die .fx-sprite.sp-break { animation: spBreak .56s ease-out forwards; }
+@keyframes spBite {
+  0%   { transform: scaleX(1.7) scaleY(.9); opacity: 0; }
+  35%  { transform: scaleX(1) scaleY(1);    opacity: 1; }
+  100% { transform: scaleX(.86) scaleY(1.04); opacity: 0; }
+}
+.die .fx-sprite.sp-bite { animation: spBite .5s cubic-bezier(.2, .9, .25, 1) forwards; }
