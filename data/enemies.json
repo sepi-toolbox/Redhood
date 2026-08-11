@@ -72,7 +72,8 @@
           "amount": 9
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 1
         }
       ]
@@ -218,7 +219,8 @@
           "amount": 13
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 1
         }
       ]
@@ -337,7 +339,8 @@
           "amount": 11
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "bind",
           "amount": 1
         }
       ]
@@ -837,7 +840,8 @@
           "amount": 9
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "bind",
           "amount": 1
         }
       ]
@@ -1659,7 +1663,8 @@
           "amount": 24
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "bind",
           "amount": 1
         }
       ]
@@ -2154,7 +2159,8 @@
           "amount": 20
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "bind",
           "amount": 1
         }
       ]
@@ -2552,7 +2558,8 @@
         "name": "윙윙거림",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           }
         ],
@@ -2600,7 +2607,8 @@
           "amount": 8
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 1
         }
       ]
@@ -2670,7 +2678,8 @@
             "amount": 8
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           },
           {
@@ -2711,7 +2720,8 @@
           "amount": 13
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 1
         }
       ]
@@ -3122,7 +3132,8 @@
             "amount": 16
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "bind",
             "amount": 2
           }
         ],
@@ -3176,7 +3187,8 @@
           "amount": 25
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "bind",
           "amount": 1
         }
       ]
@@ -3366,7 +3378,8 @@
         "name": "조종(弔鐘)",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "bind",
             "amount": 3
           }
         ],
@@ -3810,7 +3823,8 @@
           "amount": 20
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 2
         }
       ]
@@ -4069,7 +4083,8 @@
             "amount": 10
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           },
           {
@@ -4160,7 +4175,8 @@
         "name": "응시",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "bind",
             "amount": 3
           },
           {
@@ -4231,7 +4247,8 @@
           "amount": 13
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "bind",
           "amount": 2
         }
       ]
@@ -4279,7 +4296,8 @@
         "name": "인분(鱗粉)",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           },
           {
@@ -4394,7 +4412,8 @@
         "name": "속삭임",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           },
           {
@@ -4637,7 +4656,8 @@
             "amount": 7
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           }
         ],
@@ -4702,7 +4722,8 @@
           "amount": 15
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 2
         }
       ]
@@ -4745,7 +4766,8 @@
         "name": "모래 뿌리기",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 3
           }
         ],
@@ -4819,7 +4841,8 @@
             "op": "unpin"
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 3
           },
           {
@@ -4851,7 +4874,8 @@
           "amount": 26
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 2
         }
       ]
@@ -4920,7 +4944,8 @@
             "amount": 10
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "bind",
             "amount": 2
           },
           {
@@ -5060,7 +5085,8 @@
             "amount": 12
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "bind",
             "amount": 2
           }
         ],
@@ -5153,7 +5179,8 @@
           "amount": 27
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "bind",
           "amount": 1
         }
       ]
@@ -5328,7 +5355,8 @@
           "amount": 25
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 2
         }
       ]
@@ -5775,7 +5803,8 @@
             "amount": 9
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 1
           }
         ],
@@ -5803,7 +5832,8 @@
             "amount": 16
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "seal",
             "amount": 1
           },
           {
@@ -5833,7 +5863,8 @@
           "amount": 22
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 2
         }
       ]
@@ -5891,7 +5922,8 @@
         "name": "공허한 설교",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           }
         ],
@@ -5960,7 +5992,8 @@
           "amount": 14
         },
         {
-          "op": "confuse",
+          "op": "status",
+          "kind": "confuse",
           "amount": 1
         }
       ]
@@ -6012,7 +6045,8 @@
             "amount": 6
           },
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           },
           {
@@ -6131,7 +6165,8 @@
         "name": "일렁임",
         "effects": [
           {
-            "op": "confuse",
+            "op": "status",
+            "kind": "confuse",
             "amount": 2
           },
           {
