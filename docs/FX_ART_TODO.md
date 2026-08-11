@@ -1,6 +1,6 @@
-# 연출용 리소스 요청 — 프롬프트 6장 (v3.34)
+# 연출용 리소스 요청 — 프롬프트 6장 ✅ 전량 완료 (v3.35)
 
-> **1·2·3번은 v3.34 에 들어갔다.** 남은 건 4·5·6번(대가 자국 3종)뿐이다.
+> **여섯 장 전부 들어갔다.** 아래는 다시 뽑을 때를 위한 기록.
 
 **이 파일 하나로 끝난다.** 아래 프롬프트는 전부 조립이 끝난 것이라 통째로 복사해서 그대로 넣으면 된다.
 다른 문서를 찾아볼 필요 없다.
@@ -51,19 +51,19 @@ Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXAC
 출혈·독·약탈이 대가를 무는 순간 그 칸에 번진다. **같은 흰 원을 세 번 쓰면 뭘 물었는지 구분이 안 되므로
 이 셋만 색을 넣어 그린다.**
 
-### 4. 출혈 — `fx_splat_blood`
+### 4. 출혈 — `fx_splat_blood` ✅
 
 ```
 Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorealistic, NOT 3D. Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard. Do NOT draw a die or any object underneath — draw ONLY the effect itself. The dominant color of the effect must be #e83b2e. The effect: one thick crimson blood splatter thrown across the square, a fat irregular blob at the centre and three heavy drops flung off one side. No text, no letters, no watermark.
 ```
 
-### 5. 독 — `fx_splat_venom`
+### 5. 독 — `fx_splat_venom` ✅
 
 ```
 Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorealistic, NOT 3D. Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard. Do NOT draw a die or any object underneath — draw ONLY the effect itself. The dominant color of the effect must be #a8d63a. The effect: one thick acid-green venom splatter across the square with two fat round bubbles bursting inside it and a few droplets flung outward. No text, no letters, no watermark.
 ```
 
-### 6. 약탈 — `fx_splat_coin`
+### 6. 약탈 — `fx_splat_coin` ✅
 
 ```
 Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorealistic, NOT 3D. Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard. Do NOT draw a die or any object underneath — draw ONLY the effect itself. The dominant color of the effect must be #e08a2a. The effect: three thick gold coins scattering outward from the centre, tumbling at different angles, with one short bright glint between them. No text, no letters, no watermark.
@@ -83,4 +83,4 @@ Landscape 3:1 image. A 1x3 row of three effects, equal cells, equal spacing, eac
 
 ## 우선순위
 
-1·2·3은 끝났다. **남은 건 4·5번(출혈·독)이 먼저고 6번(약탈)은 나중에 해도 된다.**
+여섯 장 전부 적용 완료. 더 필요한 건 없다.

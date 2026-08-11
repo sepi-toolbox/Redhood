@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.34'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.35'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1293,16 +1293,28 @@ function playStatusFx(fx) {
     shakeScreen(120);
   }, n * 90));
 
+  // 대가 자국은 색이 들어간 그림이라 마스크가 아니라 그대로 얹는다 — 뭘 물었는지가 보여야 한다
+  const SPLAT = { bleed: 'fx_splat_blood', poison: 'fx_splat_venom', rot: 'fx_splat_blood', plunder: 'fx_splat_coin' };
   fx.burst.forEach(({ i, kind, amount, coin }, n) => setTimeout(() => {
     const el = dieEl(i); if (!el) return;
     el.classList.remove('st-burst'); void el.offsetWidth; el.classList.add('st-burst');
     setTimeout(() => el.classList.remove('st-burst'), 700);
-    const sp = document.createElement('span');
-    sp.className = 'st-splat';
-    sp.style.setProperty('--stc', colorOf(kind));
-    el.appendChild(sp);
-    setTimeout(() => sp.remove(), 700);
-    stFloat(el, coin ? `-${amount}` : `-${amount}`, coin ? 'coin' : 'hurt');
+    const art = SPLAT[kind];
+    if (art) {
+      const sp = document.createElement('img');
+      sp.className = 'fx-splat';
+      sp.src = `assets/ui/${art}.png`;
+      sp.draggable = false;
+      el.appendChild(sp);
+      setTimeout(() => sp.remove(), 700);
+    } else {
+      const sp = document.createElement('span');
+      sp.className = 'st-splat';
+      sp.style.setProperty('--stc', colorOf(kind));
+      el.appendChild(sp);
+      setTimeout(() => sp.remove(), 700);
+    }
+    stFloat(el, `-${amount}`, coin ? 'coin' : 'hurt');
   }, 120 + n * 130));
 }
 
