@@ -1742,3 +1742,18 @@ span.enemy-art {
   100% { transform: scaleX(.86) scaleY(1.04); opacity: 0; }
 }
 .die .fx-sprite.sp-bite { animation: spBite .5s cubic-bezier(.2, .9, .25, 1) forwards; }
+
+/* v3.35: 대가 자국 — 색이 있는 그림이라 그대로 얹는다 (마스크 아님).
+   img 는 left/right 로 크기가 안 잡히므로 폭·높이를 못 박고 가운데 기준으로 돌린다 */
+@keyframes fxSplat {
+  0%   { transform: translate(-50%, -50%) scale(.3) rotate(-10deg); opacity: 0; }
+  18%  { transform: translate(-50%, -50%) scale(1.04) rotate(4deg); opacity: 1; }
+  62%  { transform: translate(-50%, -50%) scale(1.08) rotate(1deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.24) rotate(3deg); opacity: 0; }
+}
+.die .fx-splat {
+  position: absolute; left: 50%; top: 50%; width: 72px; height: 72px;
+  object-fit: contain; pointer-events: none; z-index: 8;
+  filter: saturate(1.15) drop-shadow(0 1px 3px rgba(0, 0, 0, .8));
+  animation: fxSplat .58s cubic-bezier(.2, .85, .3, 1) forwards;
+}
