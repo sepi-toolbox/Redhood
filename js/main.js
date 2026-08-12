@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.41'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.42'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -172,6 +172,7 @@ if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
   window.__dev = { showBossReward: (cb) => showBossReward(cb || (() => showMap())), get run() { return run; },
     get battle() { return battle; }, redraw: () => (battle && battle.myDice ? renderCardBattle() : renderBattle()), DB,
     // v3.38: 화면 검증용 — 지도를 거치지 않고 곧장 전투로 들어간다
+    itemIcon, comboIcon,
     fight: (type = 'battle', weapon) => {
       if (!run) run = newRun();
       if (!run.weapon) chooseWeapon(run, weapon || DB.events.weapons[0].id);
@@ -269,6 +270,21 @@ function comboIcon(cat, variant) {
   const ops = ab ? (Array.isArray(ab) ? ab : [ab]).map(a => a.op) : [];
   const file = ABILITY_ICON[ops[0]] || 'intent_attack'; // 부가 능력 없는 족보는 공격 아이콘
   return `<img class="row-ico-img" src="assets/icons/${file}.png" alt="" draggable="false">`;
+}
+/* v3.41: 상품·전리품 줄이 전용 아트를 두고도 이모지를 쓰고 있었다.
+   주사위는 그 주사위의 실제 면 그림, 족보는 comboIcon, 재화는 표식 아트를 쓴다.
+   유물·전설·감정 카드는 아직 전용 아트가 없어 그 항목의 이모지로 떨어진다. */
+const dieRowIcon = (die) => {
+  const f = Math.max(...((die.faces && die.faces.length) ? die.faces : [6]));
+  return `<img class="row-ico-img die-ico" src="${dieFaceSrc(die.id, f)}" alt="" draggable="false">`;
+};
+function itemIcon(kind, item) {
+  // 주사위는 묶음 머리(무엇을 고를지 아직 모를 때)도 나무 주사위 그림으로 — 🎲 를 쓸 일이 없다
+  if (kind === 'die') return item ? dieRowIcon(item) : dieRowIcon({ id: 'normal', faces: [6] });
+  if (kind === 'category' && item && item.cat) return comboIcon(item.cat, item.variant);
+  if (kind === 'coins') return uiIco('coin', 'ico-ui row-ico-img');
+  const glyph = (item && item.icon) || (LOOT_META[kind] && LOOT_META[kind].icon) || '·';
+  return `<span class="row-ico-emoji">${glyph}</span>`;
 }
 // 선택지 텍스트 맨 앞 이모지를 아이콘 자리로 분리
 function splitLeadEmoji(text) {
@@ -433,7 +449,7 @@ function showShop() {
       const tierTag = TIER_KO[s.item.tier] || s.item.tier;
       // v3.41: 아이콘은 그림 태그(HTML)라 이름과 한 덩어리로 묶어 esc 하면 태그가 글자로 찍힌다.
       //   전리품 줄과 같은 방식으로 — 아이콘은 아이콘 칸에, 이름만 esc 한다.
-      const icon = s.kind === 'die' ? uiIco('roll', 'ico-ui row-ico-img') : `<span class="row-ico-emoji">${s.item.icon}</span>`;
+      const icon = itemIcon(s.kind, s.item);
       const sub = s.kind === 'die' ? `[${s.item.faces.join(',')}] ${s.item.desc}` : s.item.desc;
       return `
         <button class="sheet-row choice-row loot-row shop-item ${isSold || !afford ? 'used' : ''}" data-idx="${i}" ${isSold || !afford ? 'disabled' : ''}>
@@ -935,7 +951,7 @@ function renderBattle(opts = {}) {
               <span class="sheet-name">${esc(variant.name)}</span>
               <small class="cat-tag${variant.base ? ' t-slot' : ''}">${burst ? `<b class="burst-mark">${uiIco('burst')}일격</b> · ` : ''}${variant.base ? '빈 자리' : esc(cat.short || cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
             </span>
-            <span class="sheet-preview">${seal ? `🔒${seal}` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
+            <span class="sheet-preview">${seal ? `${ico('fx_seal_cat', 'ico-ui')}${seal}` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
           </button>`).join('')}
       </div>
       <div class="player-bar ${opts.playerHit ? 'hurt' : ''}">
@@ -1497,7 +1513,7 @@ function updateRollStart() {
   app.querySelectorAll('.sheet-zone .combo-row').forEach(el => {
     el.classList.remove('selected');
     const prev = el.querySelector('.sheet-preview');
-    if (prev && !prev.textContent.startsWith('🔒')) prev.textContent = '—';
+    if (prev && !prev.querySelector('img')) prev.textContent = '—';   // 봉인 줄(그림이 든 줄)은 건드리지 않는다
   });
   app.querySelectorAll('.die').forEach(el => el.classList.remove('combo-hint'));
   const hint = app.querySelector('.hint-line');
@@ -1538,7 +1554,7 @@ function updateAfterRoll() {
     el.classList.toggle('used', !!pv.locked);
     el.dataset.locked = pv.locked ? '1' : '0';
     const prev = el.querySelector('.sheet-preview');
-    if (prev) prev.textContent = pv.seal ? `🔒${pv.seal}` : battle.rolled ? (pv.bd.total > 0 ? pv.bd.total : '—') : '—';
+    if (prev) prev.innerHTML = pv.seal ? `${ico('fx_seal_cat', 'ico-ui')}${pv.seal}` : battle.rolled ? (pv.bd.total > 0 ? pv.bd.total : '—') : '—';
   });
   // 3) 힌트·주사위 표시·선택 강조
   const hint = app.querySelector('.hint-line');
@@ -1774,7 +1790,7 @@ function playHitEffects(hits, fx = 'slash') {
     }
     const dmg = document.createElement('span');
     dmg.className = 'dmg-float' + (fx === 'judgment' ? ' big' : '') + (hit.amount === 0 ? ' blocked' : '');
-    dmg.textContent = hit.amount > 0 ? `-${hit.amount}` : '🛡막음';
+    dmg.innerHTML = hit.amount > 0 ? `-${hit.amount}` : `${ico('status_block', 'ico-ui')}막음`;   // v3.41 이모지 → 표식 아트
     el.appendChild(dmg);
     cleanup.push(dmg);
     setTimeout(() => { cleanup.forEach(n => n.remove()); el.classList.remove('hit'); }, 720);
@@ -1857,10 +1873,10 @@ function showReward() {
   renderLoot();
 }
 
-function lootRowHtml(icon, name, sub, attrs) {
+function lootRowHtml(iconHtml, name, sub, attrs) {
   return `
     <button class="sheet-row choice-row loot-row" ${attrs}>
-      ${rowIcon(`<span class="row-ico-emoji">${icon}</span>`)}
+      ${rowIcon(iconHtml)}
       <span class="row-body">
         <span class="choice-main">${esc(name)}</span>
         ${sub ? `<span class="choice-sub">${esc(sub)}</span>` : ''}
@@ -1870,12 +1886,12 @@ function lootRowHtml(icon, name, sub, attrs) {
 
 function renderLoot() {
   const rows = [];
-  if (lootState.coins > 0) rows.push(lootRowHtml(LOOT_META.coins.icon, '재화', `+${lootState.coins}`, 'data-act="coins"'));
+  if (lootState.coins > 0) rows.push(lootRowHtml(itemIcon('coins'), '재화', `+${lootState.coins}`, 'data-act="coins"'));
   lootState.groups.forEach((g, i) => {
     const m = LOOT_META[g.kind];
-    rows.push(lootRowHtml(m.icon, g.label || m.name, `${g.choices.length}개 중 하나를 고른다`, `data-act="group" data-idx="${i}"`));
+    rows.push(lootRowHtml(itemIcon(g.kind, g.choices && g.choices.length === 1 ? g.choices[0].item : null), g.label || m.name, `${g.choices.length}개 중 하나를 고른다`, `data-act="group" data-idx="${i}"`));
   });
-  rows.push(lootRowHtml('\u{1F6AA}', '나가기', '', 'data-act="exit"'));
+  rows.push(lootRowHtml('<span class="row-ico-emoji">\u{1F6AA}</span>', '나가기', '', 'data-act="exit"'));
   // v0.67: 전투 프레임을 그대로 두고 족보 목록 영역 안만 전리품 줄로 바꾼다.
   //        화면을 덮는 오버레이·전용 화면 금지 (성권 지시).
   const zone = app.querySelector('.sheet-zone');
@@ -1905,8 +1921,13 @@ function renderLoot() {
 
 // 뒤에 남아 있는 전투 화면의 코인 표시만 맞춰준다
 function syncCoinSlot() {
-  const slot = app.querySelector('.coin-slot');
-  if (slot && slot.firstChild) slot.firstChild.textContent = `\u{1FA99}${run.coins} `;
+  // v3.41: 첫 자식은 코인 그림(<img>)이라 거기에 글자를 넣으면 어디에도 안 보였다.
+  //   — 전리품에서 재화를 받아도 위쪽 숫자가 그대로였다. 숫자만 든 글자 노드를 찾아 고친다.
+  app.querySelectorAll('.coin-slot').forEach(slot => {
+    const num = [...slot.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+    if (num) num.nodeValue = `${run.coins} `;
+    else slot.append(document.createTextNode(`${run.coins} `));
+  });
 }
 
 // v0.87: 쓰러진 자리에 보물상자를 놓는다.
@@ -1955,7 +1976,7 @@ function showLootModal(gi) {
               : `${c.item.cat.name} 자리 · ${c.item.replaces ? `${c.item.replaces.name} 을(를) 대신한다` : '지금은 기본'} · ${c.item.variant.abilityText || '부가 없음'}`;
             return `
               <button class="sheet-row choice-row loot-choice t-${c.item.tier}" data-idx="${i}">
-                ${rowIcon(`<span class="row-ico-emoji">${LOOT_META[c.kind].icon}</span>`)}
+                ${rowIcon(itemIcon(c.kind, c.item))}
                 <span class="row-body">
                   <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(TIER_KO[c.item.tier] || '')}</small>${isCat && c.item.variant.burst ? `<small class="cat-tag t-burst">${uiIco('burst')}일격</small>` : ''}</span>
                   <span class="choice-sub">${esc(sub)}</span>
@@ -2127,7 +2148,7 @@ function cbIntentHtml(e) {
   if (!mv || e.hp <= 0) return '';
   const P = movePower(e);
   if (mv.op === 'damage') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
-  if (mv.op === 'bleed') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>🩸${mv.amount ?? 2}</small>`;
+  if (mv.op === 'bleed') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>${ico('status_bleed', 'ico-ui')}${mv.amount ?? 2}</small>`;
   if (mv.op === 'lifesteal') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>💚흡혈</small>`;
   if (mv.op === 'armor') return `${ico('intent_defend', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
   if (mv.op === 'heal') return `${ico('intent_heal', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
@@ -2219,7 +2240,7 @@ function cbUpdate() {
   const dc = document.getElementById('cb-disc');
   if (dc) dc.querySelector('b').textContent = battle.discard.length;
   const bl = document.getElementById('cb-bleed');
-  if (bl) bl.textContent = battle.playerBleed > 0 ? `🩸${battle.playerBleed}` : '';
+  if (bl) bl.innerHTML = battle.playerBleed > 0 ? `${ico('status_bleed', 'ico-ui')}${battle.playerBleed}` : '';
   cbPreviewUpdate();
   cbRenderHand();
 }
