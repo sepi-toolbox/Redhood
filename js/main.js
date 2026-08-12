@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.43'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.44'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -278,11 +278,17 @@ const dieRowIcon = (die) => {
   const f = Math.max(...((die.faces && die.faces.length) ? die.faces : [6]));
   return `<img class="row-ico-img die-ico" src="${dieFaceSrc(die.id, f)}" alt="" draggable="false">`;
 };
+// 유물 아트가 들어온 것만 여기에 id 를 적는다 — 나머지는 그대로 이모지로 뜬다.
+// (족보의 COMBO_ICON_READY 와 같은 방식. 파일은 assets/relics/{id}.png)
+const RELIC_ART_READY = new Set([]);
 function itemIcon(kind, item) {
   // 주사위는 묶음 머리(무엇을 고를지 아직 모를 때)도 나무 주사위 그림으로 — 🎲 를 쓸 일이 없다
   if (kind === 'die') return item ? dieRowIcon(item) : dieRowIcon({ id: 'normal', faces: [6] });
   if (kind === 'category' && item && item.cat) return comboIcon(item.cat, item.variant);
   if (kind === 'coins') return uiIco('coin', 'ico-ui row-ico-img');
+  if (item && item.id && RELIC_ART_READY.has(item.id)) {
+    return `<img class="row-ico-img relic-ico" src="assets/relics/${item.id}.png" alt="" draggable="false">`;
+  }
   const glyph = (item && item.icon) || (LOOT_META[kind] && LOOT_META[kind].icon) || '·';
   return `<span class="row-ico-emoji">${glyph}</span>`;
 }
