@@ -1,6 +1,6 @@
 {
   "rules": {
-    "note": "상태이상은 주사위 한 칸에 하나뿐이다. 새로 걸 때는 빈 칸을 먼저 채우고, 빈 칸이 없으면 아무 칸이나 덮어쓴다 — 나중에 건 것이 먼저 건 것을 밀어내고, 밀려난 쪽은 그 자리에서 풀린다.",
+    "note": "상태이상은 주사위 한 칸에 하나뿐이다. 새로 걸 때는 빈 칸을 먼저 채우고, 빈 칸이 없으면 아무 칸이나 덮어쓴다 — 나중에 건 것이 먼저 건 것을 밀어내고, 밀려난 쪽은 그 자리에서 풀린다. 지속 턴은 종류마다 다르다 — 걸린 턴에는 안 깎이고, 그 뒤 턴마다 1씩 준다.",
     "preferEmpty": true,
     "overwrite": true
   },
@@ -11,7 +11,7 @@
       "color": "#e83b2e",
       "rule": "onUseFaceDamage",
       "amount": 0,
-      "turns": 1,
+      "turns": 2,
       "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다 (세기 없음)"
     },
     {
@@ -20,7 +20,7 @@
       "color": "#a8d63a",
       "rule": "onUseFaceDamage",
       "amount": 0,
-      "turns": 1,
+      "turns": 2,
       "text": "이 주사위를 족보에 쓰면 눈금만큼 피해를 받는다 (세기 없음)"
     },
     {
@@ -29,7 +29,7 @@
       "color": "#2f9e5c",
       "rule": "noReroll",
       "amount": 0,
-      "turns": 1,
+      "turns": 2,
       "text": "이 주사위는 다시 굴릴 수 없다"
     },
     {
@@ -47,7 +47,7 @@
       "color": "#c33ad6",
       "rule": "faceLow",
       "amount": 3,
-      "turns": 1,
+      "turns": 2,
       "text": "이 주사위는 수치 이하의 눈만 나온다"
     },
     {
@@ -56,7 +56,7 @@
       "color": "#ffd257",
       "rule": "faceHigh",
       "amount": 4,
-      "turns": 1,
+      "turns": 2,
       "text": "이 주사위는 수치 이상의 눈만 나온다"
     },
     {
@@ -83,7 +83,7 @@
       "color": "#e5468f",
       "rule": "fuse",
       "amount": 10,
-      "turns": 1,
+      "turns": 2,
       "text": "턴이 다 차면 터져 수치만큼 피해. 그 전에 족보에 쓰면 해제된다"
     },
     {
@@ -92,7 +92,7 @@
       "color": "#8fa0b0",
       "rule": "linked",
       "amount": 0,
-      "turns": 1,
+      "turns": 2,
       "text": "결속된 주사위끼리 항상 같이 굴러간다"
     },
     {
@@ -101,7 +101,7 @@
       "color": "#3aa8e6",
       "rule": "rerollCost",
       "amount": 2,
-      "turns": 1,
+      "turns": 2,
       "text": "이 주사위를 다시 굴리면 리롤을 수치만큼 쓴다"
     },
     {
@@ -110,7 +110,7 @@
       "color": "#e08a2a",
       "rule": "onUseFaceCoin",
       "amount": 0,
-      "turns": 1,
+      "turns": 2,
       "text": "이 주사위를 족보에 쓰면 눈금만큼 코인을 뺏긴다 (세기 없음)"
     },
     {

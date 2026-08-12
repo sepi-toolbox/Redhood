@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.39'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.40'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1169,11 +1169,18 @@ function showPlayerBuffs() {
   const stItems = Object.entries(stCount).map(([k, n]) => {
     const def = DB.statusById[k];
     if (!def) return '';
-    const amt = battle.dice.find(d => d.st && d.st.kind === k);
-    const num = amt && amt.st.power > 0 ? amt.st.power : def.amount;
+    const one = battle.dice.find(d => d.st && d.st.kind === k);
+    const num = one && one.st.power > 0 ? one.st.power : def.amount;
     const txt = esc(def.text).replace('수치', num > 0 ? `<b>${num}</b>` : '수치');
+    // v3.40: 지속 턴이 종류마다 달라졌다 — 남은 턴을 같이 보여줘야 언제 풀리는지 읽힌다
+    const lefts = battle.dice.filter(d => d.st && d.st.kind === k)
+      .map(d => (def.rule === 'fuse' ? d.st.fuse : d.st.left) + (d.st.fresh ? 1 : 0));
+    const lo = Math.min(...lefts), hi = Math.max(...lefts);
+    const when = def.rule === 'spread' ? '안 풀린다'
+      : def.rule === 'fuse' ? `${lo === hi ? lo : `${lo}~${hi}`}턴 뒤 터짐`
+      : `${lo === hi ? lo : `${lo}~${hi}`}턴 남음`;
     return `<li><span class="st-dot" style="background:${def.color}"></span>${ico('status_' + k)} ${esc(def.name)}`
-      + ` <small class="cat-tag">주사위 ${n}칸</small> — ${txt}</li>`;
+      + ` <small class="cat-tag">주사위 ${n}칸 · ${when}</small> — ${txt}</li>`;
   }).filter(Boolean).join('');
   app.append(h(`
     <div class="modal-back" id="pbuff-info">
