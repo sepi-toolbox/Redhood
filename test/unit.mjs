@@ -739,14 +739,22 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const d = b.dice.find(x => x.st);
     eq('심지는 언제나 탭 값', d.st.fuse, DB.statusById.rot.turns);
   }
-  // 지속 1턴 — 걸린 턴은 겪고, 그 다음 턴 시작에 풀린다
-  { const b = mk();
-    b.enemies[0].nextMove = { id: 't', name: '시험', effects: [{ op: 'status', kind: 'bleed', amount: 1 }] };
+  // 지속 턴 (v3.40: 종류마다 다르다) — 걸린 턴은 안 깎이고, 그 뒤 턴마다 1씩 준다.
+  //   statuses.json 의 turns 를 그대로 읽어 검사하므로 값을 바꿔도 이 검사는 계속 맞는다.
+  for (const kind of ['stun', 'bleed', 'bind']) {
+    const life = DB.statusById[kind].turns;
+    const b = mk();
+    const left = () => b.dice.filter(d => d.st && d.st.kind === kind).length;
+    b.enemies[0].nextMove = { id: 't', name: '시험', effects: [{ op: 'status', kind, amount: 1 }] };
     b.await = 'enemy'; eng.enemyPhase(b);
-    eq('걸린 직후 내 턴에는 살아 있다', b.dice.filter(d => d.st && d.st.kind === 'bleed').length, 1);
+    eq(`${kind}: 걸린 직후 내 턴에는 살아 있다`, left(), 1);
     b.enemies[0].nextMove = { id: 'r', name: '쉼', effects: [{ op: 'rest' }] };
+    for (let t = 1; t < life; t++) {                       // 지속 턴 -1 번은 버텨야 한다
+      b.await = 'enemy'; eng.enemyPhase(b);
+      eq(`${kind}: ${t}턴 지나도 아직 남아 있다 (지속 ${life})`, left(), 1);
+    }
     b.await = 'enemy'; eng.enemyPhase(b);
-    eq('한 턴 겪고 나면 풀린다', b.dice.filter(d => d.st && d.st.kind === 'bleed').length, 0);
+    eq(`${kind}: ${life}턴 다 겪으면 풀린다`, left(), 0);
   }
   // 출혈·독·약탈은 눈금 그대로다 — 세기라는 손잡이가 없다
   { const b = mk(); eng.initialRoll(b);

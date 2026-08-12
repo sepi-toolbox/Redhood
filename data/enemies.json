@@ -6,7 +6,7 @@
     "art": "🐦‍⬛",
     "hp": [
       37,
-      43
+      44
     ],
     "moves": {
       "peck": {
@@ -150,7 +150,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 44
+            "amount": 61
           }
         ],
         "minTurn": 5,
@@ -179,7 +179,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 90
+            "amount": 124
           }
         ],
         "minTurn": 5,
@@ -216,7 +216,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 36
+          "amount": 49
         },
         {
           "op": "status",
@@ -264,8 +264,8 @@
     "tier": "normal",
     "art": "🕷️",
     "hp": [
-      34,
-      39
+      35,
+      40
     ],
     "moves": {
       "bite": {
@@ -278,7 +278,7 @@
           },
           {
             "op": "damage",
-            "amount": 2
+            "amount": 1
           }
         ],
         "cooldown": 1,
@@ -315,7 +315,7 @@
           },
           {
             "op": "damage",
-            "amount": 2
+            "amount": 1
           }
         ],
         "minTurn": 3,
@@ -336,7 +336,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 4
+          "amount": 2
         },
         {
           "op": "status",
@@ -389,7 +389,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 7,
+            "amount": 6,
             "hits": 1
           }
         ],
@@ -462,7 +462,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 9
+          "amount": 8
         },
         {
           "op": "heal",
@@ -542,7 +542,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 10
           },
           {
             "op": "status",
@@ -579,7 +579,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 11
+          "amount": 10
         },
         {
           "op": "block",
@@ -615,7 +615,7 @@
     "tier": "normal",
     "art": "🌳",
     "hp": [
-      30,
+      31,
       33
     ],
     "moves": {
@@ -648,7 +648,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 28
+            "amount": 27
           }
         ],
         "minTurn": 5,
@@ -669,7 +669,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 9
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -703,7 +703,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 28
+          "amount": 27
         },
         {
           "op": "block",
@@ -1025,8 +1025,8 @@
     "tier": "normal",
     "art": "🐀",
     "hp": [
-      38,
-      43
+      37,
+      41
     ],
     "moves": {
       "gnaw": {
@@ -1066,7 +1066,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 9
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -1100,7 +1100,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 20
+          "amount": 19
         }
       ]
     },
@@ -1133,8 +1133,8 @@
     "tier": "normal",
     "art": "🧹",
     "hp": [
-      35,
-      40
+      36,
+      41
     ],
     "moves": {
       "sweep": {
@@ -1142,7 +1142,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 25
+            "amount": 45
           }
         ],
         "minTurn": 5,
@@ -1178,7 +1178,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 25
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -1211,7 +1211,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 64
+          "amount": 116
         }
       ]
     },
@@ -1252,7 +1252,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 8
+            "amount": 6
           }
         ],
         "cooldown": 1
@@ -1280,7 +1280,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 4,
+            "amount": 3,
             "hits": 3
           },
           {
@@ -1332,7 +1332,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 17
+          "amount": 12
         },
         {
           "op": "empower",
@@ -1354,7 +1354,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 8
+            "amount": 6
           }
         ],
         "followUp": {
@@ -1445,7 +1445,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 12
+            "amount": 11
           }
         ],
         "cooldown": 1
@@ -1607,7 +1607,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 21
+            "amount": 23
           }
         ],
         "minTurn": 6,
@@ -1618,7 +1618,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 8
+            "amount": 7
           }
         ],
         "minTurn": 4,
@@ -1660,7 +1660,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 31
+          "amount": 33
         },
         {
           "op": "status",
@@ -1711,8 +1711,8 @@
     "tier": "boss",
     "art": "🐺",
     "hp": [
-      116,
-      116
+      118,
+      118
     ],
     "moves": {
       "bite": {
@@ -1738,7 +1738,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 7
           }
         ],
         "minTurn": 0,
@@ -1749,7 +1749,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 2
+            "amount": 1
           },
           {
             "op": "status",
@@ -1764,7 +1764,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 2,
+            "amount": 1,
             "hits": 3
           }
         ],
@@ -1827,7 +1827,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 16
+          "amount": 9
         },
         {
           "op": "empower",
@@ -1903,8 +1903,8 @@
     "tier": "boss",
     "art": "🗿",
     "hp": [
-      139,
-      139
+      134,
+      134
     ],
     "moves": {
       "grasp": {
@@ -1924,7 +1924,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 15
+            "amount": 8
           }
         ],
         "minTurn": 1,
@@ -1943,7 +1943,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 18
           }
         ],
         "minTurn": 0,
@@ -1954,7 +1954,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 15
+            "amount": 8
           }
         ],
         "break": {
@@ -1971,7 +1971,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 75
+            "amount": 89
           }
         ]
       },
@@ -1991,7 +1991,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 15
+            "amount": 8
           }
         ],
         "break": {
@@ -2009,7 +2009,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 15
+            "amount": 8
           }
         ],
         "followUp": {
@@ -2037,7 +2037,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 15
+            "amount": 8
           }
         ],
         "cooldown": 1,
@@ -2055,7 +2055,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 15
+            "amount": 8
           }
         ],
         "followUp": {
@@ -2156,7 +2156,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 63
+          "amount": 75
         },
         {
           "op": "status",
@@ -2246,8 +2246,8 @@
     "tier": "boss",
     "art": "🧸",
     "hp": [
-      105,
-      105
+      102,
+      102
     ],
     "moves": {
       "hug": {
@@ -2285,7 +2285,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 23
+            "amount": 24
           }
         ],
         "minTurn": 6,
@@ -2417,8 +2417,8 @@
     "tier": "normal",
     "art": "🐸",
     "hp": [
-      31,
-      35
+      32,
+      36
     ],
     "moves": {
       "tongue": {
@@ -2466,7 +2466,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 7
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -2487,7 +2487,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 18
+          "amount": 19
         },
         {
           "op": "heal",
@@ -2530,8 +2530,8 @@
     "tier": "normal",
     "art": "🦟",
     "hp": [
-      31,
-      36
+      32,
+      37
     ],
     "moves": {
       "drain": {
@@ -2539,7 +2539,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 23
+            "amount": 37
           },
           {
             "op": "heal",
@@ -2582,7 +2582,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 23
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -2604,7 +2604,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 36
+          "amount": 58
         },
         {
           "op": "status",
@@ -2641,8 +2641,8 @@
     "tier": "normal",
     "art": "👻",
     "hp": [
-      31,
-      36
+      32,
+      37
     ],
     "moves": {
       "chill": {
@@ -2650,7 +2650,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 8
+            "amount": 7
           }
         ],
         "cooldown": 2
@@ -2696,7 +2696,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 8
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -2770,7 +2770,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 6
+            "amount": 7
           }
         ]
       },
@@ -2863,8 +2863,8 @@
     "tier": "normal",
     "art": "☠️",
     "hp": [
-      19,
-      21
+      18,
+      20
     ],
     "moves": {
       "slash": {
@@ -2872,7 +2872,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 7
+            "amount": 8
           }
         ],
         "cooldown": 2
@@ -2912,7 +2912,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 5
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -2933,7 +2933,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 17
+          "amount": 18
         },
         {
           "op": "block",
@@ -3011,7 +3011,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 16
+            "amount": 18
           }
         ],
         "minTurn": 5,
@@ -3043,7 +3043,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 18
+          "amount": 20
         },
         {
           "op": "heal",
@@ -3095,7 +3095,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 8
+            "amount": 10
           }
         ],
         "cooldown": 2
@@ -3122,14 +3122,14 @@
           "move": "quake",
           "chance": 1
         },
-        "cooldown": 2
+        "cooldown": 3
       },
       "quake": {
         "name": "진동",
         "effects": [
           {
             "op": "damage",
-            "amount": 11
+            "amount": 14
           },
           {
             "op": "status",
@@ -3145,7 +3145,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 4
+            "amount": 5
           }
         ],
         "minTurn": 4,
@@ -3184,7 +3184,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 16
+          "amount": 20
         },
         {
           "op": "status",
@@ -3231,8 +3231,8 @@
     "tier": "elite",
     "art": "🏇",
     "hp": [
-      66,
-      66
+      65,
+      65
     ],
     "moves": {
       "lance": {
@@ -3240,7 +3240,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 14
           }
         ],
         "cooldown": 2
@@ -3360,8 +3360,8 @@
     "tier": "elite",
     "art": "⚰️",
     "hp": [
-      70,
-      70
+      67,
+      67
     ],
     "moves": {
       "shovel": {
@@ -3369,7 +3369,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 15
           }
         ],
         "cooldown": 2
@@ -3394,7 +3394,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 19
+            "amount": 21
           },
           {
             "op": "status",
@@ -3459,7 +3459,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 24
+          "amount": 26
         },
         {
           "op": "empower",
@@ -3509,8 +3509,8 @@
     "tier": "boss",
     "art": "🐊",
     "hp": [
-      76,
-      76
+      71,
+      71
     ],
     "moves": {
       "chomp": {
@@ -3518,7 +3518,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 12
           }
         ],
         "cooldown": 2
@@ -3689,8 +3689,8 @@
     "tier": "boss",
     "art": "🌫️",
     "hp": [
-      92,
-      92
+      93,
+      93
     ],
     "moves": {
       "caress": {
@@ -3698,7 +3698,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 13
+            "amount": 14
           },
           {
             "op": "status",
@@ -3731,7 +3731,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 22
+            "amount": 23
           }
         ],
         "minTurn": 6,
@@ -3820,7 +3820,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 20
+          "amount": 21
         },
         {
           "op": "status",
@@ -3881,7 +3881,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 8
+            "amount": 6
           }
         ],
         "cooldown": 2
@@ -3909,7 +3909,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 9
+            "amount": 7
           }
         ],
         "minTurn": 6,
@@ -3940,7 +3940,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 4
+            "amount": 3
           }
         ],
         "minTurn": 4,
@@ -4005,7 +4005,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 11
+          "amount": 8
         },
         {
           "op": "empower",
@@ -4049,8 +4049,8 @@
     "tier": "normal",
     "art": "🐇",
     "hp": [
-      29,
-      33
+      30,
+      34
     ],
     "moves": {
       "nibble": {
@@ -4080,7 +4080,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 12
+            "amount": 14
           },
           {
             "op": "status",
@@ -4106,7 +4106,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 6
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -4128,7 +4128,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 18
+          "amount": 20
         }
       ]
     },
@@ -4201,7 +4201,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 51
+            "amount": 79
           }
         ],
         "minTurn": 5,
@@ -4223,7 +4223,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 23
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -4244,7 +4244,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 60
+          "amount": 94
         },
         {
           "op": "status",
@@ -4288,8 +4288,8 @@
     "tier": "normal",
     "art": "🦋",
     "hp": [
-      28,
-      32
+      29,
+      33
     ],
     "moves": {
       "dust": {
@@ -4312,7 +4312,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 32
+            "amount": 46
           }
         ],
         "minTurn": 5,
@@ -4339,7 +4339,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 23
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -4361,7 +4361,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 54
+          "amount": 78
         },
         {
           "op": "heal",
@@ -4404,8 +4404,8 @@
     "tier": "normal",
     "art": "🦠",
     "hp": [
-      37,
-      42
+      38,
+      43
     ],
     "moves": {
       "whisper": {
@@ -4531,8 +4531,8 @@
     "tier": "normal",
     "art": "🕯️",
     "hp": [
-      36,
-      42
+      37,
+      43
     ],
     "moves": {
       "dagger": {
@@ -4563,7 +4563,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 12
+            "amount": 13
           },
           {
             "op": "status",
@@ -4601,7 +4601,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 11
+          "amount": 12
         },
         {
           "op": "heal",
@@ -4644,8 +4644,8 @@
     "tier": "normal",
     "art": "🪨",
     "hp": [
-      30,
-      32
+      31,
+      33
     ],
     "moves": {
       "scream": {
@@ -4653,7 +4653,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 8
+            "amount": 7
           },
           {
             "op": "status",
@@ -4698,7 +4698,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 6
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -4758,8 +4758,8 @@
     "tier": "elite",
     "art": "⏳",
     "hp": [
-      67,
-      67
+      65,
+      65
     ],
     "moves": {
       "sand": {
@@ -4778,7 +4778,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 19
+            "amount": 18
           },
           {
             "op": "status",
@@ -4817,7 +4817,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 25
+            "amount": 24
           }
         ],
         "minTurn": 6,
@@ -4828,7 +4828,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 8
+            "amount": 7
           }
         ],
         "minTurn": 4,
@@ -4922,8 +4922,8 @@
     "tier": "elite",
     "art": "🦑",
     "hp": [
-      66,
-      66
+      62,
+      62
     ],
     "moves": {
       "slap": {
@@ -4931,7 +4931,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 9
+            "amount": 8
           }
         ],
         "cooldown": 3
@@ -4984,7 +4984,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 13
           }
         ],
         "minTurn": 6,
@@ -5030,7 +5030,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 22
+          "amount": 20
         }
       ]
     },
@@ -5121,7 +5121,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 19
+            "amount": 20
           },
           {
             "op": "status",
@@ -5176,7 +5176,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 29
+          "amount": 30
         },
         {
           "op": "status",
@@ -5221,8 +5221,8 @@
     "tier": "boss",
     "art": "🌙",
     "hp": [
-      84,
-      84
+      85,
+      85
     ],
     "moves": {
       "dream_blade": {
@@ -5267,7 +5267,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 14
+            "amount": 16
           }
         ],
         "minTurn": 6,
@@ -5352,7 +5352,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 16
+          "amount": 18
         },
         {
           "op": "status",
@@ -5403,8 +5403,8 @@
     "tier": "boss",
     "art": "🕳️",
     "hp": [
-      70,
-      70
+      72,
+      72
     ],
     "moves": {
       "gnash": {
@@ -5412,7 +5412,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 9
+            "amount": 10
           }
         ],
         "cooldown": 2
@@ -5461,7 +5461,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 16
           }
         ],
         "minTurn": 6,
@@ -5572,8 +5572,8 @@
     "tier": "boss",
     "art": "😇",
     "hp": [
-      85,
-      85
+      86,
+      86
     ],
     "moves": {
       "hymn": {
@@ -5931,7 +5931,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 36
+            "amount": 59
           }
         ],
         "minTurn": 5,
@@ -5942,7 +5942,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 9
+            "amount": 4
           },
           {
             "op": "block",
@@ -5961,7 +5961,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 22
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -5982,7 +5982,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 63
+          "amount": 102
         },
         {
           "op": "status",
@@ -6026,8 +6026,8 @@
     "tier": "normal",
     "art": "👥",
     "hp": [
-      29,
-      34
+      28,
+      33
     ],
     "moves": {
       "hymn": {
@@ -6035,7 +6035,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 8
+            "amount": 7
           },
           {
             "op": "status",
@@ -6055,7 +6055,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 15
+            "amount": 12
           }
         ],
         "minTurn": 5,
@@ -6079,7 +6079,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 7
+            "amount": 4
           }
         ],
         "minTurn": 4,
@@ -6101,7 +6101,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 20
+          "amount": 17
         }
       ]
     },
@@ -6140,8 +6140,8 @@
     "tier": "normal",
     "art": "🎇",
     "hp": [
-      33,
-      38
+      34,
+      39
     ],
     "moves": {
       "singe": {
@@ -6149,7 +6149,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 7
+            "amount": 6
           }
         ],
         "cooldown": 2
@@ -6194,7 +6194,7 @@
         "effects": [
           {
             "op": "empower",
-            "amount": 7
+            "amount": 4
           }
         ],
         "minTurn": 4,
