@@ -177,6 +177,17 @@ export function applyStatus(battle, kind, count = 1, power = 0) {
   return put;
 }
 
+/* 노페어는 언제나 낼 수 있어야 하는 바닥이다 (v3.43).
+   이것까지 봉인되면 낼 족보가 하나도 없는 턴이 생겨 그냥 맞고 넘어가게 된다.
+   행동표에 뭐라고 적혀 있든 여기서 한 번 걸러, 데이터 실수로도 잠기지 않게 한다. */
+const SEAL_EXEMPT = new Set(['chance']);
+export const canSeal = (catId) => !SEAL_EXEMPT.has(catId);
+function sealCat(battle, catId, turns) {
+  if (!canSeal(catId)) return false;
+  battle.sealed[catId] = Math.max(battle.sealed[catId] || 0, (turns || 1) + 1);
+  return true;
+}
+
 export function clearStatuses(battle, kind = null) {
   let n = 0;
   battle.dice.forEach((d, i) => {
@@ -509,7 +520,7 @@ export function previewAll(battle) {
   }
   for (const cat of DB.scoring.categories) {
     if (!(cat.id in battle.categories)) continue;        // v3.1 미보유 족보
-    const seal = battle.sealed[cat.id] || 0;
+    const seal = canSeal(cat.id) ? (battle.sealed[cat.id] || 0) : 0;   // 노페어는 어떤 경로로든 잠기지 않는다
     {
       const variant = variantOf(cat, battle.categories[cat.id]);
       // v1.31 일격(burst) — 이 변형만 벼름을 태우고 그만큼 증폭된다. 나머지는 벼름을 건드리지 않는다.
@@ -731,7 +742,7 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   const slot = battle.categories[catId] || baseIdOf(catId);
   if (variantId !== slot && variantId !== baseIdOf(catId)) return null;   // 그 자리에 없는 변형은 못 쓴다
   const variant = variantOf(cat, slot);
-  if ((battle.sealed[catId] || 0) > 0) return null;
+  if (canSeal(catId) && (battle.sealed[catId] || 0) > 0) return null;
 
   const alive = aliveEnemies(battle);
   if (alive.length === 0) return null; // v0.32: 전멸 후 중복 확정 가드 (대상 없음)
@@ -972,10 +983,10 @@ export function enemyPhase(battle) {
           break;
         // ---- v1.30 정예·보스 기믹 ----
         case 'sealLast':                                   // 🔒 직전에 쓴 족보를 봉인한다 (흉내내기)
-          if (battle.lastUsedCat) battle.sealed[battle.lastUsedCat] = Math.max(battle.sealed[battle.lastUsedCat] || 0, (ef.turns || 1) + 1);
+          if (battle.lastUsedCat) sealCat(battle, battle.lastUsedCat, ef.turns);
           break;
         case 'sealCat':                                    // 🔒 지정 족보들을 봉인한다 (솜 채우기)
-          for (const cid of (ef.cats || [])) battle.sealed[cid] = Math.max(battle.sealed[cid] || 0, (ef.turns || 1) + 1);
+          for (const cid of (ef.cats || [])) sealCat(battle, cid, ef.turns);
           break;
         case 'rollTax':                                    // 🩸 리롤할 때마다 피해 (이빨 자국)
           battle.mods.rollTax = { amount: ef.amount || 1, left: (ef.turns || 1) + 1, name: e.nextMove.name };

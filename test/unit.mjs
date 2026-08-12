@@ -739,6 +739,27 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const d = b.dice.find(x => x.st);
     eq('심지는 언제나 탭 값', d.st.fuse, DB.statusById.rot.turns);
   }
+  // v3.43: 노페어는 절대 봉인되지 않는다 — 낼 족보가 하나도 없는 턴을 만들지 않기 위해
+  { const b = mk();
+    b.lastUsedCat = 'chance';
+    b.enemies[0].nextMove = { id: 's', name: '흉내', effects: [{ op: 'sealLast', turns: 2 }] };
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('노페어는 sealLast 로 안 잠긴다', b.sealed.chance || 0, 0);
+  }
+  { const b = mk();
+    b.enemies[0].nextMove = { id: 's', name: '솜', effects: [{ op: 'sealCat', cats: ['chance', 'onePair'], turns: 2 }] };
+    b.await = 'enemy'; eng.enemyPhase(b);
+    eq('노페어는 sealCat 로도 안 잠긴다', b.sealed.chance || 0, 0);
+    eq('같은 행동의 다른 족보는 정상 봉인', (b.sealed.onePair || 0) > 0, true);
+  }
+  { const bad = [];
+    for (const e of Object.values(DB.enemyById)) for (const pool of ['moves', 'uniqueMoves'])
+      for (const [k, m] of Object.entries(e[pool] || {}))
+        for (const f of (m.effects || [])) if (f.op === 'sealCat' && (f.cats || []).includes('chance'))
+          bad.push(`${e.name}·${m.name || k}`);
+    eq('행동표에도 노페어 봉인이 남아 있지 않음', bad.join(',') || '없음', '없음');
+  }
+
   // 지속 턴 (v3.40: 종류마다 다르다) — 걸린 턴은 안 깎이고, 그 뒤 턴마다 1씩 준다.
   //   statuses.json 의 turns 를 그대로 읽어 검사하므로 값을 바꿔도 이 검사는 계속 맞는다.
   for (const kind of ['stun', 'bleed', 'bind']) {
@@ -1123,7 +1144,8 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = mk(['old_teddy']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
     cast(b, e, [{ op: 'sealCat', cats: ['chance', 'onePair'], turns: 2 }]);
     eng.initialRoll(b);
-    eq('솜 채우기: 노페어 봉인', eng.previewAll(b).find(x => x.cat.id === 'chance').seal > 0, true);
+    // v3.43: 노페어만은 예외 — 행동표가 지정해도 잠기지 않는다 (바닥 족보를 남긴다)
+    eq('솜 채우기: 노페어는 예외로 안 잠긴다', eng.previewAll(b).find(x => x.cat.id === 'chance').seal > 0, false);
     eq('솜 채우기: 원페어 봉인', eng.previewAll(b).find(x => x.cat.id === 'onePair').seal > 0, true);
     eq('솜 채우기: 투페어는 된다', eng.previewAll(b).find(x => x.cat.id === 'twoPair').seal, 0);
   }

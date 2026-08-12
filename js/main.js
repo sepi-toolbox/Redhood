@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.42'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.43'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -951,7 +951,7 @@ function renderBattle(opts = {}) {
               <span class="sheet-name">${esc(variant.name)}</span>
               <small class="cat-tag${variant.base ? ' t-slot' : ''}">${burst ? `<b class="burst-mark">${uiIco('burst')}일격</b> · ` : ''}${variant.base ? '빈 자리' : esc(cat.short || cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
             </span>
-            <span class="sheet-preview">${seal ? `${ico('fx_seal_cat', 'ico-ui')}${seal}` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
+            <span class="sheet-preview">${seal ? `<span class="seal-left">${seal}턴</span>` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
           </button>`).join('')}
       </div>
       <div class="player-bar ${opts.playerHit ? 'hurt' : ''}">
@@ -1513,7 +1513,7 @@ function updateRollStart() {
   app.querySelectorAll('.sheet-zone .combo-row').forEach(el => {
     el.classList.remove('selected');
     const prev = el.querySelector('.sheet-preview');
-    if (prev && !prev.querySelector('img')) prev.textContent = '—';   // 봉인 줄(그림이 든 줄)은 건드리지 않는다
+    if (prev && !prev.querySelector('.seal-left')) prev.textContent = '—';   // 봉인 줄(남은 턴 라벨)은 건드리지 않는다
   });
   app.querySelectorAll('.die').forEach(el => el.classList.remove('combo-hint'));
   const hint = app.querySelector('.hint-line');
@@ -1554,7 +1554,7 @@ function updateAfterRoll() {
     el.classList.toggle('used', !!pv.locked);
     el.dataset.locked = pv.locked ? '1' : '0';
     const prev = el.querySelector('.sheet-preview');
-    if (prev) prev.innerHTML = pv.seal ? `${ico('fx_seal_cat', 'ico-ui')}${pv.seal}` : battle.rolled ? (pv.bd.total > 0 ? pv.bd.total : '—') : '—';
+    if (prev) prev.innerHTML = pv.seal ? `<span class="seal-left">${pv.seal}턴</span>` : battle.rolled ? (pv.bd.total > 0 ? pv.bd.total : '—') : '—';
   });
   // 3) 힌트·주사위 표시·선택 강조
   const hint = app.querySelector('.hint-line');
