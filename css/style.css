@@ -601,8 +601,17 @@ span.enemy-art {
 /* v3.14: 봉인된 족보 = 줄을 딤 처리하고 밀랍 봉인 띠를 가로로 붙인다 (성권) */
 .sheet-row.sig-sealed { position: relative; }
 /* 딤은 줄 전체가 아니라 글자에만 건다 — 띠까지 어두워지면 봉인이 안 보인다 */
-.sheet-row.sig-sealed .row-body,
-.sheet-row.sig-sealed .sheet-preview { filter: saturate(.22) brightness(.46); }
+.sheet-row.sig-sealed .row-body { filter: saturate(.22) brightness(.46); }
+/* v3.43: 남은 턴 표시는 '무엇에 막혔는지'를 알려주는 라벨이다 — 딤·띠 위로 올려 또렷하게 둔다.
+   (족보 이름은 딤, 라벨은 그대로 — 성권) */
+.sheet-row.sig-sealed .sheet-preview {
+  position: relative; z-index: 5;
+  color: #f3e3c2; font-weight: 800;
+  text-shadow: 0 1px 2px #000, 0 0 6px rgba(0, 0, 0, .95);
+}
+/* 밀랍 도장에 글씨가 물리지 않게 오른쪽을 비운다 */
+.sheet-row.sig-sealed .sheet-preview { padding-right: 22px; }
+.seal-left { font-size: 14px; letter-spacing: -0.3px; }
 .sheet-row.sig-sealed::before {
   /* 종이 판때기는 border-image라 테두리 밖까지 그려진다 — 딤도 그만큼 넓혀야 얼룩이 안 진다 */
   content: ''; position: absolute; inset: -11px -17px; z-index: 3;

@@ -2297,7 +2297,6 @@
           {
             "op": "sealCat",
             "cats": [
-              "chance",
               "onePair"
             ],
             "turns": 2
@@ -5675,7 +5674,6 @@
           {
             "op": "sealCat",
             "cats": [
-              "chance",
               "onePair",
               "twoPair"
             ],
