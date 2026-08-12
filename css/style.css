@@ -425,6 +425,8 @@ span.enemy-art {
   100% { transform: translateY(26px) rotate(14deg); opacity: 0; filter: grayscale(1); }
 }
 .enemy.dying { animation: enemyDie .6s ease-in .05s forwards; pointer-events: none; }
+/* v3.47: 쓰러진 자리는 비워 두되 자리는 지킨다 — 두 마리 중 하나가 죽어도 남은 적이 안 움직인다 */
+.enemy.slain { visibility: hidden; pointer-events: none; }
 
 /* ---------- 공격 시퀀스: 주사위 전체 발광 → 타격 ---------- */
 .battle-screen { position: relative; overflow: hidden; }

@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.46'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.47'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -866,7 +866,9 @@ function renderBattle(opts = {}) {
   const previews = previewAll(battle);
   const lastR = battle.lastResult;
   const blindMod = modOf(battle, 'blind');       // 도사림 — 족보 위력 숨김
-  const multi = aliveEnemies(battle).length > 1;
+  // v3.47: 한 마리가 죽었다고 배치가 바뀌면 안 된다 (성권).
+  //   살아있는 수가 아니라 '이 조우에 몇 마리로 시작했는가'로 잡는다.
+  const multi = battle.enemies.length > 1;
   // 방어도는 LoL식: HP바 끝에 회백색 실드 구간으로 겹쳐 표시 (넘치면 바 전체가 재비율)
   const barTotal = Math.max(p.maxHp, p.hp + p.block);
   const hpPct = Math.max(0, p.hp / barTotal * 100);
@@ -881,8 +883,13 @@ function renderBattle(opts = {}) {
         <span class="coin-slot">${uiIco("coin")}${run.coins} <span class="hp">${uiIco("heart")}</span></span>
       </header>
       <div class="enemy-zone ${multi ? 'multi' : ''}">
-        ${battle.enemies.filter(e => e.hp > 0 || (battle.lastHits || []).some(x => x.uid === e.uid && x.killed)).map(e => `
-          <button class="enemy t-${e.tier} ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}">
+        ${battle.enemies.map(e => {
+          // 죽은 자리는 비워 두되 자리는 그대로 지킨다 — 남은 적이 옆으로 미끄러지지 않게.
+          // 방금 쓰러진 한 마리만 스러지는 연출을 위해 그대로 보인다.
+          const justKilled = (battle.lastHits || []).some(x => x.uid === e.uid && x.killed);
+          const slain = e.hp <= 0 && !justKilled;
+          return `
+          <button class="enemy t-${e.tier} ${slain ? 'slain' : ''} ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}" ${slain ? 'disabled aria-hidden="true"' : ''}>
             ${/* v0.52: 정보(의도·이름·체력바)는 머리 위, 그림은 크게 아래 */ ''}
             <span class="target-pin">▼</span>
             <span class="intent ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.chained ? 'chained' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
@@ -914,7 +921,8 @@ function renderBattle(opts = {}) {
               ]);
             })()}</span>
             ${enemyArtHtml(e)}
-          </button>`).join('')}
+          </button>`;
+        }).join('')}
       </div>
       <div class="mid-line">
         ${lastR ? `<span class="last-result">${esc(lastR.catName)}: ${breakdownText(lastR)} = <b>${lastR.total}</b> ${lastR.bonusHits.map(esc).join(' ')}</span>` : '<span class="last-result"></span>'}
