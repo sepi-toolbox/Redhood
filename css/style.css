@@ -744,6 +744,8 @@ span.enemy-art {
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .row-icon .row-ico-img { width: 76%; height: 76%; object-fit: contain; }
+/* v3.41: 주사위 그림은 원래 정사각 판이라 표식 아이콘보다 크게 채워야 같은 무게로 보인다 */
+.row-icon .row-ico-img.die-ico { width: 84%; height: 84%; }
 .row-icon .row-ico-tmp { font-size: 21px; font-weight: 700; color: #d8c39b; line-height: 1; }
 .row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; text-align: left; }
 .sheet-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1110,7 +1112,8 @@ span.enemy-art {
 .shop-item .choice-main { display: flex; align-items: baseline; gap: 5px; padding-right: 6px; } /* 종이 판때기 가장자리 장식에 값이 물리지 않게 */
 .shop-item .shop-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shop-item .cat-tag { flex: none; }
-.shop-price { margin-left: auto; flex: none; font-weight: 800; color: #e8b64b; font-size: 14px; padding-left: 8px; }
+/* v3.41: 값은 크림색 종이 위에 올라간다 — 금색이면 글씨가 종이에 묻힌다 */
+.shop-price { margin-left: auto; flex: none; font-weight: 800; color: #1c1206; font-size: 14px; padding-left: 8px; }
 .shop-item .choice-main { display: flex; align-items: center; width: 100%; }
 .shop-item.used { opacity: .4; }
 .coin-gain { font-size: 17px; font-weight: 800; color: #e8b64b; }
@@ -1200,6 +1203,10 @@ span.enemy-art {
 .enemy-buffs .ico, .buff-chip .ico, .shield-num .ico { width: 13px; height: 13px; vertical-align: -2px; }
 .die small .ico { width: 11px; height: 11px; vertical-align: -2px; }
 .deck-list .ico { width: 16px; height: 16px; vertical-align: -3px; }
+/* v3.41: 이모지를 표식 아트로 바꾼 자리들 — 글자 크기에 맞춰 줄인다 */
+.sheet-preview .ico-ui { width: 15px; height: 15px; vertical-align: -2px; margin-right: 2px; }
+.dmg-float .ico-ui { width: 14px; height: 14px; vertical-align: -2px; margin-right: 1px; }
+.dot-num .ico-ui, .intent-line small .ico-ui { width: 12px; height: 12px; vertical-align: -2px; margin-right: 1px; }
 
 /* ==================== v1.17 주사위 상태이상 ====================
    네 겹으로 얹는다 — 물듦(아래) · 그림 · 안쪽 발광 · 이름표.
