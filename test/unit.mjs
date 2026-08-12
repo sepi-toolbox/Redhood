@@ -739,6 +739,22 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const d = b.dice.find(x => x.st);
     eq('심지는 언제나 탭 값', d.st.fuse, DB.statusById.rot.turns);
   }
+  // v3.46: 행동 하나는 '메인 1 + 서브 2' 안에서 끝난다 — 셋을 넘으면 무슨 일이 났는지 안 읽힌다.
+  //   같은 종류 상태이상을 한 행동에 두 번 거는 것도 금지 (v3.37 이관 때 네 곳에 자국이 남아 있었다)
+  { const over = [], empty = [], dup = [];
+    for (const e of Object.values(DB.enemyById)) for (const pool of ['moves', 'uniqueMoves'])
+      for (const [k, m] of Object.entries(e[pool] || {})) {
+        const eff = m.effects || [];
+        if (eff.length > 3) over.push(`${e.name}·${m.name || k}(${eff.length})`);
+        if (eff.length === 0) empty.push(`${e.name}·${m.name || k}`);
+        const kinds = eff.filter(f => f.op === 'status').map(f => f.kind);
+        if (new Set(kinds).size !== kinds.length) dup.push(`${e.name}·${m.name || k}`);
+      }
+    eq('한 행동의 효과는 셋 이하', over.join(',') || '없음', '없음');
+    eq('효과가 하나도 없는 행동은 없다', empty.join(',') || '없음', '없음');
+    eq('같은 상태이상을 한 행동에 두 번 걸지 않는다', dup.join(',') || '없음', '없음');
+  }
+
   // v3.45: 강화는 '강화 행동' 한 가지로만 오른다 — 다른 행동에 얹혀 몰래 쌓이지 않는다.
   //   그리고 강화가 든 행동은 예고에 반드시 보인다 (숨김 금지).
   { const mixed = [], hidden = [];

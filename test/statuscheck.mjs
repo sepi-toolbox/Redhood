@@ -179,13 +179,24 @@ for (const k of ['curse', 'blessing']) {
 // ---------- B. 도달 검사 ----------
 const reach = Object.fromEntries(S.map(x => [x.id, []]));
 for (const e of DB.enemies) {
-  const P = e.pattern || {}; const W = P.weights || {};
-  for (const [key, mv] of Object.entries(e.moves || {})) {
+  const P = e.pattern || {}; const W = { ...(P.weights || {}) };
+  // 국면(phases)마다 가중치가 따로다 — 한 국면에서라도 나오면 나오는 것이다
+  for (const ph of (e.phases || [])) for (const [k, w] of Object.entries((ph.pattern || {}).weights || {}))
+    W[k] = Math.max(W[k] ?? 0, w);
+  // v3.46: 가중치 0이어도 다른 행동이 이어서 부르면(followUp·파쇄·국면 진입) 실제로는 나온다.
+  //   전에는 데이터에 없는 mv.chainFrom 을 보고 있어서 이런 행동을 '절대 안 나옴'으로 잘못 찍었다.
+  const called = new Set();
+  for (const pool of ['moves', 'uniqueMoves']) for (const mv of Object.values(e[pool] || {})) {
+    if (mv.followUp && mv.followUp.move) called.add(mv.followUp.move);
+    if (mv.break && mv.break.move) called.add(mv.break.move);
+  }
+  for (const ph of (e.phases || [])) if (ph.enter) called.add(ph.enter);
+  for (const pool of ['moves', 'uniqueMoves']) for (const [key, mv] of Object.entries(e[pool] || {})) {
     const efs = mv.effects || (mv.effect ? [mv.effect] : []);
     for (const ef of efs) {
       if (ef.op === 'status' && reach[ef.kind]) {
         const w = W[key] == null ? (P.mode === 'weighted' ? 0 : 1) : W[key];
-        reach[ef.kind].push({ enemy: e.name, move: mv.name, key, weight: w, chain: !!mv.chainFrom });
+        reach[ef.kind].push({ enemy: e.name, move: mv.name, key, weight: w, chain: called.has(key) });
       }
     }
   }
