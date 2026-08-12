@@ -739,6 +739,21 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const d = b.dice.find(x => x.st);
     eq('심지는 언제나 탭 값', d.st.fuse, DB.statusById.rot.turns);
   }
+  // v3.45: 강화는 '강화 행동' 한 가지로만 오른다 — 다른 행동에 얹혀 몰래 쌓이지 않는다.
+  //   그리고 강화가 든 행동은 예고에 반드시 보인다 (숨김 금지).
+  { const mixed = [], hidden = [];
+    for (const e of Object.values(DB.enemyById)) for (const pool of ['moves', 'uniqueMoves'])
+      for (const [k, m] of Object.entries(e[pool] || {})) {
+        const eff = m.effects || [];
+        if (!eff.some(f => f.op === 'empower')) continue;
+        if (m.hidden) hidden.push(`${e.name}·${m.name || k}`);
+        // 다리 밑 트롤은 힘을 쌓는 것 자체가 패턴의 뼈대라 예외 (성권)
+        if (eff.length > 1 && e.id !== 'river_hag') mixed.push(`${e.name}·${m.name || k}`);
+      }
+    eq('강화가 다른 효과에 얹혀 있지 않다', mixed.join(',') || '없음', '없음');
+    eq('강화 행동은 예고에 숨지 않는다', hidden.join(',') || '없음', '없음');
+  }
+
   // v3.43: 노페어는 절대 봉인되지 않는다 — 낼 족보가 하나도 없는 턴을 만들지 않기 위해
   { const b = mk();
     b.lastUsedCat = 'chance';
