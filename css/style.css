@@ -1106,7 +1106,11 @@ span.enemy-art {
 .dmg-float.blocked { color: #cfcabe; font-size: 15px; }
 
 /* ---------- 상점·코인·보스 전리품 (v0.13) ---------- */
-.shop-price { margin-left: auto; font-weight: 800; color: #e8b64b; font-size: 14px; padding-left: 8px; }
+/* v3.41: 이름·등급·값이 한 줄에서 서로 밀지 않게 — 길면 이름만 말줄임되고 값은 항상 오른쪽 끝에 남는다 */
+.shop-item .choice-main { display: flex; align-items: baseline; gap: 5px; padding-right: 6px; } /* 종이 판때기 가장자리 장식에 값이 물리지 않게 */
+.shop-item .shop-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shop-item .cat-tag { flex: none; }
+.shop-price { margin-left: auto; flex: none; font-weight: 800; color: #e8b64b; font-size: 14px; padding-left: 8px; }
 .shop-item .choice-main { display: flex; align-items: center; width: 100%; }
 .shop-item.used { opacity: .4; }
 .coin-gain { font-size: 17px; font-weight: 800; color: #e8b64b; }

@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.40'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.41'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -431,12 +431,17 @@ function showShop() {
       const isSold = sold.has(i);
       const afford = run.coins >= s.price;
       const tierTag = TIER_KO[s.item.tier] || s.item.tier;
-      const name = s.kind === 'die' ? `${uiIco("roll")} ${s.item.name}` : `${s.item.icon} ${s.item.name}`;
+      // v3.41: 아이콘은 그림 태그(HTML)라 이름과 한 덩어리로 묶어 esc 하면 태그가 글자로 찍힌다.
+      //   전리품 줄과 같은 방식으로 — 아이콘은 아이콘 칸에, 이름만 esc 한다.
+      const icon = s.kind === 'die' ? uiIco('roll', 'ico-ui row-ico-img') : `<span class="row-ico-emoji">${s.item.icon}</span>`;
       const sub = s.kind === 'die' ? `[${s.item.faces.join(',')}] ${s.item.desc}` : s.item.desc;
       return `
-        <button class="sheet-row choice-row shop-item ${isSold || !afford ? 'used' : ''}" data-idx="${i}" ${isSold || !afford ? 'disabled' : ''}>
-          <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(tierTag)}</small><span class="shop-price">${isSold ? '판매됨' : `${uiIco("coin")}${s.price}`}</span></span>
-          <span class="choice-sub">${esc(sub)}</span>
+        <button class="sheet-row choice-row loot-row shop-item ${isSold || !afford ? 'used' : ''}" data-idx="${i}" ${isSold || !afford ? 'disabled' : ''}>
+          ${rowIcon(icon)}
+          <span class="row-body">
+            <span class="choice-main"><span class="shop-name">${esc(s.item.name)}</span><small class="cat-tag">${esc(tierTag)}</small><span class="shop-price">${isSold ? '판매됨' : `${uiIco('coin')}${s.price}`}</span></span>
+            <span class="choice-sub">${esc(sub)}</span>
+          </span>
         </button>`;
     }).join('') + `<button class="btn ghost" id="shop-leave">🌲 떠난다</button>`;
     app.innerHTML = '';
