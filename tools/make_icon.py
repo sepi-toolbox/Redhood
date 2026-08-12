@@ -110,3 +110,14 @@ def build_band(src, path, w=384, h=128):
     im.save(path)
     print(f'{path} · {im.size} · {os.path.getsize(path)}B')
     return im
+
+# ---------- 유물 (메달 없음 · 어두운 원 안에 얹힌다) ----------
+def build_relic(src, relic_id, size=128):
+    """회색 배경을 키잉해 assets/relics/{id}.png 로 저장. 밝기를 재서 어두우면 경고한다.
+    유물 줄 아이콘은 어두운 원 위에 얹히므로 원본이 어두우면 검은 얼룩으로만 보인다."""
+    im = build_ui(src, relic_id, size=size, pad=0.04, out_dir='assets/relics', prefix='')
+    px = [p for p in im.convert('RGBA').getdata() if p[3] > 40]
+    if px:
+        lum = sum(0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2] for p in px) / len(px)
+        print(f'   평균 밝기 {lum:.0f}' + ('  ⚠ 40 이하 — 어두운 원 위에서 안 보인다. 다시 뽑는 게 낫다' if lum < 40 else ''))
+    return im

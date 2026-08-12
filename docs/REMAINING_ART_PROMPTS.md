@@ -17,7 +17,12 @@
 
 ---
 
-# 1. 유물 32종
+# 1. 유물 32종 → **`docs/RELIC_ART_TODO.md` 로 옮겼다 (v3.44)**
+
+> 조립이 끝난 프롬프트 32장이 그 파일 하나에 다 들어 있다. 아래는 옛 기록.
+
+<details><summary>옛 문서 펼치기</summary>
+
 
 **공통 머리 블록** (일반 20종용):
 
@@ -87,6 +92,8 @@ Landscape 3:2 image. A 3x2 grid of six relic items, equal size, equal spacing, i
 
 > **지금 유물은 아직 이모지로 뜬다.** (`🦷`, `🍞` …) 유물 아트가 들어오면 상태이상 때처럼
 > `RELIC_ART_READY` 를 두고 자동 교체하도록 붙이겠다 — 올려만 주면 된다.
+
+</details>
 
 ---
 
