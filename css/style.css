@@ -1187,8 +1187,12 @@ span.enemy-art {
 .buff-strip {
   flex: none; display: flex; gap: 6px; justify-content: center; align-items: center;
   /* v3.27: 체력바와 한 판때기로 이어진다 — 경계선도 사이 여백도 없앤다 */
-  padding: 1px 12px calc(5px + env(safe-area-inset-bottom)); min-height: 20px; flex-wrap: wrap;
+  padding: 1px 12px calc(5px + env(safe-area-inset-bottom));
   background: #171210 url('../assets/ui/tex_wood.jpg') center / cover;
+  /* v3.69: 높이를 못 박는다. 표식 수가 바뀌어도(0개든 8개든) 위의 체력바가 안 움직인다.
+     줄바꿈도 막는다 — 두 줄이 되면 그만큼 또 밀린다. */
+  height: calc(27px + env(safe-area-inset-bottom));
+  flex-wrap: nowrap; overflow: hidden;
 }
 .buff-chip {
   font-size: 12px; font-weight: 800; color: #e8dcc8;
