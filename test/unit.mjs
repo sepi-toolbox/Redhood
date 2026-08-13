@@ -1599,6 +1599,29 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('기절한 짝은 합에서 빠진다', evalCategory(C.onePair, [6, 6, 1, 2, 3], Z(0)).base, 6);
 }
 
+// v3.70: 한 행동이 낼 수 있는 피해에 천장을 둔다.
+// 자동 조율기가 배율을 거듭 곱하면서 몇몇 마리가 통짜 즉사기를 갖게 됐다
+// (살아있는 빗자루 「쓸어내기」 95, 도깨비불 「대폭발」 279 — 최대 체력이 70인데).
+// 등급별 천장을 넘는 순간 여기서 걸린다.
+{
+  const { DB } = await import('../js/data.js');
+  const CAP = { normal: 32, elite: 40, boss: 45 };
+  const over = [];
+  for (const e of DB.enemies) {
+    const cap = CAP[e.tier] || 32;
+    const pool = Object.entries(e.moves || {}).map(([id, m]) => [m.name || id, m]);
+    if (e.enlightenedMove) pool.push([e.enlightenedMove.name + '(각성)', e.enlightenedMove]);
+    for (const [nm, m] of pool) {
+      for (const f of (m.effects || [])) {
+        if (f.op !== 'damage') continue;
+        const tot = f.amount * Math.max(1, Math.floor(f.hits || 1));
+        if (tot > cap) over.push(`${e.name}·${nm} ${tot} > ${cap}(${e.tier})`);
+      }
+    }
+  }
+  eq('한 행동이 등급 천장보다 센 곳 없음', over, []);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
 
