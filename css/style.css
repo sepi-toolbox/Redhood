@@ -360,16 +360,12 @@ span.enemy-art {
 .enemy-tags .tg img { width: 15px; height: 15px; }
 .enemy-tags .tg.plain img { width: 14px; height: 14px; }
 .enemy-tags .tg b { font-size: 10.5px; right: -2px; bottom: -3px; }
-/* 내가 걸어 둔 것은 테두리를 한 겹 더 밝게 — 적이 두른 것과 구분된다 */
-.enemy-tags .tg.mine { box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,236,200,.14), 0 0 0 1px rgba(255, 236, 200, .28); }
 /* v3.52: 내 상태 줄도 같은 표식으로. 체력바 안에는 체력만 남았다 */
 .my-tags { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px; }
 .my-tags .tg { width: 23px; height: 23px; border-width: 1.3px; }
 .my-tags .tg img { width: 16px; height: 16px; }
 .my-tags .tg.plain img { width: 15px; height: 15px; }
 .my-tags .tg b { font-size: 11px; right: -2px; bottom: -3px; }
-/* 내게 해로운 것은 테두리를 붉게 한 겹 — 이로운 것과 한눈에 갈린다 */
-.my-tags .tg.harm { box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,236,200,.14), 0 0 0 1px rgba(190, 60, 44, .55); }
 .mid-line { flex: none; min-height: 18px; text-align: center; padding: 0 12px; position: relative; z-index: 2; }
 .last-result { font-size: 12px; color: #e8b64b; }
 .last-result b { font-size: 14px; }
@@ -1864,6 +1860,10 @@ span.enemy-art {
   box-shadow: 0 1px 3px rgba(0, 0, 0, .5), inset 0 1px 2px rgba(255, 236, 200, .14);
   display: flex; align-items: center; justify-content: center;
 }
+/* v3.54: 테두리는 그림 색을 따라가지 않는다 — 나에게 이로우면 초록, 해로우면 붉다.
+   누구 몸에 붙었는지가 아니라 '나에게 어떤가'만 말한다. 그림 자체는 그대로. */
+.tg.t-good { --tc: #4bbf62; }
+.tg.t-harm { --tc: #c8402f; }
 .tg img { width: 19px; height: 19px; object-fit: contain; pointer-events: none; }
 .tg.plain img { width: 18px; height: 18px; }
 .tg b {
