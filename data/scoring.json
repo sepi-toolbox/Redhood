@@ -20,7 +20,7 @@
       "variants": [
         {
           "id": "instinct",
-          "name": "들짐승 눈",
+          "name": "들짐승의 눈",
           "ability": [],
           "abilityText": "부가 없음 — 순수한 한 방",
           "tier": "common"
@@ -96,7 +96,7 @@
         },
         {
           "id": "clash",
-          "name": "맞부딪기",
+          "name": "부싯돌",
           "ability": [],
           "burst": true,
           "abilityText": "부가 없음 — 순수한 한 방",
@@ -166,7 +166,7 @@
       "variants": [
         {
           "id": "triple_axe",
-          "name": "세 번 도끼",
+          "name": "세 번째 도끼",
           "ability": [
             {
               "op": "strength",
@@ -178,7 +178,7 @@
         },
         {
           "id": "woodsman_breath",
-          "name": "나무꾼 숨",
+          "name": "나무꾼의 숨결",
           "ability": [
             {
               "op": "weakEnemy",
@@ -190,7 +190,7 @@
         },
         {
           "id": "chopping",
-          "name": "장작 패기",
+          "name": "도끼날 벼리기",
           "ability": [
             {
               "op": "whet",
@@ -202,7 +202,7 @@
         },
         {
           "id": "downstroke",
-          "name": "내리찍기",
+          "name": "쪼개기",
           "ability": [
             {
               "op": "vulnerable",
@@ -235,7 +235,7 @@
       "variants": [
         {
           "id": "cottage",
-          "name": "오두막",
+          "name": "할머니의 오두막",
           "ability": [
             {
               "op": "block",
@@ -259,7 +259,7 @@
         },
         {
           "id": "wedge",
-          "name": "쐐기",
+          "name": "벌어진 틈",
           "ability": [
             {
               "op": "vulnerable",
@@ -343,7 +343,7 @@
         },
         {
           "id": "snare",
-          "name": "덫 놓기",
+          "name": "올가미",
           "ability": [
             {
               "op": "vulnerable",
@@ -387,7 +387,7 @@
         },
         {
           "id": "heavy_blow",
-          "name": "묵직한 일격",
+          "name": "무쇠 주먹",
           "ability": [
             {
               "op": "strength",

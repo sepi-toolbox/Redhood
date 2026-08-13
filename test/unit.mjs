@@ -1156,14 +1156,18 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
 }
 
-// v1.37 이름은 절대 잘리지 않는다 — 가장 좁은 화면(360px)에서 세 자리 숫자와
-// 함께 놓아도 들어가는 한계가 7자. 여유를 두고 6자로 못 박는다.
+// 이름은 절대 잘리지 않는다.
+// v1.37: 가장 좁은 화면(360px)에서 세 자리 숫자와 함께 놓아도 들어가는 한계가 7자 → 6자로 못 박았다.
+// v3.53: 그때는 이름 아래 줄에 「일격 · 트리플 · 전체」가 글자로 들어가 자리를 먹었다.
+//   그것들이 그림 표식으로 빠지면서 이름 자리가 넓어졌다. 360px 에서 25개 변형 전부를
+//   태그 최대치(일격+전체+능력) · 벼름 최대 배수의 세 자리 숫자와 함께 재보니 8자까지 안 잘린다.
+//   실제 한계에 붙이지 않고 그대로 8자로 둔다 — 더 늘리려면 다시 재 볼 것.
 {
   const { DB } = await import('../js/data.js');
-  const LIMIT = 6;
+  const LIMIT = 8;
   const longV = DB.scoring.categories.flatMap(c => (c.variants || []))
     .filter(v => [...v.name].length > LIMIT).map(v => `${v.name}(${[...v.name].length}자)`);
-  eq('족보 변형 이름은 6자 이하', longV, []);
+  eq('족보 변형 이름은 8자 이하', longV, []);
   const longC = DB.scoring.categories
     .filter(c => [...(c.short || c.name)].length > LIMIT).map(c => c.short || c.name);
   eq('족보 짧은 이름도 6자 이하', longC, []);
