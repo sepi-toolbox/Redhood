@@ -1647,6 +1647,21 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('여러 턴 남아도 배율은 그대로 — 세기는 안 쌓인다', v5, v1);
 }
 
+// v3.74: 취약(받는 피해 ×1.5)은 한 턴만 걸려도 값이 크다.
+// 하위 족보에 두면 매 턴 새로 걸려 사실상 상시 배율이 된다 — 풀하우스(4단) 위로만 둔다.
+{
+  const { DB } = await import('../js/data.js');
+  const RUNG = { chance: 0, onePair: 1, twoPair: 2, threeKind: 3, fullHouse: 4, largeStraight: 5, fourKind: 6, yahtzee: 7 };
+  const low = [];
+  for (const c of DB.scoring.categories) {
+    for (const v of c.variants) {
+      const ab = v.ability ? (Array.isArray(v.ability) ? v.ability : [v.ability]) : [];
+      if (ab.some(a => a.op === 'vulnerable') && (RUNG[c.id] ?? 9) < 4) low.push(`${c.id}·${v.name}`);
+    }
+  }
+  eq('취약은 4단(풀하우스) 아래에 없음', low, []);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
 
