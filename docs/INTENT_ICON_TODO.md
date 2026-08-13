@@ -1,4 +1,4 @@
-# 적 의도 아이콘 — 6종
+# 적 의도 아이콘 — 7종
 
 **이 파일 하나로 끝난다.** 아래 프롬프트는 전부 조립이 끝난 것이라 통째로 복사해서 그대로 넣으면 된다.
 다른 문서를 찾아볼 필요 없다.
@@ -78,11 +78,19 @@ Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT paint
 Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, VERY LOW detail density — no dense texture, no tiny clutter, no thin hatching, no small internal details. NOT photorealistic, NOT 3D. Square 1:1 image. ONE single mark centered, filling about 82 percent of the frame, on one plain flat mid-grey background — solid color, no gradient, no checkerboard. IMPORTANT — draw ONLY the bare mark itself: no circle, no ring, no disc, no badge, no shield plate, no frame, no border, no plaque, nothing enclosing it and nothing behind it. The mark must be BRIGHT and vivid, clearly LIGHTER than the mid-grey background — do NOT make it dark or muddy. It floats free on the background and must read as one clear silhouette at 19px. The dominant color of the whole icon must be #d9d2c4. The mark: one thick pale question mark scrawled in wobbly ink. No text, no letters, no watermark.
 ```
 
+## 휴식 — `intent_rest`
+
+<small>색 #8fa8c4</small>
+
+```
+Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, VERY LOW detail density — no dense texture, no tiny clutter, no thin hatching, no small internal details. NOT photorealistic, NOT 3D. Square 1:1 image. ONE single mark centered, filling about 82 percent of the frame, on one plain flat mid-grey background — solid color, no gradient, no checkerboard. IMPORTANT — draw ONLY the bare mark itself: no circle, no ring, no disc, no badge, no shield plate, no frame, no border, no plaque, nothing enclosing it and nothing behind it. The mark must be BRIGHT and vivid, clearly LIGHTER than the mid-grey background — do NOT make it dark or muddy. It floats free on the background and must read as one clear silhouette at 19px. The dominant color of the whole icon must be #8fa8c4. The mark: three pale blue-grey curls of breath drifting upward, the biggest at the bottom and shrinking as they rise. No text, no letters, no watermark.
+```
+
 ---
 
 # 한 시트로 몰아 뽑고 싶다면
 
-여섯이라 3×2 한 장에 딱 맞는다.
+일곱이라 3×2 로는 안 맞는다. 앞의 여섯(공격·방어·강화·치료·방해·의문)을 묶고 휴식만 따로 뽑는 게 낫다.
 
 ```
 Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, VERY LOW detail density — no dense texture, no tiny clutter, no thin hatching, no small internal details. NOT photorealistic, NOT 3D. Landscape 3:2 image. A 3x2 grid of six marks, equal cells, equal spacing, identical framing, each centered in its own cell, all on one plain flat mid-grey background — solid color, no gradient, no checkerboard. IMPORTANT — draw ONLY the bare mark itself: no circle, no ring, no disc, no badge, no shield plate, no frame, no border, no plaque, nothing enclosing it and nothing behind it. Every mark must be BRIGHT and vivid, clearly LIGHTER than the mid-grey background — do NOT make it dark or muddy. Each floats free on the background and must read as one clear silhouette at 19px. IN ORDER — three thick bright red claw slashes crossing, torn straight through the air / two thick pale steel bars crossed into an X, like a door being barred / one bold upward chevron arrow with a short second chevron stacked under it, bright gold // a plump bright green heart with one thick cross cut into it / one thick bright violet spiral swirl winding inward / one thick pale question mark scrawled in wobbly ink. No text, no letters, no watermark.
@@ -106,6 +114,7 @@ m.build_tag('<원본.png>', '<이름>')
 |---|---|---|
 | 방어 | `status_block` (상태이상 방패) | 상태이상 표식과 같은 그림 |
 | 강화 | `status_strength` (상태이상 주먹) | 상태이상 표식과 같은 그림 |
+| **휴식** | 없음 — 이모지 `💤` | **화면에 이모지가 남은 마지막 자리** |
 
-받으면 이 둘이 제 그림을 갖는다. 그 밖에 문턱·상한·재생·격노·반사는 의도 줄에서도
+받으면 이 셋이 제 그림을 갖는다. 특히 휴식은 지금 파란 zzZ 이모지라 그림들 사이에서 혼자 튄다. 그 밖에 문턱·상한·재생·격노·반사는 의도 줄에서도
 `fx_*` 를 그대로 빌려 쓰는데, 그건 **실제로 걸리는 지속 효과**라 상태이상과 같은 그림인 게 맞다.
