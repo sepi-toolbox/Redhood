@@ -265,6 +265,11 @@ span.enemy-art {
   margin-bottom: -78px;  /* v0.55: 레이아웃은 138px만 차지, 나머지는 아래로 넘침 */
   filter: drop-shadow(0 6px 11px rgba(0, 0, 0, .9)) drop-shadow(0 0 15px rgba(0, 0, 0, .55));
   pointer-events: none;
+  /* v3.57: 몇몇 적 그림은 몸통이 캔버스 아래에서 잘려 평평한 단면으로 끝난다 (거머리·무덤 벌레 …).
+     그 단면이 하필 주사위 높이에 걸려 가로줄로 보였다. 그림 파일은 그대로 두고,
+     아래로 넘치는 구간만 서서히 지워 배경에 녹인다. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, rgba(0, 0, 0, .45) 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 72%, rgba(0, 0, 0, .45) 88%, transparent 100%);
 }
 /* v0.69: 여러 마리일 때만 폭을 반으로 — 한 마리면 가로로 넓은 그림도 잘리거나 줄어들지 않는다 */
 .enemy-zone.multi .enemy { max-width: 50%; }
