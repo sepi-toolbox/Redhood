@@ -578,7 +578,7 @@ span.enemy-art {
 /* v3.6 족보 일렬 줄 — v1.42 격자 칸과 같은 얼굴, 한 줄에 하나 (수집제 목록) */
 .sheet-zone.combo-list { gap: 6px; padding: 8px 14px; }
 .combo-list .combo-row {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center;
   column-gap: 6px; row-gap: 0; padding: 0 4px; font-size: 13.5px;
   border-width: 10px 13px; min-width: 0; min-height: 42px; text-align: left;
 }
@@ -590,7 +590,7 @@ span.enemy-art {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .combo-list .combo-row .sheet-preview {
-  grid-column: 2; grid-row: 1 / span 2; align-self: center;
+  grid-column: 3; grid-row: 1 / span 2; align-self: center;
   font-size: 19px; line-height: 19px; min-width: 34px; padding-right: 0; text-align: right;
 }
 .combo-list .combo-row .cat-tag {
@@ -1825,3 +1825,28 @@ span.enemy-art {
   animation: stFloatUp 1.4s ease-out forwards;
 }
 .sheet-row .seal-float .ico-ui { width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }
+
+
+/* ---------- v3.50 족보 태그 (시안 A) ----------
+   이름/등급과 피해 숫자 사이에, 동그라미에 든 표식으로. 수치는 원 우하단에 겹쳐 적는다. */
+.combo-list .combo-row .tagbox {
+  grid-column: 2; grid-row: 1 / span 2; align-self: center;
+  display: flex; gap: 4px; align-items: center; padding-right: 2px;
+}
+.tg {
+  position: relative; width: 26px; height: 26px; flex: none; border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #4a382b, #221a14 72%);
+  border: 1.5px solid var(--tc, #6b4f38);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .5), inset 0 1px 2px rgba(255, 236, 200, .14);
+  display: flex; align-items: center; justify-content: center;
+}
+.tg img { width: 19px; height: 19px; object-fit: contain; pointer-events: none; }
+.tg.plain img { width: 18px; height: 18px; }
+.tg b {
+  position: absolute; right: -3px; bottom: -4px;
+  font-size: 12px; font-weight: 800; color: #f3e3c2;
+  text-shadow: 0 1px 2px #000, 0 0 4px #000, 0 0 3px #000;
+}
+/* 봉인·사용 완료 줄에서는 표식도 같이 가라앉는다 */
+.sheet-row.used .tagbox { opacity: .5; }
+.sheet-row.sig-sealed .tagbox { filter: saturate(.22) brightness(.46); }
