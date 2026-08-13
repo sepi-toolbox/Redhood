@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.53'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.54'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -278,19 +278,17 @@ const TAG_ICON = {
   regen: 'status_regen', weakEnemy: 'status_weak', vulnerable: 'status_vulnerable', bleed: 'status_bleed',
   burst: 'ui_burst', aoe: 'ui_aoe',
 };
-const TAG_COLOR = {
-  whet: '#e0761a', focus: '#4fc3f7', strength: '#f0b429', block: '#b9c6d6',
-  regen: '#e5468f', weakEnemy: '#a98cd8', vulnerable: '#ff8a3d', bleed: '#e83b2e',
-  burst: '#e0761a', aoe: '#7fd4c8',
-};
 const TAG_KO = {
   whet: '벼름', focus: '집중', strength: '힘', block: '방어', regen: '재생',
   weakEnemy: '약화', vulnerable: '취약', bleed: '출혈', burst: '일격', aoe: '전체 공격',
 };
 /* 어떤 표식이든 같은 얼굴로 — 동그라미에 그림, 필요하면 그 안에 수치.
    족보 줄·적 상태 줄이 같은 언어를 쓰게 한다 (v3.51). */
-function iconTag(file, color, amount, title, cls = '') {
-  return `<span class="tg ${cls} ${amount == null || amount === '' ? 'plain' : ''}" style="--tc:${color}"`
+/* v3.54: 테두리 색은 그림 색을 따라가지 않는다. 오직 '나에게 이로운가 해로운가'만 말한다 —
+   초록이면 내 편, 붉으면 내 반대편. 누구 몸에 붙었는지는 상관없다
+   (적에게 건 약화는 초록, 적이 두른 방어는 붉다). 그림 자체는 그대로 둔다. */
+function iconTag(file, tone, amount, title) {
+  return `<span class="tg t-${tone === 'harm' ? 'harm' : 'good'}${amount == null || amount === '' ? ' plain' : ''}"`
     + `${title ? ` title="${esc(title)}"` : ''}>`
     + `<img src="assets/icons/${file}.png" alt="" draggable="false">`
     + (amount == null || amount === '' ? '' : `<b>${amount}</b>`) + '</span>';
@@ -298,32 +296,28 @@ function iconTag(file, color, amount, title, cls = '') {
 function comboTag(op, amount) {
   const file = TAG_ICON[op];
   if (!file) return '';
-  const title = TAG_KO[op] + (amount != null ? ` ${amount}` : '');
-  return `<span class="tg${amount == null ? ' plain' : ''}" style="--tc:${TAG_COLOR[op]}" title="${esc(title)}">`
-    + `<img src="assets/icons/${file}.png" alt="" draggable="false">`
-    + (amount != null ? `<b>${amount}</b>` : '') + '</span>';
+  // 족보가 주는 것은 전부 내 편이다
+  return iconTag(file, 'good', amount, TAG_KO[op] + (amount != null ? ` ${amount}` : ''));
 }
 /* v3.51: 적 라벨 아래 한 줄 — 전에는 체력 숫자와 배지가 뒤섞여 있었다.
    이제 체력은 게이지 안으로 들어갔고 이 줄은 상태만 쓴다. 전부 같은 동그라미 표식. */
 function enemyTags(e) {
-  const FXC = (DB.statuses && DB.statuses.fxColors) || {};
   const d = e.debuffs || {};
   const t = [];
-  // 규칙 (한 번에 넘겨야 하는 문턱·넘길 수 없는 상한)
-  if (e.wardLeft > 0) t.push(iconTag(FX_ICON.ward, FXC.ward || '#6b7a5a', e.ward, `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다 (${e.wardLeft}턴)`));
-  if (e.capLeft > 0) t.push(iconTag(FX_ICON.cap, FXC.cap || '#55606b', e.cap, `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다 (${e.capLeft}턴)`));
-  // 적이 두른 것
-  if (e.block > 0) t.push(iconTag('status_block', '#b9c6d6', e.block, `방어 ${e.block}`));
-  if (e.power > 0) t.push(iconTag('intent_empower', '#ffd257', e.power, `강화 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
-  if (e.regenLeft > 0 && e.regen > 0) t.push(iconTag(FX_ICON.regen, FXC.regen || '#e5468f', e.regen, `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)`));
-  if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, FXC.enrage || '#e0521a', e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
-  if (e.reflectLeft > 0 && e.reflect > 0) t.push(iconTag(FX_ICON.reflect, FXC.reflect || '#2fa39a', e.reflect, `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힌다)`));
-  if (e.undying > 0) t.push(iconTag(FX_ICON.undying, FXC.undying || '#7fe0a0', null, '불사 — 한 번은 다시 일어선다'));
-  // 내가 걸어 둔 것
-  if (d.weak > 0) t.push(iconTag('status_weak', '#a98cd8', d.weak, `약화 ${d.weak} — 적 공격력 -${d.weak}`, 'mine'));
-  if (d.vulnerable > 0) t.push(iconTag('status_vulnerable', '#ff8a3d', d.vulnerable, `취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable}`, 'mine'));
-  if (d.bleed > 0) t.push(iconTag('status_bleed', '#e83b2e', d.bleed, `출혈 ${d.bleed} — 행동할 때마다 아프다`, 'mine'));
-  if (e.stunned) t.push(iconTag('status_stun', '#c9c2b0', null, '기절 — 다음 행동이 취소됐다', 'mine'));
+  // 적이 두르거나 적을 지켜 주는 것 — 나에게는 전부 해롭다
+  if (e.wardLeft > 0) t.push(iconTag(FX_ICON.ward, 'harm', e.ward, `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다 (${e.wardLeft}턴)`));
+  if (e.capLeft > 0) t.push(iconTag(FX_ICON.cap, 'harm', e.cap, `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다 (${e.capLeft}턴)`));
+  if (e.block > 0) t.push(iconTag('status_block', 'harm', e.block, `방어 ${e.block}`));
+  if (e.power > 0) t.push(iconTag('intent_empower', 'harm', e.power, `강화 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
+  if (e.regenLeft > 0 && e.regen > 0) t.push(iconTag(FX_ICON.regen, 'harm', e.regen, `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)`));
+  if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, 'harm', e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
+  if (e.reflectLeft > 0 && e.reflect > 0) t.push(iconTag(FX_ICON.reflect, 'harm', e.reflect, `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힌다)`));
+  if (e.undying > 0) t.push(iconTag(FX_ICON.undying, 'harm', null, '불사 — 한 번은 다시 일어선다'));
+  // 내가 걸어 둔 것 — 적 몸에 붙어 있어도 나에게는 이롭다
+  if (d.weak > 0) t.push(iconTag('status_weak', 'good', d.weak, `약화 ${d.weak} — 적 공격력 -${d.weak}`));
+  if (d.vulnerable > 0) t.push(iconTag('status_vulnerable', 'good', d.vulnerable, `취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable}`));
+  if (d.bleed > 0) t.push(iconTag('status_bleed', 'good', d.bleed, `출혈 ${d.bleed} — 행동할 때마다 아프다`));
+  if (e.stunned) t.push(iconTag('status_stun', 'good', null, '기절 — 다음 행동이 취소됐다'));
   return `<span class="enemy-tags">${t.join('')}</span>`;
 }
 function comboTags(cat, variant) {
@@ -1012,19 +1006,18 @@ function renderBattle(opts = {}) {
         // 내 상태 줄 — v3.52: 적 줄과 같은 동그라미 표식으로 통일. 체력바 안에는 체력만 남았다.
         const b = battle.buffs;
         const p_ = battle.player;
-        const FXC = (DB.statuses && DB.statuses.fxColors) || {};
         const t = [];
-        if (battle.whet > 0) t.push(iconTag(UI_ICO.whet, '#e0761a', battle.whet,
+        if (battle.whet > 0) t.push(iconTag(UI_ICO.whet, 'good', battle.whet,
           `벼름 ${battle.whet} — 일격 족보로만 터뜨린다 (지금 ×${whetMultOf(battle.whet).toFixed(1)})`));
-        if (p_.block > 0) t.push(iconTag('status_block', '#b9c6d6', p_.block, `방어 ${p_.block} — 다음 적 행동까지 막아 낸다`));
-        if (b.strength > 0) t.push(iconTag('status_strength', '#f0b429', b.strength, `힘 +${b.strength} — 확정할 때마다 피해 +${b.strength}`));
-        if (b.focus > 0) t.push(iconTag('status_focus', '#4fc3f7', b.focus, `집중 +${b.focus} — 매 턴 리롤 +${b.focus}`));
-        if (b.regen > 0) t.push(iconTag('status_regen', '#e5468f', b.regen, `재생 +${b.regen} — 턴마다 회복`));
-        if (p_.dot > 0) t.push(iconTag('status_bleed', '#e83b2e', p_.dot,
-          `${DOT_KO[p_.dotKind] || '독'} ${p_.dot} — 내 행동 뒤에 피해`, 'harm'));
+        if (p_.block > 0) t.push(iconTag('status_block', 'good', p_.block, `방어 ${p_.block} — 다음 적 행동까지 막아 낸다`));
+        if (b.strength > 0) t.push(iconTag('status_strength', 'good', b.strength, `힘 +${b.strength} — 확정할 때마다 피해 +${b.strength}`));
+        if (b.focus > 0) t.push(iconTag('status_focus', 'good', b.focus, `집중 +${b.focus} — 매 턴 리롤 +${b.focus}`));
+        if (b.regen > 0) t.push(iconTag('status_regen', 'good', b.regen, `재생 +${b.regen} — 턴마다 회복`));
+        if (p_.dot > 0) t.push(iconTag('status_bleed', 'harm', p_.dot,
+          `${DOT_KO[p_.dotKind] || '독'} ${p_.dot} — 내 행동 뒤에 피해`));
         for (const k of ['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']) {
           const m = modOf(battle, k);
-          if (m) t.push(iconTag(FX_ICON[k], FXC[k] || '#9e2f2f', m.left, `${m.name} — ${CB_MOD_KO[k]} (${m.left}턴)`, 'harm'));
+          if (m) t.push(iconTag(FX_ICON[k], 'harm', m.left, `${m.name} — ${CB_MOD_KO[k]} (${m.left}턴)`));
         }
         return t.length ? `<div class="buff-strip" id="buff-strip"><span class="my-tags">${t.join('')}</span></div>` : '';
       })()}
