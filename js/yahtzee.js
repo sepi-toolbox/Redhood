@@ -69,30 +69,32 @@ export function evalCategory(cat, faces, zeroed = null) {
         : { valid: false, base: 0, contributing: [] };
     }
     case 'chance': {
+      // v3.67: 여기만 zeroed(기절)를 안 보고 faces 를 그대로 썼다 — 기절 주사위를 찬스에 쓰면
+      //        눈금이 멀쩡히 계산됐다. 고르는 것도 더하는 것도 전부 val() 로 통일한다.
       if (cat.score === 'highestDie') {
         // v0.16 노페어: 가장 높은 눈 하나 — 언제나 성립하는 순수 보험 (성권 지시)
-        let best = 0;
-        for (const i of all) if (faces[i] > faces[best]) best = i;
-        return { valid: true, base: faces[best], contributing: [best] };
+        let best = all.length ? all[0] : 0;
+        for (const i of all) if (val(i) > val(best)) best = i;
+        return { valid: true, base: all.length ? val(best) : 0, contributing: all.length ? [best] : [] };
       }
       if (cat.score === 'sumTop3Distinct') {
         // v0.15: 서로 다른 눈 중 높은 3개의 합 — 같은 눈이 뭉칠수록 찬스가 약해진다 (보험 역할 고정)
         const seen = new Set();
         const pick = [];
-        for (const i of all.slice().sort((a, b) => faces[b] - faces[a])) {
-          if (seen.has(faces[i])) continue;
-          seen.add(faces[i]);
+        for (const i of all.slice().sort((a, b) => val(b) - val(a))) {
+          if (seen.has(val(i))) continue;
+          seen.add(val(i));
           pick.push(i);
           if (pick.length === 3) break;
         }
-        return { valid: true, base: pick.reduce((s, i) => s + faces[i], 0), contributing: pick };
+        return { valid: true, base: pick.reduce((s, i) => s + val(i), 0), contributing: pick };
       }
       if (cat.score === 'sumTop3') {
         // (구) 가장 높은 눈 3개의 합
-        const idx = all.slice().sort((a, b) => faces[b] - faces[a]).slice(0, 3);
-        return { valid: true, base: idx.reduce((s, i) => s + faces[i], 0), contributing: idx };
+        const idx = all.slice().sort((a, b) => val(b) - val(a)).slice(0, 3);
+        return { valid: true, base: idx.reduce((s, i) => s + val(i), 0), contributing: idx };
       }
-      return { valid: true, base: faces.reduce((a, b) => a + b, 0), contributing: all };
+      return { valid: true, base: all.reduce((a, i) => a + val(i), 0), contributing: all };
     }
     default:
       return { valid: false, base: 0, contributing: [] };

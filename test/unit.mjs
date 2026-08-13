@@ -1582,6 +1582,21 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('세 갈래가 한꺼번에 오는 예고 없음 (묶을 그림이 없다)', triple, []);
 }
 
+// v3.67: 기절(zeroValue) — 찬스 계열만 zeroed 를 안 보고 눈금을 그대로 더하고 있었다.
+// 족보 성립에는 그대로 들어가되 합산에서는 0이어야 한다. 네 가지 셈법 전부 못 박는다.
+{
+  const Z = (...i) => new Set(i);
+  const noPair = { id: 'noPair', kind: 'chance', score: 'highestDie' };
+  eq('노페어: 가장 높은 눈이 기절이면 그 다음 눈', evalCategory(noPair, [6, 4, 2, 1, 1], Z(0)).base, 4);
+  eq('노페어: 전부 기절이면 0', evalCategory(noPair, [6, 4, 2, 1, 1], Z(0, 1, 2, 3, 4)).base, 0);
+  eq('찬스(서로 다른 셋): 기절한 눈은 0으로 센다', evalCategory(C.chanceD, [6, 5, 4, 3, 2], Z(0)).base, 12);
+  eq('찬스(높은 셋): 기절한 눈은 0으로 센다', evalCategory(C.chance, [6, 5, 4, 3, 2], Z(0)).base, 12);
+  eq('찬스: 전부 기절이면 0', evalCategory(C.chance, [6, 5, 4, 3, 2], Z(0, 1, 2, 3, 4)).base, 0);
+  // 성립 자체는 그대로 — 기절해도 족보에서 빠지지 않는다
+  eq('기절해도 원페어는 성립', evalCategory(C.onePair, [6, 6, 1, 2, 3], Z(0)).valid, true);
+  eq('기절한 짝은 합에서 빠진다', evalCategory(C.onePair, [6, 6, 1, 2, 3], Z(0)).base, 6);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
 
