@@ -739,6 +739,29 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const d = b.dice.find(x => x.st);
     eq('심지는 언제나 탭 값', d.st.fuse, DB.statusById.rot.turns);
   }
+  // v3.49: 족보 변형의 부가 효과는 '하나까지'. 그리고 세기는 족보가 어려울수록 커진다.
+  //   (몬스터 행동처럼 여러 개가 덕지덕지 붙지 않게)
+  { const RUNG = { chance: 0, onePair: 1, twoPair: 2, threeKind: 3, fullHouse: 4, largeStraight: 5, fourKind: 6, yahtzee: 7 };
+    const over = [], seen = {};
+    for (const c of DB.scoring.categories) {
+      const r = RUNG[c.id];
+      for (const v of c.variants || []) {
+        const ab = Array.isArray(v.ability) ? v.ability : (v.ability ? [v.ability] : []);
+        if (ab.length > 1) over.push(`${c.name}·${v.name}(${ab.length})`);
+        for (const a of ab) (seen[a.op] || (seen[a.op] = []))[r] = Math.max(seen[a.op][r] || 0, a.amount);
+      }
+    }
+    eq('족보 변형의 부가 효과는 하나까지', over.join(',') || '없음', '없음');
+    // 같은 효과가 여러 칸에 있으면 아래 칸이 위 칸보다 세면 안 된다
+    const bad = [];
+    for (const [op, arr] of Object.entries(seen)) {
+      const pts = arr.map((v, i) => (v ? [i, v] : null)).filter(Boolean);
+      for (let i = 1; i < pts.length; i++)
+        if (pts[i][1] < pts[i - 1][1]) bad.push(`${op} ${pts[i - 1][0]}칸 ${pts[i - 1][1]} > ${pts[i][0]}칸 ${pts[i][1]}`);
+    }
+    eq('쉬운 족보가 어려운 족보보다 센 효과를 주지 않는다', bad.join(', ') || '없음', '없음');
+  }
+
   // v3.46: 행동 하나는 '메인 1 + 서브 2' 안에서 끝난다 — 셋을 넘으면 무슨 일이 났는지 안 읽힌다.
   //   같은 종류 상태이상을 한 행동에 두 번 거는 것도 금지 (v3.37 이관 때 네 곳에 자국이 남아 있었다)
   { const over = [], empty = [], dup = [];
@@ -892,10 +915,14 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.confirmCategory(b3, 'onePair', 'red_shoes', b3.enemies[0].uid);
     eq('일격이 아니면 벼름이 안 깎인다', b3.whet, keep);
     // 벼름을 주는 변형이면 확정 직후 다시 쌓이기 시작한다
-    const b2 = mk(['normal','normal','normal','normal','normal'], [], { onePair: ['clasped_hands'] });
+    // v3.49: 어느 변형이 벼름을 주는지는 scoring.json 이 정한다 — 이름을 박아 두지 않는다
+    const wv = DB.scoring.categories.flatMap(c => (c.variants || [])
+      .map(v => ({ cat: c.id, v, n: ((v.ability || []).find(a => a.op === 'whet') || {}).amount })))
+      .filter(x => x.n > 0)[0];
+    const b2 = mk(['normal','normal','normal','normal','normal'], [], { [wv.cat]: [wv.v.id] });
     eng.initialRoll(b2);
-    eng.confirmCategory(b2, 'onePair', 'clasped_hands', b2.enemies[0].uid);
-    eq('맞잡은 손은 쓰면서 다음 벼름을 남긴다', b2.whet, 1);
+    eng.confirmCategory(b2, wv.cat, wv.v.id, b2.enemies[0].uid);
+    eq(`${wv.v.name}은 쓰면서 다음 벼름을 남긴다`, b2.whet, wv.n);
     eng.rng.next = Math.random;
   }
   // 숨 고르기 — 약한 족보로 벼름을 번다
@@ -984,7 +1011,8 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.rng.next = () => 0.5;                       // 다섯 개 전부 같은 눈
     eng.initialRoll(b);
     eng.confirmCategory(b, 'onePair', 'clasped_hands', b.enemies[0].uid);
-    eq('사냥꾼의 눈(1) + 맞잡은 손(1) = 벼름 2', b.whet, 2);
+    // v3.49: 맞잡은 손은 이제 방어를 준다 — 유물 몫만 남는다
+    eq('사냥꾼의 눈만으로 벼름 1', b.whet, 1);
     eng.rng.next = Math.random;
   }
   // 길표 — 스트레이트를 확정하면 다음 턴 리롤
