@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.50'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.51'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -287,6 +287,14 @@ const TAG_KO = {
   whet: '벼름', focus: '집중', strength: '힘', block: '방어', regen: '재생',
   weakEnemy: '약화', vulnerable: '취약', bleed: '출혈', burst: '일격', aoe: '전체 공격',
 };
+/* 어떤 표식이든 같은 얼굴로 — 동그라미에 그림, 필요하면 그 안에 수치.
+   족보 줄·적 상태 줄이 같은 언어를 쓰게 한다 (v3.51). */
+function iconTag(file, color, amount, title, cls = '') {
+  return `<span class="tg ${cls} ${amount == null || amount === '' ? 'plain' : ''}" style="--tc:${color}"`
+    + `${title ? ` title="${esc(title)}"` : ''}>`
+    + `<img src="assets/icons/${file}.png" alt="" draggable="false">`
+    + (amount == null || amount === '' ? '' : `<b>${amount}</b>`) + '</span>';
+}
 function comboTag(op, amount) {
   const file = TAG_ICON[op];
   if (!file) return '';
@@ -294,6 +302,29 @@ function comboTag(op, amount) {
   return `<span class="tg${amount == null ? ' plain' : ''}" style="--tc:${TAG_COLOR[op]}" title="${esc(title)}">`
     + `<img src="assets/icons/${file}.png" alt="" draggable="false">`
     + (amount != null ? `<b>${amount}</b>` : '') + '</span>';
+}
+/* v3.51: 적 라벨 아래 한 줄 — 전에는 체력 숫자와 배지가 뒤섞여 있었다.
+   이제 체력은 게이지 안으로 들어갔고 이 줄은 상태만 쓴다. 전부 같은 동그라미 표식. */
+function enemyTags(e) {
+  const FXC = (DB.statuses && DB.statuses.fxColors) || {};
+  const d = e.debuffs || {};
+  const t = [];
+  // 규칙 (한 번에 넘겨야 하는 문턱·넘길 수 없는 상한)
+  if (e.wardLeft > 0) t.push(iconTag(FX_ICON.ward, FXC.ward || '#6b7a5a', e.ward, `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다 (${e.wardLeft}턴)`));
+  if (e.capLeft > 0) t.push(iconTag(FX_ICON.cap, FXC.cap || '#55606b', e.cap, `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다 (${e.capLeft}턴)`));
+  // 적이 두른 것
+  if (e.block > 0) t.push(iconTag('status_block', '#b9c6d6', e.block, `방어 ${e.block}`));
+  if (e.power > 0) t.push(iconTag('intent_empower', '#ffd257', '+' + e.power, `강화 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
+  if (e.regenLeft > 0 && e.regen > 0) t.push(iconTag(FX_ICON.regen, FXC.regen || '#e5468f', e.regen, `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)`));
+  if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, FXC.enrage || '#e0521a', '+' + e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
+  if (e.reflectLeft > 0 && e.reflect > 0) t.push(iconTag(FX_ICON.reflect, FXC.reflect || '#2fa39a', e.reflect, `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힌다)`));
+  if (e.undying > 0) t.push(iconTag(FX_ICON.undying, FXC.undying || '#7fe0a0', null, '불사 — 한 번은 다시 일어선다'));
+  // 내가 걸어 둔 것
+  if (d.weak > 0) t.push(iconTag('status_weak', '#a98cd8', d.weak, `약화 ${d.weak} — 적 공격력 -${d.weak}`, 'mine'));
+  if (d.vulnerable > 0) t.push(iconTag('status_vulnerable', '#ff8a3d', d.vulnerable, `취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable}`, 'mine'));
+  if (d.bleed > 0) t.push(iconTag('status_bleed', '#e83b2e', d.bleed, `출혈 ${d.bleed} — 행동할 때마다 아프다`, 'mine'));
+  if (e.stunned) t.push(iconTag('status_stun', '#c9c2b0', null, '기절 — 다음 행동이 취소됐다', 'mine'));
+  return `<span class="enemy-tags">${t.join('')}</span>`;
 }
 function comboTags(cat, variant) {
   const ab = variant.ability ? (Array.isArray(variant.ability) ? variant.ability : [variant.ability]) : [];
@@ -925,33 +956,18 @@ function renderBattle(opts = {}) {
             ${/* v0.52: 정보(의도·이름·체력바)는 머리 위, 그림은 크게 아래 */ ''}
             <span class="target-pin">▼</span>
             <span class="intent ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.chained ? 'chained' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
-            ${badgeRow('rule-row', [
-              e.wardLeft > 0 ? badge('rule', FX_ICON.ward, e.ward, { title: `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다` }) : '',
-              e.capLeft > 0 ? badge('rule', FX_ICON.cap, e.cap, { title: `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다` }) : '',
-            ])}
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
               // 적 방어도 LoL식: HP 구간 끝에 회백색 실드 세그먼트
               const ebTotal = Math.max(e.maxHpInit, e.hp + e.block);
               const ehpPct = e.final ? 100 : Math.max(0, e.hp / ebTotal * 100);
               const eshPct = e.final ? 0 : Math.min(e.block, ebTotal - e.hp) / ebTotal * 100;
-              return `<span class="bar t-${e.tier}"><i style="width:${ehpPct}%"></i>${e.block > 0 && !e.final ? `<b class="ebar-shield" style="left:${ehpPct}%;width:${eshPct}%"></b>` : ''}</span>`;
+              // v3.51: 체력 숫자를 게이지 안으로 넣는다 — 아래 한 줄은 통째로 상태 줄이 된다
+              return `<span class="bar t-${e.tier}"><i style="width:${ehpPct}%"></i>`
+                + `${e.block > 0 && !e.final ? `<b class="ebar-shield" style="left:${ehpPct}%;width:${eshPct}%"></b>` : ''}`
+                + `<span class="bar-text">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}</span></span>`;
             })()}
-            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${(() => {
-              const d = e.debuffs || {};
-              return ' ' + badgeRow('enemy-buffs', [
-                e.block > 0 ? badge('bad', 'intent_defend', e.block, { title: '적 방어도' }) : '',
-                e.power > 0 ? badge('bad', 'intent_empower', '+' + e.power, { title: '적 강화' }) : '',
-                e.regenLeft > 0 && e.regen > 0 ? badge('bad', FX_ICON.regen, e.regen, { title: `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)` }) : '',
-                e.enrage > 0 ? badge('bad', FX_ICON.enrage, '+' + e.enrage, { title: '격노 — 맞을 때마다 힘이 오른다' }) : '',
-                e.reflectLeft > 0 && e.reflect > 0 ? badge('bad', FX_ICON.reflect, e.reflect, { title: `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힘)` }) : '',
-                e.undying > 0 ? badge('bad', FX_ICON.undying, '', { title: '불사 — 한 번은 다시 일어선다' }) : '',
-                // 적에게 불리한 것 = 내게 유리한 것
-                d.weak > 0 ? badge('good', 'status_weak', d.weak, { title: '약화' }) : '',
-                d.bleed > 0 ? badge('good', 'status_bleed', d.bleed, { title: '출혈' }) : '',
-                d.vulnerable > 0 ? badge('good', 'status_vulnerable', d.vulnerable, { title: '취약' }) : '',
-              ]);
-            })()}</span>
+            ${enemyTags(e)}
             ${enemyArtHtml(e)}
           </button>`;
         }).join('')}
