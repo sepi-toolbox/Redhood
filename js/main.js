@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.60'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.61'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -639,7 +639,10 @@ const COMBO_ICO = {
   '\uE004': ['intent_defend_confuse', 'intent_defend', 'intent_confuse'],
   '\uE005': ['intent_defend_empower', 'intent_defend', 'intent_empower'],
 };
-const INTENT_COMBO_READY = new Set([]);
+const INTENT_COMBO_READY = new Set([
+  'intent_attack_confuse', 'intent_defend_confuse', 'intent_attack_empower',
+  'intent_attack_defend', 'intent_defend_empower',
+]);
 // 적 의도 문자열(engine.intentOf)의 이모지를 그림으로 치환
 function iconifyIntent(s) {
   return s
@@ -655,6 +658,7 @@ function iconifyIntent(s) {
     .replaceAll('🌀', ico('intent_confuse', 'ico-intent'))
     .replaceAll('💪', ico('intent_empower', 'ico-intent'))
     .replaceAll('❓', ico('intent_unknown', 'ico-intent'))
+    .replaceAll('💤', ico('intent_rest', 'ico-intent'))   // v3.61: 화면에 남아 있던 마지막 이모지
     // v3.60: 치유(💚)와 지속 효과(🪨⛓💗💢🌵)는 이제 예고에 안 나온다 — 여기서도 걷어냈다.
     // 그 그림들은 적 몸에 걸린 뒤 배지(enemyTags)에서 제 역할을 계속한다.
     // 기절은 '다음에 뭘 하겠다'는 예고가 아니라 지금 그런 상태라는 표시다 — 상태이상 그림을 그대로 쓴다.
@@ -1194,7 +1198,7 @@ function enemyEffectText(e, ef) {
     case 'block': return `${ico('intent_defend')} 방어 ${ef.amount} 획득`;
     case 'confuse': return `${ico('intent_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
     case 'empower': return `${ico('intent_empower')} 강화 — 공격력 +${ef.amount} (전투 내 누적)`;
-    case 'heal': return `${ico('intent_heal')} 자신 HP ${ef.amount} 회복`;
+    case 'heal': return `${ico('status_regen')} 자신 HP ${ef.amount} 회복`;   // v3.61: intent_heal 폐기
     case 'sealLast': return `${fxIco('sealLast')} 흉내 — 직전에 쓴 족보를 ${ef.turns || 1}턴 봉인`;
     case 'sealCat': return `${fxIco('sealCat')} 봉인 — ${(ef.cats || []).join('·')} 족보를 ${ef.turns || 1}턴 봉인`;
     case 'rollTax': return `${fxIco('rollTax')} 이빨 자국 — ${ef.turns || 1}턴간 리롤할 때마다 피해 ${ef.amount || 1} (방어도 무시)`;
@@ -1207,7 +1211,7 @@ function enemyEffectText(e, ef) {
     case 'enrage': return `${fxIco('enrage')} 격노 — 맞을 때마다 힘 +${ef.amount || 1} (전투 내 누적)`;
     case 'reflect': return `${fxIco('reflect')} 반사 ${ef.amount} — ${ef.turns || 3}턴간 때리면 되받는다`;
     case 'cap': return `${fxIco('cap')} 상한 ${ef.amount} — 한 번에 이 이상 안 들어간다`;
-    case 'rest': return `💤 휴식`;
+    case 'rest': return `${ico('intent_rest')} 휴식`;
     case 'drainWhet': return `🌀 벼름을 빼앗는다`;
     case 'unpin': return `💨 새김을 흩는다`;
     case 'status': { const st = DB.statusById[ef.kind]; return `${ico('status_' + ef.kind)} ${st ? st.name : ef.kind} ×${ef.amount || 1} — ${st ? st.text : ''}`; }
@@ -2221,7 +2225,7 @@ function cbIntentHtml(e) {
   if (mv.op === 'bleed') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>${ico('status_bleed', 'ico-ui')}${mv.amount ?? 2}</small>`;
   if (mv.op === 'lifesteal') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>💚흡혈</small>`;
   if (mv.op === 'armor') return `${ico('intent_defend', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
-  if (mv.op === 'heal') return `${ico('intent_heal', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
+  if (mv.op === 'heal') return `${ico('status_regen', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
   if (mv.op === 'empower') return `${ico('intent_empower', 'ico-intent')} ${esc(mv.name)} <b>+${Math.max(1, P)}</b>`;
   return esc(mv.name);
 }

@@ -1,4 +1,9 @@
-# 적 예고 아이콘 — 전부 새로 · 11종
+# 적 예고 아이콘 — 11종 · **v3.61에서 전부 적용 완료**
+
+> 아래 프롬프트로 뽑은 그림 11장을 v3.61에 전부 넣었다. 낱개 6종·조합 5종 모두 제 그림을 갖고,
+> 방패 한 장은 `status_block.png` 로도 복사해 족보 태그·방어도 표시까지 같이 바뀌었다.
+> **화면에 남아 있던 마지막 이모지(`💤`)도 사라졌다** — `node test/emojicheck.mjs` 가 0 을 뱉는다.
+> 옛 `intent_heal.png` 는 지웠다. 아래 프롬프트는 다시 뽑을 때를 위한 기록으로 남긴다.
 
 **이 파일 하나로 끝난다.** 아래 프롬프트는 전부 조립이 끝난 것이라 통째로 복사해서 그대로 넣으면 된다.
 다른 문서를 찾아볼 필요 없다.
@@ -17,19 +22,22 @@
 
 ## 뭘 뽑나
 
-| 표식 | 파일 | 지금 |
+| 표식 | 파일 | 굽고 난 평균 밝기 |
 |---|---|---|
-| 공격 | `intent_attack` | 그림 있음 — **다시 뽑는다** |
-| 방어 | `intent_defend` = `status_block` | 방패 — **같이 다시 뽑는다** (한 장을 두 파일로) |
-| 강화 | `intent_empower` | 상태이상 주먹을 빌려 쓰는 중 |
-| 방해 | `intent_confuse` | 그림 있음 — **다시 뽑는다** |
-| 의문 | `intent_unknown` | 그림 있음 — **다시 뽑는다** |
-| 휴식 | `intent_rest` | 없음 — 화면에 이모지 `💤` 가 남은 마지막 자리 |
-| 공격+방해 | `intent_attack_confuse` | 새로 (42회) |
-| 방어+방해 | `intent_defend_confuse` | 새로 (13회) |
-| 공격+강화 | `intent_attack_empower` | 새로 (7회) |
-| 공격+방어 | `intent_attack_defend` | 새로 (3회) |
-| 방어+강화 | `intent_defend_empower` | 새로 (0회, 자리만) |
+| 공격 | `intent_attack` | 42 |
+| 방어 | `intent_defend` = `status_block` | 89 |
+| 강화 | `intent_empower` | 88 |
+| 방해 | `intent_confuse` | 60 |
+| 의문 | `intent_unknown` | 112 |
+| 휴식 | `intent_rest` | 111 |
+| 공격+방해 | `intent_attack_confuse` (42회) | 47 |
+| 방어+방해 | `intent_defend_confuse` (13회) | 85 |
+| 공격+강화 | `intent_attack_empower` (7회) | 54 |
+| 공격+방어 | `intent_attack_defend` (3회) | 75 |
+| 방어+강화 | `intent_defend_empower` (0회, 예비) | 97 |
+
+「공격」만 45 아래로 나오는데, 밝기 식이 붉은색을 0.299로 낮게 치기 때문이지 실제로는 안 어둡다.
+19px로 줄여 확인했고 다른 표식들 사이에서 제일 먼저 눈에 들어온다.
 
 **예고 줄에 뜨는 건 이 열하나가 전부다.** v3.60부터 치유·문턱·상한·재생·격노·반사는 예고에서
 완전히 빠졌다 — 저건 「이번에 뭘 하겠다」가 아니라 「앞으로 이런 몸이 되겠다」라서 예고로
