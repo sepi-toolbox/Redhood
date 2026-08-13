@@ -140,11 +140,11 @@
           "name": "두 개의 달",
           "ability": [
             {
-              "op": "vulnerable",
+              "op": "bleed",
               "amount": 2
             }
           ],
-          "abilityText": "취약 2턴 — 그동안 적이 받는 피해 ×1.5",
+          "abilityText": "출혈 2 — 적이 행동할 때마다 아프다",
           "tier": "uncommon"
         }
       ],
@@ -206,12 +206,12 @@
           "name": "쪼개기",
           "ability": [
             {
-              "op": "vulnerable",
-              "amount": 2
+              "op": "bleed",
+              "amount": 3
             }
           ],
           "burst": true,
-          "abilityText": "취약 2턴 — 그동안 적이 받는 피해 ×1.5",
+          "abilityText": "출혈 3 — 적이 행동할 때마다 아프다",
           "tier": "uncommon"
         }
       ],
@@ -264,11 +264,11 @@
           "ability": [
             {
               "op": "vulnerable",
-              "amount": 3
+              "amount": 2
             }
           ],
           "burst": true,
-          "abilityText": "취약 3턴 — 그동안 적이 받는 피해 ×1.5",
+          "abilityText": "취약 2턴 — 그동안 적이 받는 피해 ×1.5",
           "tier": "rare"
         }
       ],
@@ -348,11 +348,11 @@
           "ability": [
             {
               "op": "vulnerable",
-              "amount": 3
+              "amount": 2
             }
           ],
           "burst": true,
-          "abilityText": "취약 3턴 — 그동안 적이 받는 피해 ×1.5",
+          "abilityText": "취약 2턴 — 그동안 적이 받는 피해 ×1.5",
           "tier": "rare"
         }
       ],
