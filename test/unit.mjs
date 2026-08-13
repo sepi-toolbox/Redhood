@@ -1536,6 +1536,48 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
 }
 
+// v3.59: 예고 줄 — 치유는 안 그린다 · 두 갈래는 묶인 표식 하나로 나간다
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  const { readFileSync } = await import('fs');
+
+  const COMBO = Object.values(eng.INTENT_COMBO);
+  const PUA = /[\u{E000}-\u{F8FF}]/gu;
+  const every = [];
+  for (const def of DB.enemies) {
+    const pool = Object.entries(def.moves || {}).map(([id, m]) => [`${def.name}·${m.name || id}`, m]);
+    if (def.enlightenedMove) pool.push([`${def.name}·${def.enlightenedMove.name}(각성)`, def.enlightenedMove]);
+    for (const [label, m] of pool) {
+      if (!m || !m.effects) continue;
+      const fake = { nextMove: m, atkScale: 1, power: 0, debuffs: { weak: 0 }, stunned: false };
+      every.push([label, eng.intentOf(fake), m]);
+    }
+  }
+  eq('예고에 치유(💚)가 남은 행동 없음', every.filter(([, s]) => s.includes('💚')).map(([l]) => l), []);
+  // 예고가 텅 비어 💤 로 떨어지는 자리는 진짜 휴식 행동뿐이어야 한다.
+  // (치유만 있는 행동은 데이터가 intent 로 예고를 못 박아 준다 — 옹이 골렘 「수액 빨아올리기」)
+  eq('예고가 비는 행동은 휴식뿐',
+    every.filter(([, s, m]) => s === '💤' && !m.effects.some(f => f.op === 'rest')).map(([l]) => l), []);
+  // 묶인 표식은 딱 하나만, 그리고 반드시 아는 글자여야 한다
+  const puaHits = every.map(([label, s]) => [label, s.match(PUA) || []]);
+  eq('묶인 표식은 한 줄에 하나', puaHits.filter(([, h]) => h.length > 1).map(([l]) => l), []);
+  eq('모르는 묶음 글자 없음', puaHits.filter(([, h]) => h.some(c => !COMBO.includes(c))).map(([l]) => l), []);
+  // 화면 쪽이 다섯 글자를 전부 알고 있어야 한다 — 하나라도 빠지면 예고에 네모가 뜬다
+  const mainSrc = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+  const known = [...mainSrc.matchAll(/'\\u(E00[1-9A-Fa-f])':\s*\[/g)].map(m => String.fromCharCode(parseInt(m[1], 16)));
+  eq('main.js 가 묶음 글자를 전부 앎', COMBO.filter(c => !known.includes(c)), []);
+  eq('묶음 조합은 다섯 종', COMBO.length, 5);
+  // 세 갈래가 한꺼번에 오는 행동이 생기면 묶을 그림이 없다 — 생기는 순간 걸리게 둔다
+  const DIS = new Set(['confuse','poison','bleed','status','sealLast','sealCat','rollTax','holdTax','petrify','lockHigh','blind','drainWhet','unpin']);
+  const triple = every.filter(([, , m]) => {
+    if (m.hidden || m.intent || m.effects.some(f => f.op === 'selfDamage')) return false;
+    const ops = m.effects.map(f => f.op);
+    return [ops.includes('damage'), ops.includes('block'), ops.includes('empower'), ops.some(o => DIS.has(o))].filter(Boolean).length > 2;
+  }).map(([l]) => l);
+  eq('세 갈래가 한꺼번에 오는 예고 없음 (묶을 그림이 없다)', triple, []);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
 

@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.58'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.59'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -629,9 +629,27 @@ function ico(name, cls = '') {
 // v3.14: 전투·상점·지도에 남아 있던 이모지를 정식 표식 아트로 (C절 — 메달 없이 심볼만)
 const UI_ICO = { coin: 'ui_coin', unknown: 'ui_unknown', heart: 'ui_heart', roll: 'ui_roll', burst: 'ui_burst', whet: 'ui_whet' };
 const uiIco = (key, cls = 'ico-ui') => ico(UI_ICO[key], cls);
+// v3.59: 두 갈래가 한꺼번에 오는 예고는 표식 하나로 묶는다.
+// engine 이 사설 사용 영역 글자(U+E001~E005)로 '무슨 조합인가'만 말해 주고, 그림은 여기서 고른다.
+// [조합 그림, 그림이 아직 없을 때 대신 세울 표식 둘] — 그림이 들어오면 이름을 READY 에 적으면 끝난다.
+const COMBO_ICO = {
+  '\uE001': ['intent_attack_confuse', 'intent_attack', 'intent_confuse'],
+  '\uE002': ['intent_attack_defend', 'intent_attack', 'intent_defend'],
+  '\uE003': ['intent_attack_empower', 'intent_attack', 'intent_empower'],
+  '\uE004': ['intent_defend_confuse', 'intent_defend', 'intent_confuse'],
+  '\uE005': ['intent_defend_empower', 'intent_defend', 'intent_empower'],
+};
+const INTENT_COMBO_READY = new Set([]);
 // 적 의도 문자열(engine.intentOf)의 이모지를 그림으로 치환
 function iconifyIntent(s) {
   return s
+    // 조합 표식이 먼저다 — 뒤따르는 수치(7 · 4×3)를 그림 사이에 끼워 넣어야 하기 때문
+    .replace(/([\u{E001}-\u{E005}])(\d+(?:×\d+)?)?/gu, (_, ch, num = '') => {
+      const [combo, a, b] = COMBO_ICO[ch];
+      return INTENT_COMBO_READY.has(combo)
+        ? ico(combo, 'ico-intent') + num
+        : `${ico(a, 'ico-intent')}${num} ${ico(b, 'ico-intent')}`;
+    })
     .replaceAll('⚔️', ico('intent_attack', 'ico-intent'))
     .replaceAll('🛡', ico('intent_defend', 'ico-intent'))
     .replaceAll('🌀', ico('intent_confuse', 'ico-intent'))

@@ -1172,42 +1172,73 @@ function chooseMove(enemy, turn = 1) {
 // 한 대의 피해 — 기본 수치에 막·계몽 배율을 곱한 뒤 강화를 더하고 약화를 뺀다.
 // 연타는 이 값을 타수만큼 반복한다 (강화가 타수마다 붙는 게 연타의 핵심).
 export function hitDamage(enemy, ef) {
-  const weak = enemy.debuffs ? enemy.debuffs.weak : 0;
+  const weak = (enemy.debuffs && enemy.debuffs.weak) || 0; // 약화 칸이 아직 안 생겼어도 NaN 이 되지 않게
   return Math.max(0, Math.round(ef.amount * (enemy.atkScale || 1)) + (enemy.power || 0) - weak);
 }
 export const hitCount = (ef) => Math.max(1, Math.floor(ef.hits || 1));
 
-// 의도 표기 (v0.11): ⚔️공격 / 🛡방어 / 🌀혼란 / 💪강화 / 💚치료 / ❓의문 — 혼합은 병기
+// 의도 표기 (v0.11): ⚔️공격 / 🛡방어 / 🌀혼란 / 💪강화 / ❓의문 — 혼합은 병기
+// v3.59: 네 갈래(공격·방어·강화·방해) 중 둘이 한꺼번에 오는 행동은 표식을 나란히 두 개 세우지 않고
+//        조합 전용 표식 하나로 묶는다. 이모지와 겹치지 않게 사설 사용 영역 글자를 쓴다 —
+//        어떤 그림인지는 화면 쪽(main.js)이 안다. 여기서는 '무슨 조합인가'만 말한다.
+export const INTENT_COMBO = {
+  '공격+방해': '\uE001',
+  '공격+방어': '\uE002',
+  '공격+강화': '\uE003',
+  '방어+방해': '\uE004',
+  '방어+강화': '\uE005',
+};
+// 데이터가 예고를 직접 못 박고 싶을 때 쓰는 값 (moves[*].intent)
+const INTENT_FORCED = { attack: '⚔️', defend: '🛡', empower: '💪', confuse: '🌀', unknown: '❓', rest: '💤' };
+const DISRUPT_OPS = new Set(['confuse', 'poison', 'bleed', 'status', 'sealLast', 'sealCat',
+  'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind', 'drainWhet', 'unpin']);
+
 export function intentOf(enemy) {
   const mv = enemy.nextMove;
   if (!mv) return '';
   if (enemy.stunned) return '💫';
   if (mv.hidden) return '❓';
-  const parts = [];
   // 자해처럼 예고로 읽어낼 수 없는 효과가 섞이면 통째로 '?' 로 가린다
   if (mv.effects.some(ef => ef.op === 'selfDamage')) return '❓';
+  // 예고가 텅 비는 자리(치유만 있는 행동 따위)는 데이터가 직접 지정한다
+  if (mv.intent && INTENT_FORCED[mv.intent]) return INTENT_FORCED[mv.intent];
+
+  const dmg = [];            // 한 대 피해 × 타수
+  let blockAmt = null, emp = false, dis = false;
+  const tail = [];           // 문턱·상한·재생·격노·반사 — 지속 효과라 제 표식을 지킨다
   for (const ef of mv.effects) {
-    if (ef.op !== 'damage') continue;
-    const per = hitDamage(enemy, ef), n = hitCount(ef);
-    if (per * n > 0) parts.push(n > 1 ? `⚔️${per}×${n}` : `⚔️${per}`);
+    if (ef.op === 'damage') {
+      const per = hitDamage(enemy, ef), n = hitCount(ef);
+      if (per * n > 0) dmg.push(n > 1 ? `${per}×${n}` : `${per}`);
+    } else if (ef.op === 'block') blockAmt = (blockAmt || 0) + ef.amount;
+    else if (ef.op === 'empower') emp = true;
+    else if (ef.op === 'ward') tail.push(`🪨${ef.amount}`);
+    else if (ef.op === 'cap') tail.push(`⛓${ef.amount}`);
+    else if (ef.op === 'regen') tail.push(`💗${ef.amount}`);
+    else if (ef.op === 'enrage') tail.push('💢');
+    else if (ef.op === 'reflect') tail.push(`🌵${ef.amount}`);
+    // v3.59: 치유는 예고에 그리지 않는다 — 적이 제 몸을 아무는 건 이번 턴 내 선택을 바꾸지 않는다
+    else if (ef.op === 'heal') { /* 표기 없음 */ }
+    // 방해 효과는 종류를 뭉뚱그려 🌀 하나로만 예고한다 — 행동의 정체는 이름이 말하고,
+    // 무슨 장치인지(결속×2 따위)는 길게 눌러 상세에서 본다. (성권: 예고는 '행동'이다)
+    else if (DISRUPT_OPS.has(ef.op)) dis = true;
   }
-  // 방해 효과는 종류를 뭉뚱그려 🌀 하나로만 예고한다 — 행동의 정체는 이름이 말하고,
-  // 무슨 장치인지(결속×2 따위)는 길게 눌러 상세에서 본다. (성권: 예고는 '행동'이다)
-  let debuff = false;
-  for (const ef of mv.effects) {
-    if (ef.op === 'block') parts.push(`🛡${ef.amount}`);
-    else if (ef.op === 'confuse' || ef.op === 'poison' || ef.op === 'bleed') debuff = true;
-    else if (ef.op === 'status') debuff = true;
-    else if (ef.op === 'empower') parts.push('💪');
-    else if (ef.op === 'heal') parts.push(`💚${ef.amount}`);
-    else if (['sealLast', 'sealCat', 'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind', 'drainWhet', 'unpin'].includes(ef.op)) debuff = true;
-    else if (ef.op === 'ward') parts.push(`🪨${ef.amount}`);
-    else if (ef.op === 'cap') parts.push(`⛓${ef.amount}`);
-    else if (ef.op === 'regen') parts.push(`💗${ef.amount}`);
-    else if (ef.op === 'enrage') parts.push('💢');
-    else if (ef.op === 'reflect') parts.push(`🌵${ef.amount}`);
+  const atk = dmg.length > 0, def = blockAmt !== null;
+  const core = [atk && '공격', def && '방어', emp && '강화', dis && '방해'].filter(Boolean);
+  const combo = core.length === 2 ? INTENT_COMBO[core.join('+')] : null;
+
+  const parts = [];
+  if (combo) {
+    // 묶인 표식이 앞선 갈래의 수치를 그대로 데리고 간다 — 공격이면 피해, 아니면 방어도
+    parts.push(combo + (atk ? dmg[0] : String(blockAmt)));
+    for (const d of dmg.slice(1)) parts.push(`⚔️${d}`);
+  } else {
+    for (const d of dmg) parts.push(`⚔️${d}`);
+    if (def) parts.push(`🛡${blockAmt}`);
+    if (emp) parts.push('💪');
   }
-  if (debuff) parts.push('🌀');
+  parts.push(...tail);
+  if (!combo && dis) parts.push('🌀');
   // 파쇄 기준치(🔨N)는 예고에 내보내지 않는다 — 적을 길게 눌러 여는 치트 창에서만 보인다
   return parts.join(' ') || '💤';
 }

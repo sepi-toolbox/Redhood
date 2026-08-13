@@ -658,7 +658,8 @@
             "amount": 7
           }
         ],
-        "cooldown": 3
+        "cooldown": 3,
+        "intent": "defend"
       },
       "surge": {
         "name": "옹이가 굵어진다",

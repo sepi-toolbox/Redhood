@@ -54,7 +54,13 @@ Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT paint
 Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, VERY LOW detail density — no dense texture, no tiny clutter, no thin hatching, no small internal details. NOT photorealistic, NOT 3D. Square 1:1 image. ONE single mark centered, filling about 82 percent of the frame, on one plain flat mid-grey background — solid color, no gradient, no checkerboard. IMPORTANT — draw ONLY the bare mark itself: no circle, no ring, no disc, no badge, no shield plate, no frame, no border, no plaque, nothing enclosing it and nothing behind it. The mark must be BRIGHT and vivid, clearly LIGHTER than the mid-grey background — do NOT make it dark or muddy. It floats free on the background and must read as one clear silhouette at 19px. The dominant color of the whole icon must be #ffd257. The mark: one bold upward chevron arrow with a short second chevron stacked under it, bright gold. No text, no letters, no watermark.
 ```
 
-## 치료 — `intent_heal`
+## ~~치료~~ — `intent_heal` · **v3.59부터 안 쓴다, 뽑지 마라**
+
+> 예고에서 치유를 걷어냈다. 적이 제 몸을 아무는 건 이번 턴 내 선택을 바꾸지 않는다.
+> 「공격+치유」(거머리 흡혈 13회)는 공격으로, 「치유+방해」는 방해로 읽힌다.
+> 치유만 있던 옹이 골렘 「수액 빨아올리기」는 데이터에 `"intent": "defend"` 를 박아 방어로 예고한다.
+> 아래 프롬프트는 되돌릴 때를 위해 남겨 둔 것이라 지금은 뽑을 필요가 없다.
+> (한 시트로 몰아 뽑을 때도 이 칸은 빼고 다섯만 뽑으면 된다.)
 
 <small>색 #37d67a</small>
 
