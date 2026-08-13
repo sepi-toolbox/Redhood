@@ -150,7 +150,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 138
+            "amount": 32
           }
         ],
         "minTurn": 5,
@@ -179,7 +179,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 279
+            "amount": 32
           }
         ],
         "minTurn": 5,
@@ -216,7 +216,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 112
+          "amount": 32
         },
         {
           "op": "status",
@@ -644,7 +644,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 37
+            "amount": 32
           }
         ],
         "minTurn": 5,
@@ -700,7 +700,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 37
+          "amount": 32
         },
         {
           "op": "block",
@@ -1139,7 +1139,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 95
+            "amount": 32
           }
         ],
         "minTurn": 5,
@@ -1208,7 +1208,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 245
+          "amount": 32
         }
       ]
     },
@@ -1641,7 +1641,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 43
+          "amount": 40
         },
         {
           "op": "status",
@@ -1948,7 +1948,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 159
+            "amount": 45
           }
         ]
       },
@@ -2133,7 +2133,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 136
+          "amount": 45
         },
         {
           "op": "status",
@@ -2511,7 +2511,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 63
+            "amount": 32
           },
           {
             "op": "heal",
@@ -2571,7 +2571,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 101
+          "amount": 32
         },
         {
           "op": "status",
@@ -4104,7 +4104,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 147
+            "amount": 32
           }
         ],
         "minTurn": 5,
@@ -4147,7 +4147,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 173
+          "amount": 32
         },
         {
           "op": "status",
@@ -4215,7 +4215,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 70
+            "amount": 32
           }
         ],
         "minTurn": 5,
@@ -4264,7 +4264,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 119
+          "amount": 32
         },
         {
           "op": "heal",
@@ -4755,7 +4755,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 44
+          "amount": 40
         },
         {
           "op": "status",
@@ -5751,7 +5751,7 @@
         "effects": [
           {
             "op": "damage",
-            "amount": 129
+            "amount": 32
           }
         ],
         "minTurn": 5,
@@ -5798,7 +5798,7 @@
       "effects": [
         {
           "op": "damage",
-          "amount": 223
+          "amount": 32
         },
         {
           "op": "status",
