@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.54'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.55'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -643,7 +643,10 @@ function iconifyIntent(s) {
     .replaceAll('⛓', ico('fx_cap', 'ico-intent'))
     .replaceAll('💗', ico('status_regen', 'ico-intent'))
     .replaceAll('💢', ico('fx_enrage', 'ico-intent'))
-    .replaceAll('🌵', ico('fx_reflect', 'ico-intent'));
+    .replaceAll('🌵', ico('fx_reflect', 'ico-intent'))
+    // 기절은 '다음에 뭘 하겠다'는 예고가 아니라 지금 그런 상태라는 표시다 — 상태이상 그림을 그대로 쓴다.
+    // (의도 줄에서는 동그라미 없이 얹히므로 예고 표식들과 섞여도 결이 맞는다)
+    .replaceAll('💫', ico('status_stun', 'ico-intent'));
 }
 
 // ---------- 맵 ----------
@@ -925,7 +928,7 @@ function renderBattle(opts = {}) {
           <button class="enemy t-${e.tier} ${slain ? 'slain' : ''} ${targetUid === e.uid && e.hp > 0 ? 'targeted' : ''}" data-uid="${e.uid}" ${slain ? 'disabled aria-hidden="true"' : ''}>
             ${/* v0.52: 정보(의도·이름·체력바)는 머리 위, 그림은 크게 아래 */ ''}
             <span class="target-pin">▼</span>
-            <span class="intent ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.chained ? 'chained' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}">${iconifyIntent(intentOf(e))} <small>${esc(e.nextMove.hidden && !e.stunned ? '???' : e.nextMove.name)}</small></span>
+            <span class="intent ${e.nextMove.id === 'surge' ? 'surging' : ''} ${e.nextMove.chained ? 'chained' : ''} ${e.nextMove.phaseShift ? 'phase-shift' : ''} ${e.nextMove.broken ? 'broken' : ''}">${iconifyIntent(intentOf(e))} <small>${esc(e.stunned ? '멈춤' : e.nextMove.hidden ? '???' : e.nextMove.name)}</small></span>
             <span class="enemy-name">${esc(e.name)}</span>
             ${(() => {
               // 적 방어도 LoL식: HP 구간 끝에 회백색 실드 세그먼트
