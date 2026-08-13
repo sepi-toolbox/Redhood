@@ -30,13 +30,13 @@
 | 방해 | `intent_confuse` | 60 |
 | 의문 | `intent_unknown` | 112 |
 | 휴식 | `intent_rest` | 111 |
-| 공격+방해 | `intent_attack_confuse` (42회) | 47 |
-| 방어+방해 | `intent_defend_confuse` (13회) | 85 |
-| 공격+강화 | `intent_attack_empower` (7회) | 54 |
-| 공격+방어 | `intent_attack_defend` (3회) | 75 |
-| 방어+강화 | `intent_defend_empower` (0회, 예비) | 97 |
+| 공격+방해 | `intent_attack_confuse` (42회) | 44 |
+| 방어+방해 | `intent_defend_confuse` (13회) | 75 |
+| 공격+강화 | `intent_attack_empower` (7회) | 59 |
+| 공격+방어 | `intent_attack_defend` (3회) | 58 |
+| 방어+강화 | `intent_defend_empower` (0회, 예비) | 94 |
 
-「공격」만 45 아래로 나오는데, 밝기 식이 붉은색을 0.299로 낮게 치기 때문이지 실제로는 안 어둡다.
+「공격」과 「공격+방해」만 45 아래로 나오는데, 밝기 식이 붉은색을 0.299로 낮게 치기 때문이지 실제로는 안 어둡다.
 19px로 줄여 확인했고 다른 표식들 사이에서 제일 먼저 눈에 들어온다.
 
 **예고 줄에 뜨는 건 이 열하나가 전부다.** v3.60부터 치유·문턱·상한·재생·격노·반사는 예고에서
