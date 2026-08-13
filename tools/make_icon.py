@@ -121,3 +121,14 @@ def build_relic(src, relic_id, size=128):
         lum = sum(0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2] for p in px) / len(px)
         print(f'   평균 밝기 {lum:.0f}' + ('  ⚠ 40 이하 — 어두운 원 위에서 안 보인다. 다시 뽑는 게 낫다' if lum < 40 else ''))
     return im
+
+# ---------- 태그 심볼 (족보 태그 · 버프 칩 · 적 배지 공용) ----------
+def build_tag(src, name, size=96):
+    """회색 배경을 키잉해 assets/icons/{name}.png 로 굽고 밝기를 잰다.
+    26px 원 안에 들어가므로 어두우면 검은 점으로만 보인다 — 45 아래면 다시 뽑는 게 낫다."""
+    im = build_ui(src, name, size=size, pad=0.04, out_dir='assets/icons', prefix='')
+    px = [p for p in im.convert('RGBA').getdata() if p[3] > 40]
+    if px:
+        lum = sum(0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2] for p in px) / len(px)
+        print(f'   평균 밝기 {lum:.0f}' + ('  ⚠ 45 이하 — 어두운 원 안에서 안 읽힌다. 다시 뽑자' if lum < 45 else '  ✅'))
+    return im
