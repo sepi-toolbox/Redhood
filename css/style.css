@@ -362,6 +362,14 @@ span.enemy-art {
 .enemy-tags .tg b { font-size: 10.5px; right: -2px; bottom: -3px; }
 /* 내가 걸어 둔 것은 테두리를 한 겹 더 밝게 — 적이 두른 것과 구분된다 */
 .enemy-tags .tg.mine { box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,236,200,.14), 0 0 0 1px rgba(255, 236, 200, .28); }
+/* v3.52: 내 상태 줄도 같은 표식으로. 체력바 안에는 체력만 남았다 */
+.my-tags { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px; }
+.my-tags .tg { width: 23px; height: 23px; border-width: 1.3px; }
+.my-tags .tg img { width: 16px; height: 16px; }
+.my-tags .tg.plain img { width: 15px; height: 15px; }
+.my-tags .tg b { font-size: 11px; right: -2px; bottom: -3px; }
+/* 내게 해로운 것은 테두리를 붉게 한 겹 — 이로운 것과 한눈에 갈린다 */
+.my-tags .tg.harm { box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,236,200,.14), 0 0 0 1px rgba(190, 60, 44, .55); }
 .mid-line { flex: none; min-height: 18px; text-align: center; padding: 0 12px; position: relative; z-index: 2; }
 .last-result { font-size: 12px; color: #e8b64b; }
 .last-result b { font-size: 14px; }
@@ -730,7 +738,6 @@ span.enemy-art {
   border-right: 1px solid rgba(0, 0, 0, .35);
   transition: width .3s, left .3s;
 }
-.hp-text .dot-num { color: #a8dc8c; font-size: 11.5px; }
 /* LoL식 방어도: HP 구간 끝에 회백색 실드 세그먼트가 겹쳐 붙는다 */
 .hp-shield {
   position: absolute; top: 0; bottom: 0;
@@ -742,7 +749,6 @@ span.enemy-art {
   position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 5px;
   font-size: 12.5px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px #000;
 }
-.shield-num { font-size: 11px; color: #efece4; }
 /* 나무결을 덮어쓰지 않도록 배경색 대신 안쪽 그림자로 붉게 물들인다 */
 @keyframes hurtFlash {
   0%, 100% { box-shadow: none; }
@@ -1233,13 +1239,11 @@ span.enemy-art {
 .topbar .ico-node { width: 16px; height: 16px; vertical-align: -3px; }
 .ico-weapon { width: 36px; height: 36px; vertical-align: -12px; margin-right: 2px; }
 .rest-art .ico-big { width: 86px; height: 86px; }
-.enemy-buffs .ico, .buff-chip .ico, .shield-num .ico { width: 13px; height: 13px; vertical-align: -2px; }
 .die small .ico { width: 11px; height: 11px; vertical-align: -2px; }
 .deck-list .ico { width: 16px; height: 16px; vertical-align: -3px; }
 /* v3.41: 이모지를 표식 아트로 바꾼 자리들 — 글자 크기에 맞춰 줄인다 */
 .sheet-preview .ico-ui { width: 15px; height: 15px; vertical-align: -2px; margin-right: 2px; }
 .dmg-float .ico-ui { width: 14px; height: 14px; vertical-align: -2px; margin-right: 1px; }
-.dot-num .ico-ui, .intent-line small .ico-ui { width: 12px; height: 12px; vertical-align: -2px; margin-right: 1px; }
 
 /* ==================== v1.17 주사위 상태이상 ====================
    네 겹으로 얹는다 — 물듦(아래) · 그림 · 안쪽 발광 · 이름표.
@@ -1773,7 +1777,7 @@ span.enemy-art {
   70%  { transform: translateY(0) scale(.97); }
   100% { transform: none; }
 }
-.buff-strip .badge.chip-in {
+.buff-strip .tg.chip-in {
   animation: chipIn .46s cubic-bezier(.2, .9, .3, 1.5) both;
   box-shadow: 0 0 0 2px rgba(255, 210, 140, .5), 0 0 12px rgba(255, 180, 90, .55);
 }
