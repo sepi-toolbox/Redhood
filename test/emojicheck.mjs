@@ -12,7 +12,7 @@ DB.enemyById=Object.fromEntries(DB.enemies.map(e=>[e.id,e]));
 const E=await import('../js/engine.js');
 
 // main.js 의 iconifyIntent 가 그림으로 바꿔 주는 목록
-const MAPPED = new Set(['⚔️','🛡','🌀','💪','💚','❓','🪨','⛓','💗','💢','🌵','💫']);
+const MAPPED = new Set(['⚔️','🛡','🌀','💪','❓','💫']);  // v3.60: 예고가 낼 수 있는 글자는 이게 전부
 // ⚔️ 처럼 변이 선택자(FE0F)가 붙는 것은 한 글자로 묶어 센다 — 쪼개면 안 바뀐 것처럼 보인다
 const RE = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]\u{FE0F}?/gu;
 
