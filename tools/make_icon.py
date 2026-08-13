@@ -123,12 +123,45 @@ def build_relic(src, relic_id, size=128):
     return im
 
 # ---------- 태그 심볼 (족보 태그 · 버프 칩 · 적 배지 공용) ----------
-def build_tag(src, name, size=96):
-    """회색 배경을 키잉해 assets/icons/{name}.png 로 굽고 밝기를 잰다.
-    26px 원 안에 들어가므로 어두우면 검은 점으로만 보인다 — 45 아래면 다시 뽑는 게 낫다."""
+def build_tag(src, name, size=96, tone=True):
+    """회색 배경을 키잉하고 게임 톤으로 눌러 assets/icons/{name}.png 로 굽는다.
+    26px 원 안에 들어가므로 어두우면 검은 점으로만 보인다 — 밝기 45 아래면 다시 뽑는 게 낫다."""
     im = build_ui(src, name, size=size, pad=0.04, out_dir='assets/icons', prefix='')
+    if tone:
+        im = tone_to_game(im)
+        im.save(f'assets/icons/{name}.png')
     px = [p for p in im.convert('RGBA').getdata() if p[3] > 40]
     if px:
         lum = sum(0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2] for p in px) / len(px)
         print(f'   평균 밝기 {lum:.0f}' + ('  ⚠ 45 이하 — 어두운 원 안에서 안 읽힌다. 다시 뽑자' if lum < 45 else '  ✅'))
     return im
+
+# ---------- 게임 톤 맞추기 ----------
+#   새로 뽑은 그림은 대체로 쨍하다. 이미 자리 잡은 표식들(벼름·일격·출혈·문턱 …)의
+#   명도·채도 폭 안으로 눌러 넣어 화면에서 혼자 튀지 않게 한다.
+#   밝히지는 않는다 — 어두워서 안 보이는 문제는 프롬프트 단계에서 잡는다.
+TONE_V = 46.0   # 자리 잡은 표식들의 명도(HSV V, %) 중앙값
+TONE_S = 70.0   # 채도는 이 위로만 누른다
+
+def tone_to_game(im):
+    import colorsys
+    im = im.convert('RGBA')
+    px = list(im.getdata())
+    lit = [p for p in px if p[3] > 60]
+    if not lit:
+        return im
+    hsv = [colorsys.rgb_to_hsv(p[0] / 255, p[1] / 255, p[2] / 255) for p in lit]
+    s0 = sum(h[1] for h in hsv) / len(hsv) * 100
+    v0 = sum(h[2] for h in hsv) / len(hsv) * 100
+    kv = min(1.0, max(0.55, TONE_V / v0)) if v0 > 0 else 1.0
+    ks = min(1.0, max(0.60, TONE_S / s0)) if s0 > 0 else 1.0
+    out = []
+    for r, g, b, a in px:
+        if a <= 0:
+            out.append((r, g, b, a)); continue
+        h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+        r2, g2, b2 = colorsys.hsv_to_rgb(h, min(1, s * ks), min(1, v * kv))
+        out.append((round(r2 * 255), round(g2 * 255), round(b2 * 255), a))
+    im2 = Image.new('RGBA', im.size); im2.putdata(out)
+    print(f'   톤 맞춤: 채도 {s0:.0f}→{s0*ks:.0f} · 명도 {v0:.0f}→{v0*kv:.0f}')
+    return im2
