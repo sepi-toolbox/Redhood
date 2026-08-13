@@ -1808,3 +1808,20 @@ span.enemy-art {
   margin-right: 6px; vertical-align: middle;
   box-shadow: 0 0 0 1px #0006;
 }
+
+/* v3.48: 족보가 봉인되는 순간 — 밀랍 도장이 내리찍히듯 한 번 눌린다 */
+@keyframes sealStrike {
+  0%   { transform: scale(1);    filter: brightness(1); }
+  18%  { transform: scale(1.04); filter: brightness(2.1) saturate(.4); }
+  46%  { transform: scale(.985); filter: brightness(1.15); }
+  100% { transform: scale(1);    filter: brightness(1); }
+}
+.sheet-row.seal-strike { animation: sealStrike .9s cubic-bezier(.2, .9, .3, 1); z-index: 6; }
+.sheet-row .seal-float {
+  position: absolute; left: 50%; top: -2px; z-index: 9; pointer-events: none;
+  transform: translateX(-50%); white-space: nowrap;
+  font-size: 13px; font-weight: 800; color: #cfe0ff;
+  text-shadow: 0 1px 3px #000, 0 0 8px rgba(0, 0, 0, .9);
+  animation: stFloatUp 1.4s ease-out forwards;
+}
+.sheet-row .seal-float .ico-ui { width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }

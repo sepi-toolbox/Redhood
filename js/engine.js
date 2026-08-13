@@ -49,6 +49,7 @@ export function createBattle(run, encounterIds) {
     categories: slotsOf(run.categories),   // 족보 id -> 끼워진 변형 id (없으면 null = 기본)
     sealed: {},
     lastUsedCat: null,
+    lastSealableCat: null,          // 흉내내기가 노려보는 족보 (노페어는 면제라 따로 둔다)
     rollsLeft: 0,
     nextTurnRerolls: 0,
     pendingBuff: 0,
@@ -185,8 +186,13 @@ export const canSeal = (catId) => !SEAL_EXEMPT.has(catId);
 function sealCat(battle, catId, turns) {
   if (!canSeal(catId)) return false;
   battle.sealed[catId] = Math.max(battle.sealed[catId] || 0, (turns || 1) + 1);
+  // v3.48: 봉인이 걸린 순간을 연출로 알린다 — 전에는 아무 표시 없이 조용히 잠겨서
+  //        '아무 일도 안 일어난다'로 읽혔다.
+  // 저장값은 '이번 적 페이즈 직후의 감소분'까지 더한 수라, 연출에는 화면에 뜰 턴수를 그대로 넘긴다
+  (battle.sealFx || (battle.sealFx = [])).push({ cat: catId, turns: Math.max(1, (turns || 1)) });
   return true;
 }
+export function takeSealFx(battle) { const f = battle.sealFx || []; battle.sealFx = []; return f; }
 
 export function clearStatuses(battle, kind = null) {
   let n = 0;
@@ -765,6 +771,9 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   }
   battle.lastResult = { catName: `${variant.name}(${cat.name})`, ...bd, bonusHits: [], aoe: isAoE(cat), fx: cat.fx || 'slash' };
   battle.lastUsedCat = catId;
+  // v3.48: 노페어는 봉인 면제라, 직전에 노페어를 쓰면 흉내내기가 그냥 헛방이었다 (12%).
+  //        봉인할 수 있는 족보를 따로 기억해 둔다 — '흉내낸다'는 뜻은 그대로다.
+  if (canSeal(catId)) battle.lastSealableCat = catId;
   battle.lastHits = [];
 
   if (bd.total > 0) {
@@ -983,7 +992,7 @@ export function enemyPhase(battle) {
           break;
         // ---- v1.30 정예·보스 기믹 ----
         case 'sealLast':                                   // 🔒 직전에 쓴 족보를 봉인한다 (흉내내기)
-          if (battle.lastUsedCat) sealCat(battle, battle.lastUsedCat, ef.turns);
+          if (battle.lastSealableCat) sealCat(battle, battle.lastSealableCat, ef.turns);
           break;
         case 'sealCat':                                    // 🔒 지정 족보들을 봉인한다 (솜 채우기)
           for (const cid of (ef.cats || [])) sealCat(battle, cid, ef.turns);

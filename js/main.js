@@ -1,11 +1,11 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
-import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf, modOf, takeFx } from './engine.js';
+import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf, modOf, takeFx, takeSealFx } from './engine.js';
 import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.47'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.48'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1390,6 +1390,24 @@ function playStatusFx(fx) {
   }, 120 + n * 130));
 }
 
+/* v3.48: 족보가 봉인되는 순간 — 전에는 아무 표시 없이 줄만 조용히 잠겨서
+   "흉내내기는 아무 일도 안 일어난다"로 읽혔다. 그 줄을 화면으로 끌어와 도장을 찍는다. */
+function playSealFx(list) {
+  list.forEach(({ cat, turns }, n) => setTimeout(() => {
+    const el = app.querySelector(`.sheet-row[data-cat="${cat}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    el.classList.remove('seal-strike'); void el.offsetWidth; el.classList.add('seal-strike');
+    setTimeout(() => el.classList.remove('seal-strike'), 900);
+    const f = document.createElement('span');
+    f.className = 'seal-float';
+    f.innerHTML = `${ico('fx_seal_cat', 'ico-ui')}봉인 ${turns}턴`;
+    el.appendChild(f);
+    setTimeout(() => f.remove(), 1500);
+    shakeScreen(140);
+  }, n * 220));
+}
+
 function shakeScreen(ms) {
   const sc = app.querySelector('.battle-screen');
   if (!sc) return;
@@ -1621,9 +1639,11 @@ function tryConfirm(catId, variantId, uid) {
       }
       syncTarget();
       const stfx = takeFx(battle);
+      const sfx = takeSealFx(battle);
       renderBattle();
       popNewChips();
       setTimeout(() => playStatusFx(stfx), 120);
+      if (sfx.length) setTimeout(() => playSealFx(sfx), 160);
       const hits = (battle.enemyHits || []).filter(h => h.taken > 0 || h.blocked > 0);
       if (hits.length > 1) { playMultiHit(hits, hpBefore); busy = false; return; }
       const dmgTaken = hpBefore - battle.player.hp;
