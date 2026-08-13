@@ -223,7 +223,7 @@
       "kind": "fullHouse",
       "score": "sumAll",
       "tier": "uncommon",
-      "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2)면 성립. 피해 25.",
+      "ruleText": "같은 눈 3개 + 다른 같은 눈 2개(예: 5·5·5·2·2) — 피해: 주사위 다섯 눈의 합 ×1.8 (내림)",
       "example": [
         5,
         5,
@@ -281,7 +281,7 @@
       "length": 5,
       "score": "sumRun", "mult": 3.4,
       "tier": "rare",
-      "ruleText": "다섯 눈이 이어진다 — 피해 60 (전체 공격)",
+      "ruleText": "다섯 눈이 이어진다 — 피해: 이어진 다섯 눈의 합 ×3.4 (내림, 전체 공격)",
       "target": "allEnemies",
       "example": [
         2,
@@ -421,7 +421,7 @@
       "count": 5,
       "score": "matchedSum",
       "tier": "epic",
-      "ruleText": "주사위 5개가 모두 같은 눈이면 성립. 피해 50.",
+      "ruleText": "주사위 5개가 모두 같은 눈 — 피해: 다섯 눈의 합 ×4",
       "example": [
         6,
         6,
