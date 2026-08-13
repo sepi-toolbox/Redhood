@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.55'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.56'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -307,7 +307,6 @@ function enemyTags(e) {
   // 적이 두르거나 적을 지켜 주는 것 — 나에게는 전부 해롭다
   if (e.wardLeft > 0) t.push(iconTag(FX_ICON.ward, 'harm', e.ward, `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다 (${e.wardLeft}턴)`));
   if (e.capLeft > 0) t.push(iconTag(FX_ICON.cap, 'harm', e.cap, `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다 (${e.capLeft}턴)`));
-  if (e.block > 0) t.push(iconTag('status_block', 'harm', e.block, `방어 ${e.block}`));
   if (e.power > 0) t.push(iconTag('intent_empower', 'harm', e.power, `강화 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
   if (e.regenLeft > 0 && e.regen > 0) t.push(iconTag(FX_ICON.regen, 'harm', e.regen, `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)`));
   if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, 'harm', e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
@@ -938,7 +937,8 @@ function renderBattle(opts = {}) {
               // v3.51: 체력 숫자를 게이지 안으로 넣는다 — 아래 한 줄은 통째로 상태 줄이 된다
               return `<span class="bar t-${e.tier}"><i style="width:${ehpPct}%"></i>`
                 + `${e.block > 0 && !e.final ? `<b class="ebar-shield" style="left:${ehpPct}%;width:${eshPct}%"></b>` : ''}`
-                + `<span class="bar-text">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}</span></span>`;
+                + `<span class="bar-text"><span class="bar-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}</span>`
+                + `${e.block > 0 && !e.final ? `<span class="bar-block" title="방어 ${e.block}">+${e.block}</span>` : ''}</span></span>`;
             })()}
             ${enemyTags(e)}
             ${enemyArtHtml(e)}
@@ -1001,7 +1001,7 @@ function renderBattle(opts = {}) {
             return `<div class="hp-dot" style="left:${Math.max(0, hpPct - w)}%; width:${w}%"></div>`;
           })()}
           ${p.block > 0 ? `<div class="hp-shield" style="left:${hpPct}%; width:${shieldPct}%"></div>` : ''}
-          <span class="hp-text">${p.hp} / ${p.maxHp}</span>
+          <span class="hp-text"><span class="bar-hp">${p.hp} / ${p.maxHp}</span>${p.block > 0 ? `<span class="bar-block" title="방어 ${p.block} — 다음 적 행동까지 막아 낸다">+${p.block}</span>` : ''}</span>
         </div>
         <span class="pb-side">${battle.pendingBuff > 0 ? `${uiIco('burst')}+${battle.pendingBuff}` : ''}</span>
       </div>
@@ -1012,7 +1012,6 @@ function renderBattle(opts = {}) {
         const t = [];
         if (battle.whet > 0) t.push(iconTag(UI_ICO.whet, 'good', battle.whet,
           `벼름 ${battle.whet} — 일격 족보로만 터뜨린다 (지금 ×${whetMultOf(battle.whet).toFixed(1)})`));
-        if (p_.block > 0) t.push(iconTag('status_block', 'good', p_.block, `방어 ${p_.block} — 다음 적 행동까지 막아 낸다`));
         if (b.strength > 0) t.push(iconTag('status_strength', 'good', b.strength, `힘 +${b.strength} — 확정할 때마다 피해 +${b.strength}`));
         if (b.focus > 0) t.push(iconTag('status_focus', 'good', b.focus, `집중 +${b.focus} — 매 턴 리롤 +${b.focus}`));
         if (b.regen > 0) t.push(iconTag('status_regen', 'good', b.regen, `재생 +${b.regen} — 턴마다 회복`));

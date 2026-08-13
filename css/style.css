@@ -344,8 +344,8 @@ span.enemy-art {
 .enemy-hp { font-size: 11.5px; color: #9c8f7a; }
 /* v3.51: 체력 숫자를 게이지 안으로 — 아래 한 줄은 통째로 상태 줄이 된다 */
 .enemy .bar .bar-text {
-  position: absolute; inset: 0; z-index: 3; pointer-events: none;
-  display: flex; align-items: center; justify-content: center;
+  position: absolute; inset: 0; z-index: 3; pointer-events: none; align-items: center;
+  display: grid; grid-template-columns: 1fr auto 1fr;
   font-size: 11px; line-height: 1; font-weight: 800; color: #f3e3c2;
   text-shadow: 0 1px 2px #000, 0 0 4px rgba(0, 0, 0, .95);
 }
@@ -741,9 +741,18 @@ span.enemy-art {
   border-left: 1px solid rgba(0, 0, 0, .35);
   transition: width .3s, left .3s;
 }
+/* v3.56: 체력 숫자는 바 한가운데 못 박고, 방어도는 그 오른쪽에 붙인다.
+   가운데 칸(auto)만 중앙에 놓이므로 +N 이 생기거나 사라져도 체력 숫자는 제자리다.
+   (한 덩어리로 가운데 정렬하면 방어도가 붙을 때마다 체력이 왼쪽으로 밀린다) */
 .hp-text {
-  position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 5px;
+  position: absolute; inset: 0; z-index: 2; align-items: center;
+  display: grid; grid-template-columns: 1fr auto 1fr;
   font-size: 12.5px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px #000;
+}
+.hp-text .bar-hp, .bar-text .bar-hp { grid-column: 2; justify-self: center; white-space: nowrap; }
+.hp-text .bar-block, .bar-text .bar-block {
+  grid-column: 3; justify-self: start; white-space: nowrap;
+  margin-left: 5px; color: #d8e6f2; font-weight: 800;
 }
 /* 나무결을 덮어쓰지 않도록 배경색 대신 안쪽 그림자로 붉게 물들인다 */
 @keyframes hurtFlash {
@@ -1874,3 +1883,6 @@ span.enemy-art {
 /* 봉인·사용 완료 줄에서는 표식도 같이 가라앉는다 */
 .sheet-row.used .tagbox { opacity: .5; }
 .sheet-row.sig-sealed .tagbox { filter: saturate(.22) brightness(.46); }
+
+/* 적 바는 좁아서 방어도를 조금 더 작게 */
+.enemy .bar .bar-text .bar-block { font-size: 10px; margin-left: 4px; }
