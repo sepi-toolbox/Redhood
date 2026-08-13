@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.51'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.52'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -627,32 +627,8 @@ function showFinalEnd(turns) {
 }
 
 // ---------- 아이콘 아트 (v0.24): 이모지 자리 → 그림 아이콘 ----------
-/* ---------- 표식(badge) — v1.33 -------------------------------------------
- * 화면에 뜨는 '아이콘 + 값' 은 전부 이 하나를 통과한다. 결(tone)은 셋뿐:
- *   good  내게 유리한 것  (내 버프 · 적에게 걸린 디버프)
- *   bad   내게 불리한 것  (내가 물린 지속 피해 · 적이 두른 것)
- *   rule  규칙·제약       (정예/보스 기믹)
- * 아이콘은 그림이 있으면 그림, 없으면 글자 — 담는 틀은 어느 쪽이든 같다.
- * ------------------------------------------------------------------------ */
-// v3.14: 손으로 적던 흰 목록이 fx_*·ui_* 를 몰라 배지에 파일 이름이 그대로 찍혔다.
-// 접두사로 판별한다 — 새 아이콘을 넣을 때마다 여기를 고칠 일이 없게.
-const ICON_ASSET = /^(status|intent|fx|ui|node|doodle)_/;
-function badgeIcon(icon) {
-  return ICON_ASSET.test(icon)
-    ? `<img class="bdg-ico" src="assets/icons/${icon}.png" alt="" draggable="false">`
-    : `<span class="bdg-ico glyph">${icon}</span>`;
-}
-function badge(tone, icon, value, opt = {}) {
-  return `<span class="badge t-${tone}${opt.cls ? ' ' + opt.cls : ''}"${opt.title ? ` title="${esc(opt.title)}"` : ''}>`
-    + badgeIcon(icon)
-    + (value !== '' && value != null ? `<span class="bdg-val">${value}</span>` : '')
-    + (opt.sub ? `<span class="bdg-sub">${opt.sub}</span>` : '')
-    + '</span>';
-}
-const badgeRow = (cls, list) => {
-  const inner = list.filter(Boolean).join('');
-  return inner ? `<span class="${cls}">${inner}</span>` : '';
-};
+/* v3.52: 옛 표식(badge/badgeRow)은 전부 iconTag 로 갈아탔다 — 내 줄·적 줄·족보 줄이 한 얼굴이다.
+   쓰는 곳이 없어져 지웠다. 표식을 만들 때는 iconTag 를 쓴다. */
 
 function ico(name, cls = '') {
   return `<img class="ico ${cls}" src="assets/icons/${name}.png" alt="" draggable="false">`;
@@ -1028,27 +1004,29 @@ function renderBattle(opts = {}) {
             return `<div class="hp-dot" style="left:${Math.max(0, hpPct - w)}%; width:${w}%"></div>`;
           })()}
           ${p.block > 0 ? `<div class="hp-shield" style="left:${hpPct}%; width:${shieldPct}%"></div>` : ''}
-          <span class="hp-text">${p.hp} / ${p.maxHp}${p.block > 0 ? `<span class="shield-num">${ico('status_block')}${p.block}</span>` : ''}${p.dot > 0 ? `<span class="dot-num">${DOT_KO[p.dotKind] || '독'} ${p.dot}</span>` : ''}</span>
+          <span class="hp-text">${p.hp} / ${p.maxHp}</span>
         </div>
         <span class="pb-side">${battle.pendingBuff > 0 ? `${uiIco('burst')}+${battle.pendingBuff}` : ''}</span>
       </div>
       ${(() => {
-        // 내 버프 칩 — v3.24: 체력바 아래로 내렸다 (성권). 길게 눌러 상세
+        // 내 상태 줄 — v3.52: 적 줄과 같은 동그라미 표식으로 통일. 체력바 안에는 체력만 남았다.
         const b = battle.buffs;
-        const row = badgeRow('badge-row', [
-          battle.whet > 0 ? badge('good', UI_ICO.whet, battle.whet,
-            { cls: 'whet', title: `벼름 ${battle.whet} — 일격 족보로만 터뜨린다 (지금 ×${whetMultOf(battle.whet).toFixed(1)})` }) : '',
-          b.strength > 0 ? badge('good', 'status_strength', b.strength, { title: '힘 — 확정마다 피해 +' }) : '',
-          b.focus > 0 ? badge('good', 'status_focus', '+' + b.focus, { title: '집중 — 리롤 +' }) : '',
-          b.regen > 0 ? badge('good', 'status_regen', '+' + b.regen, { title: '재생 — 턴마다 회복' }) : '',
-          battle.player.dot > 0 ? badge('bad', 'status_bleed', battle.player.dot,
-            { title: (DOT_KO[battle.player.dotKind] || '독') + ' — 내 행동 뒤에 피해' }) : '',
-          ...['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind'].map(k => {
-            const m = modOf(battle, k);
-            return m ? badge('bad', FX_ICON[k], m.left, { title: `${m.name} — ${CB_MOD_KO[k]}` }) : '';
-          }),
-        ]);
-        return row ? `<div class="buff-strip" id="buff-strip">${row}</div>` : '';
+        const p_ = battle.player;
+        const FXC = (DB.statuses && DB.statuses.fxColors) || {};
+        const t = [];
+        if (battle.whet > 0) t.push(iconTag(UI_ICO.whet, '#e0761a', battle.whet,
+          `벼름 ${battle.whet} — 일격 족보로만 터뜨린다 (지금 ×${whetMultOf(battle.whet).toFixed(1)})`));
+        if (p_.block > 0) t.push(iconTag('status_block', '#b9c6d6', p_.block, `방어 ${p_.block} — 다음 적 행동까지 막아 낸다`));
+        if (b.strength > 0) t.push(iconTag('status_strength', '#f0b429', b.strength, `힘 +${b.strength} — 확정할 때마다 피해 +${b.strength}`));
+        if (b.focus > 0) t.push(iconTag('status_focus', '#4fc3f7', '+' + b.focus, `집중 +${b.focus} — 매 턴 리롤 +${b.focus}`));
+        if (b.regen > 0) t.push(iconTag('status_regen', '#e5468f', '+' + b.regen, `재생 +${b.regen} — 턴마다 회복`));
+        if (p_.dot > 0) t.push(iconTag('status_bleed', '#e83b2e', p_.dot,
+          `${DOT_KO[p_.dotKind] || '독'} ${p_.dot} — 내 행동 뒤에 피해`, 'harm'));
+        for (const k of ['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']) {
+          const m = modOf(battle, k);
+          if (m) t.push(iconTag(FX_ICON[k], FXC[k] || '#9e2f2f', m.left, `${m.name} — ${CB_MOD_KO[k]} (${m.left}턴)`, 'harm'));
+        }
+        return t.length ? `<div class="buff-strip" id="buff-strip"><span class="my-tags">${t.join('')}</span></div>` : '';
       })()}
     </div>`));
 
@@ -1467,7 +1445,7 @@ function shakeScreen(ms) {
 // 체력바 아래 칩 — 새로 생긴 것만 튀어 오른다
 let prevChipKeys = new Set();
 function popNewChips() {
-  const chips = [...app.querySelectorAll('.buff-strip .badge')];
+  const chips = [...app.querySelectorAll('.buff-strip .tg')];
   const now = new Set();
   chips.forEach(c => {
     const img = c.querySelector('img.bdg-ico');
