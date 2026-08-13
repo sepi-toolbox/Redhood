@@ -1166,9 +1166,24 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.confirmCategory(b, 'onePair', 'onePair__base');
     cast(b, e, [{ op: 'sealLast', turns: 2 }]);
     eq('흉내내기: 직전 족보가 봉인된다', (b.sealed.onePair || 0) > 0, true);
+    eq('흉내내기: 봉인이 걸리면 연출 신호가 나온다',
+       (() => { const f = eng.takeSealFx(b); return f.length === 1 && f[0].cat === 'onePair'; })(), true);
     setFaces(b, [5, 5, 4, 2, 1]);
     eq('흉내내기: 봉인된 족보 확정 불가', eng.confirmCategory(b, 'onePair', 'onePair__base'), null);
     eq('흉내내기: 다른 족보는 된다', !!eng.confirmCategory(b, 'chance', 'chance__base'), true);
+  }
+  // v3.48: 노페어는 봉인 면제라, 직전에 노페어를 쓰면 흉내내기가 그냥 헛방이었다 (실측 12%).
+  //   이제 '봉인할 수 있는 마지막 족보'를 노리므로 헛방이 없다.
+  {
+    const b = mk(['crow']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
+    setFaces(b, [5, 5, 4, 2, 1]);
+    eng.confirmCategory(b, 'onePair', 'onePair__base');      // 봉인 가능한 족보를 먼저
+    setFaces(b, [6, 5, 4, 2, 1]);
+    eng.confirmCategory(b, 'chance', 'chance__base');        // 그 다음 노페어
+    eq('흉내내기: 직전이 노페어여도 노릴 대상이 남는다', b.lastSealableCat, 'onePair');
+    cast(b, e, [{ op: 'sealLast', turns: 2 }]);
+    eq('흉내내기: 헛방이 되지 않는다', (b.sealed.onePair || 0) > 0, true);
+    eq('흉내내기: 노페어는 여전히 안 잠긴다', b.sealed.chance || 0, 0);
   }
   // sealCat — 지정 족보 봉인 (솜 채우기)
   {
