@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.68'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.69'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1048,7 +1048,9 @@ function renderBattle(opts = {}) {
           const m = modOf(battle, k);
           if (m) t.push(iconTag(FX_ICON[k], 'harm', m.left, `${m.name} — ${CB_MOD_KO[k]} (${m.left}턴)`));
         }
-        return t.length ? `<div class="buff-strip" id="buff-strip"><span class="my-tags">${t.join('')}</span></div>` : '';
+        // v3.69: 표식이 하나도 없어도 줄을 지운 채로 두면, 벼름이 붙었다 사라질 때마다
+        //        체력바가 그 높이만큼 위아래로 튄다. 줄은 늘 자리를 지키고 안만 비운다.
+        return `<div class="buff-strip" id="buff-strip"><span class="my-tags">${t.join('')}</span></div>`;
       })()}
     </div>`));
 
