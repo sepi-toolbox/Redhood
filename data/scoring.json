@@ -140,11 +140,11 @@
           "name": "두 개의 달",
           "ability": [
             {
-              "op": "bleed",
-              "amount": 2
+              "op": "weakEnemy",
+              "amount": 1
             }
           ],
-          "abilityText": "출혈 2 — 적이 행동할 때마다 아프다",
+          "abilityText": "약화 1 — 적 공격력 -1 (달이 둘이면 겨냥이 흔들린다)",
           "tier": "uncommon"
         }
       ],
