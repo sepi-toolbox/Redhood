@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.59'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.60'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -654,13 +654,9 @@ function iconifyIntent(s) {
     .replaceAll('🛡', ico('intent_defend', 'ico-intent'))
     .replaceAll('🌀', ico('intent_confuse', 'ico-intent'))
     .replaceAll('💪', ico('intent_empower', 'ico-intent'))
-    .replaceAll('💚', ico('intent_heal', 'ico-intent'))
     .replaceAll('❓', ico('intent_unknown', 'ico-intent'))
-    .replaceAll('🪨', ico('fx_ward', 'ico-intent'))
-    .replaceAll('⛓', ico('fx_cap', 'ico-intent'))
-    .replaceAll('💗', ico('status_regen', 'ico-intent'))
-    .replaceAll('💢', ico('fx_enrage', 'ico-intent'))
-    .replaceAll('🌵', ico('fx_reflect', 'ico-intent'))
+    // v3.60: 치유(💚)와 지속 효과(🪨⛓💗💢🌵)는 이제 예고에 안 나온다 — 여기서도 걷어냈다.
+    // 그 그림들은 적 몸에 걸린 뒤 배지(enemyTags)에서 제 역할을 계속한다.
     // 기절은 '다음에 뭘 하겠다'는 예고가 아니라 지금 그런 상태라는 표시다 — 상태이상 그림을 그대로 쓴다.
     // (의도 줄에서는 동그라미 없이 얹히므로 예고 표식들과 섞여도 결이 맞는다)
     .replaceAll('💫', ico('status_stun', 'ico-intent'));

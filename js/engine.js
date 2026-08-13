@@ -1192,6 +1192,8 @@ export const INTENT_COMBO = {
 const INTENT_FORCED = { attack: '⚔️', defend: '🛡', empower: '💪', confuse: '🌀', unknown: '❓', rest: '💤' };
 const DISRUPT_OPS = new Set(['confuse', 'poison', 'bleed', 'status', 'sealLast', 'sealCat',
   'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind', 'drainWhet', 'unpin']);
+// 예고 줄로는 말할 수 없는 것 — 걸리고 나서 배지로 보는 지속 효과
+const OPAQUE_OPS = new Set(['ward', 'cap', 'regen', 'enrage', 'reflect']);
 
 export function intentOf(enemy) {
   const mv = enemy.nextMove;
@@ -1200,23 +1202,21 @@ export function intentOf(enemy) {
   if (mv.hidden) return '❓';
   // 자해처럼 예고로 읽어낼 수 없는 효과가 섞이면 통째로 '?' 로 가린다
   if (mv.effects.some(ef => ef.op === 'selfDamage')) return '❓';
+  // v3.60: 몸에 얹혀 여러 턴 남는 것(문턱·상한·재생·격노·반사)도 마찬가지다. 저건 '이번에 뭘 하겠다'가
+  //        아니라 '앞으로 이런 몸이 되겠다'라서 예고 줄의 다섯 갈래로는 말할 수 없다. 걸리고 나면
+  //        배지로 보이니 예고에서는 정체를 밝히지 않는다. (성권: 상태이상은 예고에 표시되는 게 아니다)
+  if (mv.effects.some(ef => OPAQUE_OPS.has(ef.op))) return '❓';
   // 예고가 텅 비는 자리(치유만 있는 행동 따위)는 데이터가 직접 지정한다
   if (mv.intent && INTENT_FORCED[mv.intent]) return INTENT_FORCED[mv.intent];
 
   const dmg = [];            // 한 대 피해 × 타수
   let blockAmt = null, emp = false, dis = false;
-  const tail = [];           // 문턱·상한·재생·격노·반사 — 지속 효과라 제 표식을 지킨다
   for (const ef of mv.effects) {
     if (ef.op === 'damage') {
       const per = hitDamage(enemy, ef), n = hitCount(ef);
       if (per * n > 0) dmg.push(n > 1 ? `${per}×${n}` : `${per}`);
     } else if (ef.op === 'block') blockAmt = (blockAmt || 0) + ef.amount;
     else if (ef.op === 'empower') emp = true;
-    else if (ef.op === 'ward') tail.push(`🪨${ef.amount}`);
-    else if (ef.op === 'cap') tail.push(`⛓${ef.amount}`);
-    else if (ef.op === 'regen') tail.push(`💗${ef.amount}`);
-    else if (ef.op === 'enrage') tail.push('💢');
-    else if (ef.op === 'reflect') tail.push(`🌵${ef.amount}`);
     // v3.59: 치유는 예고에 그리지 않는다 — 적이 제 몸을 아무는 건 이번 턴 내 선택을 바꾸지 않는다
     else if (ef.op === 'heal') { /* 표기 없음 */ }
     // 방해 효과는 종류를 뭉뚱그려 🌀 하나로만 예고한다 — 행동의 정체는 이름이 말하고,
@@ -1237,7 +1237,6 @@ export function intentOf(enemy) {
     if (def) parts.push(`🛡${blockAmt}`);
     if (emp) parts.push('💪');
   }
-  parts.push(...tail);
   if (!combo && dis) parts.push('🌀');
   // 파쇄 기준치(🔨N)는 예고에 내보내지 않는다 — 적을 길게 눌러 여는 치트 창에서만 보인다
   return parts.join(' ') || '💤';
