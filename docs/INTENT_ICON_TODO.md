@@ -167,6 +167,11 @@ Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT paint
 | 공격+방어 | 방패 | 발톱 |
 | 방어+강화 | 방패 | 꺾쇠 |
 
+배치가 19px에서 읽히는지 지금 낱개 그림들을 실제로 겹쳐서 확인했다 — `docs/mock_intent_combo.png`.
+윗줄이 96px, 아랫줄이 실제 크기인 19px를 5배로 늘린 것이다. 왼쪽부터
+공격+방해 · 방어+방해 · 공격+강화 · 공격+방어 · 방어+강화.
+같은 크기로 왼쪽 위로 밀어 겹치면 19px에서도 둘 다 살아 있다.
+
 ## 공격 + 방해 — `intent_attack_confuse`
 
 <small>가장 많이 나온다(42회). 숲거미 「독니」 · 까마귀 「눈알 노리기」. 뒤 = 소용돌이 · 앞 = 발톱</small>
