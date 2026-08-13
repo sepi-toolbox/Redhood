@@ -653,6 +653,7 @@ function applyAbility(battle, variant, bd, targets) {
         battle.lastResult.bonusHits.push(`🩸${ab.amount}`);
         break;
       case 'vulnerable':
+        // 세기는 안 쌓인다 — 남은 턴만 늘어난다
         for (const t of targets) t.debuffs.vulnerable += ab.amount;
         battle.lastResult.bonusHits.push(`🎯${ab.amount}`);
         break;
@@ -660,9 +661,12 @@ function applyAbility(battle, variant, bd, targets) {
   }
 }
 
-// 적에게 피해 — 취약(받는 피해 +N) 가산 후 방어(block)가 흡수 (v0.19)
+// v3.73 취약 — 세기를 쌓는 게 아니라 '받는 피해 ×1.5'. 여러 번 걸면 배율은 그대로고 턴만 늘어난다.
+//   (성권) 예전엔 +N 가산이라 족보가 세질수록 존재감이 사라졌다. 이제 내 한 방에 비례한다.
+export const vulnMult = () => (DB.scoring && DB.scoring.vulnMult != null) ? DB.scoring.vulnMult : 1.5;
+// 적에게 피해 — 취약 배율을 먹인 뒤 방어(block)가 흡수 (v0.19)
 function dealToEnemy(battle, t, amount) {
-  let total = amount + (t.debuffs ? t.debuffs.vulnerable : 0);
+  let total = (t.debuffs && t.debuffs.vulnerable > 0) ? Math.floor(amount * vulnMult()) : amount;
   // 문턱 — 얕은 타격은 아예 안 닿는다. 한 번 넘겨서 뚫으면 그대로 부서진다(자물쇠).
   if (t.wardLeft > 0 && total > 0) {
     if (total <= t.ward) {

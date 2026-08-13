@@ -1622,6 +1622,31 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('한 행동이 등급 천장보다 센 곳 없음', over, []);
 }
 
+// v3.73: 취약 — 세기 가산이 아니라 받는 피해 ×1.5. 여러 번 걸어도 배율은 그대로, 턴만 는다.
+{
+  const eng = await import('../js/engine.js');
+  const { DB } = await import('../js/data.js');
+  eng.rng.next = () => 0.5;
+  const mk = () => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['crow'], 'battle');
+  eq('취약 배율은 데이터에서 온다', eng.vulnMult(), 1.5);
+  // 배율이 곱해지는지는 확정 경로로 본다 — 같은 손, 취약만 다르게
+  const run = (vuln) => {
+    const b = mk(); const e = b.enemies[0];
+    e.hp = 9e6; e.maxHpInit = 9e6; e.block = 0; e.wardLeft = 0; e.capLeft = 0; e.debuffs.vulnerable = vuln;
+    eng.initialRoll(b);
+    b.dice.forEach(d => { d.face = 6; });
+    const pre = eng.previewAll(b).find(o => o.cat.id === 'onePair');
+    const hp0 = e.hp;
+    eng.confirmCategory(b, 'onePair', pre.variant.id, e.uid);
+    return hp0 - e.hp;
+  };
+  const plain = run(0), v1 = run(1), v5 = run(5);
+  eq('취약이 걸리면 더 아프다', v1 > plain, true);
+  eq('취약 배율은 1.5 (내림)', v1, Math.floor(plain * 1.5));
+  eq('여러 턴 남아도 배율은 그대로 — 세기는 안 쌓인다', v5, v1);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
 

@@ -1,6 +1,7 @@
 {
   "_version": 12,
   "rerollsPerTurn": 2,
+  "vulnMult": 1.5,
   "categories": [
     {
       "id": "chance",
@@ -143,7 +144,7 @@
               "amount": 2
             }
           ],
-          "abilityText": "취약 2 — 적이 받는 피해 +2",
+          "abilityText": "취약 2턴 — 그동안 적이 받는 피해 ×1.5",
           "tier": "uncommon"
         }
       ],
@@ -210,7 +211,7 @@
             }
           ],
           "burst": true,
-          "abilityText": "취약 2 — 적이 받는 피해 +2",
+          "abilityText": "취약 2턴 — 그동안 적이 받는 피해 ×1.5",
           "tier": "uncommon"
         }
       ],
@@ -267,7 +268,7 @@
             }
           ],
           "burst": true,
-          "abilityText": "취약 3 — 적이 받는 피해 +3",
+          "abilityText": "취약 3턴 — 그동안 적이 받는 피해 ×1.5",
           "tier": "rare"
         }
       ],
@@ -351,7 +352,7 @@
             }
           ],
           "burst": true,
-          "abilityText": "취약 3 — 적이 받는 피해 +3",
+          "abilityText": "취약 3턴 — 그동안 적이 받는 피해 ×1.5",
           "tier": "rare"
         }
       ],

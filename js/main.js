@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.72'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.73'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -314,7 +314,7 @@ function enemyTags(e) {
   if (e.undying > 0) t.push(iconTag(FX_ICON.undying, 'harm', null, '불사 — 한 번은 다시 일어선다'));
   // 내가 걸어 둔 것 — 적 몸에 붙어 있어도 나에게는 이롭다
   if (d.weak > 0) t.push(iconTag('status_weak', 'good', d.weak, `약화 ${d.weak} — 적 공격력 -${d.weak}`));
-  if (d.vulnerable > 0) t.push(iconTag('status_vulnerable', 'good', d.vulnerable, `취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable}`));
+  if (d.vulnerable > 0) t.push(iconTag('status_vulnerable', 'good', d.vulnerable, `취약 — 받는 피해 ×1.5 (${d.vulnerable}턴)`));
   if (d.bleed > 0) t.push(iconTag('status_bleed', 'good', d.bleed, `출혈 ${d.bleed} — 행동할 때마다 아프다`));
   if (e.stunned) t.push(iconTag('status_stun', 'good', null, '기절 — 다음 행동이 취소됐다'));
   return `<span class="enemy-tags">${t.join('')}</span>`;
@@ -1294,7 +1294,7 @@ function showEnemyInfo(uid) {
     e.power > 0 ? `<li>${ico('status_strength')} 힘 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
     d.weak > 0 ? `<li>${ico('status_weak')} 약화 ${d.weak} — 공격력 -${d.weak} · 매 턴 1 소멸</li>` : '',
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
-    d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable} · 매 턴 1 소멸</li>` : '',
+    d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 — 받는 피해 ×1.5 (${d.vulnerable}턴 남음, 매 턴 1 소멸)</li>` : '',
     e.wardLeft > 0 ? `<li>${fxIco('ward')} 문턱 ${e.ward} — 한 번에 ${e.ward} 이하로 때리면 아예 안 통한다 (${e.wardLeft}턴)</li>` : '',
     e.regenLeft > 0 && e.regen > 0 ? `<li>${fxIco('regen')} 재생 ${e.regen} — 자기 차례마다 회복 (${e.regenLeft}턴). 이보다 세게 때려야 줄어든다</li>` : '',
     e.enrage > 0 ? `<li>${fxIco('enrage')} 격노 — 피해를 받을 때마다 힘 +${e.enrage} (전투 내 누적). 잔펀치가 벌을 받는다</li>` : '',
