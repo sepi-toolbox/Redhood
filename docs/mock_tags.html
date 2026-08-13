@@ -1,0 +1,75 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<link rel="stylesheet" href="./assets/fonts/song-myung/index.css">
+<link rel="stylesheet" href="./css/style.css">
+<style>
+  body { overflow: auto; }
+  .wrap { width: 390px; margin: 0 auto; padding: 10px 0 30px; }
+  h2 { font-size: 14px; color: #e0c188; text-align: center; margin: 18px 0 6px; letter-spacing: .5px; }
+  h2 small { display:block; font-size: 11px; color:#9a8straight; }
+  .note { font-size: 11px; color: #a08a68; text-align: center; margin-bottom: 8px; }
+  .sheet-zone.combo-list { display:flex; flex-direction:column; }
+
+  /* ── 태그 칸: 이름/등급 과 피해 숫자 사이 ── */
+  .combo-list .combo-row { grid-template-columns: minmax(0,1fr) auto auto; column-gap: 7px; }
+  .combo-list .combo-row .sheet-preview { grid-column: 3; }
+  .tagbox { grid-column: 2; grid-row: 1 / span 2; align-self:center; display:flex; gap:4px; align-items:center; }
+
+  /* 공통 원 */
+  .tg { position: relative; width: 26px; height: 26px; flex:none; border-radius: 50%;
+        background: radial-gradient(circle at 36% 30%, #4a382b, #221a14 72%);
+        border: 1.5px solid var(--tc, #6b4f38);
+        box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,236,200,.14);
+        display:flex; align-items:center; justify-content:center; }
+  .tg img { width: 17px; height: 17px; object-fit: contain; }
+  .tg b { font-family: 'Song Myung', serif; }
+
+  /* 시안 A — 아이콘이 원을 채우고 숫자는 우하단 배지 */
+  .A .tg img { width: 19px; height: 19px; }
+  .A .tg b { position:absolute; right:-3px; bottom:-4px; font-size: 12px; font-weight:800;
+             color:#f3e3c2; text-shadow: 0 1px 2px #000, 0 0 4px #000, 0 0 3px #000; }
+
+  /* 시안 B — 원을 위아래로: 위 아이콘, 아래 숫자 */
+  .B .tg { flex-direction: column; gap: 0; }
+  .B .tg img { width: 13px; height: 13px; margin-top: 2px; }
+  .B .tg b { font-size: 10.5px; line-height: 10px; font-weight: 800; color: #f3e3c2; margin-bottom: 2px; }
+
+  /* 시안 C — 아이콘을 배경으로 깔고 숫자를 정중앙에 */
+  .C .tg img { position:absolute; width: 24px; height: 24px; opacity: .38; }
+  .C .tg b { position: relative; font-size: 14px; font-weight: 800; color: #f6e8c8;
+             text-shadow: 0 1px 2px #000, 0 0 5px #000; }
+
+  /* 수치 없는 태그(일격·전체)는 아이콘만 */
+  .tg.plain img { width: 18px; height: 18px; }
+</style></head><body>
+<div class="wrap" id="w"></div>
+<script>
+const ICON = { whet:'assets/icons/ui_whet.png', focus:'assets/icons/status_focus.png',
+  strength:'assets/icons/status_strength.png', block:'assets/icons/status_block.png',
+  regen:'assets/icons/status_regen.png', weakEnemy:'assets/icons/status_weak.png',
+  vulnerable:'assets/icons/status_vulnerable.png', bleed:'assets/icons/status_bleed.png',
+  burst:'assets/icons/ui_burst.png', aoe:'assets/icons/intent_attack.png' };
+const COLOR = { whet:'#e0761a', focus:'#4fc3f7', strength:'#f0b429', block:'#b9c6d6',
+  regen:'#e5468f', weakEnemy:'#a98cd8', vulnerable:'#ff8a3d', bleed:'#e83b2e',
+  burst:'#e0761a', aoe:'#c9302f' };
+const ROWS = [
+  { n:'숨 고르기',  c:'노페어',    v:6,  t:[['whet',1]] },
+  { n:'맞부딪기',   c:'원페어',    v:14, t:[['burst',null]] },
+  { n:'쌍둥이 자매', c:'투페어',    v:22, t:[['block',7]] },
+  { n:'내리찍기',   c:'트리플',    v:31, t:[['burst',null],['vulnerable',2]] },
+  { n:'오두막',    c:'풀하우스',   v:38, t:[['block',14]] },
+  { n:'몰이사냥',   c:'스트레이트',  v:60, t:[['aoe',null],['block',18]] },
+  { n:'묵직한 일격', c:'포카드',    v:72, t:[['burst',null],['strength',5]] },
+  { n:'핏빛 만월',  c:'야찌',     v:96, t:[['bleed',8]] },
+];
+const tag = ([op,n]) => `<span class="tg ${n==null?'plain':''}" style="--tc:${COLOR[op]}">`
+  + `<img src="${ICON[op]}" alt="">${n!=null?`<b>${n}</b>`:''}</span>`;
+const row = r => `<button class="sheet-row combo-row t-common">
+    <span class="row-body"><span class="sheet-name">${r.n}</span>
+    <small class="cat-tag">${r.c}</small></span>
+    <span class="tagbox">${r.t.map(tag).join('')}</span>
+    <span class="sheet-preview">${r.v}</span></button>`;
+const NOTE = { A:'아이콘이 원을 채우고, 숫자는 우하단에 겹친다', B:'원을 위아래로 나눠 위는 아이콘, 아래는 숫자', C:'아이콘을 흐리게 깔고 숫자를 정중앙에' };
+w.innerHTML = ['A','B','C'].map(k =>
+  `<h2>시안 ${k}</h2><div class="note">${NOTE[k]}</div>
+   <div class="sheet-zone combo-list ${k}">${ROWS.map(row).join('')}</div>`).join('');
+</script></body></html>
