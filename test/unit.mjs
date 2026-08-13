@@ -13,8 +13,8 @@ const C = {
   threeKind: { id: 'threeKind', kind: 'ofKind', count: 3, score: 'matchedSum', mult: 1.5 },
   fourKind: { id: 'fourKind', kind: 'ofKind', count: 4, score: 'matchedSum', mult: 3 },
   fullHouse: { id: 'fullHouse', kind: 'fullHouse', score: 'sumAll', mult: 1.8 },  // v3.23 눈 합 기반
-  small: { id: 'smallStraight', kind: 'straight', length: 4, score: 28 },
-  large: { id: 'largeStraight', kind: 'straight', length: 5, score: 60 },
+  small: { id: 'smallStraight', kind: 'straight', length: 4, score: 'sumRun', mult: 2 },
+  large: { id: 'largeStraight', kind: 'straight', length: 5, score: 'sumRun', mult: 3.4 },
   yahtzee: { id: 'yahtzee', kind: 'ofKind', count: 5, score: 'matchedSum', mult: 4 }, // v3.23
   chance: { id: 'chance', kind: 'chance', score: 'sumTop3' },
   chanceD: { id: 'chance', kind: 'chance', score: 'sumTop3Distinct' },
@@ -32,9 +32,11 @@ eq('풀하우스 [2,2,3,3,3] = 13×1.8', evalCategory(C.fullHouse, [2, 2, 3, 3, 
 eq('풀하우스 [6,6,5,5,5] = 27×1.8', evalCategory(C.fullHouse, [6, 6, 5, 5, 5]).base, 48);
 eq('풀하우스 실패 [2,2,3,3,4]', evalCategory(C.fullHouse, [2, 2, 3, 3, 4]).valid, false);
 eq('풀하우스=야찌 인정 [4,4,4,4,4] = 20×1.8', evalCategory(C.fullHouse, [4, 4, 4, 4, 4]).base, 36);
-eq('스몰 [1,2,3,4,6]', evalCategory(C.small, [1, 2, 3, 4, 6]).base, 28);
+eq('스몰 [1,2,3,4,6] → 이은 눈 합 10 ×2', evalCategory(C.small, [1, 2, 3, 4, 6]).base, 20);
 eq('스몰 실패 [1,2,4,5,6]는 4연속? (2,4,5,6→3연속)', evalCategory(C.small, [1, 2, 4, 5, 6]).valid, false);
-eq('라지 [2,3,4,5,6]', evalCategory(C.large, [2, 3, 4, 5, 6]).base, 60);
+eq('라지 [2,3,4,5,6] → 합 20 ×3.4', evalCategory(C.large, [2, 3, 4, 5, 6]).base, 68);
+eq('라지 [1,2,3,4,5] → 합 15 ×3.4 (작은 눈은 약하다)', evalCategory(C.large, [1, 2, 3, 4, 5]).base, 51);
+eq('라지: 기절한 눈은 합에서 빠진다', evalCategory(C.large, [2, 3, 4, 5, 6], new Set([4])).base, 47);
 eq('트리플 [4,4,4,2,1] 매칭합×1.5', evalCategory(C.threeKind, [4, 4, 4, 2, 1]).base, 18);
 eq('포카드 [5,5,5,5,2] 매칭합×3', evalCategory(C.fourKind, [5, 5, 5, 5, 2]).base, 60);
 eq('포카드 실패 [4,4,4,2,1]', evalCategory(C.fourKind, [4, 4, 4, 2, 1]).valid, false);

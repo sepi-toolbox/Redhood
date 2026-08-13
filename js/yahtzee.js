@@ -58,15 +58,27 @@ export function evalCategory(cat, faces, zeroed = null) {
       return { valid: true, base, contributing: all };
     }
     case 'straight': {
-      const uniq = [...new Set(faces)].sort((a, b) => a - b);
-      let run = 1, best = 1;
+      // v3.68: 스트레이트만 눈을 안 보고 고정 점수를 뱉고 있었다 — 어떤 눈으로 이었든 값이 같고,
+      //        기절한 주사위도 그대로 값을 냈다. 이제 이어진 눈의 합 × 배수로 간다 (다른 족보와 같은 문법).
+      const uniq = [...new Set(faces.filter(v => v > 0))].sort((a, b) => a - b);
+      let run = 1, best = 1, endAt = uniq.length ? uniq[0] : 0;
       for (let i = 1; i < uniq.length; i++) {
         run = uniq[i] === uniq[i - 1] + 1 ? run + 1 : 1;
-        best = Math.max(best, run);
+        if (run > best) { best = run; endAt = uniq[i]; }
       }
-      return best >= cat.length
-        ? { valid: true, base: cat.score, contributing: all }
-        : { valid: false, base: 0, contributing: [] };
+      if (best < cat.length) return { valid: false, base: 0, contributing: [] };
+      // 이은 눈마다 한 칸씩만 — 같은 눈이 둘이면 하나만 센다
+      const runFaces = new Set();
+      for (let f = endAt - cat.length + 1; f <= endAt; f++) runFaces.add(f);
+      const idx = [];
+      const used = new Set();
+      for (const i of all) {
+        if (runFaces.has(faces[i]) && !used.has(faces[i])) { used.add(faces[i]); idx.push(i); }
+      }
+      const base = typeof cat.score === 'number'
+        ? cat.score                                          // (구) 고정 점수 — 데이터에 남아 있으면 그대로
+        : Math.floor(idx.reduce((a, i) => a + val(i), 0) * (cat.mult || 1));
+      return { valid: true, base, contributing: idx };
     }
     case 'chance': {
       // v3.67: 여기만 zeroed(기절)를 안 보고 faces 를 그대로 썼다 — 기절 주사위를 찬스에 쓰면

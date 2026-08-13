@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.67'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.68'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -388,7 +388,7 @@ function eventFrame(npc, linesHtml, choicesHtml) {
         <span class="pb-side"></span>
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${hpPct}%"></div>
-          <span class="hp-text">${run.hp} / ${run.maxHp}</span>
+          <span class="hp-text"><span class="bar-hp">${run.hp} / ${run.maxHp}</span></span>
         </div>
         <span class="pb-side"></span>
       </div>
@@ -750,7 +750,7 @@ function showMap() {
         <button class="btn ghost tiny" id="bag-btn">${uiIco("roll")} 가방</button>
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${Math.max(0, run.hp / run.maxHp * 100)}%"></div>
-          <span class="hp-text">${run.hp} / ${run.maxHp}</span>
+          <span class="hp-text"><span class="bar-hp">${run.hp} / ${run.maxHp}</span></span>
         </div>
         <span class="pb-side"></span>
       </div>
@@ -1781,10 +1781,10 @@ function flashScreen(screen, tone) {
 function playMultiHit(hits, hpBefore) {
   const p = battle.player;
   const fill = app.querySelector('.hp-fill');
-  const text = app.querySelector('.hp-text');
+  const text = app.querySelector('.hp-text .bar-hp');
   const setBar = (hp) => {
     if (fill) fill.style.width = `${Math.max(0, hp / p.maxHp * 100)}%`;
-    if (text) text.firstChild && (text.firstChild.nodeValue = `${Math.max(0, hp)} / ${p.maxHp}`);
+    if (text) text.textContent = `${Math.max(0, hp)} / ${p.maxHp}`;
   };
   let hp = hpBefore;
   setBar(hp);                                   // 맞기 전으로 되돌려 놓고 시작
@@ -2179,7 +2179,7 @@ function renderCardBattle() {
       <div class="cb-hud">
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${Math.max(0, battle.player.hp / battle.player.maxHp * 100)}%"></div>
-          <span class="hp-text">${battle.player.hp} / ${battle.player.maxHp}</span>
+          <span class="hp-text"><span class="bar-hp">${battle.player.hp} / ${battle.player.maxHp}</span></span>
         </div>
         <span class="cb-bleedbadge" id="cb-bleed"></span>
       </div>
@@ -2642,7 +2642,7 @@ function cbShowPlayerHit(dmg, hpShown) {
   const g = app.querySelector('.cb-hud .hp-gauge');
   if (g) {
     g.querySelector('.hp-fill').style.width = `${Math.max(0, hpShown / battle.player.maxHp * 100)}%`;
-    g.querySelector('.hp-text').textContent = `${hpShown} / ${battle.player.maxHp}`;
+    g.querySelector('.hp-text .bar-hp').textContent = `${hpShown} / ${battle.player.maxHp}`;
     const f = document.createElement('span');
     f.className = 'pdmg-float';
     f.style.setProperty('--nudge', `${(idx % 3 - 1) * 26}px`);
