@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.49'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.50'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -270,6 +270,38 @@ function comboIcon(cat, variant) {
   const ops = ab ? (Array.isArray(ab) ? ab : [ab]).map(a => a.op) : [];
   const file = ABILITY_ICON[ops[0]] || 'intent_attack'; // 부가 능력 없는 족보는 공격 아이콘
   return `<img class="row-ico-img" src="assets/icons/${file}.png" alt="" draggable="false">`;
+}
+/* v3.50: 족보 태그 — 이름 옆이 아니라 피해 숫자 왼쪽에, 동그라미에 든 표식으로 붙는다.
+   수치가 있는 것은 그 원 안에 수치까지 적는다. 일격·전체는 수치가 없어 표식만. */
+const TAG_ICON = {
+  whet: 'ui_whet', focus: 'status_focus', strength: 'status_strength', block: 'status_block',
+  regen: 'status_regen', weakEnemy: 'status_weak', vulnerable: 'status_vulnerable', bleed: 'status_bleed',
+  burst: 'ui_burst', aoe: 'ui_aoe',
+};
+const TAG_COLOR = {
+  whet: '#e0761a', focus: '#4fc3f7', strength: '#f0b429', block: '#b9c6d6',
+  regen: '#e5468f', weakEnemy: '#a98cd8', vulnerable: '#ff8a3d', bleed: '#e83b2e',
+  burst: '#e0761a', aoe: '#7fd4c8',
+};
+const TAG_KO = {
+  whet: '벼름', focus: '집중', strength: '힘', block: '방어', regen: '재생',
+  weakEnemy: '약화', vulnerable: '취약', bleed: '출혈', burst: '일격', aoe: '전체 공격',
+};
+function comboTag(op, amount) {
+  const file = TAG_ICON[op];
+  if (!file) return '';
+  const title = TAG_KO[op] + (amount != null ? ` ${amount}` : '');
+  return `<span class="tg${amount == null ? ' plain' : ''}" style="--tc:${TAG_COLOR[op]}" title="${esc(title)}">`
+    + `<img src="assets/icons/${file}.png" alt="" draggable="false">`
+    + (amount != null ? `<b>${amount}</b>` : '') + '</span>';
+}
+function comboTags(cat, variant) {
+  const ab = variant.ability ? (Array.isArray(variant.ability) ? variant.ability : [variant.ability]) : [];
+  const out = [];
+  if (variant.burst) out.push(comboTag('burst', null));      // 벼름을 태운다
+  if (isAoE(cat)) out.push(comboTag('aoe', null));           // 전부를 친다
+  for (const a of ab) out.push(comboTag(a.op, a.amount));    // 부가 효과는 하나뿐 (v3.49)
+  return out.length ? `<span class="tagbox">${out.join('')}</span>` : '<span class="tagbox"></span>';
 }
 /* v3.41: 상품·전리품 줄이 전용 아트를 두고도 이모지를 쓰고 있었다.
    주사위는 그 주사위의 실제 면 그림, 족보는 comboIcon, 재화는 표식 아트를 쓴다.
@@ -963,8 +995,9 @@ function renderBattle(opts = {}) {
             ${COMBO_PLATE_READY.has(variant.id) ? `style="border-image-source: url('assets/ui/paper_${variant.id}.png')"` : ''}>
             <span class="row-body">
               <span class="sheet-name">${esc(variant.name)}</span>
-              <small class="cat-tag${variant.base ? ' t-slot' : ''}">${burst ? `<b class="burst-mark">${uiIco('burst')}일격</b> · ` : ''}${variant.base ? '빈 자리' : esc(cat.short || cat.name)}${isAoE(cat) ? ' · 전체' : ''}</small>
+              <small class="cat-tag${variant.base ? ' t-slot' : ''}">${variant.base ? '빈 자리' : esc(cat.short || cat.name)}</small>
             </span>
+            ${comboTags(cat, variant)}
             <span class="sheet-preview">${seal ? `<span class="seal-left">${seal}턴</span>` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
           </button>`).join('')}
       </div>
