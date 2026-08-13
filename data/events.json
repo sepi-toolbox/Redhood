@@ -40,7 +40,7 @@
       "icon": "⛏️",
       "desc": "파고, 막고, 버틴다.",
       "start": {
-        "chance": "instinct",
+        "chance": "catch_breath",
         "onePair": "clasped_hands",
         "threeKind": "downstroke"
       }
@@ -51,7 +51,7 @@
       "icon": "🏹",
       "desc": "조용히 재고, 정확히 맞힌다.",
       "start": {
-        "chance": "instinct",
+        "chance": "catch_breath",
         "onePair": "clash",
         "largeStraight": "windpath"
       }
