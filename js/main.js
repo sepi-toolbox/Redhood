@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.66'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.67'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -307,7 +307,7 @@ function enemyTags(e) {
   // 적이 두르거나 적을 지켜 주는 것 — 나에게는 전부 해롭다
   if (e.wardLeft > 0) t.push(iconTag(FX_ICON.ward, 'harm', e.ward, `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다 (${e.wardLeft}턴)`));
   if (e.capLeft > 0) t.push(iconTag(FX_ICON.cap, 'harm', e.cap, `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다 (${e.capLeft}턴)`));
-  if (e.power > 0) t.push(iconTag('intent_empower', 'harm', e.power, `강화 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
+  if (e.power > 0) t.push(iconTag('status_strength', 'harm', e.power, `힘 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
   if (e.regenLeft > 0 && e.regen > 0) t.push(iconTag(FX_ICON.regen, 'harm', e.regen, `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)`));
   if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, 'harm', e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
   if (e.reflectLeft > 0 && e.reflect > 0) t.push(iconTag(FX_ICON.reflect, 'harm', e.reflect, `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힌다)`));
@@ -1202,11 +1202,11 @@ function enemyEffectText(e, ef) {
       return `${ico('intent_attack')} ${head}` + (parts.length ? ` (한 대당 기본 ${base} ${parts.join(' ')})` : '');
     }
     case 'poison':
-    case 'bleed': return `${ico('intent_confuse')} ${DOT_KO[ef.op]} ${ef.amount} — 내 행동이 끝날 때마다 쌓인 만큼 피해, 그 뒤 1 감소 (방어도로 막힘)`;
+    case 'bleed': return `${ico(ef.op === 'poison' ? 'status_poison' : 'status_bleed')} ${DOT_KO[ef.op]} ${ef.amount} — 내 행동이 끝날 때마다 쌓인 만큼 피해, 그 뒤 1 감소 (방어도로 막힘)`;
     case 'selfDamage': return `${uiIco('unknown')} 자해 — 스스로 ${ef.amount} 피해를 입는다 (방어도 무시)`;
-    case 'block': return `${ico('intent_defend')} 방어 ${ef.amount} 획득`;
-    case 'confuse': return `${ico('intent_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
-    case 'empower': return `${ico('intent_empower')} 강화 — 공격력 +${ef.amount} (전투 내 누적)`;
+    case 'block': return `${ico('status_block')} 방어 ${ef.amount} 획득`;
+    case 'confuse': return `${ico('status_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
+    case 'empower': return `${ico('status_strength')} 힘 +${ef.amount} — 공격력이 그만큼 오른다 (전투 내 누적)`;
     case 'heal': return `${ico('status_regen')} 자신 HP ${ef.amount} 회복`;   // v3.61: intent_heal 폐기
     case 'sealLast': return `${fxIco('sealLast')} 흉내 — 직전에 쓴 족보를 ${ef.turns || 1}턴 봉인`;
     case 'sealCat': return `${fxIco('sealCat')} 봉인 — ${(ef.cats || []).join('·')} 족보를 ${ef.turns || 1}턴 봉인`;
@@ -1288,8 +1288,8 @@ function showEnemyInfo(uid) {
   const effects = mv.effects.map(ef => `<li>${enemyEffectText(e, ef)}</li>`).join(''); // enemyEffectText는 내부 생성 HTML(아이콘 포함)
   const d = e.debuffs || {};
   const status = [
-    e.block > 0 ? `<li>${ico('intent_defend')} 방어 ${e.block} — 다음 행동까지 받는 피해 흡수</li>` : '',
-    e.power > 0 ? `<li>${ico('intent_empower')} 강화 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
+    e.block > 0 ? `<li>${ico('status_block')} 방어 ${e.block} — 다음 행동까지 받는 피해 흡수</li>` : '',
+    e.power > 0 ? `<li>${ico('status_strength')} 힘 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
     d.weak > 0 ? `<li>${ico('status_weak')} 약화 ${d.weak} — 공격력 -${d.weak} · 매 턴 1 소멸</li>` : '',
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
     d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 ${d.vulnerable} — 받는 피해 +${d.vulnerable} · 매 턴 1 소멸</li>` : '',
