@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.52'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.53'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -314,9 +314,9 @@ function enemyTags(e) {
   if (e.capLeft > 0) t.push(iconTag(FX_ICON.cap, FXC.cap || '#55606b', e.cap, `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다 (${e.capLeft}턴)`));
   // 적이 두른 것
   if (e.block > 0) t.push(iconTag('status_block', '#b9c6d6', e.block, `방어 ${e.block}`));
-  if (e.power > 0) t.push(iconTag('intent_empower', '#ffd257', '+' + e.power, `강화 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
+  if (e.power > 0) t.push(iconTag('intent_empower', '#ffd257', e.power, `강화 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
   if (e.regenLeft > 0 && e.regen > 0) t.push(iconTag(FX_ICON.regen, FXC.regen || '#e5468f', e.regen, `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)`));
-  if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, FXC.enrage || '#e0521a', '+' + e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
+  if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, FXC.enrage || '#e0521a', e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
   if (e.reflectLeft > 0 && e.reflect > 0) t.push(iconTag(FX_ICON.reflect, FXC.reflect || '#2fa39a', e.reflect, `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힌다)`));
   if (e.undying > 0) t.push(iconTag(FX_ICON.undying, FXC.undying || '#7fe0a0', null, '불사 — 한 번은 다시 일어선다'));
   // 내가 걸어 둔 것
@@ -1018,8 +1018,8 @@ function renderBattle(opts = {}) {
           `벼름 ${battle.whet} — 일격 족보로만 터뜨린다 (지금 ×${whetMultOf(battle.whet).toFixed(1)})`));
         if (p_.block > 0) t.push(iconTag('status_block', '#b9c6d6', p_.block, `방어 ${p_.block} — 다음 적 행동까지 막아 낸다`));
         if (b.strength > 0) t.push(iconTag('status_strength', '#f0b429', b.strength, `힘 +${b.strength} — 확정할 때마다 피해 +${b.strength}`));
-        if (b.focus > 0) t.push(iconTag('status_focus', '#4fc3f7', '+' + b.focus, `집중 +${b.focus} — 매 턴 리롤 +${b.focus}`));
-        if (b.regen > 0) t.push(iconTag('status_regen', '#e5468f', '+' + b.regen, `재생 +${b.regen} — 턴마다 회복`));
+        if (b.focus > 0) t.push(iconTag('status_focus', '#4fc3f7', b.focus, `집중 +${b.focus} — 매 턴 리롤 +${b.focus}`));
+        if (b.regen > 0) t.push(iconTag('status_regen', '#e5468f', b.regen, `재생 +${b.regen} — 턴마다 회복`));
         if (p_.dot > 0) t.push(iconTag('status_bleed', '#e83b2e', p_.dot,
           `${DOT_KO[p_.dotKind] || '독'} ${p_.dot} — 내 행동 뒤에 피해`, 'harm'));
         for (const k of ['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']) {
