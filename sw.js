@@ -1,6 +1,6 @@
 // REDHOOD 서비스 워커 — 오프라인 캐시
 // ⚠ 판을 바꾸면 CACHE 번호를 반드시 +1 (runbook 규칙)
-const CACHE = 'redhood-v241';
+const CACHE = 'redhood-v242';
 const ASSETS = [
   './',
   './index.html',
@@ -247,6 +247,26 @@ const ASSETS = [
   './assets/dice/gold.png',
   './assets/dice/cursed.png',
   './assets/dice/fang.png',
+  './assets/relics/wolf_fang.png',
+  './assets/relics/breadcrumbs.png',
+  './assets/relics/spool.png',
+  './assets/relics/warm_milk.png',
+  './assets/relics/firewood.png',
+  './assets/relics/leather_gloves.png',
+  './assets/relics/crow_feather.png',
+  './assets/relics/hunters_charm.png',
+  './assets/relics/ledger.png',
+  './assets/relics/moss_compass.png',
+  './assets/relics/silver_scale.png',
+  './assets/relics/tallow_candle.png',
+  './assets/relics/old_bone.png',
+  './assets/relics/glass_jar.png',
+  './assets/relics/wolf_pelt.png',
+  './assets/relics/poison_apple.png',
+  './assets/relics/waymark.png',
+  './assets/relics/gate_bar.png',
+  './assets/relics/clover.png',
+  './assets/relics/acorn_charm.png',
   './assets/icon-192.png',
   './assets/icon-512.png',
 ];
