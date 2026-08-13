@@ -342,6 +342,26 @@ span.enemy-art {
 .enemy .bar.t-elite { width: 136px; height: 22px; border-width: 8px 9px 8px 9px; border-image: url('../assets/ui/hpbar_elite.png') 58 65 58 65 stretch; }
 .enemy .bar.t-boss { width: 154px; height: 22px; border-width: 7px 11px 7px 18px; border-image: url('../assets/ui/hpbar_boss.png') 49 77 49 132 stretch; }
 .enemy-hp { font-size: 11.5px; color: #9c8f7a; }
+/* v3.51: 체력 숫자를 게이지 안으로 — 아래 한 줄은 통째로 상태 줄이 된다 */
+.enemy .bar .bar-text {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; line-height: 1; font-weight: 800; color: #f3e3c2;
+  text-shadow: 0 1px 2px #000, 0 0 4px rgba(0, 0, 0, .95);
+}
+.enemy .bar.t-normal .bar-text { font-size: 10.5px; }
+.enemy .bar.t-elite .bar-text, .enemy .bar.t-boss .bar-text { font-size: 11.5px; }
+.enemy-tags {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: 3px; min-height: 22px; max-width: 100%; padding: 1px 2px 0;
+}
+/* 적 줄의 표식은 족보 줄보다 조금 작다 — 두 마리가 나란히 서기 때문 */
+.enemy-tags .tg { width: 21px; height: 21px; border-width: 1.2px; }
+.enemy-tags .tg img { width: 15px; height: 15px; }
+.enemy-tags .tg.plain img { width: 14px; height: 14px; }
+.enemy-tags .tg b { font-size: 10.5px; right: -2px; bottom: -3px; }
+/* 내가 걸어 둔 것은 테두리를 한 겹 더 밝게 — 적이 두른 것과 구분된다 */
+.enemy-tags .tg.mine { box-shadow: 0 1px 3px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,236,200,.14), 0 0 0 1px rgba(255, 236, 200, .28); }
 .mid-line { flex: none; min-height: 18px; text-align: center; padding: 0 12px; position: relative; z-index: 2; }
 .last-result { font-size: 12px; color: #e8b64b; }
 .last-result b { font-size: 14px; }
