@@ -1,6 +1,6 @@
 // REDHOOD 서비스 워커 — 오프라인 캐시
 // ⚠ 판을 바꾸면 CACHE 번호를 반드시 +1 (runbook 규칙)
-const CACHE = 'redhood-v239';
+const CACHE = 'redhood-v240';
 const ASSETS = [
   './',
   './index.html',
@@ -117,8 +117,13 @@ const ASSETS = [
   './assets/icons/intent_defend.png',
   './assets/icons/intent_confuse.png',
   './assets/icons/intent_empower.png',
-  './assets/icons/intent_heal.png',
   './assets/icons/intent_unknown.png',
+  './assets/icons/intent_rest.png',
+  './assets/icons/intent_attack_confuse.png',
+  './assets/icons/intent_defend_confuse.png',
+  './assets/icons/intent_attack_empower.png',
+  './assets/icons/intent_attack_defend.png',
+  './assets/icons/intent_defend_empower.png',
   './assets/icons/node_battle.png',
   './assets/icons/node_elite.png',
   './assets/icons/node_rest.png',
@@ -246,8 +251,16 @@ const ASSETS = [
   './assets/icon-512.png',
 ];
 
+// v3.62: addAll 은 목록 중 하나만 404 여도 통째로 실패한다. 그러면 새 캐시가 안 만들어지고
+//   activate 도 안 돌아서 낡은 캐시가 계속 화면을 차지한다 — 판을 올려도 아무것도 안 바뀐다.
+//   (v3.61 이 정확히 그랬다: 지운 intent_heal.png 가 목록에 남아 설치가 죽었다)
+//   그래서 한 장씩 따로 담고, 빠진 게 있어도 나머지는 살린다.
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE)
+      .then(c => Promise.all(ASSETS.map(u => c.add(u).catch(() => console.warn('[sw] 못 받음', u)))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
