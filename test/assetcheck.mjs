@@ -50,5 +50,14 @@ const ready = [...(main.match(/const INTENT_COMBO_READY = new Set\(\[([\s\S]*?)\
   .matchAll(/'([a-z0-9_]+)'/g)].map(m => m[1]);
 bad('READY 에 올랐는데 그림이 없는 조합', ready.filter(n => !have.has(n)));
 
+// 4) 유물 그림도 마찬가지 — READY 에 오른 것은 파일이 있어야 하고, 실재하는 유물이어야 한다
+const relicFiles = existsSync(join(ROOT, 'assets/relics'))
+  ? new Set(readdirSync(join(ROOT, 'assets/relics')).map(f => f.replace(/\.png$/, ''))) : new Set();
+const relicIds = new Set(JSON.parse(read('data/relics.json')).map(r => r.id));
+const relicReady = [...(main.match(/const RELIC_ART_READY = new Set\(\[([\s\S]*?)\]\)/)?.[1] || '')
+  .matchAll(/'([a-z0-9_]+)'/g)].map(m => m[1]);
+bad('READY 에 올랐는데 그림이 없는 유물', relicReady.filter(n => !relicFiles.has(n)));
+bad('READY 에 올랐는데 데이터에 없는 유물', relicReady.filter(n => !relicIds.has(n)));
+
 console.log(fails === 0 ? 'ALL ASSET PASS' : `ASSET FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
