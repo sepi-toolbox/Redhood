@@ -772,6 +772,9 @@ span.enemy-art {
   position: absolute; left: 50%; transform: translateX(-50%);
   width: min(214px, 54%); flex: none; max-width: none;
 }
+/* v3.72: 체력바를 흐름에서 빼내는 순간 줄 높이를 잡아 줄 놈이 없어졌다 — 줄이 글자 높이(≈29px)로
+   쪼그라들고 36px 짜리 막대가 아래로 삐져나와 상태 줄과 겹쳤다. 막대가 들어갈 높이를 직접 준다. */
+.player-bar { min-height: calc(36px + 11px); }
 
 /* ---------- 전투: 족보 시트 ---------- */
 .sheet-zone {
