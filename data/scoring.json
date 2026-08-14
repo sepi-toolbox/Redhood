@@ -36,7 +36,7 @@
               "amount": 1
             }
           ],
-          "abilityText": "집중 +1 — 다음 턴 리롤 +1",
+          "abilityText": "집중 1턴 — 그동안 매 턴 리롤 +1",
           "tier": "uncommon"
         },
         {
@@ -303,7 +303,7 @@
               "amount": 2
             }
           ],
-          "abilityText": "집중 +2 — 다음 턴 리롤 +2",
+          "abilityText": "집중 2턴 — 그동안 매 턴 리롤 +1",
           "tier": "rare"
         },
         {
