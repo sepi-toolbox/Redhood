@@ -1663,6 +1663,32 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('취약은 4단(풀하우스) 아래에 없음', low, []);
 }
 
+// v3.77: 미리보기 = 고른 대상에게 실제로 들어갈 최종값 (취약까지 반영)
+{
+  const eng = await import('../js/engine.js');
+  eng.rng.next = () => 0.5;
+  const mk = () => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['crow'], 'battle');
+  const shown = (vuln) => {
+    const b = mk(); const e = b.enemies[0];
+    e.hp = 9e6; e.maxHpInit = 9e6; e.block = 0; e.wardLeft = 0; e.capLeft = 0; e.debuffs.vulnerable = vuln;
+    eng.initialRoll(b); b.dice.forEach(d => { d.face = 6; });
+    return eng.previewAll(b, e.uid).find(o => o.cat.id === 'onePair').bd.total;
+  };
+  const real = (vuln) => {
+    const b = mk(); const e = b.enemies[0];
+    e.hp = 9e6; e.maxHpInit = 9e6; e.block = 0; e.wardLeft = 0; e.capLeft = 0; e.debuffs.vulnerable = vuln;
+    eng.initialRoll(b); b.dice.forEach(d => { d.face = 6; });
+    const pre = eng.previewAll(b, e.uid).find(o => o.cat.id === 'onePair');
+    const hp0 = e.hp; eng.confirmCategory(b, 'onePair', pre.variant.id, e.uid);
+    return hp0 - e.hp;
+  };
+  eq('취약 없을 때 미리보기 = 실제', shown(0), real(0));
+  eq('취약 있을 때도 미리보기 = 실제', shown(1), real(1));
+  eq('미리보기에 취약 배율이 반영된다', shown(1), Math.floor(shown(0) * eng.vulnMult()));
+  eq('약화 배율은 데이터에서 온다', eng.weakMult(), 0.75);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
 

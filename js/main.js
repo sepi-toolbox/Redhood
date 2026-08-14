@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.76'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.77'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -925,7 +925,7 @@ function renderBattle(opts = {}) {
   const p = battle.player;
   // v0.27: 재렌더 시 족보 목록 스크롤 위치 보존 (아래 족보 탭 → 맨 위로 튀는 문제)
   const prevSheetScroll = app.querySelector('.sheet-zone')?.scrollTop || 0;
-  const previews = previewAll(battle);
+  const previews = previewAll(battle, targetUid);
   const lastR = battle.lastResult;
   const blindMod = modOf(battle, 'blind');       // 도사림 — 족보 위력 숨김
   // v3.47: 한 마리가 죽었다고 배치가 바뀌면 안 된다 (성권).
@@ -1168,7 +1168,7 @@ function updateComboHint() {
   dieEls.forEach(el => el.classList.remove('combo-hint'));
   if (!selectedCat || !battle || !battle.rolled || battle.over) return;
   const [cid, vid] = selectedCat.split(':');
-  const row = previewAll(battle).find(x => x.cat.id === cid && x.variant.id === vid);
+  const row = previewAll(battle, targetUid).find(x => x.cat.id === cid && x.variant.id === vid);
   if (!row || !row.bd || !(row.bd.total > 0)) return;
   for (const i of (row.bd.contributing || [])) dieEls[i]?.classList.add('combo-hint');
 }
@@ -1608,7 +1608,7 @@ function updateRollStart() {
 // 굴릴 때마다 화면 전체가 한 번 깜빡였다. 굴림으로 바뀌는 것만 제자리에서 고친다.
 function updateAfterRoll() {
   if (!battle || battle.over) { renderBattle(); return; }
-  const previews = previewAll(battle);
+  const previews = previewAll(battle, targetUid);
   // 1) 굴림 버튼 → 리롤 버튼 (첫 굴림에서 한 번만 교체)
   const bar = app.querySelector('.roll-bar');
   if (bar) {
