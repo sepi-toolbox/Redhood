@@ -224,7 +224,7 @@ Stylized dark fairytale UI element for the dice game REDHOOD. Match the EXACT pa
 | 두 개의 달 (투페어) | two_moons | `two crescent moons side by side` |
 | 세 번 찍는 도끼 (트리플) | triple_axe | `a woodcutter's axe beside three notch marks` |
 | 나무꾼의 호흡 (트리플) | woodsman_breath | `an axe resting on a tree stump with a small puff of breath` |
-| 네 개의 송곳니 (포카드) | four_fangs | `four sharp wolf fangs in a row` |
+| 독버섯 (포카드) | deathcap | `four speckled death-cap mushrooms in a row, caps tilted` | **재생성 필요** (v3.95 개명) |
 | 묵직한 일격 (포카드) | heavy_blow | `a heavy iron mallet with small crack lines beneath it` |
 | 할머니의 오두막 (풀하우스) | cottage | `a tiny cottage with a smoking chimney` |
 | 따뜻한 화덕 (풀하우스) | hearth | `a stone hearth with a warm little fire` |
@@ -233,14 +233,14 @@ Stylized dark fairytale UI element for the dice game REDHOOD. Match the EXACT pa
 | 달빛 오솔길 (라지) | moonpath | `a winding path lit by a crescent moon` |
 | 폭풍 질주 (라지) | storm_run | `storm clouds with a red lightning bolt and speed lines` |
 | 심판의 밤 (야찌) | judgment_night | `a hanging balance scale under a dark moon` |
-| 핏빛 만월 (야찌) | blood_moon | `a full moon dripping red at its lower edge` |
+| 역병의 달 (야찌) | plague_moon | `a full moon veined with sickly green rot, faint vapour rising` | **재생성 필요** (v3.95 개명) |
 
 파일: `assets/ui/paper_{variantId}.png` — 없는 변형은 기본 paper_row로 폴백.
 
 **묶음 예시** (6장):
 1. instinct / whisper / clasped_hands
 2. red_shoes / twin_sisters / two_moons
-3. triple_axe / woodsman_breath / four_fangs
+3. triple_axe / woodsman_breath / deathcap
 4. heavy_blow / cottage / hearth
 5. windpath / hunt_drive / moonpath
 6. storm_run / judgment_night / blood_moon
@@ -381,3 +381,18 @@ Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown i
 - 배포본은 게임 실행 파일만 (`index.html manifest.json sw.js css js data assets .nojekyll`) — docs·test 제외
 - 커밋 서명 금지 (`commit.gpgsign false`), 판마다 `sw.js` CACHE·`VERSION`·`index.html ?v=` 3곳 동시 증가
 - 배포 후 검증: Pages API로 `status: built` 확인 → 라이브 파일 내용 확인
+
+## v3.95 개명분 — 다시 뽑아야 하는 판 2장
+
+중독(본체)과 출혈(주사위)을 가르면서 족보 셋의 이름이 바뀌었다.
+`쪼개기 → 쐐기풀` · `네 송곳니 → 독버섯` · `핏빛 만월 → 역병의 달`.
+쐐기풀(nettle)은 원래 판 그림이 없어 폴백을 쓰므로 새로 그릴 필요는 없다(있으면 좋다).
+아래 둘은 파일명만 바꿔 둔 상태라 **그림이 옛 이름 그대로**다 — 이빨과 붉은 달이 중독을 말하고 있다.
+
+| 이름 | 파일 | 프롬프트 |
+|---|---|---|
+| 독버섯 | `assets/ui/paper_deathcap.png` | `four speckled death-cap mushrooms in a row, caps tilted` |
+| 역병의 달 | `assets/ui/paper_plague_moon.png` | `a full moon veined with sickly green rot, faint vapour rising` |
+| (선택) 쐐기풀 | `assets/ui/paper_nettle.png` | `a sprig of stinging nettle, serrated leaves with fine hairs` |
+
+나머지 조건(테두리 장식·해상도·여백)은 위 콤보 판 항목과 동일하다.

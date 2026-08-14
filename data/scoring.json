@@ -203,16 +203,16 @@
           "tier": "uncommon"
         },
         {
-          "id": "downstroke",
-          "name": "쪼개기",
+          "id": "nettle",
+          "name": "쐐기풀",
           "ability": [
             {
-              "op": "bleed",
+              "op": "poison",
               "amount": 3
             }
           ],
           "burst": true,
-          "abilityText": "출혈 3 — 적이 행동할 때마다 아프다",
+          "abilityText": "중독 3 — 내 턴이 끝날 때마다 쌓인 만큼 아프다",
           "tier": "uncommon"
         }
       ],
@@ -376,15 +376,15 @@
       "fx": "smash",
       "variants": [
         {
-          "id": "four_fangs",
-          "name": "네 송곳니",
+          "id": "deathcap",
+          "name": "독버섯",
           "ability": [
             {
-              "op": "bleed",
+              "op": "poison",
               "amount": 6
             }
           ],
-          "abilityText": "출혈 6 — 적이 행동할 때마다 그만큼 아프다",
+          "abilityText": "중독 6 — 내 턴이 끝날 때마다 쌓인 만큼 아프다",
           "tier": "rare"
         },
         {
@@ -447,15 +447,15 @@
           "burst": true
         },
         {
-          "id": "blood_moon",
-          "name": "핏빛 만월",
+          "id": "plague_moon",
+          "name": "역병의 달",
           "ability": [
             {
-              "op": "bleed",
+              "op": "poison",
               "amount": 8
             }
           ],
-          "abilityText": "출혈 8 — 적이 행동할 때마다 그만큼 아프다",
+          "abilityText": "중독 8 — 내 턴이 끝날 때마다 쌓인 만큼 아프다",
           "tier": "epic"
         }
       ],

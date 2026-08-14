@@ -39,7 +39,7 @@ export function createBattle(run, encounterIds) {
   const battle = {
     over: false, result: null, turn: 1,
     await: null,                          // null | 'enemy' (플레이어 확정 후 적 페이즈 대기)
-    player: { hp: run.hp, maxHp: run.maxHp, block: 0, dot: 0, dotKind: 'poison' },
+    player: { hp: run.hp, maxHp: run.maxHp, block: 0, dot: 0 },   // dot = 중독 누적 (v3.95: 출혈은 주사위 전용이라 종류 구분이 없어졌다)
     // v1.14 독·출혈: 완전히 같은 장치이고 이름과 연출만 다르다. 한 판에 섞어 쓰지 않는다.
     //   내 행동이 끝나면 쌓인 수치만큼 피해를 받고 누적이 1 줄어든다. 방어도로 막힌다.
     diceDefs: run.dice.map(id => DB.diceById[id]),
@@ -92,7 +92,9 @@ function spawnEnemy(id, idx, scale) {
     enlightened,
     block: (def.start || {}).block || 0,  // 방어: 자기 다음 행동 때까지 피해 흡수 (start.block 으로 시작 부여 가능)
     power: (def.start || {}).power || 0,  // 강화: 이후 모든 공격 피해 +power (전투 내 누적)
-    debuffs: { weak: 0, bleed: 0, vulnerable: 0 }, // v0.19: 약화(공격-N)/출혈(행동마다 피해, -1씩 감소)/취약(받는 피해+N)
+    // v3.95: 중독은 '본체'에, 출혈은 '주사위'에 — 붙는 자리로 두 상태를 가른다.
+    //   적에게는 주사위가 없으므로 적이 지는 지속 피해는 중독뿐이고, 출혈은 내 주사위 위에서만 산다.
+    debuffs: { weak: 0, poison: 0, vulnerable: 0 }, // 약화(주는 피해 ×0.75)/중독(턴 끝 누적 피해)/취약(받는 피해 ×1.5)
     patternState: { index: 0, recent: [], count: 0 }, phaseIndex: 0, nextMove: null,
     cooldown: {},                         // v1.01: 행동 id → 다시 쓸 수 있게 되는 턴. moves.*.cooldown 이 없으면 0(제한 없음)
     breakTaken: 0,                        // v1.08: 지금 예고된 행동을 건 뒤 HP로 받은 피해 누적 (파쇄 판정용)
@@ -376,11 +378,11 @@ export function endTurnStatus(battle) {
 export function enemyDotTick(battle) {
   battle.enemyDots = [];
   for (const e of aliveEnemies(battle)) {
-    if (!(e.debuffs.bleed > 0)) continue;
-    const amount = e.debuffs.bleed;
+    if (!(e.debuffs.poison > 0)) continue;
+    const amount = e.debuffs.poison;
     e.hp -= amount;
-    e.debuffs.bleed -= 1;
-    battle.enemyDots.push({ uid: e.uid, amount, kind: 'bleed', died: e.hp <= 0 });
+    e.debuffs.poison -= 1;
+    battle.enemyDots.push({ uid: e.uid, amount, kind: 'poison', died: e.hp <= 0 });
   }
   if (!battle.over && aliveEnemies(battle).length === 0) { battle.over = true; battle.result = 'victory'; }
 }
@@ -734,8 +736,8 @@ function applyAbility(battle, variant, bd, targets) {
         for (const t of targets) t.debuffs.weak += ab.amount;
         battle.lastResult.bonusHits.push(`🔻${ab.amount}`);
         break;
-      case 'bleed':
-        for (const t of targets) t.debuffs.bleed += ab.amount;
+      case 'poison':
+        for (const t of targets) t.debuffs.poison += ab.amount;
         battle.lastResult.bonusHits.push(`🩸${ab.amount}`);
         break;
       case 'vulnerable':
@@ -974,7 +976,7 @@ export function confirmVoidCall(battle) {
   return battle.lastResult;
 }
 
-// 독·출혈 — 내 행동이 끝난 직후 쌓인 만큼 아프고 누적이 1 줄어든다. 방어도가 먼저 막는다.
+// 중독 — 내 턴이 끝날 때 쌓인 만큼 아프고 누적이 1 줄어든다. 방어도가 먼저 막는다.
 export function tickDot(battle) {
   const p = battle.player;
   if (!(p.dot > 0)) return 0;
@@ -986,7 +988,7 @@ export function tickDot(battle) {
     if (p.hp <= 0) { p.hp = 0; battle.over = true; battle.result = 'defeat'; }
   }
   p.dot -= 1;
-  if (battle.lastResult) battle.lastResult.dotHit = { amount: absorbed + dmg, kind: p.dotKind };
+  if (battle.lastResult) battle.lastResult.dotHit = { amount: absorbed + dmg, kind: 'poison' };
   return absorbed + dmg;
 }
 
@@ -1066,10 +1068,8 @@ export function enemyPhase(battle) {
           break;
         case 'rest':                                       // 💤 휴식 — 아무것도 하지 않고 턴을 넘긴다
           break;                                           //   (숨 고르는 틈을 의도적으로 만들 때 쓴다)
-        case 'poison':                                     // 🌀 독 — 지속 피해를 건다 (아래 bleed 와 같은 장치)
-        case 'bleed':                                      // 🌀 출혈 — 이름과 연출만 다르다
+        case 'poison':                                     // 🌀 중독 — 내 본체에 쌓인다. 턴 끝마다 쌓인 만큼 아프고 1 준다
           battle.player.dot += ef.amount;
-          battle.player.dotKind = ef.op;
           break;
         case 'selfDamage':                                 // ❓ 자해 — 제 HP를 깎는다 (방어도 무시, 죽을 수도 있다)
           e.hp -= ef.amount;                                //   예고로는 무슨 행동인지 알 수 없다
@@ -1275,7 +1275,7 @@ export const INTENT_COMBO = {
 };
 // 데이터가 예고를 직접 못 박고 싶을 때 쓰는 값 (moves[*].intent)
 const INTENT_FORCED = { attack: '⚔️', defend: '🛡', empower: '💪', confuse: '🌀', unknown: '❓', rest: '💤' };
-const DISRUPT_OPS = new Set(['confuse', 'poison', 'bleed', 'status', 'sealLast', 'sealCat',
+const DISRUPT_OPS = new Set(['confuse', 'poison', 'status', 'sealLast', 'sealCat',
   'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind', 'drainWhet', 'unpin']);
 // 예고 줄로는 말할 수 없는 것 — 걸리고 나서 배지로 보는 지속 효과
 const OPAQUE_OPS = new Set(['regen', 'enrage', 'reflect']);

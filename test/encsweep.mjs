@@ -104,7 +104,7 @@ const RUNBASE = (act, floor, cats, hp=70) => ({ hp, maxHp: hp, act, floor, enlig
 
 const N = Number(process.argv[2] || 150);
 const STRONG = process.argv[3] === 'strong';   // 정예·보스용 강화 빌드 (변형·주사위 성장 가정)
-const CATS_STRONG = { chance:'catch_breath', onePair:'red_shoes', threeKind:'downstroke',
+const CATS_STRONG = { chance:'catch_breath', onePair:'red_shoes', threeKind:'nettle',
   twoPair:'twin_sisters', fourKind:'heavy_blow', fullHouse:'cottage', largeStraight:'windpath' };
 const ACTOF = {};
 (function() {

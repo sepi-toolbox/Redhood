@@ -60,7 +60,7 @@ const BUILDS = {
       largeStraight:'storm_run',threeKind:'chopping'} },
   '🔥 피': { dice:['cursed','cursed','fang','spark','gold'],
     relics:['leech_ring','dried_heart','poison_apple','whetstone','wolf_pelt'],
-    cats:{chance:'catch_breath',onePair:'clasped_hands',threeKind:'downstroke',
+    cats:{chance:'catch_breath',onePair:'clasped_hands',threeKind:'nettle',
       fourKind:'heavy_blow',twoPair:'two_moons'} },
   '🛡 둥지': { dice:['straw','bramble','straw','normal','gold'],
     relics:['bears_back','gate_bar','firewood','whetstone','hunters_charm'],

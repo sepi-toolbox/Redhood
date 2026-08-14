@@ -45,12 +45,13 @@ const rows = [];
 const ok = (id, what, pass, note = '') => rows.push({ id, name: byId[id].name, what, pass, note });
 
 // ---------- A. 규칙 검사 ----------
-for (const k of ['bleed', 'poison']) {
+// v3.95: 독은 본체 중독으로 나갔다 — 주사위에 남은 즉발 도트는 출혈 하나뿐
+{
   const b = mkBattle(); setFaces(b, [5, 5, 1, 2, 3]);
-  put(b, 0, k);
+  put(b, 0, 'bleed');
   const hp0 = b.player.hp;
   E.confirmCategory(b, 'onePair', V0(CAT.onePair), b.enemies[0].uid);
-  ok(k, '쓴 칸이면 눈금만큼 자해', b.player.hp === hp0 - 5, `HP ${hp0}→${b.player.hp} (기대 ${hp0 - 5})`);
+  ok('bleed', '쓴 칸이면 눈금만큼 자해', b.player.hp === hp0 - 5, `HP ${hp0}→${b.player.hp} (기대 ${hp0 - 5})`);
 }
 {
   const b = mkBattle(); setFaces(b, [5, 5, 1, 2, 3]);
@@ -259,4 +260,4 @@ console.log('');
 if (fail) console.log(RED(`규칙 실패 ${fail}건`));
 if (dead.length) console.log(RED(`경로가 아예 없음: ${dead.join(', ')}`));
 if (never.length) console.log(YEL(`실판에서 한 번도 안 뜸: ${never.join(', ')}`));
-if (!fail && !dead.length && !never.length) console.log(GRN('13종 전부 작동하고 전부 실제로 뜬다'));
+if (!fail && !dead.length && !never.length) console.log(GRN(`${S.length}종 전부 작동하고 전부 실제로 뜬다`));

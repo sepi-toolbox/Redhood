@@ -540,7 +540,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = mk(); const e = b.enemies[0];
     eq('독 예고는 혼란과 같은 소용돌이', eng.intentOf(e), '🌀');
     endTurn(b);
-    eq('독 3 부여', [b.player.dot, b.player.dotKind], [3, 'poison']);
+    eq('중독 3 부여', b.player.dot, 3);
     b.player.block = 0;
     const hp0 = b.player.hp;
     eq('행동 후 누적만큼 피해', eng.tickDot(b), 3);
@@ -555,10 +555,10 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.tickDot(b);
     eq('방어도 3이 먼저 깎이고 나머지 2만 HP로', [b.player.block, hp0 - b.player.hp], [0, 2]);
   }
-  {   // 출혈은 이름만 다르다
-    DB.enemyById.__dotenemy.moves.spit.effects = [{ op: 'bleed', amount: 4 }];
+  {   // v3.95: 중독은 겹쳐 쌓인다 (출혈은 이제 주사위 전용이라 본체에 안 붙는다)
+    DB.enemyById.__dotenemy.moves.spit.effects = [{ op: 'poison', amount: 4 }];
     const b = mk(); endTurn(b);
-    eq('출혈도 같은 칸에 쌓인다', [b.player.dot, b.player.dotKind], [4, 'bleed']);
+    eq('중독은 겹쳐 쌓인다', b.player.dot, 4);
     DB.enemyById.__dotenemy.moves.spit.effects = [{ op: 'poison', amount: 3 }];
   }
   {   // 독으로 죽을 수 있다
@@ -597,7 +597,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 }
 
 
-// v1.17: 주사위 상태이상 13종
+// v1.17: 주사위 상태이상 (v3.95 부터 12종 — 독은 본체 중독으로 옮겼다)
 {
   const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
@@ -722,9 +722,9 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   // 적 행동이 상태이상을 걸 수 있다
   { const b = mk();
     const before = b.dice.filter(d => d.st).length;
-    b.enemies[0].nextMove = { id: 'test', name: '시험', effects: [{ op: 'status', kind: 'poison', amount: 2 }] };
+    b.enemies[0].nextMove = { id: 'test', name: '시험', effects: [{ op: 'status', kind: 'bleed', amount: 2 }] };
     endTurn(b);
-    eq('적이 건 상태이상이 붙는다', b.dice.filter(d => d.st && d.st.kind === 'poison').length >= 2, true);
+    eq('적이 건 상태이상이 붙는다', b.dice.filter(d => d.st && d.st.kind === 'bleed').length >= 2, true);
   }
 
   // 정화는 주사위 상태이상까지 씻는다
@@ -859,8 +859,8 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eq('세기를 넣어도 눈금 그대로', r.bonusHits.includes('🩸-3'), true);
   }
   // 적 행동에서 세기를 정할 수 있는 건 부패 하나뿐
-  { const NO = ['bleed','poison','plunder','bind','stun','confuse','seal','chain','devour'];
-    eq('세기를 안 쓰는 아홉 종은 기본값이 0', NO.every(k => (DB.statusById[k].amount || 0) === 0), true);
+  { const NO = ['bleed','plunder','bind','stun','confuse','seal','chain','devour'];
+    eq('세기를 안 쓰는 여덟 종은 기본값이 0', NO.every(k => (DB.statusById[k].amount || 0) === 0), true);
     eq('부패만 규칙이 fuse', DB.statuses.list.filter(x => x.rule === 'fuse').map(x => x.id), ['rot']);
   }
   // 저주·축복·마비는 상태이상 탭 값으로 고정 — 적 행동이 뭘 넣든 안 바뀐다
@@ -876,7 +876,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
 
   // 데이터 무결성
-  eq('상태이상 13종', DB.statuses.list.length, 13);
+  eq('주사위 상태이상 12종 (v3.95: 독은 본체 중독으로 나갔다)', DB.statuses.list.length, 12);
   eq('규칙이 전부 구현된 것만 쓴다',
     DB.statuses.list.every(s => ['onUseFaceDamage','noReroll','zeroValue','faceLow','faceHigh',
       'hideFace','needReroll','fuse','linked','rerollCost','onUseFaceCoin','spread'].includes(s.rule)), true);
@@ -1077,7 +1077,8 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
   // 데이터: 정예·보스는 전부 기믹을 하나씩 가진다
   {
-    const GIM = new Set(['ward', 'cap', 'drainWhet', 'unpin', 'status', 'regen', 'enrage', 'reflect',
+    // v3.95: ward·cap 은 v3.90 에 제거됐다. 중독(poison)은 status 가 아니라 제 op 을 쓴다.
+    const GIM = new Set(['poison', 'drainWhet', 'unpin', 'status', 'regen', 'enrage', 'reflect',
       'sealLast', 'sealCat', 'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']);
     const missing = DB.enemies.filter(e => !e.final && (e.tier === 'elite' || e.tier === 'boss'))
       .filter(e => !e.start && !Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
@@ -1321,7 +1322,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     for (const e of DB.enemies) for (const m of Object.values({ ...e.moves, ...(e.uniqueMoves || {}) }))
       for (const f of (m.effects || [])) if (f.op === 'status') used.add(f.kind);
     const all = DB.statuses.list.map(x => x.id).filter(id => !used.has(id));
-    eq('상태이상 13종 전원 등판 (미사용 없음)', all, []);
+    eq('주사위 상태이상 12종 전원 등판 (미사용 없음)', all, []);
   }
   // 시작 버프 — 문턱·상한은 그냥 버프다 (enemies.json start 로 시작 부여)
   {

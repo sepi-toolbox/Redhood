@@ -272,9 +272,8 @@
         "name": "독니",
         "effects": [
           {
-            "op": "status",
-            "amount": 2,
-            "kind": "poison"
+            "op": "poison",
+            "amount": 3
           },
           {
             "op": "damage",
@@ -309,9 +308,8 @@
         "name": "맹독니",
         "effects": [
           {
-            "op": "status",
-            "amount": 2,
-            "kind": "poison"
+            "op": "poison",
+            "amount": 4
           },
           {
             "op": "damage",
@@ -2418,8 +2416,7 @@
             "amount": 10
           },
           {
-            "op": "status",
-            "kind": "poison",
+            "op": "poison",
             "amount": 2
           }
         ],
@@ -3161,10 +3158,7 @@
         "op": "armor",
         "weight": 2
       }
-    ],
-    "start": {
-      "cap": 14
-    }
+    ]
   },
   {
     "id": "headless_knight",
@@ -3286,10 +3280,7 @@
         "op": "armor",
         "weight": 1
       }
-    ],
-    "start": {
-      "ward": 12
-    }
+    ]
   },
   {
     "id": "grave_keeper",
@@ -3868,9 +3859,8 @@
             "amount": 14
           },
           {
-            "op": "status",
-            "kind": "poison",
-            "amount": 3
+            "op": "poison",
+            "amount": 4
           }
         ],
         "cooldown": 2,
@@ -4630,10 +4620,7 @@
         "op": "armor",
         "weight": 2
       }
-    ],
-    "start": {
-      "ward": 5
-    }
+    ]
   },
   {
     "id": "sandman",
@@ -5396,8 +5383,7 @@
         "op": "heal",
         "weight": 1
       }
-    ],
-    "start": {}
+    ]
   },
   {
     "id": "false_saint",
