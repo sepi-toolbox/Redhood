@@ -66,7 +66,7 @@ export function createBattle(run, encounterIds) {
     coinsLost: 0,                         // v1.17 약탈 — 전투가 끝나면 run에서 깎는다
     voidLocked: false,                    // v1.17 잠식이 다섯 칸을 다 먹은 상태
     lastHits: [],                         // [{uid, amount}] — 연출용
-    mods: {},                             // v3.3 행동이 남긴 지속 방해 (rollTax·holdTax·petrify·lockHigh·blind)
+    mods: {},                             // v3.3 행동이 남긴 지속 방해 (rollTax·holdTax·blind)
   };
   for (const e of battle.enemies) chooseMove(e, 1);
   startTurn(battle, true);
@@ -193,7 +193,10 @@ export function applyStatus(battle, kind, count = 1, power = 0) {
     const free = battle.dice.map((d, i) => (!d.st && !touched.has(i) ? i : -1)).filter(i => i >= 0);
     const rest = battle.dice.map((_, i) => (touched.has(i) ? -1 : i)).filter(i => i >= 0);
     const pool = free.length ? free : (rest.length ? rest : battle.dice.map((_, i) => i));
-    const i = pool[Math.floor(rng.next() * pool.length)];
+    // 물림처럼 '어느 칸을 무는가'가 정해진 상태이상은 아무 데나 가지 않는다 (statuses.json 의 pick)
+    const i = def.pick === 'highest'
+      ? pool.reduce((best, k) => (battle.dice[k].face > battle.dice[best].face ? k : best), pool[0])
+      : pool[Math.floor(rng.next() * pool.length)];
     touched.add(i);
     setStatus(battle, i, { kind, power: power > 0 ? power : 0,
       left: def.rule === 'fuse' ? 0 : life,
@@ -229,21 +232,26 @@ export function clearStatuses(battle, kind = null) {
 }
 
 // 봉인은 한 번 다시 굴리기 전에는 값이 없다 — 족보 계산에서 아예 빠진다.
-// 물린 주사위(sigLock — 흡착·물어채기 행동)도 같은 취급.
-export const faceOf = (d) => ((stRule(d, 'needReroll') && !d.st.opened) || d.sigLock) ? 0 : d.face;
+// v3.99: 물림도 상태이상 하나다. 예전엔 지속 방해(lockHigh)가 주사위에 sigLock 깃발을 또 세우는
+//   이중 구조였는데, 그 층을 걷어내고 다른 상태이상과 같은 자리·같은 규칙으로 옮겼다.
+export const faceOf = (d) => ((stRule(d, 'needReroll') && !d.st.opened) || stRule(d, 'locked')) ? 0 : d.face;
 export const facesOf = (battle) => battle.dice.map(faceOf);
 // 기절은 족보에는 들어가되 합산에서만 0으로 친다.
 // 굳음(petrify)은 그 눈이 나온 칸에 기절 상태이상을 직접 붙인다 — 규칙도 연출도 상태이상 문법 하나로 통일.
 const zeroedOf = (battle) => {
   const s = new Set();
-  battle.dice.forEach((d, i) => { if (stRule(d, 'zeroValue')) s.add(i); });
+  battle.dice.forEach((d, i) => {
+    if (stRule(d, 'zeroValue')) s.add(i);
+    // 굳음 — 이 칸에 그 눈이 나온 순간만 0이 된다 (예전 petrify 지속 방해를 상태이상으로 접었다)
+    if (stRule(d, 'zeroOnFace') && d.face === stAmount(d)) s.add(i);
+  });
   return s;
 };
 /* ==================== 행동이 남기는 지속 효과 (v3.3 mods) ====================
    적의 "행동"이 걸어두는 플레이어 쪽 지속 방해 — 상태이상과 같은 문법(턴 감쇠).
    rollTax  리롤할 때마다 피해   holdTax  리롤 시 지킨 주사위당 피해
-   petrify  그 눈이 나오면 기절st 부착   lockHigh  최고 눈 잠금(+시전자 회복)
    blind    족보 위력 미리보기 숨김
+   v3.99: 굳음·물기는 여기서 나가 주사위 상태이상이 됐다 — 방해가 또 주사위 상태를 낳던 층을 없앴다.
    족보 봉인(sealLast/sealCat)은 기존 sealed 를 그대로 쓴다.                     */
 export const modOf = (battle, key) => (battle.mods && battle.mods[key] && battle.mods[key].left > 0) ? battle.mods[key] : null;
 function decayMods(battle) {
@@ -252,17 +260,6 @@ function decayMods(battle) {
     if (!m) continue;
     m.left -= 1;
     if (m.left <= 0) delete battle.mods[k];
-  }
-}
-// 굴림 직후 훅 — 굳음(petrify)이 이번에 나온 그 눈들에 기절을 들러붙인다 (다음 턴 시작에 떨어진다)
-function modAfterRoll(battle, idxs) {
-  const m = modOf(battle, 'petrify');
-  if (!m) return;
-  for (const i of idxs) {
-    const d = battle.dice[i];
-    if (d.face === (m.face ?? 6) && !stRule(d, 'zeroValue')) {
-      setStatus(battle, i, { kind: 'stun', power: 0, left: 1, fuse: 0, opened: false, fresh: false });
-    }
   }
 }
 // 저주·축복은 나올 수 있는 눈을 자른다
@@ -449,8 +446,9 @@ function startTurn(battle, first = false) {
   battle.rolled = false;
   // 못 주사위(pin): 확정 때 새겨둔 눈을 지우지 않고 그대로 가지고 간다
   battle.dice.forEach((d, i) => {
-    const keep = dieOp(battle, i) === 'pin' && d.pinned && d.face > 0;
-    d.held = false; d.confused = false; d.sigLock = false;
+    // 물린 칸은 문 그 눈을 그대로 물고 있는다 — 값은 없지만 무엇이 물렸는지는 보여야 한다
+    const keep = (dieOp(battle, i) === 'pin' && d.pinned && d.face > 0) || (stRule(d, 'locked') && d.face > 0);
+    d.held = false; d.confused = false;
     if (!keep) { d.face = 0; d.pinned = false; }
   });
   battle.whetGained = 0;
@@ -482,29 +480,12 @@ export function initialRoll(battle) {
     // v3.29: 봉인된 칸은 턴 첫 굴림에 아예 안 굴러간다. 밀랍이 붙들고 있다.
     //   푸는 길은 리롤 하나뿐이라는 게 이 상태이상의 값이다 (엔진은 예전부터 그랬는데
     //   화면에서는 같이 굴러가는 것처럼 보여 "풀린 줄 알았는데 안 풀린다"가 됐다).
+    if (stRule(d, 'locked')) { d.held = true; return; }               // 물린 칸은 굴러가지 않는다
     if (stRule(d, 'needReroll') && !d.st.opened) { d.held = true; return; }
     d.face = rollWith(battle.diceDefs[i], d); d.held = true; rolled.push(i);
   });
   applyMirror(battle, battle.dice.map((_, i) => i));
   applyLadder(battle, battle.dice.map((_, i) => i));
-  modAfterRoll(battle, battle.dice.map((_, i) => i));
-  // 흡착·물어채기(lockHigh 행동) — 가장 높은 눈 하나가 물린다 (족보 제외·리롤 불가)
-  {
-    const m = modOf(battle, 'lockHigh');
-    if (m) {
-      let hi = -1;
-      battle.dice.forEach((d, i) => { if (d.face > 0 && (hi < 0 || d.face > battle.dice[hi].face)) hi = i; });
-      if (hi >= 0) {
-        const d = battle.dice[hi];
-        d.sigLock = true;
-        fxPush(battle, 'added', { i: hi, kind: 'bite' });   // 무는 순간도 연출한다
-        if (m.heal) {
-          const e = battle.enemies.find(x => x.uid === m.from);
-          if (e && e.hp > 0) e.hp = Math.min(e.maxHpInit, e.hp + d.face);
-        }
-      }
-    }
-  }
   battle.rolled = true;
   return true;
 }
@@ -545,7 +526,6 @@ export function reroll(battle) {
   }
   applyMirror(battle, rolled);
   applyLadder(battle, rolled);
-  modAfterRoll(battle, rolled);
   // 행동이 남긴 세금 — 이빨 자국(리롤당)·가시(지킨 주사위당). 방어도 무시.
   {
     const rt = modOf(battle, 'rollTax');
@@ -564,7 +544,7 @@ export function reroll(battle) {
 export function toggleHold(battle, i) {
   if (battle.over || !battle.rolled || battle.await) return;
   const d = battle.dice[i];
-  if (d.sigLock) return;                             // 시그니처에 잠긴 주사위는 못 건드린다
+  if (stRule(d, 'locked')) return;                   // 물림 — 손댈 수 없다
   if (d.confused || stRule(d, 'noReroll')) return;   // 포박 — 다시 굴릴 수 없다
   const next = !d.held;
   d.held = next;
@@ -865,6 +845,7 @@ function interrupt(enemy, dealt) {
 }
 
 // 시험용 — 족보를 거치지 않고 적에게 직접 피해를 넣는다 (파쇄·국면 전환 검증)
+export const __test_zeroed = (battle) => zeroedOf(battle);
 export function __test_deal(battle, enemy, amount) { battle.lastHits = battle.lastHits || []; dealToEnemy(battle, enemy, amount); }
 
 // ---------- 족보 확정 (플레이어 페이즈) — 사용할 변형을 지정 ----------
@@ -1145,25 +1126,25 @@ export function enemyPhase(battle) {
           e.hp -= ef.amount;                                //   예고로는 무슨 행동인지 알 수 없다
           break;
         // ---- v1.30 정예·보스 기믹 ----
+        // ── 아래는 전부 '걸어 두는 것' — 행운 하나가 통째로 무른다 (v3.99) ──
         case 'sealLast':                                   // 🔒 직전에 쓴 족보를 봉인한다 (흉내내기)
+          if (spendFortune(battle)) break;
           if (battle.lastSealableCat) sealCat(battle, battle.lastSealableCat, ef.turns);
           break;
         case 'sealCat':                                    // 🔒 지정 족보들을 봉인한다 (솜 채우기)
+          if (spendFortune(battle)) break;
           for (const cid of (ef.cats || [])) sealCat(battle, cid, ef.turns);
           break;
         case 'rollTax':                                    // 🩸 리롤할 때마다 피해 (이빨 자국)
+          if (spendFortune(battle)) break;
           battle.mods.rollTax = { amount: ef.amount || 1, left: (ef.turns || 1) + 1, name: e.nextMove.name };
           break;
         case 'holdTax':                                    // 🩸 리롤 시 지킨 주사위당 피해 (가시)
+          if (spendFortune(battle)) break;
           battle.mods.holdTax = { per: ef.per || 0.5, left: (ef.turns || 1) + 1, name: e.nextMove.name };
           break;
-        case 'petrify':                                    // 🗿 그 눈이 나오면 기절이 붙는다 (굳음)
-          battle.mods.petrify = { face: ef.face || 6, left: (ef.turns || 1) + 1, name: e.nextMove.name };
-          break;
-        case 'lockHigh':                                   // 🧲 매 굴림 최고 눈을 문다 (흡착·물어채기)
-          battle.mods.lockHigh = { heal: !!ef.heal, from: e.uid, left: (ef.turns || 1) + 1, name: e.nextMove.name };
-          break;
         case 'blind':                                      // 🌫 족보 위력 미리보기 숨김 (스멀거림)
+          if (spendFortune(battle)) break;
           battle.mods.blind = { left: (ef.turns || 1) + 1, name: e.nextMove.name };
           break;
         case 'regen':                                      // 💗 재생 — 자기 차례마다 amount 회복
@@ -1346,7 +1327,7 @@ export const INTENT_COMBO = {
 // 데이터가 예고를 직접 못 박고 싶을 때 쓰는 값 (moves[*].intent)
 const INTENT_FORCED = { attack: '⚔️', defend: '🛡', empower: '💪', confuse: '🌀', unknown: '❓', rest: '💤' };
 const DISRUPT_OPS = new Set(['confuse', 'poison', 'status', 'sealLast', 'sealCat',
-  'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind', 'drainWhet', 'unpin']);
+  'rollTax', 'holdTax', 'blind', 'drainWhet', 'unpin']);
 // 예고 줄로는 말할 수 없는 것 — 걸리고 나서 배지로 보는 지속 효과
 const OPAQUE_OPS = new Set(['regen', 'enrage', 'reflect']);
 

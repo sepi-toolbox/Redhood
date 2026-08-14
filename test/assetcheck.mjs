@@ -40,7 +40,12 @@ for (const re of [/ico\('([a-z0-9_]+)'/g, /'(intent_[a-z0-9_]+)'/g, /'(status_[a
   }
 }
 // 'status_' + ef.kind 처럼 이어 붙이는 자리는 데이터에서 종류를 끌어와 확인한다
-const statuses = JSON.parse(read('data/statuses.json')).list.map(s => `status_${s.id}`);
+/* v3.99: 그림 파일 이름이 id 와 다른 상태이상은 main.js 의 ST_ICO_FILE 이 이어 준다.
+   (물림·굳음은 지속 방해에서 내려오면서 예전 그림을 그대로 물려받았다) */
+const stAlias = Object.fromEntries([...(read('js/main.js')
+  .match(/const ST_ICO_FILE = \{([^}]*)\}/)?.[1] || '')
+  .matchAll(/(\w+):\s*'([a-z0-9_]+)'/g)].map(m => [m[1], m[2]]));
+const statuses = JSON.parse(read('data/statuses.json')).list.map(s => stAlias[s.id] || `status_${s.id}`);
 for (const n of statuses) names.add(n);
 /* v3.97: 아직 안 그린 그림은 READY 에 올라야만 실제로 불린다 (BUFF_ICO 의 [원하는 것, 대신 세울 것]).
    READY 밖에 있는 이름은 코드에 적혀 있어도 화면에 안 나가므로 '없는 아이콘'이 아니다. */

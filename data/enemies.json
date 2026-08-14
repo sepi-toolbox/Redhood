@@ -673,9 +673,9 @@
         "name": "굳히기",
         "effects": [
           {
-            "op": "petrify",
-            "face": 6,
-            "turns": 2
+            "op": "status",
+            "kind": "petrify",
+            "amount": 2
           }
         ],
         "cooldown": 2
@@ -905,9 +905,13 @@
         "name": "흡착",
         "effects": [
           {
-            "op": "lockHigh",
-            "heal": true,
-            "turns": 2
+            "op": "status",
+            "kind": "bite",
+            "amount": 1
+          },
+          {
+            "op": "heal",
+            "amount": 4
           }
         ],
         "minTurn": 0,
@@ -1444,9 +1448,9 @@
         "name": "물어채기",
         "effects": [
           {
-            "op": "lockHigh",
-            "heal": false,
-            "turns": 2
+            "op": "status",
+            "kind": "bite",
+            "amount": 1
           }
         ],
         "hidden": true,
@@ -4544,9 +4548,9 @@
             "amount": 12
           },
           {
-            "op": "petrify",
-            "face": 6,
-            "turns": 3
+            "op": "status",
+            "kind": "petrify",
+            "amount": 2
           }
         ],
         "followUp": {

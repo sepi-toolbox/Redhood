@@ -55,5 +55,23 @@ const eq=(l,a,e)=>{const ok=JSON.stringify(a)===JSON.stringify(e);console.log(`$
   end(b);
   eq('중독 4를 한꺼번에 얹는 것도 하나로 친다', [b.player.dot, b.buffs.fortune], [0,0]);
 }
-console.log(fail?`NEW BUFF FAILS: ${fail}`:'ALL NEW BUFF PASS');
-process.exit(fail?1:0);
+
+// ── v3.99: 행운이 지속 방해와 족보 봉인도 무른다 ──
+{
+  const CASES = [
+    ['봉인(흉내내기)', [{op:'sealLast', turns:2}], b => Object.keys(b.sealed).length],
+    ['봉인(솜 채우기)', [{op:'sealCat', cats:['onePair'], turns:2}], b => Object.keys(b.sealed).length],
+    ['이빨 자국',      [{op:'rollTax', amount:2, turns:2}], b => (b.mods.rollTax ? 1 : 0)],
+    ['가시(리롤세)',   [{op:'holdTax', per:0.5, turns:2}], b => (b.mods.holdTax ? 1 : 0)],
+    ['스멀거림',       [{op:'blind', turns:2}], b => (b.mods.blind ? 1 : 0)],
+  ];
+  for (const [name, effects, probe] of CASES) {
+    DB.enemyById.__dis = { id:'__dis', name:'방해', tier:'normal', art:'x', hp:[40,40],
+      moves:{ m:{ name:'방해', effects } }, pattern:{ mode:'weighted', weights:{ m:1 } } };
+    const b1 = mk('__dis'); b1.lastSealableCat = 'onePair'; b1.buffs.fortune = 1; end(b1);
+    const b2 = mk('__dis'); b2.lastSealableCat = 'onePair'; end(b2);
+    eq(`행운이 ${name}을 무른다`, [probe(b1), b1.buffs.fortune, probe(b2) > 0], [0, 0, true]);
+  }
+}
+console.log(fail ? `NEW BUFF FAILS: ${fail}` : 'ALL NEW BUFF PASS');
+process.exit(fail ? 1 : 0);

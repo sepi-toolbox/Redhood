@@ -408,3 +408,16 @@ Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown i
 | 철갑 | `status_ironclad.png` | `a layered iron plate pauldron, riveted bands, seen head-on` |
 | 가시 | `status_thorns.png` | `a ring of sharp bramble thorns curving outward` |
 | 행운 | `status_fortune.png` | `a four-leaf clover with a faint spark at its centre` |
+
+## v3.99 상태이상 승격분 — 주사위 판 그림 1장
+
+굳음(petrify)이 지속 방해에서 주사위 상태이상으로 내려왔다. 지금은 기절 판을
+빌려 쓰고 있다(`DIE_ART_ALIAS`). 전용 그림이 들어오면 별칭을 지우면 된다.
+물림(bite)은 `status_die_bite.png` 가 이미 있어 그대로 쓴다.
+
+| 이름 | 파일 | 프롬프트 |
+|---|---|---|
+| 굳음 | `assets/ui/status_die_petrify.png` | `a die face crusted over with grey stone, cracks spreading from the centre` |
+
+표식 아이콘도 지금은 `fx_petrify.png` 를 빌려 쓴다. 다른 상태이상과 결을 맞추려면
+`assets/icons/status_petrify.png` 로 새로 뽑고 `ST_ICO_FILE` 에서 별칭을 지운다.

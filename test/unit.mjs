@@ -883,10 +883,12 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
 
   // 데이터 무결성
-  eq('주사위 상태이상 12종 (v3.95: 독은 본체 중독으로 나갔다)', DB.statuses.list.length, 12);
+  // v3.99: 물림·굳음이 지속 방해에서 상태이상으로 내려왔다 (이중 구조 제거)
+  eq('주사위 상태이상 14종', DB.statuses.list.length, 14);
   eq('규칙이 전부 구현된 것만 쓴다',
     DB.statuses.list.every(s => ['onUseFaceDamage','noReroll','zeroValue','faceLow','faceHigh',
-      'hideFace','needReroll','fuse','linked','rerollCost','onUseFaceCoin','spread'].includes(s.rule)), true);
+      'hideFace','needReroll','fuse','linked','rerollCost','onUseFaceCoin','spread',
+      'locked','zeroOnFace'].includes(s.rule)), true);
 }
 
 
@@ -1266,25 +1268,30 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.reroll(b);
     eq('가시: 지킨 4개 → 피해 2', hp0 - b.player.hp, 2);
   }
-  // petrify — 그 눈이 나오면 기절이 붙는다 (굳히기)
+  // v3.99 굳음 — 이제 지속 방해가 아니라 칸에 붙는 상태이상이다. 그 눈이 나온 순간만 0으로 친다.
   {
     const b = mk(['twig_golem']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
-    cast(b, e, [{ op: 'petrify', face: 6, turns: 2 }]);
-    eng.rng.next = () => 0.999;     // 전부 6이 나오게
-    eng.initialRoll(b);
-    eq('굳히기: 6이 나온 칸마다 기절', b.dice.every(d => d.st && d.st.kind === 'stun'), true);
-    eng.rng.next = () => 0.5;
+    cast(b, e, [{ op: 'status', kind: 'petrify', amount: 2 }]);
+    eq('굳음이 두 칸에 붙는다', b.dice.filter(d => d.st && d.st.kind === 'petrify').length, 2);
+    const i = b.dice.findIndex(d => d.st && d.st.kind === 'petrify');
+    b.dice.forEach((d, k) => { d.face = k === i ? 6 : 3; });
+    eq('그 눈이 나오면 0으로 친다', eng.__test_zeroed(b).has(i), true);
+    b.dice[i].face = 5;
+    eq('다른 눈이면 그대로 센다', eng.__test_zeroed(b).has(i), false);
   }
-  // lockHigh — 최고 눈 물림 + 회복 (흡착)
+  // v3.99 물림 — 최고 눈 한 칸을 문다. 족보에서도 빠지고 손도 못 댄다.
   {
     const b = mk(['leech']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
-    e.hp = 900;
-    cast(b, e, [{ op: 'lockHigh', heal: true, turns: 2 }]);
     eng.initialRoll(b);
-    const locked = b.dice.filter(d => d.sigLock);
-    eq('흡착: 딱 하나 물린다', locked.length, 1);
-    eq('흡착: 물린 칸은 족보에서 빠진다', eng.faceOf(locked[0]), 0);
-    eq('흡착: 그 값만큼 회복', e.hp - 900, locked[0].face);
+    const hi = b.dice.reduce((a, d, k) => (d.face > b.dice[a].face ? k : a), 0);
+    cast(b, e, [{ op: 'status', kind: 'bite', amount: 1 }]);
+    const locked = b.dice.filter(d => d.st && d.st.kind === 'bite');
+    eq('물림: 딱 하나, 그리고 가장 높은 눈', [locked.length, b.dice[hi].st && b.dice[hi].st.kind], [1, 'bite']);
+    eq('물린 칸은 값이 없다', eng.faceOf(b.dice[hi]), 0);
+    const was = b.dice[hi].held;
+    eng.toggleHold(b, hi);
+    eq('물린 칸은 손댈 수 없다', b.dice[hi].held, was);
+    eq('물린 칸은 족보에서 빠진다', eng.faceOf(locked[0]), 0);
   }
   // blind + 감쇠 — 턴이 지나면 풀린다
   {
