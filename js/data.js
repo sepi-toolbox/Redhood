@@ -105,7 +105,7 @@ function validate() {
     }
   }
   // 적 행동 효과 검증 (v1.08: 휴식 추가, 유니크 행동·기본 행동·파쇄 대상까지 함께 본다)
-  const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal', 'rest', 'selfDamage', 'poison', 'bleed', 'status',
+  const ENEMY_OPS = new Set(['damage', 'block', 'confuse', 'empower', 'heal', 'rest', 'selfDamage', 'poison', 'status',
   'ward', 'cap', 'drainWhet', 'unpin',
   'sealLast', 'sealCat', 'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind',
   'regen', 'enrage', 'reflect']);   // v3.3 테마 행동 + v3.8 적 자기 버프 — 별도 시스템 아님

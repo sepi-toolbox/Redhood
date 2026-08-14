@@ -42,7 +42,7 @@
       "start": {
         "chance": "catch_breath",
         "onePair": "clasped_hands",
-        "threeKind": "downstroke"
+        "threeKind": "nettle"
       }
     },
     {
@@ -64,7 +64,7 @@
       "start": {
         "chance": "catch_breath",
         "onePair": "red_shoes",
-        "threeKind": "downstroke"
+        "threeKind": "nettle"
       }
     }
   ],

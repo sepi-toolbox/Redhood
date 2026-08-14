@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.94'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.95'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -248,22 +248,22 @@ function rowIcon(inner) {
 // 규격은 기본 paper_row와 동일(800x212, 9-슬라이스 55 92)이라 CSS는 그림만 갈아끼운다.
 const COMBO_PLATE_READY = new Set(['instinct', 'clasped_hands', 'judgment_night', 'hunt_drive', 'triple_axe', 'twin_sisters',
   'whisper', 'red_shoes', 'two_moons', 'woodsman_breath', 'heavy_blow',
-  'cottage', 'windpath', 'four_fangs', 'hearth', 'moonpath',
-  'blood_moon', 'storm_run']);
+  'cottage', 'windpath', 'deathcap', 'hearth', 'moonpath',
+  'plague_moon', 'storm_run']);
 // v0.96: 판마다 양 끝 장식의 폭이 다르다. 테두리 폭을 17px로 고정해두면
 // 장식이 넓은 판일수록 좌우로 짓눌린다(할머니의 오두막은 원본 대비 62%까지 찌그러졌다).
 // 그래서 판별로 '원본 장식 폭 ÷ 원본 높이 × 줄 높이(45)'를 계산해 테두리 폭을 따로 준다.
 // 값이 없는 판은 20px — 비례 절단의 최소치(45 × 92/212)와 같다.
 const PLATE_EDGE = {
   judgment_night: 30, cottage: 27, instinct: 27, moonpath: 26, hearth: 25,
-  hunt_drive: 23, blood_moon: 23, windpath: 22, four_fangs: 22, twin_sisters: 21,
+  hunt_drive: 23, plague_moon: 23, windpath: 22, deathcap: 22, twin_sisters: 21,
   red_shoes: 21, storm_run: 21,
 };
 const plateEdge = (id) => PLATE_EDGE[id] || 20;
 const COMBO_ICON_READY = new Set();
 const ABILITY_ICON = {
   strength: 'status_strength', focus: 'status_focus', regen: 'status_regen',
-  block: 'status_block', weakEnemy: 'status_weak', bleed: 'status_bleed',
+  block: 'status_block', weakEnemy: 'status_weak', poison: 'status_poison',
   vulnerable: 'status_vulnerable',
 };
 function comboIcon(cat, variant) {
@@ -279,12 +279,12 @@ function comboIcon(cat, variant) {
    수치가 있는 것은 그 원 안에 수치까지 적는다. 일격·전체는 수치가 없어 표식만. */
 const TAG_ICON = {
   whet: 'ui_whet', focus: 'status_focus', strength: 'status_strength', block: 'status_block',
-  regen: 'status_regen', weakEnemy: 'status_weak', vulnerable: 'status_vulnerable', bleed: 'status_bleed',
+  regen: 'status_regen', weakEnemy: 'status_weak', vulnerable: 'status_vulnerable', poison: 'status_poison',
   burst: 'ui_burst', aoe: 'ui_aoe',
 };
 const TAG_KO = {
   whet: '벼름', focus: '집중', strength: '힘', block: '방어', regen: '재생',
-  weakEnemy: '약화', vulnerable: '취약', bleed: '출혈', burst: '일격', aoe: '전체 공격',
+  weakEnemy: '약화', vulnerable: '취약', poison: '중독', burst: '일격', aoe: '전체 공격',
 };
 /* 어떤 표식이든 같은 얼굴로 — 동그라미에 그림, 필요하면 그 안에 수치.
    족보 줄·적 상태 줄이 같은 언어를 쓰게 한다 (v3.51). */
@@ -1072,8 +1072,8 @@ function renderBattle(opts = {}) {
         if (b.strength > 0) t.push(iconTag('status_strength', 'good', b.strength, `힘 +${b.strength} — 확정할 때마다 피해 +${b.strength}`));
         if (b.focus > 0) t.push(iconTag('status_focus', 'good', b.focus, `집중 +${b.focus} — 매 턴 리롤 +${b.focus}`));
         if (b.regen > 0) t.push(iconTag('status_regen', 'good', b.regen, `재생 +${b.regen} — 턴마다 회복`));
-        if (p_.dot > 0) t.push(iconTag('status_bleed', 'harm', p_.dot,
-          `${DOT_KO[p_.dotKind] || '독'} ${p_.dot} — 내 행동 뒤에 피해`));
+        if (p_.dot > 0) t.push(iconTag('status_poison', 'harm', p_.dot,
+          `중독 ${p_.dot} — 내 턴이 끝날 때마다 쌓인 만큼 피해 (방어도로 막힌다)`));
         for (const k of ['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']) {
           const m = modOf(battle, k);
           if (m) t.push(iconTag(FX_ICON[k], 'harm', m.left, `${m.name} — ${CB_MOD_KO[k]} (${m.left}턴)`));
@@ -1206,7 +1206,7 @@ function updateComboHint() {
 
 // ---------- 적 행동 상세 (치트): 적 길게 눌러 예고 행동의 실제 내용 확인 — ❓ 의문도 공개 ----------
 const ENEMY_TIER_KO = { normal: '일반', elite: '정예', boss: '보스' };
-const DOT_KO = { poison: '독', bleed: '출혈' };   // v1.14: 같은 장치, 이름만 다르다
+// v3.95: 중독은 본체(내 HP·적 HP)에, 출혈은 주사위 칸에. 붙는 자리가 곧 이름이다.
 // v3.10 상태/버프 아이콘 — 이모지 금지. (임시) 표시가 붙은 것은 전용 아트 대기 중
 const FX_ICON = {          // v3.13 전량 정식 아트
   rollTax: 'fx_rolltax', holdTax: 'fx_holdtax', petrify: 'fx_petrify',
@@ -1234,8 +1234,7 @@ function enemyEffectText(e, ef) {
       const head = n > 1 ? `피해 ${final} × ${n}타 = ${final * n}` : `피해 ${final}`;
       return `${ico('intent_attack')} ${head}` + (parts.length ? ` (한 대당 기본 ${base} ${parts.join(' ')})` : '');
     }
-    case 'poison':
-    case 'bleed': return `${ico(ef.op === 'poison' ? 'status_poison' : 'status_bleed')} ${DOT_KO[ef.op]} ${ef.amount} — 내 행동이 끝날 때마다 쌓인 만큼 피해, 그 뒤 1 감소 (방어도로 막힘)`;
+    case 'poison': return `${ico('status_poison')} 중독 ${ef.amount} — 내 턴이 끝날 때마다 쌓인 만큼 피해, 그 뒤 1 감소 (방어도로 막힘)`;
     case 'selfDamage': return `${uiIco('unknown')} 자해 — 스스로 ${ef.amount} 피해를 입는다 (방어도 무시)`;
     case 'block': return `${ico('status_block')} 방어 ${ef.amount} 획득`;
     case 'confuse': return `${ico('status_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
@@ -1270,7 +1269,7 @@ function showPlayerBuffs() {
     battle.whet > 0 ? `<li>${uiIco('whet')} 벼름 ${battle.whet} — <b>${uiIco('burst')}일격</b> 족보로 터뜨리면 피해 <b>×${whetMultOf(battle.whet).toFixed(2).replace(/0$/, '')}</b>. 일격이 아닌 족보로는 쓰이지도 깎이지도 않는다</li>` : '',
     battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
     // v3.38: 칩에는 뜨는데 상세에는 없던 것들 — 지속 피해와 기믹 제약
-    battle.player.dot > 0 ? `<li>${ico('status_bleed')} ${DOT_KO[battle.player.dotKind] || '독'} ${battle.player.dot} — 내 행동이 끝날 때마다 ${battle.player.dot} 피해 (방어도로 막힌다)</li>` : '',
+    battle.player.dot > 0 ? `<li>${ico('status_poison')} 중독 ${battle.player.dot} — 내 턴이 끝날 때마다 ${battle.player.dot} 피해 (방어도로 막힌다)</li>` : '',
     ...['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind'].map(k => {
       const m = modOf(battle, k);
       return m ? `<li>${fxIco(k)} ${esc(m.name)} — ${CB_MOD_KO[k]} <small class="cat-tag">${m.left}턴</small></li>` : '';
