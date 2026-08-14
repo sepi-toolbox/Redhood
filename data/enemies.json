@@ -1428,8 +1428,8 @@
     "tier": "elite",
     "art": "🐟",
     "hp": [
-      65,
-      65
+      77,
+      77
     ],
     "moves": {
       "snap": {
@@ -1477,11 +1477,6 @@
       "slick": {
         "name": "미끈 비늘",
         "effects": [
-          {
-            "op": "cap",
-            "amount": 13,
-            "turns": 3
-          },
           {
             "op": "status",
             "kind": "stun",
@@ -1879,8 +1874,8 @@
     "tier": "boss",
     "art": "🗿",
     "hp": [
-      131,
-      131
+      160,
+      160
     ],
     "moves": {
       "grasp": {
@@ -2047,9 +2042,8 @@
         "name": "바위 가죽",
         "effects": [
           {
-            "op": "ward",
-            "amount": 12,
-            "turns": 4
+            "op": "block",
+            "amount": 12
           },
           {
             "op": "status",
@@ -3039,8 +3033,8 @@
     "tier": "elite",
     "art": "🗿",
     "hp": [
-      45,
-      45
+      55,
+      55
     ],
     "moves": {
       "slam": {
@@ -3103,9 +3097,8 @@
         "name": "진흙 갑주",
         "effects": [
           {
-            "op": "ward",
-            "amount": 13,
-            "turns": 2
+            "op": "block",
+            "amount": 13
           },
           {
             "op": "status",
@@ -3304,8 +3297,8 @@
     "tier": "elite",
     "art": "⚰️",
     "hp": [
-      67,
-      67
+      79,
+      79
     ],
     "moves": {
       "shovel": {
@@ -3365,9 +3358,8 @@
         "name": "흙 덮기",
         "effects": [
           {
-            "op": "ward",
-            "amount": 16,
-            "turns": 4
+            "op": "block",
+            "amount": 14
           },
           {
             "op": "status",
@@ -3803,8 +3795,8 @@
     "tier": "boss",
     "art": "🧟",
     "hp": [
-      97,
-      97
+      114,
+      114
     ],
     "moves": {
       "claw": {
@@ -3872,9 +3864,8 @@
         "name": "흙 아래",
         "effects": [
           {
-            "op": "ward",
-            "amount": 16,
-            "turns": 4
+            "op": "block",
+            "amount": 14
           },
           {
             "op": "status",
@@ -4942,8 +4933,8 @@
     "tier": "elite",
     "art": "🔔",
     "hp": [
-      54,
-      54
+      65,
+      65
     ],
     "moves": {
       "toll": {
@@ -5011,11 +5002,6 @@
       "toll_cage": {
         "name": "가두는 종",
         "effects": [
-          {
-            "op": "cap",
-            "amount": 23,
-            "turns": 3
-          },
           {
             "op": "status",
             "kind": "plunder",
@@ -5260,8 +5246,8 @@
     "tier": "boss",
     "art": "🕳️",
     "hp": [
-      73,
-      73
+      91,
+      91
     ],
     "moves": {
       "gnash": {
@@ -5327,12 +5313,11 @@
         "cooldown": 3
       },
       "not_one_bite": {
-        "name": "걸린 목구멍",
+        "name": "아귀 다물기",
         "effects": [
           {
-            "op": "cap",
-            "amount": 23,
-            "turns": 2
+            "op": "block",
+            "amount": 16
           }
         ],
         "cooldown": 2,

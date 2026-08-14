@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.89'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.90'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -305,8 +305,6 @@ function enemyTags(e) {
   const d = e.debuffs || {};
   const t = [];
   // 적이 두르거나 적을 지켜 주는 것 — 나에게는 전부 해롭다
-  if (e.wardLeft > 0) t.push(iconTag(FX_ICON.ward, 'harm', e.ward, `문턱 ${e.ward} — 한 번에 넘겨야 뚫린다 (${e.wardLeft}턴)`));
-  if (e.capLeft > 0) t.push(iconTag(FX_ICON.cap, 'harm', e.cap, `상한 ${e.cap} — 한 번에 이 이상 줄 수 없다 (${e.capLeft}턴)`));
   if (e.power > 0) t.push(iconTag('status_strength', 'harm', e.power, `힘 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
   if (e.regenLeft > 0 && e.regen > 0) t.push(iconTag(FX_ICON.regen, 'harm', e.regen, `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)`));
   if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, 'harm', e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
@@ -1189,7 +1187,7 @@ const DOT_KO = { poison: '독', bleed: '출혈' };   // v1.14: 같은 장치, �
 const FX_ICON = {          // v3.13 전량 정식 아트
   rollTax: 'fx_rolltax', holdTax: 'fx_holdtax', petrify: 'fx_petrify',
   lockHigh: 'fx_bite', blind: 'fx_blind', sealLast: 'fx_seal_cat', sealCat: 'fx_seal_cat',
-  ward: 'fx_ward', cap: 'fx_cap', enrage: 'fx_enrage',
+  enrage: 'fx_enrage',
   reflect: 'fx_reflect', undying: 'fx_undying', regen: 'status_regen',
 };
 const fxIco = (key, cls = '') => ico(FX_ICON[key] || 'status_block', cls);
@@ -1226,11 +1224,9 @@ function enemyEffectText(e, ef) {
     case 'petrify': return `${fxIco('petrify')} 굳음 — ${ef.turns || 1}턴간 ${ef.face || 6}이 나오면 굳는다(기절)`;
     case 'lockHigh': return `${fxIco('lockHigh')} 물기 — ${ef.turns || 1}턴간 매 굴림 가장 높은 눈이 물린다${ef.heal ? ' (그만큼 회복)' : ''}`;
     case 'blind': return `${fxIco('blind')} 어둠 — ${ef.turns || 1}턴간 족보 위력이 보이지 않는다`;
-    case 'ward': return `${fxIco('ward')} 문턱 ${ef.amount} — 한 번에 넘겨야 뚫린다`;
     case 'regen': return `${fxIco('regen')} 재생 ${ef.amount} — ${ef.turns || 3}턴간 자기 차례마다 회복`;
     case 'enrage': return `${fxIco('enrage')} 격노 — 맞을 때마다 힘 +${ef.amount || 1} (전투 내 누적)`;
     case 'reflect': return `${fxIco('reflect')} 반사 ${ef.amount} — ${ef.turns || 3}턴간 때리면 되받는다`;
-    case 'cap': return `${fxIco('cap')} 상한 ${ef.amount} — 한 번에 이 이상 안 들어간다`;
     case 'rest': return `${ico('intent_rest')} 휴식`;
     case 'drainWhet': return `🌀 벼름을 빼앗는다`;
     case 'unpin': return `💨 새김을 흩는다`;
@@ -1304,12 +1300,10 @@ function showEnemyInfo(uid) {
     d.weak > 0 ? `<li>${ico('status_weak')} 약화 — 주는 피해 ×0.75 (${d.weak}턴 남음, 매 턴 1 소멸)</li>` : '',
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
     d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 — 받는 피해 ×1.5 (${d.vulnerable}턴 남음, 매 턴 1 소멸)</li>` : '',
-    e.wardLeft > 0 ? `<li>${fxIco('ward')} 문턱 ${e.ward} — 한 번에 ${e.ward} 이하로 때리면 아예 안 통한다 (${e.wardLeft}턴)</li>` : '',
     e.regenLeft > 0 && e.regen > 0 ? `<li>${fxIco('regen')} 재생 ${e.regen} — 자기 차례마다 회복 (${e.regenLeft}턴). 이보다 세게 때려야 줄어든다</li>` : '',
     e.enrage > 0 ? `<li>${fxIco('enrage')} 격노 — 피해를 받을 때마다 힘 +${e.enrage} (전투 내 누적). 잔펀치가 벌을 받는다</li>` : '',
     e.reflectLeft > 0 && e.reflect > 0 ? `<li>${fxIco('reflect')} 반사 ${e.reflect} — 때릴 때마다 되받는다 (${e.reflectLeft}턴, 방어도로 막힘)</li>` : '',
     e.undying > 0 ? `<li>${fxIco('undying')} 불사 — 처음 쓰러질 때 한 번 다시 일어선다</li>` : '',
-    e.capLeft > 0 ? `<li>${fxIco('cap')} 상한 ${e.cap} — 한 번에 ${e.cap}을 넘겨 줄 수 없다 (${e.capLeft}턴)</li>` : '',
     e.stunned ? '<li>💫 다음 행동 취소됨</li>' : '',
   ].filter(Boolean).join('');
   app.append(h(`
