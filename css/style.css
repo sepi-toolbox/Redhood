@@ -200,9 +200,11 @@ img {
 .btn.tiny { border-width: 9px 13px; font-size: 12.5px; }
 /* v0.90: 지도 헤더의 작은 음소거 토글 */
 .mute-mini {
-  background: none; border: none; padding: 2px 4px; font-size: 16px;
-  color: #b8a98e; cursor: pointer; line-height: 1; flex: none;
+  background: none; border: none; padding: 2px 4px; font-size: 12px; font-weight: 700;
+  color: #b8a98e; cursor: pointer; line-height: 1; flex: none; letter-spacing: .5px;
 }
+/* v3.93: 스피커 이모지를 걷어냈다 — 꺼진 상태는 글자를 흐리게 하고 사선을 긋는다 */
+.mute-mini.off { color: #6b6157; text-decoration: line-through; }
 .mute-mini:active { filter: brightness(1.3); }
 .player-bar.map-foot { justify-content: flex-start; padding-left: 10px; padding-right: 10px; }
 
@@ -1053,6 +1055,14 @@ span.enemy-art {
 .card.r-rare { border-color: #7d5ba6; }
 .card.r-epic { border-color: #b08948; }
 .rest-art { font-size: 56px; }
+/* v3.93: 족보 상세의 예시 눈금 — 이모지 대신 게임에서 쓰는 주사위 눈 그림 */
+.pip-ico { width: 22px; height: 22px; vertical-align: -5px; margin-right: 3px; image-rendering: auto; }
+/* v3.93: 문장 안에 섞여 들어가는 작은 표식 — 글줄 높이를 안 밀도록 글자 크기에 맞춘다 */
+.ico-inline { width: 1.05em; height: 1.05em; vertical-align: -.16em; margin-right: 1px; object-fit: contain; }
+.info-ability .ab-tag {
+  display: inline-block; margin-right: 5px; padding: 1px 6px; border-radius: 4px;
+  background: #3a2f24; color: #d9c79f; font-size: 11px; font-weight: 800; vertical-align: 1px;
+}
 
 /* ---------- 모달 ---------- */
 .modal-back {
@@ -1925,6 +1935,25 @@ span.enemy-art {
 .gain-float.heal  { color: #57d98a; }
 .gain-float.block { color: #cfd8e2; }
 .enemy .gain-float { top: 6px; font-size: 17px; }
+
+/* v3.93: 상태이상 피해 — 출혈은 붉게, 독은 풀빛, 부패는 자줏빛.
+   때린 사람이 없는 피해라 타격 이펙트 대신 색과 짧은 발광으로만 알린다. */
+.dot-float {
+  position: absolute; left: 50%; top: -12px; z-index: 42;
+  font-size: 19px; font-weight: 800; pointer-events: none;
+  text-shadow: 0 1px 4px #000, 0 0 6px #000;
+  animation: gainFloat 1.3s ease-out forwards;
+}
+.dot-float.bleed  { color: #ff6b5a; }
+.dot-float.poison { color: #9ad257; }
+.dot-float.rot    { color: #b98ad6; }
+.enemy .dot-float { top: 2px; font-size: 17px; }
+@keyframes dotHit {
+  0%, 100% { filter: none; }
+  30%      { filter: brightness(1.6) saturate(.55) contrast(1.12); }
+  60%      { filter: brightness(1.2) saturate(.8); }
+}
+.dot-hit { animation: dotHit .55s ease-out; }
 @keyframes gainFloat {
   0%   { opacity: 0; transform: translate(-50%, 6px) scale(.8); }
   18%  { opacity: 1; transform: translate(-50%, -4px) scale(1.08); }

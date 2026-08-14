@@ -59,5 +59,13 @@ const relicReady = [...(main.match(/const RELIC_ART_READY = new Set\(\[([\s\S]*?
 bad('READY 에 올랐는데 그림이 없는 유물', relicReady.filter(n => !relicFiles.has(n)));
 bad('READY 에 올랐는데 데이터에 없는 유물', relicReady.filter(n => !relicIds.has(n)));
 
+// 5) v3.93: 코드가 부르는 그림이 sw.js 목록에도 있어야 한다.
+//    (2)는 '파일이 있느냐'만 봤다. 파일은 있는데 목록에 없으면 오프라인에서만 조용히 비어 보인다 —
+//    화면 검증으로는 절대 안 잡히는 종류의 구멍이라 여기서 막는다.
+const cached = new Set(assets);
+const wanted = [...names].map(n => `assets/icons/${n}.png`)
+  .concat([1, 2, 3, 4, 5, 6].map(i => `assets/dice/pip${i}.png`));
+bad('있는데 sw.js 목록에 없는 그림', wanted.filter(p => existsSync(join(ROOT, p)) && !cached.has(p)));
+
 console.log(fails === 0 ? 'ALL ASSET PASS' : `ASSET FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
