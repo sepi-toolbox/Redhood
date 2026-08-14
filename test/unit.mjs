@@ -884,15 +884,15 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
       dice, categories: cats }, ['crow'], 'battle');
 
   eq('벼름 0이면 배수 1', whetMultOf(0), 1);
-  eq('벼름 2면 배수 2', whetMultOf(2), 2);
-  eq('벼름은 6에서 멈춘다', whetMultOf(99), 4);
+  eq('벼름 2면 배수 1.5', whetMultOf(2), 1.5);
+  eq('벼름은 6에서 멈춘다', whetMultOf(99), 2.5);
 
   // 공식에 곱연산으로 들어간다: 원페어 [5,5] = 10 → 벼름 2면 20
   const five = [5, 5, 1, 2, 3], N5 = Array(5).fill({ faces: [1,2,3,4,5,6] });
   const C = DB.scoring.categories.find(c => c.id === 'onePair');
   eq('벼름 없이 원페어 [5,5]', computeDamage(C, five, N5, []).total, 10);
-  eq('벼름 2면 두 배', computeDamage(C, five, N5, [], null, { whet: 2 }).total, 20);
-  eq('벼름 4면 세 배', computeDamage(C, five, N5, [], null, { whet: 4 }).total, 30);
+  eq('벼름 2면 1.5배', computeDamage(C, five, N5, [], null, { whet: 2 }).total, 15);
+  eq('벼름 4면 두 배', computeDamage(C, five, N5, [], null, { whet: 4 }).total, 20);
 
   // 숫돌 — 매 턴 시작 벼름 +1
   {
