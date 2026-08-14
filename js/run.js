@@ -1,5 +1,8 @@
 // run.js — 런 상태, 맵 생성, 보상, 세이브 (v2: 주사위/유물)
 import { DB } from './data.js';
+import { healPlayer } from './engine.js';
+// v3.79: 런 밖(휴식·만남)의 회복도 같은 통로를 쓴다 — 거머리 반지가 빠짐없이 걸리게
+const healRun = (run, amt) => healPlayer(run, (run.relics || []).map(id => DB.relicById[id]).filter(Boolean), amt);
 import { rng } from './engine.js';
 
 const SAVE_KEY = 'redhood_run_v9';
@@ -172,7 +175,7 @@ export function applyEventEffects(run, effects) {
       }
       case 'gainRelic': {
         const pool = DB.relics.filter(r => !run.relics.includes(r.id));
-        if (pool.length === 0) { run.hp = Math.min(run.maxHp, run.hp + 5); messages.push('줄 것이 없어 HP +5'); break; }
+        if (pool.length === 0) { healRun(run, 5); messages.push('줄 것이 없어 HP +5'); break; }
         const r = pool[Math.floor(rng.next() * pool.length)];
         applyRelicPickup(run, r);
         messages.push(`${r.icon} ${r.name} 획득`);
@@ -416,7 +419,7 @@ export function rollRewards(run, nodeType) {
   // 2) 범주 안에서 등급 가중으로 3개 추첨 (허용 등급 밖으로는 절대 나가지 않음)
   // 네잎클로버(luck): 상위 등급 가중 배가 / 유물은 등급 가중 없음(일반 균등)
   let tierWeights = { ...cfg.tierWeights };
-  const luckMult = run.relics.map(id => DB.relicById[id].hook)
+  const luckMult = run.relics.flatMap(id => (DB.relicById[id].hooks || [DB.relicById[id].hook]))
     .filter(h => h.type === 'luck').reduce((m, h) => m * (h.mult || 2), 1);
   if (luckMult > 1) {
     for (const t of ['rare', 'epic']) if (tierWeights[t]) tierWeights[t] *= luckMult;
@@ -490,7 +493,7 @@ export function rollShopStock(run) {
   const cfg = DB.act1.shop;
   let priceMult = (run.enlight || 0) >= 16 ? 1.3 : 1; // 계몽 16: 상점 가격 증가
   // 가계부: 상점 가격 -20%
-  priceMult *= run.relics.map(id => DB.relicById[id].hook)
+  priceMult *= run.relics.flatMap(id => (DB.relicById[id].hooks || [DB.relicById[id].hook]))
     .filter(h => h.type === 'shopDiscount').reduce((m, h) => m * (h.mult || 1), 1);
   const stock = [];
   const usedDie = new Set();
@@ -533,7 +536,7 @@ export function coinReward(run, nodeType) {
   const cr = DB.act1.coins[nodeType === 'elite' ? 'elite' : 'battle'];
   let got = cr[0] + Math.floor(rng.next() * (cr[1] - cr[0] + 1));
   // 은저울: 코인 +25%
-  const cm = run.relics.map(id => DB.relicById[id].hook)
+  const cm = run.relics.flatMap(id => (DB.relicById[id].hooks || [DB.relicById[id].hook]))
     .filter(h => h.type === 'coinBonus').reduce((m, h) => m * (h.mult || 1), 1);
   got = Math.round(got * cm);
   if ((run.enlight || 0) >= 13) got = Math.floor(got * 0.75);
@@ -551,9 +554,10 @@ function rollWeight(weights) {
 // ---------- 유물 획득 (즉발 훅 적용: 유리병 최대 HP 등) ----------
 export function applyRelicPickup(run, relic) {
   run.relics.push(relic.id);
-  if (relic.hook.type === 'maxHp') {
-    run.maxHp += relic.hook.amount;
-    run.hp += relic.hook.amount;
+  const mh = (relic.hooks || [relic.hook]).find(h => h && h.type === 'maxHp');
+  if (mh) {
+    run.maxHp += mh.amount;
+    run.hp = Math.max(1, Math.min(run.maxHp, run.hp + mh.amount));
   }
 }
 
@@ -564,7 +568,7 @@ export function restHealAmount(run) {
 }
 export function applyRest(run) {
   const heal = restHealAmount(run);
-  run.hp = Math.min(run.maxHp, run.hp + heal);
+  healRun(run, heal);
   return heal;
 }
 

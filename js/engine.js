@@ -107,13 +107,32 @@ function spawnEnemy(id, idx, scale) {
   };
 }
 
+// v3.79: 유물 하나가 훅을 여러 개 가질 수 있다 — 「이득 + 대가」 짜리 정예를 위해.
+//   옛 형식(hook 하나)도 그대로 받는다. 읽는 쪽은 전부 이 함수를 거친다.
+export const hooksOf = (r) => (r && r.hooks) ? r.hooks : (r && r.hook ? [r.hook] : []);
 // 유물 훅 합산 (같은 훅 여러 개 소지 가능)
 function sumRelic(relics, type, field = 'amount') {
   let v = 0;
-  for (const r of relics) if (r.hook.type === type) v += r.hook[field] || 0;
+  for (const r of relics) for (const h of hooksOf(r)) if (h.type === type) v += h[field] || 0;
   return v;
 }
-function hasRelic(relics, type) { return relics.some(r => r.hook.type === type); }
+function hasRelic(relics, type) { return relics.some(r => hooksOf(r).some(h => h.type === type)); }
+const findHook = (relics, type) => {
+  for (const r of relics) for (const h of hooksOf(r)) if (h.type === type) return h;
+  return null;
+};
+
+// v3.79: 플레이어 HP 가 차는 유일한 통로. 회복을 건드리는 유물(거머리 반지)이
+//   모든 회복원에 빠짐없이 걸리게 하려면 출구가 하나여야 한다. 전투 밖(run.js·main.js)도 이걸 쓴다.
+// v3.79: 거머리 반지 — 방어도를 아예 못 얻는다. 얻는 자리가 여럿이라 여기 한 곳에서 막는다.
+export const canBlock = (relics) => !hasRelic(relics || [], 'noBlock');
+export function healPlayer(state, relics, amount) {
+  if (!(amount > 0)) return 0;
+  const bonus = sumRelic(relics || [], 'healBonus', 'amount');
+  const got = Math.max(0, Math.min(state.maxHp - state.hp, amount + bonus));
+  state.hp += got;
+  return got;
+}
 
 // ---------- 턴 ----------
 /* ==================== 주사위 상태이상 (v1.17) ====================
@@ -345,13 +364,25 @@ function startTurn(battle, first = false) {
       if (battle.sealed[id] <= 0) delete battle.sealed[id];
     }
   }
+  // v3.79 족보 봉인 — 유물이 건 것은 전투 내내 풀리지 않는다 (턴 감쇠 대상 아님)
+  for (const r of battle.relics) for (const h of hooksOf(r)) {
+    if (h.type === 'sealCategory' && h.category) battle.sealed[h.category] = 99;
+  }
   // 방어: 기본은 초기화. 문지기의 빗장(blockKeep)이 있으면 유지 + 턴 시작 방어 가산
-  const keepR = battle.relics.find(r => r.hook.type === 'blockKeep');
-  const kept = keepR ? Math.floor(battle.player.block * (keepR.hook.ratio != null ? keepR.hook.ratio : 0.5)) : 0;
-  battle.player.block = kept + dicePassive(battle, 'turnBlock') + sumRelic(battle.relics, 'turnBlock');
+  const keepR = findHook(battle.relics, 'blockKeep');
+  const kept = keepR ? Math.floor(battle.player.block * (keepR.ratio != null ? keepR.ratio : 0.5)) : 0;
+  battle.player.block = canBlock(battle.relics) ? (kept + dicePassive(battle, 'turnBlock') + sumRelic(battle.relics, 'turnBlock')) : 0;
   // 따뜻한 우유·재생 버프: 턴 시작 회복
   const th = sumRelic(battle.relics, 'turnHeal') + battle.buffs.regen;
-  if (th > 0) battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + th);
+  if (th > 0) healPlayer(battle.player, battle.relics, th);
+  // v3.79 매 턴 자해 — 정예의 대가. 방어도로 못 막는다.
+  {
+    const sd = sumRelic(battle.relics, 'turnSelfDamage');
+    if (sd > 0 && battle.turn > 1) {
+      battle.player.hp = Math.max(0, battle.player.hp - sd);
+      if (battle.player.hp <= 0) { battle.over = true; battle.result = 'defeat'; }
+    }
+  }
   // 리롤: 기본 + 유물 + 주사위 패시브 + 집중 버프
   battle.rollsLeft = relicValue(battle.relics, 'extraReroll', DB.scoring.rerollsPerTurn)
     + dicePassive(battle, 'extraReroll') + battle.buffs.focus + battle.nextTurnRerolls;
@@ -446,6 +477,10 @@ export function reroll(battle) {
     }
     d.held = true; // 선택 초기화
   });
+  {   // v3.79 불씨 항아리 — 리롤을 태워 벼름으로 바꾼다
+    const w = sumRelic(battle.relics, 'whetOnReroll');
+    if (w > 0) addWhet(battle, w, '🔥');
+  }
   applyMirror(battle, rolled);
   applyLadder(battle, rolled);
   modAfterRoll(battle, rolled);
@@ -497,8 +532,7 @@ export function variantOf(cat, variantId) {
 // 저체력 보너스(독사과 등): 조건 충족 시 모든 족보 피해 가산
 function situationalFlat(battle) {
   let v = 0;
-  for (const r of battle.relics) {
-    const h = r.hook;
+  for (const r of battle.relics) for (const h of hooksOf(r)) {
     if (h.type === 'lowHpDamage' && battle.player.hp <= battle.player.maxHp * h.ratio) v += h.amount;
     // 곰의 등 — 지금 두른 방어도 per 마다 amount
     if (h.type === 'blockScaleDamage') v += Math.floor(battle.player.block / (h.per || 10)) * h.amount;
@@ -582,11 +616,11 @@ function applyDiceEffects(battle, bd) {
         if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; }
         break;
       case 'heal':
-        battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + ef.amount);
+        healPlayer(battle.player, battle.relics, ef.amount);
         battle.lastResult.bonusHits.push(`🎲+${ef.amount}HP`);
         break;
       case 'block':
-        battle.player.block += ef.amount;
+        if (canBlock(battle.relics)) battle.player.block += ef.amount;
         battle.lastResult.bonusHits.push(`🎲🛡${ef.amount}`);
         break;
     }
@@ -599,12 +633,12 @@ function applyAbility(battle, variant, bd, targets) {
     switch (ab.op) {
       case 'block': {
         const amt = Math.floor(ab.amount !== undefined ? ab.amount : bd.total * (ab.scoreMult || 1));
-        battle.player.block += amt;
+        if (canBlock(battle.relics)) battle.player.block += amt;
         battle.lastResult.bonusHits.push(`🛡${amt}`);
         break;
       }
       case 'heal':
-        battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + ab.amount);
+        healPlayer(battle.player, battle.relics, ab.amount);
         battle.lastResult.bonusHits.push(`HP +${ab.amount}`);
         break;
       case 'rerollNext':
@@ -806,14 +840,24 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   applyConfirmRelics(battle, cat, faces, bd);
   if (battle.over && battle.result === 'defeat') return battle.lastResult; // 저주 주사위 등으로 자멸
 
-  // 늑대 가죽: 처치한 적 수만큼 회복
-  const hk = sumRelic(battle.relics, 'healOnKill');
-  if (hk > 0) {
+  // 처치할 때 켜지는 것 — 회복(healOnKill) · 그릇이 커지는 성장(maxHpOnKill, 늑대 가죽)
+  {
     const kills = new Set(battle.lastHits.filter(h => h.killed).map(h => h.uid)).size;
     if (kills > 0) {
-      const heal = hk * kills;
-      battle.player.hp = Math.min(battle.player.maxHp, battle.player.hp + heal);
-      battle.lastResult.bonusHits.push(`🐺+${heal}HP`);
+      const hk = sumRelic(battle.relics, 'healOnKill');
+      if (hk > 0) {
+        const heal = hk * kills;
+        healPlayer(battle.player, battle.relics, heal);
+        battle.lastResult.bonusHits.push(`🐺+${heal}HP`);
+      }
+      const gk = sumRelic(battle.relics, 'maxHpOnKill');
+      if (gk > 0) {
+        const grow = gk * kills;
+        battle.player.maxHp += grow;
+        battle.player.hp += grow;                       // 늘어난 만큼 채워진다
+        battle.grownMaxHp = (battle.grownMaxHp || 0) + grow;   // 전투 뒤 런에 얹는다
+        battle.lastResult.bonusHits.push(`🐺최대HP+${grow}`);
+      }
     }
   }
 
@@ -832,8 +876,7 @@ function applyConfirmRelics(battle, cat, faces, bd) {
   const count = {};
   for (const f of faces) if (f > 0) count[f] = (count[f] || 0) + 1;
   const most = Math.max(0, ...Object.values(count));
-  for (const r of battle.relics) {
-    const h = r.hook;
+  for (const r of battle.relics) for (const h of hooksOf(r)) {
     // 사냥꾼의 눈 — 같은 눈이 N개 이상 나온 판이면 벼름
     if (h.type === 'whetOnKind' && most >= (h.count || 3)) addWhet(battle, h.amount || 1, '🔍');
     // 길표 — 이 족보군을 확정하면 다음 턴 리롤

@@ -1689,6 +1689,28 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('약화 배율은 데이터에서 온다', eng.weakMult(), 0.75);
 }
 
+// v3.79: 유물 훅 배열 · 회복 통로 · 방어도 봉인
+{
+  const eng = await import('../js/engine.js');
+  eng.rng.next = () => 0.5;
+  const mk = (relics) => eng.createBattle({ hp: 40, maxHp: 70, act: 1, floor: 1, enlight: 0, relics: [],
+    dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['crow'], 'battle');
+  const LEECH = { id: 'leech_ring', hooks: [{ type: 'healBonus', amount: 3 }, { type: 'noBlock' }] };
+  const MILK  = { id: 'warm_milk', hook: { type: 'turnHeal', amount: 1 } };
+
+  eq('hooksOf: 배열형도 단일형도 읽는다', [eng.hooksOf(LEECH).length, eng.hooksOf(MILK).length], [2, 1]);
+
+  // 회복 통로 — 어느 회복원이든 +3 이 붙는다
+  const st = { hp: 40, maxHp: 70 };
+  eq('회복 증폭이 붙는다', eng.healPlayer(st, [LEECH], 1), 4);
+  eq('최대치를 넘지 않는다', eng.healPlayer({ hp: 69, maxHp: 70 }, [LEECH], 1), 1);
+  eq('유물이 없으면 그대로', eng.healPlayer({ hp: 40, maxHp: 70 }, [], 5), 5);
+
+  // 방어도 봉인
+  eq('방어도를 얻을 수 없다(canBlock)', eng.canBlock([LEECH]), false);
+  eq('보통은 얻을 수 있다', eng.canBlock([MILK]), true);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
 
