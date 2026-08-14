@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.79'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.80'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1038,7 +1038,7 @@ function renderBattle(opts = {}) {
         const p_ = battle.player;
         const t = [];
         if (battle.whet > 0) t.push(iconTag(UI_ICO.whet, 'good', battle.whet,
-          `벼름 ${battle.whet} — 일격 족보로만 터뜨린다 (지금 ×${whetMultOf(battle.whet).toFixed(1)})`));
+          `벼름 ${battle.whet} — 일격 족보로만 터뜨린다 (지금 ×${whetMultOf(battle.whet).toFixed(2).replace(/0$/, '')})`));
         if (b.strength > 0) t.push(iconTag('status_strength', 'good', b.strength, `힘 +${b.strength} — 확정할 때마다 피해 +${b.strength}`));
         if (b.focus > 0) t.push(iconTag('status_focus', 'good', b.focus, `집중 +${b.focus} — 매 턴 리롤 +${b.focus}`));
         if (b.regen > 0) t.push(iconTag('status_regen', 'good', b.regen, `재생 +${b.regen} — 턴마다 회복`));
@@ -1238,7 +1238,7 @@ function showPlayerBuffs() {
     b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 모든 족보 피해 +${b.strength} · 매 턴 1 소멸</li>` : '',
     b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus} — 매 턴 리롤 +${b.focus} · 매 턴 1 소멸</li>` : '',
     b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen} · 매 턴 1 소멸</li>` : '',
-    battle.whet > 0 ? `<li>${uiIco('whet')} 벼름 ${battle.whet} — <b>${uiIco('burst')}일격</b> 족보로 터뜨리면 피해 <b>×${whetMultOf(battle.whet).toFixed(1)}</b>. 일격이 아닌 족보로는 쓰이지도 깎이지도 않는다</li>` : '',
+    battle.whet > 0 ? `<li>${uiIco('whet')} 벼름 ${battle.whet} — <b>${uiIco('burst')}일격</b> 족보로 터뜨리면 피해 <b>×${whetMultOf(battle.whet).toFixed(2).replace(/0$/, '')}</b>. 일격이 아닌 족보로는 쓰이지도 깎이지도 않는다</li>` : '',
     battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
     // v3.38: 칩에는 뜨는데 상세에는 없던 것들 — 지속 피해와 기믹 제약
     battle.player.dot > 0 ? `<li>${ico('status_bleed')} ${DOT_KO[battle.player.dotKind] || '독'} ${battle.player.dot} — 내 행동이 끝날 때마다 ${battle.player.dot} 피해 (방어도로 막힌다)</li>` : '',

@@ -463,6 +463,6 @@
       "mult": 4
     }
   ],
-  "whetStep": 0.5,
+  "whetStep": 0.25,
   "whetCap": 6
 }
