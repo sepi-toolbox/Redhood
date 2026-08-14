@@ -345,6 +345,7 @@ span.enemy-art {
   position: absolute; inset: 0; z-index: 3; pointer-events: none; align-items: center;
   display: grid; grid-template-columns: 1fr auto 1fr;
   font-size: 11px; line-height: 1; font-weight: 800; color: #f3e3c2;
+  text-shadow: 0 1px 2px #000; letter-spacing: .2px;
   text-shadow: 0 1px 2px #000, 0 0 4px rgba(0, 0, 0, .95);
 }
 .enemy .bar.t-normal .bar-text { font-size: 10.5px; }
@@ -746,10 +747,14 @@ span.enemy-art {
 /* v3.56: 체력 숫자는 바 한가운데 못 박고, 방어도는 그 오른쪽에 붙인다.
    가운데 칸(auto)만 중앙에 놓이므로 +N 이 생기거나 사라져도 체력 숫자는 제자리다.
    (한 덩어리로 가운데 정렬하면 방어도가 붙을 때마다 체력이 왼쪽으로 밀린다) */
+/* v3.87: 내 체력바와 적 체력바의 숫자가 서로 다른 글꼴처럼 보였다 —
+   굵기(700 vs 800)·색(흰색 vs 크림)·표기(70 / 70 vs 73/73)가 다 달랐기 때문.
+   가운데 정렬은 원래 맞았고, 어긋나 보인 건 이 차이 탓이다. 하나로 맞춘다. */
 .hp-text {
   position: absolute; inset: 0; z-index: 2; align-items: center;
   display: grid; grid-template-columns: 1fr auto 1fr;
-  font-size: 12.5px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px #000;
+  font-size: 12px; font-weight: 800; color: #f3e3c2; text-shadow: 0 1px 2px #000;
+  letter-spacing: .2px;
 }
 .hp-text .bar-hp, .bar-text .bar-hp { grid-column: 2; justify-self: center; white-space: nowrap; }
 .hp-text .bar-block, .bar-text .bar-block {
