@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.77'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.78'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1521,6 +1521,11 @@ function syncDieStatusDom(i) {
 
 function animateRoll(indices) {
   busy = true;
+  // v3.78: 굴림이 만들어 낸 표식 변화(봉인 풀림·물기·굳음→기절)를 여기서 바로 꺼낸다.
+  //   예전엔 굴림 쪽에서 큐를 아무도 안 비워서, 이 이펙트들이 다음 takeFx(확정 순간이나 적 턴 끝)
+  //   까지 큐에 남아 있다가 엉뚱한 때 터졌다 — 봉인을 푼 이펙트가 턴이 끝날 때 나오던 이유다.
+  //   주사위가 멈추는 순간에 맞춰 튼다. (성권: 비주얼이 변할 때 이펙트가 붙어야 한다)
+  const rollFx = takeFx(battle);
   updateRollStart(); // v0.63: 여기서 renderBattle()을 부르던 것이 굴림마다 화면 전체가 깜빡이던 원인
   battle.dice.forEach((_, i) => syncDieStatusDom(i));   // 풀린 봉인 등 남은 표시부터 걷어낸다
   const dieEls = [...app.querySelectorAll('.die')];
@@ -1585,6 +1590,20 @@ function animateRoll(indices) {
     }, landAt);
   });
 
+  // 각 주사위가 멈추는 시점에 그 칸의 표식 변화를 튼다 — 안 구른 칸의 것은 첫 착지에 몰아서
+  if (rollFx.length) {
+    const landOf = (i) => {
+      const order = indices.indexOf(i);
+      return 460 + (order >= 0 ? order : 0) * 170 + 60;
+    };
+    const byTime = new Map();
+    for (const f of rollFx) {
+      const t = landOf(f.i);
+      if (!byTime.has(t)) byTime.set(t, []);
+      byTime.get(t).push(f);
+    }
+    for (const [t, list] of byTime) setTimeout(() => playStatusFx(list), t);
+  }
   setTimeout(() => { busy = false; updateAfterRoll(); }, 460 + indices.length * 170 + 80 + 260);
 }
 
