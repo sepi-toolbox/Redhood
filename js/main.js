@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.86'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.87'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -389,7 +389,7 @@ function eventFrame(npc, linesHtml, choicesHtml) {
         <span class="pb-side"></span>
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${hpPct}%"></div>
-          <span class="hp-text"><span class="bar-hp">${run.hp} / ${run.maxHp}</span></span>
+          <span class="hp-text"><span class="bar-hp">${run.hp}/${run.maxHp}</span></span>
         </div>
         <span class="pb-side"></span>
       </div>
@@ -751,7 +751,7 @@ function showMap() {
         <button class="btn ghost tiny" id="bag-btn">${uiIco("roll")} 가방</button>
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${Math.max(0, run.hp / run.maxHp * 100)}%"></div>
-          <span class="hp-text"><span class="bar-hp">${run.hp} / ${run.maxHp}</span></span>
+          <span class="hp-text"><span class="bar-hp">${run.hp}/${run.maxHp}</span></span>
         </div>
         <span class="pb-side"></span>
       </div>
@@ -1029,7 +1029,7 @@ function renderBattle(opts = {}) {
             return `<div class="hp-dot" style="left:${Math.max(0, hpPct - w)}%; width:${w}%"></div>`;
           })()}
           ${p.block > 0 ? `<div class="hp-shield" style="left:${hpPct}%; width:${shieldPct}%"></div>` : ''}
-          <span class="hp-text"><span class="bar-hp">${p.hp} / ${p.maxHp}</span>${p.block > 0 ? `<span class="bar-block" title="방어 ${p.block} — 다음 적 행동까지 막아 낸다">+${p.block}</span>` : ''}</span>
+          <span class="hp-text"><span class="bar-hp">${p.hp}/${p.maxHp}</span>${p.block > 0 ? `<span class="bar-block" title="방어 ${p.block} — 다음 적 행동까지 막아 낸다">+${p.block}</span>` : ''}</span>
         </div>
         <span class="pb-side">${battle.pendingBuff > 0 ? `${uiIco('burst')}+${battle.pendingBuff}` : ''}</span>
       </div>
@@ -1841,7 +1841,7 @@ function playMultiHit(hits, hpBefore) {
   const text = app.querySelector('.hp-text .bar-hp');
   const setBar = (hp) => {
     if (fill) fill.style.width = `${Math.max(0, hp / p.maxHp * 100)}%`;
-    if (text) text.textContent = `${Math.max(0, hp)} / ${p.maxHp}`;
+    if (text) text.textContent = `${Math.max(0, hp)}/${p.maxHp}`;
   };
   let hp = hpBefore;
   setBar(hp);                                   // 맞기 전으로 되돌려 놓고 시작
@@ -2239,7 +2239,7 @@ function renderCardBattle() {
       <div class="cb-hud">
         <div class="hp-gauge">
           <div class="hp-fill" style="width:${Math.max(0, battle.player.hp / battle.player.maxHp * 100)}%"></div>
-          <span class="hp-text"><span class="bar-hp">${battle.player.hp} / ${battle.player.maxHp}</span></span>
+          <span class="hp-text"><span class="bar-hp">${battle.player.hp}/${battle.player.maxHp}</span></span>
         </div>
         <span class="cb-bleedbadge" id="cb-bleed"></span>
       </div>
@@ -2702,7 +2702,7 @@ function cbShowPlayerHit(dmg, hpShown) {
   const g = app.querySelector('.cb-hud .hp-gauge');
   if (g) {
     g.querySelector('.hp-fill').style.width = `${Math.max(0, hpShown / battle.player.maxHp * 100)}%`;
-    g.querySelector('.hp-text .bar-hp').textContent = `${hpShown} / ${battle.player.maxHp}`;
+    g.querySelector('.hp-text .bar-hp').textContent = `${hpShown}/${battle.player.maxHp}`;
     const f = document.createElement('span');
     f.className = 'pdmg-float';
     f.style.setProperty('--nudge', `${(idx % 3 - 1) * 26}px`);
