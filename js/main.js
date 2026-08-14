@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.75'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.76'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -313,7 +313,7 @@ function enemyTags(e) {
   if (e.reflectLeft > 0 && e.reflect > 0) t.push(iconTag(FX_ICON.reflect, 'harm', e.reflect, `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힌다)`));
   if (e.undying > 0) t.push(iconTag(FX_ICON.undying, 'harm', null, '불사 — 한 번은 다시 일어선다'));
   // 내가 걸어 둔 것 — 적 몸에 붙어 있어도 나에게는 이롭다
-  if (d.weak > 0) t.push(iconTag('status_weak', 'good', d.weak, `약화 ${d.weak} — 적 공격력 -${d.weak}`));
+  if (d.weak > 0) t.push(iconTag('status_weak', 'good', d.weak, `약화 — 적이 주는 피해 ×0.75 (${d.weak}턴)`));
   if (d.vulnerable > 0) t.push(iconTag('status_vulnerable', 'good', d.vulnerable, `취약 — 받는 피해 ×1.5 (${d.vulnerable}턴)`));
   if (d.bleed > 0) t.push(iconTag('status_bleed', 'good', d.bleed, `출혈 ${d.bleed} — 행동할 때마다 아프다`));
   if (e.stunned) t.push(iconTag('status_stun', 'good', null, '기절 — 다음 행동이 취소됐다'));
@@ -1199,7 +1199,7 @@ function enemyEffectText(e, ef) {
       const n = Math.max(1, Math.floor(ef.hits || 1));
       const parts = [];
       if (e.power > 0) parts.push(`+강화 ${e.power}`);
-      if (weak > 0) parts.push(`-약화 ${weak}`);
+      if (weak > 0) parts.push(`×0.75 약화`);
       const head = n > 1 ? `피해 ${final} × ${n}타 = ${final * n}` : `피해 ${final}`;
       return `${ico('intent_attack')} ${head}` + (parts.length ? ` (한 대당 기본 ${base} ${parts.join(' ')})` : '');
     }
@@ -1292,7 +1292,7 @@ function showEnemyInfo(uid) {
   const status = [
     e.block > 0 ? `<li>${ico('status_block')} 방어 ${e.block} — 다음 행동까지 받는 피해 흡수</li>` : '',
     e.power > 0 ? `<li>${ico('status_strength')} 힘 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
-    d.weak > 0 ? `<li>${ico('status_weak')} 약화 ${d.weak} — 공격력 -${d.weak} · 매 턴 1 소멸</li>` : '',
+    d.weak > 0 ? `<li>${ico('status_weak')} 약화 — 주는 피해 ×0.75 (${d.weak}턴 남음, 매 턴 1 소멸)</li>` : '',
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
     d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 — 받는 피해 ×1.5 (${d.vulnerable}턴 남음, 매 턴 1 소멸)</li>` : '',
     e.wardLeft > 0 ? `<li>${fxIco('ward')} 문턱 ${e.ward} — 한 번에 ${e.ward} 이하로 때리면 아예 안 통한다 (${e.wardLeft}턴)</li>` : '',

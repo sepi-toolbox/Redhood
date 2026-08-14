@@ -1175,9 +1175,13 @@ function chooseMove(enemy, turn = 1) {
 
 // 한 대의 피해 — 기본 수치에 막·계몽 배율을 곱한 뒤 강화를 더하고 약화를 뺀다.
 // 연타는 이 값을 타수만큼 반복한다 (강화가 타수마다 붙는 게 연타의 핵심).
+// v3.76 약화 — 세기를 빼는 게 아니라 '주는 피해 ×0.75'. 여러 번 걸어도 배율은 그대로고 턴만 는다.
+//   순서가 중요하다: 막 배율·힘(power)을 먼저 다 더한 뒤, 그 최종값에서 깎는다. (성권)
+export const weakMult = () => (DB.scoring && DB.scoring.weakMult != null) ? DB.scoring.weakMult : 0.75;
 export function hitDamage(enemy, ef) {
   const weak = (enemy.debuffs && enemy.debuffs.weak) || 0; // 약화 칸이 아직 안 생겼어도 NaN 이 되지 않게
-  return Math.max(0, Math.round(ef.amount * (enemy.atkScale || 1)) + (enemy.power || 0) - weak);
+  const base = Math.round(ef.amount * (enemy.atkScale || 1)) + (enemy.power || 0);
+  return Math.max(0, weak > 0 ? Math.floor(base * weakMult()) : base);
 }
 export const hitCount = (ef) => Math.max(1, Math.floor(ef.hits || 1));
 

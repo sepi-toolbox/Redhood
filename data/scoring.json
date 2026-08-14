@@ -2,6 +2,7 @@
   "_version": 12,
   "rerollsPerTurn": 2,
   "vulnMult": 1.5,
+  "weakMult": 0.75,
   "categories": [
     {
       "id": "chance",
@@ -144,7 +145,7 @@
               "amount": 1
             }
           ],
-          "abilityText": "약화 1 — 적 공격력 -1 (달이 둘이면 겨냥이 흔들린다)",
+          "abilityText": "약화 — 적이 주는 피해 ×0.75 (턴만 늘어난다)",
           "tier": "uncommon"
         }
       ],
@@ -186,7 +187,7 @@
               "amount": 2
             }
           ],
-          "abilityText": "약화 2 — 적 공격력 -2",
+          "abilityText": "약화 — 적이 주는 피해 ×0.75 (턴만 늘어난다)",
           "tier": "uncommon"
         },
         {
@@ -327,7 +328,7 @@
               "amount": 3
             }
           ],
-          "abilityText": "약화 3 — 적 공격력 -3",
+          "abilityText": "약화 — 적이 주는 피해 ×0.75 (턴만 늘어난다)",
           "tier": "uncommon"
         },
         {
@@ -441,7 +442,7 @@
               "amount": 5
             }
           ],
-          "abilityText": "약화 5 — 적 공격력 -5",
+          "abilityText": "약화 — 적이 주는 피해 ×0.75 (턴만 늘어난다)",
           "tier": "epic",
           "burst": true
         },

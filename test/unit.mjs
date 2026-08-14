@@ -355,13 +355,14 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('강화 0이면 총합이 같다', [run('__once', 1, 0), run('__multi', 1, 0)], [12, 12]);
   // 강화 6: 한 방은 12+6=18, 연타는 (4+6)×3=30
   eq('강화가 타수마다 붙는다', [run('__once', 1, 6), run('__multi', 1, 6)], [18, 30]);
-  // 약화도 타수마다 빠진다
+  // v3.76: 약화는 이제 세기를 빼는 게 아니라 최종값에 ×0.75 — 타수마다 그 배율이 걸린다
+  //   4를 세 번 → 한 대당 floor(4×0.75)=3, 총 9
   {
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
       dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__multi'], 'battle');
     b.enemies[0].debuffs.weak = 2; const hp0 = b.player.hp;
     b.await = 'enemy'; eng.enemyPhase(b);
-    eq('약화도 타수마다 빠진다', hp0 - b.player.hp, (4 - 2) * 3);
+    eq('약화는 한 대마다 ×0.75', hp0 - b.player.hp, Math.floor(4 * 0.75) * 3);
   }
   // 방어는 한 대씩 갉힌다 — 방어 5는 첫 대를 막고 남은 두 대가 들어온다
   {
