@@ -397,27 +397,28 @@ Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown i
 
 나머지 조건(테두리 장식·해상도·여백)은 위 콤보 판 항목과 동일하다.
 
-## v3.97 새 버프 표식 3장
 
-`assets/icons/` 에 넣고 `js/main.js` 의 `BUFF_ART_READY` 에 이름을 적으면 갈아 끼워진다.
-지금은 뜻이 가장 가까운 그림(방어·반사·축복)을 임시로 세워 두었다.
-다른 상태이상 표식과 같은 규격 — 단색 심볼, 여백 최소, 배경 투명.
 
-| 이름 | 파일 | 프롬프트 |
-|---|---|---|
-| 철갑 | `status_ironclad.png` | `a layered iron plate pauldron, riveted bands, seen head-on` |
-| 가시 | `status_thorns.png` | `a ring of sharp bramble thorns curving outward` |
-| 행운 | `status_fortune.png` | `a four-leaf clover with a faint spark at its centre` |
+## 상태이상 표식 — 아직 안 그린 것 (v4.1)
 
-## v3.99 상태이상 승격분 — 주사위 판 그림 1장
+`node test/icocheck.mjs` 가 이 목록을 세어 준다. 그림이 들어오면 검사가 저절로 조용해진다.
 
-굳음(petrify)이 지속 방해에서 주사위 상태이상으로 내려왔다. 지금은 기절 판을
-빌려 쓰고 있다(`DIE_ART_ALIAS`). 전용 그림이 들어오면 별칭을 지우면 된다.
-물림(bite)은 `status_die_bite.png` 가 이미 있어 그대로 쓴다.
+넷 다 지금은 남의 얼굴을 빌려 쓰고 있다. **철갑은 방어도와, 행운은 축복과 화면에서
+똑같이 생겼다** — 뜻이 다른 둘이 한 얼굴로 서 있는 상태다.
 
-| 이름 | 파일 | 프롬프트 |
-|---|---|---|
-| 굳음 | `assets/ui/status_die_petrify.png` | `a die face crusted over with grey stone, cracks spreading from the centre` |
+| 이름 | 넣을 곳 | 지금 빌린 것 | 프롬프트 |
+|---|---|---|---|
+| 철갑 | `assets/icons/status_ironclad.png` | 방어도(status_block) | `a layered iron plate pauldron, riveted bands, seen head-on` |
+| 가시 | `assets/icons/status_thorns.png` | 반사(fx_reflect) | `a ring of sharp bramble thorns curving outward` |
+| 행운 | `assets/icons/status_fortune.png` | 축복(status_blessing) | `a four-leaf clover with a faint spark at its centre` |
+| 굳음(주사위 판) | `assets/ui/status_die_petrify.png` | 기절 판(status_die_stun) | `a die face crusted over with grey stone, cracks spreading from the centre` |
 
-표식 아이콘도 지금은 `fx_petrify.png` 를 빌려 쓴다. 다른 상태이상과 결을 맞추려면
-`assets/icons/status_petrify.png` 로 새로 뽑고 `ST_ICO_FILE` 에서 별칭을 지운다.
+넣는 법:
+- 앞의 셋 — 파일을 넣고 `js/main.js` 의 `BUFF_ART_READY` 에 이름을 적는다.
+- 굳음 판 — 파일을 넣고 `DIE_ART_ALIAS` 에서 `petrify` 줄을 지운다.
+
+### 이름이 겹치는 곳 하나
+
+새로 넣은 버프 **가시**(맞으면 되돌려준다)와, 적의 지속 방해 **가시**(리롤할 때 지킨
+주사위마다 피해, `holdTax`)가 같은 이름이다. 화면에서는 방해 쪽이 적 기술명으로 뜨기
+때문에 지금 당장 부딪히지는 않지만, 문서와 표에서는 헷갈린다.
