@@ -512,7 +512,15 @@ const dmgOpts = (battle, variant) => ({ whet: (variant && variant.burst) ? battl
 // v0.9: 족보당 변형을 여러 개 보유(누적) — 같은 족보의 변형은 목록에서 이웃하게 정렬됨
 const VOID_CAT = { id: 'void_call', name: '공허', kind: 'void', target: 'oneEnemy', fx: 'slash', variants: [] };
 
-export function previewAll(battle) {
+// v3.77: 미리보기가 '내가 고른 대상에게 실제로 들어갈 값'을 말하게 한다.
+//   힘·벼름은 이미 더해져 있었고, 빠져 있던 건 취약(×1.5)이다. 순서는 확정 경로와 같다 —
+//   다 더한 최종값에서 배율을 먹인다. 전체 공격이라도 숫자는 고른 대상 기준이다. (성권)
+export function previewAll(battle, targetUid) {
+  const tgt = (() => {
+    const alive = aliveEnemies(battle);
+    return (targetUid && alive.find(e => e.uid === targetUid)) || alive[0] || null;
+  })();
+  const vuln = (tgt && tgt.debuffs && tgt.debuffs.vulnerable > 0) ? vulnMult() : 1;
   const faces = facesOf(battle);
   const zero = zeroedOf(battle);
   const situ = situationalFlat(battle);
@@ -533,7 +541,8 @@ export function previewAll(battle) {
       const bd0 = battle.rolled
         ? computeDamage(cat, faces, battle.diceDefs, battle.relics, zero, dmgOpts(battle, variant))
         : { total: 0, isZero: true, base: 0, gold: 0, mult: 1, whetMult: 1, bonus: 0, flat: 0 };
-      const total = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ + battle.buffs.strength : bd0.total;
+      const flat = bd0.total > 0 ? bd0.total + battle.pendingBuff + situ + battle.buffs.strength : bd0.total;
+      const total = flat > 0 && vuln !== 1 ? Math.floor(flat * vuln) : flat;
       const locked = seal > 0 || !battle.rolled || total === 0;
       out.push({ cat, variant, seal, locked, burst: !!variant.burst, bd: { ...bd0, total } });
     }
