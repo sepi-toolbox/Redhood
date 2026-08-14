@@ -20,7 +20,7 @@ const cases = await pg.evaluate(() => {
   const reset = () => { const b = D.battle;
     b.buffs = { strength:0, focus:0, regen:0, ironclad:0, thorns:0, fortune:0, enrage:0 };
     b.whet = 0; b.player.dot = 0; b.sealed = {}; b.relicSealed = {}; b.mods = {};
-    b.pendingConfuse = 0; b.voidLocked = false;
+    b.voidLocked = false;
     b.dice.forEach(d => { d.st = null; d.confused = false; });
     D.redraw(); };
   const test = (label, fn) => { reset(); const before = strip(); fn(D.battle); D.redraw();
@@ -36,7 +36,6 @@ const cases = await pg.evaluate(() => {
   test('족보 봉인(유물)', b => { b.relicSealed = { chance: 1 }; });
   for (const k of ['rollTax','holdTax','blind'])
     test(`지속 방해 ${k}`, b => { b.mods[k] = { amount:2, per:0.5, left:2, name:'시험' }; });
-  test('예약된 혼란(pendingConfuse)', b => { b.pendingConfuse = 2; });
   reset();
   return out;
 });

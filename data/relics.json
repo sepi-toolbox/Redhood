@@ -129,7 +129,7 @@
     "name": "수지 양초",
     "icon": "🕯️",
     "tier": "normal",
-    "desc": "혼란(🌀)에 면역 — 주사위가 뒤틀리지 않는다.",
+    "desc": "혼란(🌀)에 면역 — 혼란이 아예 걸리지 않는다.",
     "hook": {
       "type": "confuseImmune"
     }

@@ -91,5 +91,15 @@ const eq=(l,a,e)=>{const ok=JSON.stringify(a)===JSON.stringify(e);console.log(`$
   const b2 = mk('__rage'); end(b2);
   eq('행운이 격노도 무른다', [b1.enemies[0].enrage, b2.enemies[0].enrage], [0, 2]);
 }
+// ── v4.4: 수지 양초 — 혼란만, 걸리는 그 순간을 막는다 (예전엔 죽은 예약값만 지웠다) ──
+{
+  const withCandle = eng.createBattle({hp:70,maxHp:70,act:1,floor:1,enlight:0,relics:['tallow_candle'],
+    dice:['normal','normal','normal','normal','normal'],categories:{onePair:'clasped_hands'}},['stray_dog'],'battle');
+  const plain = mk();
+  eng.applyStatus(plain,'confuse',3); eng.applyStatus(withCandle,'confuse',3); eng.applyStatus(withCandle,'bind',2);
+  const has=(b,k)=>b.dice.filter(d=>d.st&&d.st.kind===k).length;
+  eq('수지 양초: 혼란은 아예 안 걸린다', [has(plain,'confuse'), has(withCandle,'confuse')], [3, 0]);
+  eq('수지 양초: 다른 상태이상은 그대로', has(withCandle,'bind'), 2);
+}
 console.log(fail ? `NEW BUFF FAILS: ${fail}` : 'ALL NEW BUFF PASS');
 process.exit(fail ? 1 : 0);
