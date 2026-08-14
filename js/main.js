@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.87'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.88'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -347,6 +347,13 @@ const RELIC_ART_READY = new Set([
   'red_cloak', 'whetstone', 'hunters_eye', 'bears_back',
   'ember_jar',
 ]);
+// v3.88: 헤더·상세의 유물 표시도 그림으로. 그림이 없는 유물만 이모지로 남는다.
+function relicIco(r, cls = 'relic-mini') {
+  if (!r) return '';
+  return RELIC_ART_READY.has(r.id)
+    ? `<img class="${cls}" src="assets/relics/${r.id}.png" alt="" draggable="false" title="${esc(r.name)}">`
+    : `<span class="${cls} as-emoji" title="${esc(r.name)}">${r.icon}</span>`;
+}
 function itemIcon(kind, item) {
   // 주사위는 묶음 머리(무엇을 고를지 아직 모를 때)도 나무 주사위 그림으로 — 🎲 를 쓸 일이 없다
   if (kind === 'die') return item ? dieRowIcon(item) : dieRowIcon({ id: 'normal', faces: [6] });
@@ -374,7 +381,7 @@ function eventFrame(npc, linesHtml, choicesHtml) {
       ${bgLayer()}
       <header class="topbar">
         <span>💬 ${run.floor > 0 ? `${run.floor}층 · ` : ''}만남</span>
-        <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
+        <span class="relic-bar">${run.relics.map(id => relicIco(DB.relicById[id])).join('')}</span>
         <span>${run.floor > 0 ? `${uiIco("coin")}${run.coins}` : ''}</span>
       </header>
       <div class="npc-stage">
@@ -737,7 +744,7 @@ function showMap() {
     <div class="screen map-screen">
       <header class="topbar map-top">
         <button class="btn ghost tiny" id="abandon-btn">런 포기</button>
-        <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
+        <span class="relic-bar">${run.relics.map(id => relicIco(DB.relicById[id])).join('')}</span>
         <span class="coin-slot">${uiIco("coin")}${run.coins}</span>
         <button class="mute-mini" id="map-mute">${isMuted() ? '🔇' : '🔊'}</button>
       </header>
@@ -834,7 +841,7 @@ function showBagModal() {
       + `<span class="modal-text">${esc(v.abilityText || '')}</span></li>`;
   }).join('');
   const relicItems = run.relics.length
-    ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${r.icon} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
+    ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${relicIco(r, 'relic-mini lg')} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
     : '<li class="modal-text">유물 없음</li>';
   app.append(h(`
     <div class="modal-back">
@@ -942,7 +949,7 @@ function renderBattle(opts = {}) {
       ${bgLayer()}
       <header class="topbar">
         <span>${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
-        <span class="relic-bar">${battle.relics.map(r => r.icon).join('')}</span>
+        <span class="relic-bar">${battle.relics.map(r => relicIco(r)).join('')}</span>
         <span class="coin-slot">${uiIco("coin")}${run.coins} <span class="hp">${uiIco("heart")}</span></span>
       </header>
       <div class="enemy-zone ${multi ? 'multi' : ''}">
@@ -2221,7 +2228,7 @@ function renderCardBattle() {
       ${bgLayer()}
       <header class="topbar">
         <span id="cb-top">${NODE_META[currentNodeType].icon} ${run.floor}층 · ${battle.turn}턴</span>
-        <span class="relic-bar">${run.relics.map(id => DB.relicById[id].icon).join('')}</span>
+        <span class="relic-bar">${run.relics.map(id => relicIco(DB.relicById[id])).join('')}</span>
         <span class="coin-slot">${uiIco("coin")}${run.coins} <span class="hp">${uiIco("heart")}</span></span>
       </header>
       <div class="enemy-zone ${multi ? 'multi' : ''}">
