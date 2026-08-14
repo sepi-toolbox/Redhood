@@ -142,7 +142,7 @@
           "ability": [
             {
               "op": "weakEnemy",
-              "amount": 1
+              "amount": 2
             }
           ],
           "abilityText": "약화 — 적이 주는 피해 ×0.75 (턴만 늘어난다)",
@@ -184,7 +184,7 @@
           "ability": [
             {
               "op": "weakEnemy",
-              "amount": 2
+              "amount": 3
             }
           ],
           "abilityText": "약화 — 적이 주는 피해 ×0.75 (턴만 늘어난다)",
@@ -325,7 +325,7 @@
           "ability": [
             {
               "op": "weakEnemy",
-              "amount": 3
+              "amount": 4
             }
           ],
           "abilityText": "약화 — 적이 주는 피해 ×0.75 (턴만 늘어난다)",
@@ -439,7 +439,7 @@
           "ability": [
             {
               "op": "weakEnemy",
-              "amount": 5
+              "amount": 6
             }
           ],
           "abilityText": "약화 — 적이 주는 피해 ×0.75 (턴만 늘어난다)",

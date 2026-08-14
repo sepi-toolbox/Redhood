@@ -322,12 +322,17 @@ function applyMirror(battle, rolled) {
   for (const i of targets) battle.dice[i].face = Number(top[0]);
 }
 
-function statusTurn(battle) {
+/* v3.94: 주사위에 붙은 상태이상을 한 칸씩 소모한다 — 이제 내 턴이 '끝날 때' 돈다.
+   fresh 는 여기서 지우지 않는다. 지우는 곳은 startTurn 한 군데다.
+   그래야 규칙이 한 줄로 선다 — "내 턴이 시작될 때 이미 있던 것만 이번 턴 끝에 깎인다".
+   적이 적 턴에 건 것은 startTurn 이 곧바로 지나가며 표를 떼 주므로,
+   내 다음 턴을 통째로 겪은 뒤 그 턴 끝에 처음 깎인다. */
+function diceStatusTick(battle) {
   battle.stEvents = [];
   battle.dice.forEach((d, i) => {
     if (!d.st) return;
     if (stRule(d, 'fuse')) {
-      if (d.st.fresh) { d.st.fresh = false; return; }
+      if (d.st.fresh) return;
       d.st.fuse -= 1;
       if (d.st.fuse <= 0) {                       // 터진다
         const dmg = stAmount(d);
@@ -340,13 +345,44 @@ function statusTurn(battle) {
       }
       return;
     }
-    if (d.st.fresh) { d.st.fresh = false; return; }   // 걸린 턴에는 안 깎인다 (최소 한 턴은 겪는다)
+    if (d.st.fresh) return;                          // 걸린 턴에는 안 깎인다 (최소 한 턴은 겪는다)
     if (d.st.left > 0) {
       d.st.left -= 1;
       if (d.st.left <= 0) { fxPush(battle, 'removed', { i, kind: d.st.kind }); d.st = null; }
     }
   });
-  if (stRule(battle.dice[0], 'spread') && battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;
+}
+
+/* v3.94: 내 턴이 끝나는 한 지점에서 상태이상을 전부 처리한다.
+   예전에는 세 군데로 흩어져 있었다 — 주사위 상태이상은 내 턴 '시작'에, 독·출혈은 확정 직후에,
+   버프·디버프 스택은 적 턴 '끝'에. 그래서 부패는 내가 손쓸 새 없이 턴 머리에서 터졌고,
+   적 출혈은 그 적이 움직이는 순간에 따로 깎여서 같은 '한 턴'이 자리마다 다른 길이였다.
+   순서: 주사위(부패 폭발 → 지속 감소) → 나의 독·출혈 → 적의 출혈 → 버프·디버프 스택. */
+export function endTurnStatus(battle) {
+  // 확정이 이미 지나간 턴은 다시 돌지 않는다 — 확정 뒤에 await 가 'enemy' 로 잠긴다.
+  //   (테스트나 화면이 실수로 한 번 더 불러도 두 번 깎이지 않게)
+  if (battle.over || battle.await === 'enemy') return;
+  battle.enemyDots = [];
+  diceStatusTick(battle);
+  if (battle.over) return;
+  tickDot(battle);
+  if (battle.over) return;
+  enemyDotTick(battle);
+  if (battle.over) return;
+  decayStatuses(battle);
+}
+
+// 🩸 적 출혈 — 쌓인 만큼 방어를 무시하고 깎고 누적이 1 준다. 여기서 쓰러지면 행동하지 못한다.
+export function enemyDotTick(battle) {
+  battle.enemyDots = [];
+  for (const e of aliveEnemies(battle)) {
+    if (!(e.debuffs.bleed > 0)) continue;
+    const amount = e.debuffs.bleed;
+    e.hp -= amount;
+    e.debuffs.bleed -= 1;
+    battle.enemyDots.push({ uid: e.uid, amount, kind: 'bleed', died: e.hp <= 0 });
+  }
+  if (!battle.over && aliveEnemies(battle).length === 0) { battle.over = true; battle.result = 'victory'; }
 }
 
 function startTurn(battle, first = false) {
@@ -397,7 +433,10 @@ function startTurn(battle, first = false) {
   });
   battle.whetGained = 0;
   addWhet(battle, sumRelic(battle.relics, 'turnWhet') + dicePassive(battle, 'whet'));  // 숫돌 등
-  statusTurn(battle);
+  // v3.94: 상태이상 처리는 턴 끝으로 옮겼다. 여기서는 '이제 새것이 아니다' 표만 뗀다 —
+  //   적이 방금 적 턴에 건 것도 이 줄을 지나므로, 내 턴을 한 번 다 겪고 나서야 깎이기 시작한다.
+  battle.dice.forEach(d => { if (d.st) d.st.fresh = false; });
+  if (stRule(battle.dice[0], 'spread') && battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;
   if (!first) decayMods(battle);
   if (hasRelic(battle.relics, 'confuseImmune')) battle.pendingConfuse = 0; // 수지 양초: 혼란 면역
   // 혼란(🌀): 무작위 주사위 N개가 뒤틀림 — 이번 턴 다시 굴릴 수 없다
@@ -856,7 +895,9 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
     battle.over = true; battle.result = 'victory';
     return battle.lastResult;
   }
-  tickDot(battle);
+  // 여기까지가 '내가 한 일'. 화면이 타격과 턴 끝 처리를 따로 보여줄 수 있게 연출 큐를 끊어 둔다.
+  battle.useFx = takeFx(battle);
+  endTurnStatus(battle);
   if (battle.over) return battle.lastResult;
   battle.await = 'enemy';
   return battle.lastResult;
@@ -926,6 +967,9 @@ export function confirmVoidCall(battle) {
                         bonusHits: [`🩸-${self}`], aoe: false, fx: 'slash' };
   battle.player.hp -= self;
   if (battle.player.hp <= 0) { battle.player.hp = 0; battle.over = true; battle.result = 'defeat'; return battle.lastResult; }
+  battle.useFx = takeFx(battle);
+  endTurnStatus(battle);                 // v3.94: 공허만 턴 끝 처리를 건너뛰던 구멍을 막는다
+  if (battle.over) return battle.lastResult;
   battle.await = 'enemy';
   return battle.lastResult;
 }
@@ -972,12 +1016,7 @@ export function enemyPhase(battle) {
   for (const e of aliveEnemies(battle)) {
     if (battle.over) break;
     e.block = 0; // 자기 차례가 돌아오면 이전 방어는 소멸
-    // 🩸 출혈: 행동할 때마다 스택만큼 피해(방어 무시), 이후 스택 -1
-    if (e.debuffs.bleed > 0) {
-      e.hp -= e.debuffs.bleed;
-      e.debuffs.bleed -= 1;
-      if (e.hp <= 0) continue; // 출혈사 — 행동 없이 쓰러진다
-    }
+    // v3.94: 출혈은 내 턴 끝(endTurnStatus)으로 옮겼다 — 상태이상은 전부 한 자리에서 돈다
     if (e.reflectLeft > 0) { e.reflectLeft -= 1; if (e.reflectLeft <= 0) e.reflect = 0; }
     // 재생 — 자기 차례마다 아문다. 순 피해가 이걸 못 넘으면 영원히 못 잡는다
     if (e.regenLeft > 0 && e.regen > 0 && e.hp > 0) {
@@ -1082,7 +1121,6 @@ export function enemyPhase(battle) {
     chooseMove(e, battle.turn + 1);
   }
   battle.dodgeActive = false;
-  decayStatuses(battle); // v0.71: 한 턴에 한 스택씩 소멸
   // 출혈사 등으로 적이 전멸했으면 승리
   if (!battle.over && aliveEnemies(battle).length === 0) {
     battle.over = true;
