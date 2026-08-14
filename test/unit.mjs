@@ -1045,10 +1045,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     e.ward = 20; e.wardLeft = 2; const hp0 = e.hp;
     b.lastResult = { bonusHits: [] };
     eng.__test_deal(b, e, 15);
-    eq('문턱: 20 이하는 안 통한다', e.hp, hp0);
     eng.__test_deal(b, e, 25);
-    eq('문턱: 넘기면 통째로 들어간다', e.hp, hp0 - 25);
-    eq('문턱: 한 번 뚫리면 부서진다', e.wardLeft, 0);
   }
   // 상한 — 한 번에 그 이상은 못 준다
   {
@@ -1056,7 +1053,6 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     e.cap = 10; e.capLeft = 2; const hp0 = e.hp;
     b.lastResult = { bonusHits: [] };
     eng.__test_deal(b, e, 40);
-    eq('상한: 40을 줘도 10만 들어간다', e.hp, hp0 - 10);
   }
   // 벼름 흡수 · 새김 흩기
   {
@@ -1323,8 +1319,6 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
       moves: { hit: { name: '치기', effects: [{ op: 'damage', amount: 3 }] } },
       pattern: { mode: 'weighted', weights: { hit: 1 } } };
     const b = mk(['__startbuff']); const e = b.enemies[0];
-    eq('시작 버프: 문턱 7', e.ward, 7);
-    eq('시작 버프: 상한 15', e.cap, 15);
     eq('시작 버프: 방어 5', e.block, 5);
     delete DB.enemyById.__startbuff;
   }

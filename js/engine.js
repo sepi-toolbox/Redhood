@@ -97,8 +97,6 @@ function spawnEnemy(id, idx, scale) {
     cooldown: {},                         // v1.01: 행동 id → 다시 쓸 수 있게 되는 턴. moves.*.cooldown 이 없으면 0(제한 없음)
     breakTaken: 0,                        // v1.08: 지금 예고된 행동을 건 뒤 HP로 받은 피해 누적 (파쇄 판정용)
     // v1.30 정예·보스 기믹 — 머리를 써서 풀라고 거는 조건들
-    ward: (def.start || {}).ward || 0, wardLeft: (def.start || {}).ward ? ((def.start || {}).wardTurns || 99) : 0,
-    cap: (def.start || {}).cap || 0, capLeft: (def.start || {}).cap ? ((def.start || {}).capTurns || 99) : 0,
     // 적 자기 버프(v3.8) — 문턱·상한과 같은 문법: 행동으로도, 시작 버프로도 얻는다
     regen: (def.start || {}).regen || 0, regenLeft: (def.start || {}).regen ? 99 : 0,   // 매 행동 회복
     enrage: (def.start || {}).enrage || 0,                                              // 맞을 때마다 힘 +N (전투 내)
@@ -716,21 +714,7 @@ export const vulnMult = () => (DB.scoring && DB.scoring.vulnMult != null) ? DB.s
 // 적에게 피해 — 취약 배율을 먹인 뒤 방어(block)가 흡수 (v0.19)
 function dealToEnemy(battle, t, amount) {
   let total = (t.debuffs && t.debuffs.vulnerable > 0) ? Math.floor(amount * vulnMult()) : amount;
-  // 문턱 — 얕은 타격은 아예 안 닿는다. 한 번 넘겨서 뚫으면 그대로 부서진다(자물쇠).
-  if (t.wardLeft > 0 && total > 0) {
-    if (total <= t.ward) {
-      battle.lastHits.push({ uid: t.uid, amount: 0, warded: true });
-      if (battle.lastResult) battle.lastResult.bonusHits.push(`🪨문턱 ${t.ward} — 안 통했다`);
-      return 0;
-    }
-    t.ward = 0; t.wardLeft = 0;                       // 뚫렸다 — 다시 걸기 전까지 열려 있다
-    if (battle.lastResult) battle.lastResult.bonusHits.push('🪨문턱을 부쉈다!');
-  }
-  // 상한 — 한 번에 이 이상은 못 준다. 크게 벼려도 소용없으니 꾸준히 쳐야 한다.
-  if (t.capLeft > 0 && total > t.cap) {
-    if (battle.lastResult) battle.lastResult.bonusHits.push(`⛓상한 ${t.cap}`);
-    total = t.cap;
-  }
+
   const absorbed = Math.min(t.block || 0, total);
   t.block -= absorbed;
   const dealt = total - absorbed;
@@ -994,14 +978,12 @@ export function enemyPhase(battle) {
       e.debuffs.bleed -= 1;
       if (e.hp <= 0) continue; // 출혈사 — 행동 없이 쓰러진다
     }
-    if (e.wardLeft > 0) { e.wardLeft -= 1; if (e.wardLeft <= 0) e.ward = 0; }
     if (e.reflectLeft > 0) { e.reflectLeft -= 1; if (e.reflectLeft <= 0) e.reflect = 0; }
     // 재생 — 자기 차례마다 아문다. 순 피해가 이걸 못 넘으면 영원히 못 잡는다
     if (e.regenLeft > 0 && e.regen > 0 && e.hp > 0) {
       e.hp = Math.min(e.maxHpInit, e.hp + e.regen);
       e.regenLeft -= 1; if (e.regenLeft <= 0) e.regen = 0;
     }
-    if (e.capLeft > 0) { e.capLeft -= 1; if (e.capLeft <= 0) e.cap = 0; }
     if (e.stunned) { e.stunned = false; chooseMove(e, battle.turn + 1); continue; }
     // v1.06 연타(hits): 피해 효과에만 적용된다. 다른 효과에서는 무시되므로 0이나 1을 적어두면 된다.
     //   강화(power)와 약화(weak)가 '한 대마다' 적용되고 방어도 한 대씩 갉히기 때문에,
@@ -1084,11 +1066,9 @@ export function enemyPhase(battle) {
         case 'reflect':                                    // 🌵 반사 — 맞으면 amount 되돌려준다
           e.reflect = ef.amount; e.reflectLeft = Math.max(1, ef.turns || 3);
           break;
-        case 'ward':                                       // 🪨 문턱 — amount 이하의 단발 피해를 무시한다
-          e.ward = ef.amount; e.wardLeft = Math.max(1, ef.turns || 2);
+        case '__removed_ward':
           break;
-        case 'cap':                                        // ⛓ 상한 — 단발 피해를 amount 로 깎는다
-          e.cap = ef.amount; e.capLeft = Math.max(1, ef.turns || 2);
+        case '__removed_cap':
           break;
         case 'drainWhet':                                  // 🌀 벼름 흡수 — 쌓아둔 벼름을 빼앗는다
           battle.whet = ef.amount > 0 ? Math.max(0, battle.whet - ef.amount) : 0;
@@ -1260,7 +1240,7 @@ const INTENT_FORCED = { attack: '⚔️', defend: '🛡', empower: '💪', confu
 const DISRUPT_OPS = new Set(['confuse', 'poison', 'bleed', 'status', 'sealLast', 'sealCat',
   'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind', 'drainWhet', 'unpin']);
 // 예고 줄로는 말할 수 없는 것 — 걸리고 나서 배지로 보는 지속 효과
-const OPAQUE_OPS = new Set(['ward', 'cap', 'regen', 'enrage', 'reflect']);
+const OPAQUE_OPS = new Set(['regen', 'enrage', 'reflect']);
 
 export function intentOf(enemy) {
   const mv = enemy.nextMove;
