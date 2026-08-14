@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.91'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.92'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1098,7 +1098,7 @@ function renderBattle(opts = {}) {
       animateRoll(rerolled);
       const tax = hpBefore - battle.player.hp;             // 시그니처 세금 (이빨 자국·가시)
       if (tax > 0) sigHurtFx(tax);
-      if (battle.over && battle.result === 'defeat') setTimeout(() => renderBattle(), 700);
+      if (battle.over && battle.result === 'defeat') setTimeout(() => playerDeathFx(), 700);
     }
   });
   // 적 탭 = 표적 변경 (언제든, 확정과 무관) / 길게 누르면 행동 상세 (치트)
@@ -1722,7 +1722,12 @@ function tryConfirm(catId, variantId, uid) {
   const fxTotal = playAttackSequence(); // 기여 주사위 발광 → 타격
 
   setTimeout(() => {
-    if (battle.over) { finishBattle(); return; } // 승리 — 처치 연출이 재생된 뒤 전환
+    if (battle.over) {
+      // v3.92: 여기로 오는 죽음은 상태이상·자해로 내 턴에 쓰러진 경우다.
+      //   예전엔 승리와 한 갈래로 묶여 있어 사망 연출 없이 결과 화면으로 튀었다.
+      if (battle.result === 'defeat') { playerDeathFx(); return; }
+      finishBattle(); return;                    // 승리 — 처치 연출이 재생된 뒤 전환
+    }
 
     // 적 공격 연출: 행동하는 적이 순서대로 윈드업 → 내려찍기 (준비 행동은 은은한 충전 발광)
     const ATK_MS = 780;

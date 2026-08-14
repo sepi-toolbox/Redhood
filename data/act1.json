@@ -21,7 +21,7 @@
       "shop": 0.8,
       "rest": 0.9
     },
-    "eliteFloors": [
+    "shopMinFloor":4,"eliteFloors": [
       3,
       4,
       5,

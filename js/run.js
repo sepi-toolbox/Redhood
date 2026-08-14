@@ -332,6 +332,8 @@ function rollNodeType(cfg, floor, existing, enlight = 0, ban = null) {
   const w = { ...cfg.nodeWeights };
   if (enlight >= 1 && w.elite) w.elite *= 2; // 계몽 1: 엘리트가 더 자주 나온다
   if (!cfg.eliteFloors.includes(floor)) delete w.elite;
+  // v3.92: 상점이 너무 이르면 살 돈이 없어 그냥 지나치는 칸이 된다 — 최소 층을 둔다 (성권)
+  if (floor < (cfg.shopMinFloor || 4)) delete w.shop;
   if (existing.some(nd => nd.type === 'elite')) delete w.elite;
   if (ban) for (const t of ban) delete w[t];
   if (Object.keys(w).length === 0) return 'battle'; // 다 막히면 전투로
