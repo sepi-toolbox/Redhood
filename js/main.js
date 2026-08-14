@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.99'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v4.0'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -314,7 +314,7 @@ function enemyTags(e) {
   // 적이 두르거나 적을 지켜 주는 것 — 나에게는 전부 해롭다
   if (e.strength > 0) t.push(iconTag('status_strength', 'harm', e.strength, `힘 +${e.strength} — 때리는 한 방마다 그만큼 늘어난다 (전투 내내 남는다)`));
   if (e.regenLeft > 0 && e.regen > 0) t.push(iconTag(FX_ICON.regen, 'harm', e.regen, `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)`));
-  if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, 'harm', e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
+  if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, 'harm', e.enrage, `격노 ${e.enrage} — 턴이 끝날 때마다 힘 +${e.enrage}`));
   if (e.reflectLeft > 0 && e.reflect > 0) t.push(iconTag(FX_ICON.reflect, 'harm', e.reflect, `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힌다)`));
   if (e.undying > 0) t.push(iconTag(FX_ICON.undying, 'harm', null, '불사 — 한 번은 다시 일어선다'));
   // 내가 걸어 둔 것 — 적 몸에 붙어 있어도 나에게는 이롭다
@@ -1097,6 +1097,8 @@ function renderBattle(opts = {}) {
           `가시 ${b.thorns} — 맞을 때마다 때린 적에게 ${b.thorns} 피해 (전투 내내 남는다)`));
         if (b.fortune > 0) t.push(iconTag(buffIcoName('fortune'), 'good', b.fortune,
           `행운 ${b.fortune} — 상태이상을 거는 효과 ${b.fortune}번을 무른다`));
+        if (b.enrage > 0) t.push(iconTag(FX_ICON.enrage, 'good', b.enrage,
+          `격노 ${b.enrage} — 턴이 끝날 때마다 힘 +${b.enrage}`));
         if (p_.dot > 0) t.push(iconTag('status_poison', 'harm', p_.dot,
           `중독 ${p_.dot} — 내 턴이 끝날 때마다 쌓인 만큼 피해 (방어도로 막힌다)`));
 
@@ -1296,7 +1298,7 @@ function enemyEffectText(e, ef) {
     case 'holdTax': return `${fxIco('holdTax')} 가시 — ${ef.turns || 1}턴간 리롤 시 지킨 주사위 2개당 피해 1`;
     case 'blind': return `${fxIco('blind')} 어둠 — ${ef.turns || 1}턴간 족보 위력이 보이지 않는다`;
     case 'regen': return `${fxIco('regen')} 재생 ${ef.amount} — ${ef.turns || 3}턴간 자기 차례마다 회복`;
-    case 'enrage': return `${fxIco('enrage')} 격노 — 맞을 때마다 힘 +${ef.amount || 1} (전투 내 누적)`;
+    case 'enrage': return `${fxIco('enrage')} 격노 ${ef.amount || 1} — 턴이 끝날 때마다 힘 +${ef.amount || 1} (계속 쌓인다)`;
     case 'reflect': return `${fxIco('reflect')} 반사 ${ef.amount} — ${ef.turns || 3}턴간 때리면 되받는다`;
     case 'rest': return `${ico('intent_rest')} 휴식`;
     case 'drainWhet': return `${uiIco('whet')} 벼름을 빼앗는다`;
@@ -1315,6 +1317,7 @@ function showPlayerBuffs() {
     b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus}턴 — 그동안 매 턴 리롤 +1 (겹쳐 얻으면 세기가 아니라 턴이 늘어난다)</li>` : '',
     b.ironclad > 0 ? `<li>${buffIco('ironclad')} 철갑 ${b.ironclad} — 턴이 끝날 때 방어 ${b.ironclad}를 얻고 누적이 1 준다. 그 방어로 다가오는 적 턴을 받는다</li>` : '',
     b.thorns > 0 ? `<li>${buffIco('thorns')} 가시 ${b.thorns} — 적의 공격이 내 체력을 깎을 때마다 그 적에게 ${b.thorns} 피해 (적 방어도로 막힌다). 중독·부패처럼 때린 주체가 없는 피해는 되돌려주지 않는다. 이번 전투가 끝날 때까지 남는다</li>` : '',
+    b.enrage > 0 ? `<li>${fxIco('enrage')} 격노 ${b.enrage} — 턴이 끝날 때마다 힘 +${b.enrage} (계속 쌓인다)</li>` : '',
     b.fortune > 0 ? `<li>${buffIco('fortune')} 행운 ${b.fortune} — 상태이상을 거는 효과를 통째로 무르고 1 준다. 주사위 세 칸에 거는 혼란도 하나, 중독 4를 한꺼번에 얹는 것도 하나로 친다</li>` : '',
     b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen} · 매 턴 1 소멸</li>` : '',
     battle.whet > 0 ? `<li>${uiIco('whet')} 벼름 ${battle.whet} — <b>${uiIco('burst')}일격</b> 족보로 터뜨리면 피해 <b>×${whetMultOf(battle.whet).toFixed(2).replace(/0$/, '')}</b>. 일격이 아닌 족보로는 쓰이지도 깎이지도 않는다</li>` : '',
@@ -1375,7 +1378,7 @@ function showEnemyInfo(uid) {
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
     d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 — 받는 피해 ×1.5 (${d.vulnerable}턴 남음, 매 턴 1 소멸)</li>` : '',
     e.regenLeft > 0 && e.regen > 0 ? `<li>${fxIco('regen')} 재생 ${e.regen} — 자기 차례마다 회복 (${e.regenLeft}턴). 이보다 세게 때려야 줄어든다</li>` : '',
-    e.enrage > 0 ? `<li>${fxIco('enrage')} 격노 — 피해를 받을 때마다 힘 +${e.enrage} (전투 내 누적). 잔펀치가 벌을 받는다</li>` : '',
+    e.enrage > 0 ? `<li>${fxIco('enrage')} 격노 ${e.enrage} — 턴이 끝날 때마다 힘 +${e.enrage}. 오래 끌수록 위험해진다</li>` : '',
     e.reflectLeft > 0 && e.reflect > 0 ? `<li>${fxIco('reflect')} 반사 ${e.reflect} — 때릴 때마다 되받는다 (${e.reflectLeft}턴, 방어도로 막힘)</li>` : '',
     e.undying > 0 ? `<li>${fxIco('undying')} 불사 — 처음 쓰러질 때 한 번 다시 일어선다</li>` : '',
     e.stunned ? `<li>${ico('status_stun', 'ico-inline')} 다음 행동 취소됨</li>` : '',
@@ -1395,7 +1398,6 @@ function showEnemyInfo(uid) {
           const alt = (DB.enemyById[e.defId].uniqueMoves || {})[br.move];
           return `<p class="modal-text">파쇄 — 앞으로 <b>${left}</b> 피해를 더 주면 이 행동이 무너지고 <b>${esc(alt ? alt.name : br.move)}</b>(으)로 바뀐다. 방어도로 막힌 피해는 세지 않는다.</p>`;
         })()}
-        ${e.escalation ? `<p class="modal-text">매 턴 공격력 +${e.escalation} 누적 — 점점 강해진다</p>` : ''}
         ${e.enlightened ? `<p class="modal-text">계몽 상태 — 3번째 행동마다 강화 기술 사용</p>` : ''}
         <p class="hint">치트 보기 — 숨겨진 정보(${uiIco('unknown')})까지 공개된다</p>
         <button class="btn primary" id="enemy-info-close">닫기</button>

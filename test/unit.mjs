@@ -1313,10 +1313,15 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eq('불사: 두 번째는 없다', e.hp <= 0, true);
   }
   {
+    // v4.0: 격노는 '맞을 때마다'가 아니라 '턴이 끝날 때마다' 힘을 올린다 (옛 escalation 과 합쳤다)
     const b = mk(['crow']); const e = b.enemies[0]; e.hp = 200; e.maxHpInit = 200;
-    e.enrage = 1; b.lastResult = { bonusHits: [] };
+    e.enrage = 2; b.lastResult = { bonusHits: [] };
     eng.__test_deal(b, e, 10);
-    eq('격노: 맞으면 힘이 오른다', e.strength, 1);
+    eq('격노: 맞는다고 오르지 않는다', e.strength, 0);
+    eng.endTurnStatus(b);
+    eq('격노: 턴이 끝나면 그만큼 오른다', e.strength, 2);
+    b.await = 'enemy'; eng.enemyPhase(b); eng.endTurnStatus(b);
+    eq('격노: 계속 쌓인다', e.strength, 4);
     e.reflect = 3; e.reflectLeft = 2; b.player.block = 1;
     const hp0 = b.player.hp;
     eng.__test_deal(b, e, 10);

@@ -73,5 +73,23 @@ const eq=(l,a,e)=>{const ok=JSON.stringify(a)===JSON.stringify(e);console.log(`$
     eq(`행운이 ${name}을 무른다`, [probe(b1), b1.buffs.fortune, probe(b2) > 0], [0, 0, true]);
   }
 }
+// ── v4.0: 격노 — 나도 적도 턴이 끝날 때마다 힘이 오른다 ──
+{
+  // 제 행동으로 힘을 올리는 적이면 셈이 섞인다 — 아무것도 안 하는 허수아비를 쓴다
+  DB.enemyById.__idle = { id:'__idle', name:'허수아비', tier:'normal', art:'x', hp:[99,99],
+    moves:{ r:{ name:'가만히', effects:[{op:'rest'}] } }, pattern:{ mode:'weighted', weights:{ r:1 } } };
+  const b = mk('__idle'); b.buffs.enrage = 3; b.enemies[0].enrage = 2;
+  eng.endTurnStatus(b);
+  eq('격노: 내 힘도 적 힘도 턴 끝에 오른다', [b.buffs.strength, b.enemies[0].strength], [3, 2]);
+  b.await='enemy'; eng.enemyPhase(b); eng.endTurnStatus(b);
+  eq('격노: 매 턴 계속 쌓인다', [b.buffs.strength, b.enemies[0].strength], [6, 4]);
+}
+{
+  DB.enemyById.__rage = { id:'__rage', name:'격노', tier:'normal', art:'x', hp:[40,40],
+    moves:{ m:{ name:'분노', effects:[{op:'enrage', amount:2}] } }, pattern:{ mode:'weighted', weights:{ m:1 } } };
+  const b1 = mk('__rage'); b1.buffs.fortune = 1; end(b1);
+  const b2 = mk('__rage'); end(b2);
+  eq('행운이 격노도 무른다', [b1.enemies[0].enrage, b2.enemies[0].enrage], [0, 2]);
+}
 console.log(fail ? `NEW BUFF FAILS: ${fail}` : 'ALL NEW BUFF PASS');
 process.exit(fail ? 1 : 0);
