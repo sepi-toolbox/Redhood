@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v4.3'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v4.4'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1035,7 +1035,7 @@ function renderBattle(opts = {}) {
           const hidden = st && st.rule === 'hideFace';
           const sealedOff = st && st.rule === 'needReroll' && !d.st.opened;
           const pinned = !!d.pinned && def.effect && def.effect.op === 'pin';
-          return `<button class="die art ${sealedOff ? 'sealed-off' : ''} ${pinned ? 'pinned' : ''} ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''} ${st ? 'st t-' + st.id : ''}"
+          return `<button class="die art ${sealedOff ? 'sealed-off' : ''} ${pinned ? 'pinned' : ''} ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''} ${st ? 'st t-' + st.id : ''}"
             data-idx="${i}" title="${esc(def.name)}${st ? ' · ' + st.name + ' — ' + st.text : ''}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
             ${blank || hidden || sealedOff
               ? '<span class="pip-art empty"></span>'
@@ -1127,9 +1127,6 @@ function renderBattle(opts = {}) {
           t.push(iconTag('fx_seal_cat', 'harm', sealedIds.length + relicSealedIds.length,
             `족보 봉인 — ${parts.join(' · ')}`));
         }
-        // 예약된 혼란 — 적이 걸어 두고 내 턴이 시작될 때 터진다. 걸린 뒤에야 보이면 늦다.
-        if (battle.pendingConfuse > 0) t.push(iconTag('status_confuse', 'harm', battle.pendingConfuse,
-          `혼란 예약 ${battle.pendingConfuse} — 다음 턴이 시작될 때 주사위 ${battle.pendingConfuse}개가 뒤틀린다`));
         for (const k of ['rollTax', 'holdTax', 'blind']) {
           const m = modOf(battle, k);
           if (m) t.push(iconTag(FX_ICON[k], 'harm', m.left,
@@ -1226,7 +1223,6 @@ function updateDiceMarks() {
   app.querySelectorAll('.die').forEach(el => {
     const i = parseInt(el.dataset.idx, 10);
     const d = battle.dice[i];
-    if (d.confused) return; // 혼란 주사위는 상태 불변 (아이콘 유지)
     const marked = battle.rolled && !d.held;
     el.classList.toggle('mark-reroll', marked);
     const sm = el.querySelector('small');
@@ -1323,7 +1319,6 @@ function enemyEffectText(e, ef) {
 function showPlayerBuffs() {
   if (!battle) return;
   const b = battle.buffs;
-  const confusedNow = battle.dice.filter(d => d.confused).length;
   const items = [
     b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 모든 족보 피해 +${b.strength} (이번 전투가 끝날 때까지 남는다)</li>` : '',
     b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus}턴 — 그동안 매 턴 리롤 +1 (겹쳐 얻으면 세기가 아니라 턴이 늘어난다)</li>` : '',
@@ -1340,8 +1335,6 @@ function showPlayerBuffs() {
       const m = modOf(battle, k);
       return m ? `<li>${fxIco(k)} ${esc(m.name)} — ${CB_MOD_KO[k]} <small class="cat-tag">${m.left}턴</small></li>` : '';
     }),
-    confusedNow > 0 ? `<li>${ico('status_confuse')} 혼란 — 이번 턴 주사위 ${confusedNow}개가 뒤틀려 다시 굴릴 수 없음</li>` : '',
-    battle.pendingConfuse > 0 ? `<li>${ico('status_confuse')} 혼란 예고 — 다음 턴 주사위 ${battle.pendingConfuse}개가 뒤틀린다</li>` : '',
   ].filter(Boolean).join('');
   // v3.38: 주사위에 붙은 상태이상도 같은 창에서 읽힌다 — 종류별로 묶어 몇 칸인지까지
   const stCount = {};

@@ -53,7 +53,6 @@ export function createBattle(run, encounterIds) {
     rollsLeft: 0,
     nextTurnRerolls: 0,
     pendingBuff: 0,
-    pendingConfuse: 0,                    // 적 혼란 예약 — 다음 턴 시작 시 주사위 잠금 수
     dodgeActive: false,
     // v3.96: 힘 = 전투 내내 남는 누적치. 집중 = 남은 턴 수(효과는 리롤 +1 고정). 재생 = 턴당 회복량.
     // v3.97: 철갑 = 턴 끝에 누적만큼 방어를 낳고 1 준다. 가시 = 맞을 때마다 때린 놈에게 누적만큼 되돌려준다(전투 내내).
@@ -185,6 +184,9 @@ function setStatus(battle, i, st) {
 
 export function applyStatus(battle, kind, count = 1, power = 0) {
   if (!stDef(kind)) return 0;
+  // 수지 양초 — 혼란만 막는다. v4.4: 예전엔 아무도 안 쓰는 예약값(pendingConfuse)을 지워서
+  //   실제로는 아무 일도 하지 않았다. 이제 걸리는 그 순간을 막는다.
+  if (kind === 'confuse' && hasRelic(battle.relics, 'confuseImmune')) return 0;
   const def = stDef(kind);
   if (def.rule !== 'fuse') power = 0;        // 폭발 피해를 정할 수 있는 건 부패뿐
   const life = def.turns || 0;
@@ -467,7 +469,7 @@ function startTurn(battle, first = false) {
   battle.dice.forEach((d, i) => {
     // 물린 칸은 문 그 눈을 그대로 물고 있는다 — 값은 없지만 무엇이 물렸는지는 보여야 한다
     const keep = (dieOp(battle, i) === 'pin' && d.pinned && d.face > 0) || (stRule(d, 'locked') && d.face > 0);
-    d.held = false; d.confused = false;
+    d.held = false;
     if (!keep) { d.face = 0; d.pinned = false; }
   });
   battle.whetGained = 0;
@@ -477,18 +479,6 @@ function startTurn(battle, first = false) {
   battle.dice.forEach(d => { if (d.st) d.st.fresh = false; });
   if (stRule(battle.dice[0], 'spread') && battle.dice.every(d => stRule(d, 'spread'))) battle.voidLocked = true;
   if (!first) decayMods(battle);
-  if (hasRelic(battle.relics, 'confuseImmune')) battle.pendingConfuse = 0; // 수지 양초: 혼란 면역
-  // 혼란(🌀): 무작위 주사위 N개가 뒤틀림 — 이번 턴 다시 굴릴 수 없다
-  if (battle.pendingConfuse > 0) {
-    const idx = battle.dice.map((_, i) => i);
-    const n = Math.min(battle.pendingConfuse, idx.length);
-    for (let k = 0; k < n; k++) {
-      const j = Math.floor(rng.next() * idx.length);
-      battle.dice[idx[j]].confused = true;
-      idx.splice(j, 1);
-    }
-    battle.pendingConfuse = 0;
-  }
 }
 
 export function initialRoll(battle) {
@@ -564,7 +554,7 @@ export function toggleHold(battle, i) {
   if (battle.over || !battle.rolled || battle.await) return;
   const d = battle.dice[i];
   if (stRule(d, 'locked')) return;                   // 물림 — 손댈 수 없다
-  if (d.confused || stRule(d, 'noReroll')) return;   // 포박 — 다시 굴릴 수 없다
+  if (stRule(d, 'noReroll')) return;                 // 포박 — 다시 굴릴 수 없다
   const next = !d.held;
   d.held = next;
   // 결속 — 묶인 것들은 항상 같이 움직인다
@@ -714,12 +704,8 @@ function applyAbility(battle, variant, bd, targets) {
         battle.lastResult.bonusHits.push(`다음 피해 +${ab.amount}`);
         break;
       case 'cleanse': {
-        // v0.11: 해제 = 혼란(🌀) 제거 (현재 뒤틀린 주사위 + 예약된 혼란)
-        let n = 0;
-        for (const d of battle.dice) if (d.confused) { d.confused = false; n++; }
-        n += clearStatuses(battle);
-        n += battle.pendingConfuse;
-        battle.pendingConfuse = 0;
+        // v0.11: 해제 = 걸린 것을 전부 걷어낸다 (주사위 상태이상 + 족보 봉인)
+        let n = clearStatuses(battle);
         battle.sealed = {};
         if (n > 0) battle.lastResult.bonusHits.push('혼란 해제!');
         break;
@@ -1117,9 +1103,6 @@ export function enemyPhase(battle) {
         }
         case 'block':                                      // 🛡 방어
           e.block += ef.amount;
-          break;
-        case 'confuse':                                    // 🌀 (구) 혼란 — 다음 턴 주사위 잠금
-          battle.pendingConfuse += ef.amount;
           break;
         case 'status':                                     // v1.17 주사위에 상태이상을 건다
           // amount = 몇 칸에 거는가 · power = 부패의 폭발 피해(0이면 기본값)
