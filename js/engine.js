@@ -240,14 +240,9 @@ export function clearStatuses(battle, kind = null) {
 export const faceOf = (d) => ((stRule(d, 'needReroll') && !d.st.opened) || stRule(d, 'locked')) ? 0 : d.face;
 export const facesOf = (battle) => battle.dice.map(faceOf);
 // 기절은 족보에는 들어가되 합산에서만 0으로 친다.
-// 굳음(petrify)은 그 눈이 나온 칸에 기절 상태이상을 직접 붙인다 — 규칙도 연출도 상태이상 문법 하나로 통일.
 const zeroedOf = (battle) => {
   const s = new Set();
-  battle.dice.forEach((d, i) => {
-    if (stRule(d, 'zeroValue')) s.add(i);
-    // 굳음 — 이 칸에 그 눈이 나온 순간만 0이 된다 (예전 petrify 지속 방해를 상태이상으로 접었다)
-    if (stRule(d, 'zeroOnFace') && d.face === stAmount(d)) s.add(i);
-  });
+  battle.dice.forEach((d, i) => { if (stRule(d, 'zeroValue')) s.add(i); });
   return s;
 };
 /* ==================== 행동이 남기는 지속 효과 (v3.3 mods) ====================
