@@ -382,49 +382,9 @@ Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown i
 - 커밋 서명 금지 (`commit.gpgsign false`), 판마다 `sw.js` CACHE·`VERSION`·`index.html ?v=` 3곳 동시 증가
 - 배포 후 검증: Pages API로 `status: built` 확인 → 라이브 파일 내용 확인
 
-## v3.95 개명분 — 다시 뽑아야 하는 판 2장
 
-중독(본체)과 출혈(주사위)을 가르면서 족보 셋의 이름이 바뀌었다.
-`쪼개기 → 쐐기풀` · `네 송곳니 → 독버섯` · `핏빛 만월 → 역병의 달`.
-쐐기풀(nettle)은 원래 판 그림이 없어 폴백을 쓰므로 새로 그릴 필요는 없다(있으면 좋다).
-아래 둘은 파일명만 바꿔 둔 상태라 **그림이 옛 이름 그대로**다 — 이빨과 붉은 달이 중독을 말하고 있다.
+## 지금 그려야 하는 것은 여기서 보지 말 것
 
-| 이름 | 파일 | 프롬프트 |
-|---|---|---|
-| 독버섯 | `assets/ui/paper_deathcap.png` | `four speckled death-cap mushrooms in a row, caps tilted` |
-| 역병의 달 | `assets/ui/paper_plague_moon.png` | `a full moon veined with sickly green rot, faint vapour rising` |
-| (선택) 쐐기풀 | `assets/ui/paper_nettle.png` | `a sprig of stinging nettle, serrated leaves with fine hairs` |
-
-나머지 조건(테두리 장식·해상도·여백)은 위 콤보 판 항목과 동일하다.
-
-
-
-## 상태이상 표식 — 아직 안 그린 것 (v4.1)
-
-`node test/icocheck.mjs` 가 이 목록을 세어 준다. 그림이 들어오면 검사가 저절로 조용해진다.
-
-넷 다 지금은 남의 얼굴을 빌려 쓰고 있다. **철갑은 방어도와, 행운은 축복과 화면에서
-똑같이 생겼다** — 뜻이 다른 둘이 한 얼굴로 서 있는 상태다.
-
-| 이름 | 넣을 곳 | 지금 빌린 것 | 프롬프트 |
-|---|---|---|---|
-| 철갑 | `assets/icons/status_ironclad.png` | 방어도(status_block) | `a layered iron plate pauldron, riveted bands, seen head-on` |
-| 가시 | `assets/icons/status_thorns.png` | 반사(fx_reflect) | `a ring of sharp bramble thorns curving outward` |
-| 행운 | `assets/icons/status_fortune.png` | 축복(status_blessing) | `a four-leaf clover with a faint spark at its centre` |
-| 굳음(주사위 판) | `assets/ui/status_die_petrify.png` | 기절 판(status_die_stun) | `a die face crusted over with grey stone, cracks spreading from the centre` |
-
-물림·굳음의 **표식 아이콘은 전용 그림이 이미 있다** (`status_lock.png`, `fx_petrify.png`).
-파일 이름이 `status_<id>` 규칙과 다를 뿐이라 `ST_ICO_FILE` 이 이어 준다 — 다시 그릴 필요 없다.
-물림은 주사위 판(`status_die_bite.png`)도 있다. 굳음만 판이 없는데, 예전에는 굳음이
-제 판을 가질 일이 없었기 때문이다(그 자리에 기절을 붙였으니까). v3.99 에 굳음이
-직접 칸에 붙게 되면서 처음 필요해졌다.
-
-넣는 법:
-- 앞의 셋 — 파일을 넣고 `js/main.js` 의 `BUFF_ART_READY` 에 이름을 적는다.
-- 굳음 판 — 파일을 넣고 `DIE_ART_ALIAS` 에서 `petrify` 줄을 지운다.
-
-### 이름이 겹치는 곳 하나
-
-새로 넣은 버프 **가시**(맞으면 되돌려준다)와, 적의 지속 방해 **가시**(리롤할 때 지킨
-주사위마다 피해, `holdTax`)가 같은 이름이다. 화면에서는 방해 쪽이 적 기술명으로 뜨기
-때문에 지금 당장 부딪히지는 않지만, 문서와 표에서는 헷갈린다.
+밀린 목록은 손으로 적지 않는다 — 반드시 낡는다.
+`node tools/arttodo.mjs` 를 돌리면 코드·데이터에서 직접 뽑아 `docs/ART_TODO_NOW.md` 에 쓴다.
+이 파일은 '어떤 결로 그리는가'(규격·화풍·묶음)만 남긴다.
