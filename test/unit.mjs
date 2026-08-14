@@ -2,6 +2,17 @@
 import { evalCategory, computeDamage } from '../js/yahtzee.js';
 
 let fails = 0;
+let ENG = null;   // 각 블록이 데이터를 먼저 읽은 뒤 engine 을 불러오므로, 처음 불러온 것을 여기 붙잡아 둔다
+/* v3.94: 한 턴을 끝낸다 = 내 턴 끝 상태이상 일괄 처리 → 적 페이즈.
+   예전엔 테스트가 곧장 enemyPhase 만 불렀다. 그때는 지속시간 감소가 적 페이즈 안에 있어서
+   그래도 맞아떨어졌지만, 이제 상태이상은 '내 턴이 끝날 때' 돈다 — 확정을 안 하는 테스트도
+   턴을 닫으려면 이 두 단계를 다 지나야 실제 판과 같아진다. */
+function endTurn(b) {
+  ENG.endTurnStatus(b);
+  if (b.over) return;
+  b.await = 'enemy';
+  ENG.enemyPhase(b);
+}
 function eq(label, actual, expected) {
   const ok = JSON.stringify(actual) === JSON.stringify(expected);
   console.log(`${ok ? '✅' : '❌'} ${label}: ${JSON.stringify(actual)}${ok ? '' : ' (기대: ' + JSON.stringify(expected) + ')'}`);
@@ -96,7 +107,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   globalThis.fetch = async (u) => ({ ok: true, json: async () => JSON.parse(readFileSync(new URL('../' + String(u).replace(/^\.?\//, ''), import.meta.url), 'utf8')) });
   const { loadAll } = await import('../js/data.js');
   await loadAll();
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   eng.rng.next = () => 0.5;
   const run = { hp: 70, maxHp: 70, act: 1, floor: 1, enlight: 0, relics: [],
     dice: ['normal', 'normal', 'normal', 'normal', 'normal'], categories: { onePair: 'clasped_hands' } };
@@ -104,27 +115,27 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const baseRerolls = b.rollsLeft;
   b.buffs.focus += 1; b.buffs.strength += 2; b.buffs.regen += 1;
   b.enemies[0].debuffs.weak += 2; b.enemies[0].debuffs.vulnerable += 2;
-  b.await = 'enemy'; eng.enemyPhase(b);                       // 1턴 종료 → 2턴
+  endTurn(b);                       // 1턴 종료 → 2턴
   eq('부여한 턴에는 안 깎임(집중)', b.buffs.focus, 1);
   eq('부여한 턴에는 안 깎임(약화)', b.enemies[0].debuffs.weak, 2);
   eq('집중 효과가 실제로 적용됨', b.rollsLeft, baseRerolls + 1);
-  b.await = 'enemy'; eng.enemyPhase(b);                       // 2턴 종료 → 3턴
+  endTurn(b);                       // 2턴 종료 → 3턴
   eq('한 턴 뒤 집중 소멸', b.buffs.focus, 0);
   eq('한 턴 뒤 힘 1 감소', b.buffs.strength, 1);
   eq('한 턴 뒤 재생 소멸', b.buffs.regen, 0);
   eq('한 턴 뒤 약화 1 감소', b.enemies[0].debuffs.weak, 1);
   eq('한 턴 뒤 취약 1 감소', b.enemies[0].debuffs.vulnerable, 1);
   eq('집중 소멸 후 리롤 원복', b.rollsLeft, baseRerolls);
-  b.await = 'enemy'; eng.enemyPhase(b);                       // 3턴 종료 → 4턴
+  endTurn(b);                       // 3턴 종료 → 4턴
   eq('두 턴 뒤 힘 소멸', b.buffs.strength, 0);
   eq('두 턴 뒤 약화 소멸', b.enemies[0].debuffs.weak, 0);
-  b.await = 'enemy'; eng.enemyPhase(b);
+  endTurn(b);
   eq('0에서 더 내려가지 않음', b.buffs.strength, 0);
 }
 
 // v1.03: 강화 행동은 일반 행동으로 흡수됐다 — 해금 턴 4 + 쿨다운 4 + 가중치로 표현된다
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
@@ -169,7 +180,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = mk('stray_dog'); let first = 0;
     for (let t = 1; t <= 14; t++) {
       if (b.enemies[0].nextMove.id === sid) { if (t < def.moves[sid].minTurn) early++; if (!first) first = t; }
-      b.await = 'enemy'; eng.enemyPhase(b);
+      endTurn(b);
     }
     if (first) firsts.push(first);
   }
@@ -184,7 +195,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = mk('stray_dog');
     for (let t = 1; t < heavy[1].minTurn; t++) {
       if (b.enemies[0].nextMove.id === heavy[0]) leaked++;
-      b.await = 'enemy'; eng.enemyPhase(b);
+      endTurn(b);
     }
   }
   eq('minTurn 이전에 최강기 미등장', leaked, 0);
@@ -192,7 +203,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v0.75: 연계기 — A를 쓰면 확률에 따라 다음 턴 B가 확정된다
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
@@ -208,7 +219,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
       const wasA = e.nextMove.id === aId;
       // 연계 대상이 후반 전용이면 그 전 턴은 발동률 계산에서 제외한다
       const unlocked = !(def.moves[aMv.followUp.move].minTurn > t + 1);
-      b.await = 'enemy'; eng.enemyPhase(b);
+      endTurn(b);
       if (wasA && unlocked) { seen++; if (e.nextMove.chained) { chained++; if (e.nextMove.id !== aMv.followUp.move) wrong++; } }
       if (prevChained && e.nextMove.chained) doubleChain++;
       prevChained = !!e.nextMove.chained;
@@ -222,14 +233,14 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
       for (let n = 0; n < 200; n++) { const b = mk('wolf'); const e = b.enemies[0];
         for (let t = 1; t < def.moves[aMv.followUp.move].minTurn; t++) {
           if (e.nextMove.id === aMv.followUp.move) leak++;
-          b.await = 'enemy'; eng.enemyPhase(b); } }
+          endTurn(b); } }
       return leak; })(), 0);
   eq('연계가 무한히 이어지지 않음', doubleChain, 0);
 }
 
 // v1.01: 쿨다운 — 한 번 쓴 행동은 지정한 턴 수만큼 다시 안 나온다
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   // 임시 적: 세 행동 중 hammer 에만 쿨다운 3을 건다
@@ -256,7 +267,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
         if (last > -99) { minGap = Math.min(minGap, gap); if (gap < CD + 1) tooSoon++; }
         last = t;
       }
-      b.await = 'enemy'; eng.enemyPhase(b);
+      endTurn(b);
     }
   }
   eq('쿨다운 행동이 실제로 쓰이긴 함', uses > 400, true);
@@ -272,7 +283,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const e = b.enemies[0]; let last = -99;
     for (let t = 1; t <= 16; t++) {
       if (e.nextMove.id === 'hammer') { if (t - last === 2) back2back++; last = t; }
-      b.await = 'enemy'; eng.enemyPhase(b);
+      endTurn(b);
     }
   }
   eq('쿨다운 없는 행동은 간격 제한 없음', back2back > 0, true);
@@ -280,7 +291,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v1.02: 가중치 0 = 추첨 제외 (연계로만 등장) · 쿨다운+연계+가중치0 이 '정해진 순서'를 그대로 재현하는가
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const D = (n) => [{ op: 'damage', amount: n }];
@@ -290,7 +301,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
       dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, [id], 'battle');
     const e = b.enemies[0]; const out = [];
-    for (let t = 1; t <= T; t++) { out.push(e.nextMove.id); b.await = 'enemy'; eng.enemyPhase(b); }
+    for (let t = 1; t <= T; t++) { out.push(e.nextMove.id); endTurn(b); }
     return out;
   };
   // 가중치 0 인 기술은 연계가 없으면 절대 안 나온다
@@ -317,7 +328,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v1.05: 휴식 효과 — 턴만 넘기고 아무 일도 일어나지 않는다
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   DB.enemyById.__rest = { id: '__rest', name: '쉬는 적', tier: 'normal', art: '🧪', hp: [200, 200],
@@ -327,7 +338,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__rest'], 'battle');
   const e = b.enemies[0];
   const hp0 = b.player.hp, ehp0 = e.hp;
-  for (let t = 0; t < 8; t++) { b.await = 'enemy'; eng.enemyPhase(b); }
+  for (let t = 0; t < 8; t++) { endTurn(b); }
   eq('휴식은 플레이어 HP를 안 깎음', b.player.hp, hp0);
   eq('휴식은 적 방어·힘을 안 올림', [e.block, e.power], [0, 0]);
   eq('휴식은 적 HP를 안 바꿈', e.hp, ehp0);
@@ -337,7 +348,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v1.06: 연타 — 한 대는 약하지만 강화가 타수마다 붙는다
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const mkEnemy = (id, ef) => { DB.enemyById[id] = { id, name: id, tier: 'normal', art: '🧪', hp: [9e6, 9e6],
@@ -347,7 +358,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
       dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, [id], 'battle');
     b.enemies[0].power = power;
     const hp0 = b.player.hp;
-    for (let t = 0; t < turns; t++) { b.await = 'enemy'; eng.enemyPhase(b); b.enemies[0].power = power; }
+    for (let t = 0; t < turns; t++) { endTurn(b); b.enemies[0].power = power; }
     return hp0 - b.player.hp;
   };
   mkEnemy('__once', { op: 'damage', amount: 12 });            // 한 방 12
@@ -361,7 +372,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
       dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__multi'], 'battle');
     b.enemies[0].debuffs.weak = 2; const hp0 = b.player.hp;
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('약화는 한 대마다 ×0.75', hp0 - b.player.hp, Math.floor(4 * 0.75) * 3);
   }
   // 방어는 한 대씩 갉힌다 — 방어 5는 첫 대를 막고 남은 두 대가 들어온다
@@ -369,7 +380,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
       dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__multi'], 'battle');
     b.player.block = 5; const hp0 = b.player.hp;
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('방어를 타수로 갉는다', hp0 - b.player.hp, 12 - 5);
   }
   // 의도 표시에 타수가 보인다
@@ -385,7 +396,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v1.08: 락 턴 · 유니크 행동 · 국면 전환 · 파쇄
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const D = (n) => [{ op: 'damage', amount: n }];
@@ -399,7 +410,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const seen = new Set();
   for (let n = 0; n < 400; n++) {
     const b = mk('__lock');
-    for (let t = 1; t <= 9; t++) { if (b.enemies[0].nextMove.id === 'win') seen.add(t); b.await = 'enemy'; eng.enemyPhase(b); }
+    for (let t = 1; t <= 9; t++) { if (b.enemies[0].nextMove.id === 'win') seen.add(t); endTurn(b); }
   }
   eq('락 턴 구간에서만 등장 (2·3·4턴)', [...seen].sort((a, b2) => a - b2), [2, 3, 4]);
 
@@ -442,7 +453,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eq('임계 전에는 전환 없음', e.nextMove.id, 'a');
     eng.__test_deal(b, e, 15);                    // HP 45% — 2국면 진입
     eq('임계를 지나면 예고가 강제 교체', [e.nextMove.id, !!e.nextMove.phaseShift], ['awaken', true]);
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('전환 행동이 실제로 발동', e.power, 9);
     eq('이후에는 2국면 행동', e.nextMove.id, 'b');
     eng.__test_deal(b, e, 20);
@@ -456,7 +467,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     pattern: { mode: 'weighted', weights: { only: 1 } } };
   {
     const b = mk('__dflt'); const e = b.enemies[0]; const seq = [];
-    for (let t = 1; t <= 6; t++) { seq.push(e.nextMove.id); b.await = 'enemy'; eng.enemyPhase(b); }
+    for (let t = 1; t <= 6; t++) { seq.push(e.nextMove.id); endTurn(b); }
     eq('첫 턴은 정상 행동, 이후 쿨다운이라 기본 행동', seq, ['only', 'idle', 'idle', 'idle', 'idle', 'idle']);
     eq('기본 행동은 강제 표시가 붙음', !!e.nextMove.forced, true);
   }
@@ -468,14 +479,14 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     pattern: { mode: 'weighted', weights: { only: 1, fallback: 0 } } };
   {
     const b = mk('__dflt2'); const e = b.enemies[0]; const seq = [];
-    for (let t = 1; t <= 6; t++) { seq.push(e.nextMove.id); b.await = 'enemy'; eng.enemyPhase(b); }
+    for (let t = 1; t <= 6; t++) { seq.push(e.nextMove.id); endTurn(b); }
     eq('기본 행동은 해금·락·쿨다운을 전부 무시', seq, ['only', 'fallback', 'fallback', 'fallback', 'fallback', 'fallback']);
   }
   // 기본 행동이 없으면 제한을 풀어서라도 뭔가는 낸다 (전투가 멈추지 않는다)
   DB.enemyById.__nodflt = { ...DB.enemyById.__dflt, id: '__nodflt', defaultMove: undefined };
   {
     const b = mk('__nodflt'); const e = b.enemies[0]; let blank = 0;
-    for (let t = 1; t <= 6; t++) { if (!e.nextMove || !e.nextMove.id) blank++; b.await = 'enemy'; eng.enemyPhase(b); }
+    for (let t = 1; t <= 6; t++) { if (!e.nextMove || !e.nextMove.id) blank++; endTurn(b); }
     eq('기본 행동이 없어도 예고가 비지 않음', blank, 0);
   }
 
@@ -483,14 +494,14 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   {
     let leak = 0;
     for (let n = 0; n < 200; n++) { const b = mk('__ph');
-      for (let t = 1; t <= 6; t++) { if (b.enemies[0].nextMove.id === 'awaken') leak++; b.await = 'enemy'; eng.enemyPhase(b); } }
+      for (let t = 1; t <= 6; t++) { if (b.enemies[0].nextMove.id === 'awaken') leak++; endTurn(b); } }
     eq('유니크 행동은 추첨으로 안 나옴', leak, 0);
   }
 }
 
 // v1.13: 자해 — 적이 스스로 HP를 깎는다. 예고에는 정체가 드러나지 않는다(❓)
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const mk = (id) => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
@@ -502,22 +513,22 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = mk('__self'); const e = b.enemies[0];
     eq('자해 예고는 정체 불명(❓)', eng.intentOf(e), '❓');
     const hp0 = b.player.hp;
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('자기 HP가 깎임', e.hp, 25);
     eq('플레이어는 멀쩡함', b.player.hp, hp0);
-    e.block = 99; b.await = 'enemy'; eng.enemyPhase(b);
+    e.block = 99; endTurn(b);
     eq('자기 방어도는 자해를 못 막음', e.hp, 10);
   }
   {   // 자해로 죽으면 그 자리에서 전투가 끝난다
     const b = mk('__self'); const e = b.enemies[0]; e.hp = 10;
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('자해로 쓰러지면 승리 처리', [e.hp <= 0, b.over, b.result], [true, true, 'victory']);
   }
 }
 
 // v1.14: 독·출혈 — 같은 장치, 이름만 다름. 내 행동 후 누적만큼 아프고 1 줄어든다
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = Math.random;
   const mk = () => eng.createBattle({ hp: 100, maxHp: 100, act: 1, floor: 1, enlight: 0, relics: [],
@@ -528,7 +539,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   {
     const b = mk(); const e = b.enemies[0];
     eq('독 예고는 혼란과 같은 소용돌이', eng.intentOf(e), '🌀');
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('독 3 부여', [b.player.dot, b.player.dotKind], [3, 'poison']);
     b.player.block = 0;
     const hp0 = b.player.hp;
@@ -546,7 +557,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   }
   {   // 출혈은 이름만 다르다
     DB.enemyById.__dotenemy.moves.spit.effects = [{ op: 'bleed', amount: 4 }];
-    const b = mk(); b.await = 'enemy'; eng.enemyPhase(b);
+    const b = mk(); endTurn(b);
     eq('출혈도 같은 칸에 쌓인다', [b.player.dot, b.player.dotKind], [4, 'bleed']);
     DB.enemyById.__dotenemy.moves.spit.effects = [{ op: 'poison', amount: 3 }];
   }
@@ -588,7 +599,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v1.17: 주사위 상태이상 13종
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   const mk = () => {
     eng.rng.next = () => 0.5;
@@ -663,7 +674,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   { const b = mk();
     b.dice[0].st = { kind: 'rot', left: 0, fuse: 1, opened: false };
     const hp = b.player.hp;
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('부패가 터져 아프다', hp - b.player.hp >= DB.statusById.rot.amount, true);
     eq('터진 뒤에는 사라진다', b.dice[0].st, null);
   }
@@ -712,7 +723,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   { const b = mk();
     const before = b.dice.filter(d => d.st).length;
     b.enemies[0].nextMove = { id: 'test', name: '시험', effects: [{ op: 'status', kind: 'poison', amount: 2 }] };
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('적이 건 상태이상이 붙는다', b.dice.filter(d => d.st && d.st.kind === 'poison').length >= 2, true);
   }
 
@@ -727,13 +738,13 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   // 적 행동이 세기와 지속까지 정한다
   { const b = mk();
     b.enemies[0].nextMove = { id: 't', name: '시험', effects: [{ op: 'status', kind: 'rot', amount: 1, power: 33 }] };
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     const d = b.dice.find(x => x.st && x.st.kind === 'rot');
     eq('적이 정한 폭발 피해가 들어간다', d.st.power, 33);
     eq('걸린 턴에는 심지가 안 탄다', d.st.fuse, DB.statusById.rot.turns);
     const hp = b.player.hp;
-    b.await = 'enemy'; eng.enemyPhase(b);
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
+    endTurn(b);
     eq('기본값 10이 아니라 33으로 터진다', hp - b.player.hp >= 33, true);
   }
   // 지속 턴은 적 행동이 못 건드린다
@@ -800,12 +811,12 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   { const b = mk();
     b.lastUsedCat = 'chance';
     b.enemies[0].nextMove = { id: 's', name: '흉내', effects: [{ op: 'sealLast', turns: 2 }] };
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('노페어는 sealLast 로 안 잠긴다', b.sealed.chance || 0, 0);
   }
   { const b = mk();
     b.enemies[0].nextMove = { id: 's', name: '솜', effects: [{ op: 'sealCat', cats: ['chance', 'onePair'], turns: 2 }] };
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('노페어는 sealCat 로도 안 잠긴다', b.sealed.chance || 0, 0);
     eq('같은 행동의 다른 족보는 정상 봉인', (b.sealed.onePair || 0) > 0, true);
   }
@@ -824,14 +835,14 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = mk();
     const left = () => b.dice.filter(d => d.st && d.st.kind === kind).length;
     b.enemies[0].nextMove = { id: 't', name: '시험', effects: [{ op: 'status', kind, amount: 1 }] };
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq(`${kind}: 걸린 직후 내 턴에는 살아 있다`, left(), 1);
     b.enemies[0].nextMove = { id: 'r', name: '쉼', effects: [{ op: 'rest' }] };
     for (let t = 1; t < life; t++) {                       // 지속 턴 -1 번은 버텨야 한다
-      b.await = 'enemy'; eng.enemyPhase(b);
+      endTurn(b);
       eq(`${kind}: ${t}턴 지나도 아직 남아 있다 (지속 ${life})`, left(), 1);
     }
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq(`${kind}: ${life}턴 다 겪으면 풀린다`, left(), 0);
   }
   // 출혈·독·약탈은 눈금 그대로다 — 세기라는 손잡이가 없다
@@ -877,7 +888,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 // ---------------------------------------------------------------
 {
   const { DB } = await import('../js/data.js');
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { computeDamage, whetMultOf } = await import('../js/yahtzee.js');
   const mk = (dice, relics = [], cats = { onePair: ['clasped_hands'] }) =>
     eng.createBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics,
@@ -898,7 +909,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   {
     const b = mk(['normal','normal','normal','normal','normal'], ['whetstone']);
     eq('숫돌: 첫 턴에 벼름 1', b.whet, 1);
-    eng.initialRoll(b); b.await = 'enemy'; eng.enemyPhase(b);
+    eng.initialRoll(b); endTurn(b);
     eq('숫돌: 다음 턴에 벼름 2', b.whet, 2);
   }
   // 확정하면 벼름이 0으로 돌아간다
@@ -1035,7 +1046,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 // ---------------------------------------------------------------
 {
   const { DB } = await import('../js/data.js');
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const mkB = (dice = ['normal','normal','normal','normal','normal'], relics = [], cats = { onePair: ['clasped_hands'] }) =>
     eng.createBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics, dice, categories: cats }, ['crow'], 'battle');
 
@@ -1060,7 +1071,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     b.whet = 5; b.dice[0].pinned = true;
     const e = b.enemies[0];
     e.nextMove = { id: 'x', name: '시험', effects: [{ op: 'drainWhet', amount: 0 }, { op: 'unpin' }] };
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('벼름을 통째로 빼앗긴다', b.whet, 0);
     eq('새김이 풀린다', b.dice[0].pinned, false);
   }
@@ -1086,7 +1097,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 // ---------------------------------------------------------------
 {
   const { DB } = await import('../js/data.js');
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const mkS = (cats) => eng.createBattle({ hp: 60, maxHp: 60, act: 1, floor: 1, enlight: 0, relics: [],
     dice: ['normal','normal','normal','normal','normal'], categories: cats }, ['crow'], 'battle');
 
@@ -1176,7 +1187,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // ========== v3.3 테마 행동 — 전부 '행동'이 거는 효과다 (별도 시스템 없음) ==========
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = () => 0.5;
   const RUN = () => ({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
@@ -1300,7 +1311,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = mk(['crow']); const e = b.enemies[0]; e.hp = 50; e.maxHpInit = 200;
     e.regen = 4; e.regenLeft = 2;
     e.nextMove = { id: 't', name: '가만히', effects: [{ op: 'rest' }] };
-    b.await = 'enemy'; eng.enemyPhase(b);
+    endTurn(b);
     eq('재생: 자기 차례에 아문다', e.hp, 54);
     eq('재생: 턴이 줄어든다', e.regenLeft, 1);
   }
@@ -1535,7 +1546,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v3.59: 예고 줄 — 치유는 안 그린다 · 두 갈래는 묶인 표식 하나로 나간다
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   const { readFileSync } = await import('fs');
 
@@ -1619,7 +1630,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v3.73: 취약 — 세기 가산이 아니라 받는 피해 ×1.5. 여러 번 걸어도 배율은 그대로, 턴만 는다.
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   const { DB } = await import('../js/data.js');
   eng.rng.next = () => 0.5;
   const mk = () => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
@@ -1659,7 +1670,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v3.77: 미리보기 = 고른 대상에게 실제로 들어갈 최종값 (취약까지 반영)
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   eng.rng.next = () => 0.5;
   const mk = () => eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
     dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['crow'], 'battle');
@@ -1685,7 +1696,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
 // v3.79: 유물 훅 배열 · 회복 통로 · 방어도 봉인
 {
-  const eng = await import('../js/engine.js');
+  const eng = ENG = await import('../js/engine.js');
   eng.rng.next = () => 0.5;
   const mk = (relics) => eng.createBattle({ hp: 40, maxHp: 70, act: 1, floor: 1, enlight: 0, relics: [],
     dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['crow'], 'battle');

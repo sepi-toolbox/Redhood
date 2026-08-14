@@ -112,7 +112,7 @@ for (const k of ['curse', 'blessing']) {
     setFaces(b, [1, 2, 3, 4, 5]);            // 0번 칸(눈 1)은 상위3합에 안 들어간다 = 안 쓰인다
     E.confirmCategory(b, 'chance', V0(CAT.chance), b.enemies[0].uid);
     if (b.over || b.enemies.every(e => e.hp <= 0)) break;
-    E.enemyPhase(b); E.initialRoll(b);
+    E.endTurnStatus(b); E.enemyPhase(b); E.initialRoll(b);
   }
   ok('rot', '방치하면 터져서 피해', b.player.hp < hp0 && !b.dice[0].st, `HP ${hp0}→${b.player.hp} 남음=${!!b.dice[0].st}`);
 
@@ -216,7 +216,7 @@ for (const e of DB.enemies) {
       const alive = E.aliveEnemies(b);
       E.confirmCategory(b, pv[0].cat.id, pv[0].variant.id, alive[0] && alive[0].uid);
       if (b.over) break;
-      E.enemyPhase(b);
+      E.endTurnStatus(b); E.enemyPhase(b);
       E.initialRoll(b);          // 새 턴 첫 굴림 — 이걸 빼면 두 턴째부터 아무 일도 안 난다
       turns++;
       const seen = new Set();

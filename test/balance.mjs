@@ -104,7 +104,7 @@ function playBattle(run,type){
       b.dice.forEach((d,i)=>{ if(keep.has(i)!==d.held)toggleHold(b,i); });
       if(!reroll(b))break; }
     const pv=previewAll(b).filter(p=>!p.locked&&p.bd.total>0);
-    if(pv.length===0){ if(b.voidLocked&&confirmVoidCall(b)){ if(b.over)break; enemyPhase(b); continue; } b.await='enemy'; enemyPhase(b); continue; }
+    if(pv.length===0){ if(b.voidLocked&&confirmVoidCall(b)){ if(b.over)break; enemyPhase(b); continue; } eng.endTurnStatus(b); if(b.over)break; b.await='enemy'; enemyPhase(b); continue; }
     const best=pv.sort((x,y)=>scoreChoice(b,y)-scoreChoice(b,x))[0];
     (S.dmg[run.act] ||= []).push(best.bd.total);
     const alive=[...aliveEnemies(b)].sort((x,y)=>x.hp-y.hp);

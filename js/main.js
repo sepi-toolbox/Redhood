@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.93'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.94'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1765,7 +1765,11 @@ function tryConfirm(catId, variantId, uid) {
   const res = (variantId === 'void_call') ? confirmVoidCall(battle) : confirmCategory(battle, catId, variantId, uid);
   if (!res) { busy = false; renderBattle(); return; }
   syncTarget(); // 표적이 죽었으면 다음 적으로
-  const useFx = takeFx(battle);          // 출혈·독·약탈·부패·잠식이 확정 순간에 무는 대가
+  // v3.94: 엔진이 '내가 한 일'과 '턴 끝 일괄 처리'를 끊어서 넘겨준다 — 두 사건을 겹쳐 놓으면
+  //   무엇 때문에 아팠는지 못 읽는다. 확정 순간의 대가가 먼저, 턴 끝 처리는 타격이 끝난 뒤.
+  const useFx = battle.useFx || takeFx(battle);
+  battle.useFx = null;
+  const endFx = takeFx(battle);
   renderBattle();
   popNewChips();
   if (useFx.burst.length || useFx.added.length || useFx.removed.length) {
@@ -1774,28 +1778,34 @@ function tryConfirm(catId, variantId, uid) {
   const fxTotal = playAttackSequence(); // 기여 주사위 발광 → 타격
 
   setTimeout(() => {
-    // 🩸 내 행동이 끝난 직후 무는 독·출혈 — 타격이 끝난 자리에서 대가를 보여준다
+    // ── 내 턴 끝: 상태이상 일괄 처리 연출 ────────────────────────────────────
+    //   순서는 엔진과 같다. 주사위(부패 폭발·지속 만료) → 나의 독·출혈 → 적의 출혈.
+    //   한 박자씩 띄워야 세 사건이 각각 읽힌다.
+    let t = 0;
+    if (endFx.burst.length || endFx.added.length || endFx.removed.length) {
+      playStatusFx(endFx);
+      // 부패가 터진 것은 내 체력이 깎인 사건이기도 하다 — 주사위 위 숫자만으로는 안 읽힌다
+      const boom = endFx.burst.filter(x => x.kind === 'rot').reduce((a, x) => a + (x.amount || 0), 0);
+      if (boom > 0) setTimeout(() => sigHurtFx(boom, 'rot'), 200);
+      t = boom > 0 ? 700 : 420;
+    }
     const dh = (res && res.dotHit) || null;
-    if (dh && dh.amount > 0) sigHurtFx(dh.amount, dh.kind);
-    const dotWait = (dh && dh.amount > 0) ? 520 : 0;
+    if (dh && dh.amount > 0) { setTimeout(() => sigHurtFx(dh.amount, dh.kind), t); t += 460; }
+    const edots = (battle.enemyDots || []).filter(d => d.amount > 0);
+    edots.forEach((d, i) => setTimeout(() => {
+      const el = app.querySelector(`.enemy[data-uid="${d.uid}"]`);
+      if (!el) return;
+      dotHitFx(el, d.amount, d.kind, el.querySelector('.enemy-art'));
+    }, t + i * 150));
+    if (edots.length) t += (edots.length - 1) * 150 + 460;
+    const dotWait = t;
 
     if (battle.over) {
       // v3.92: 여기로 오는 죽음은 상태이상·자해로 내 턴에 쓰러진 경우다.
       //   예전엔 승리와 한 갈래로 묶여 있어 사망 연출 없이 결과 화면으로 튀었다.
       if (battle.result === 'defeat') { setTimeout(() => playerDeathFx(), dotWait); return; }
-      finishBattle(); return;                    // 승리 — 처치 연출이 재생된 뒤 전환
+      setTimeout(() => finishBattle(), dotWait); return;   // 승리 — 적 출혈로 끝난 판도 여기로 온다
     }
-
-    // 🩸 적 출혈: 자기 차례가 돌아오는 순간 스택만큼 깎인다(방어 무시).
-    //   때린 사람이 없어 조용히 사라지던 피해라, 행동을 시작하는 타이밍에 맞춰 보여준다.
-    aliveEnemies(battle)
-      .filter(e => e.debuffs.bleed > 0)
-      .map(e => ({ uid: e.uid, amount: e.debuffs.bleed }))
-      .forEach((b, i) => setTimeout(() => {
-        const el = app.querySelector(`.enemy[data-uid="${b.uid}"]`);
-        if (!el) return;
-        dotHitFx(el, b.amount, 'bleed', el.querySelector('.enemy-art'));
-      }, dotWait + 120 + i * 160));
 
     // 적 공격 연출: 행동하는 적이 순서대로 윈드업 → 내려찍기 (준비 행동은 은은한 충전 발광)
     const ATK_MS = 780;

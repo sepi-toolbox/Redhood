@@ -56,7 +56,7 @@ const mk = (ids = []) => eng.createBattle({ hp: 70, maxHp: 70, act: 1, floor: 1,
 {
   const b = mk(['grandma_book']);
   eq('동화책: 첫 턴에는 안 깎인다', b.player.hp, 70);
-  b.await = 'enemy'; eng.enemyPhase(b);
+  eng.endTurnStatus(b); b.await = 'enemy'; eng.enemyPhase(b);
   eq('동화책: 둘째 턴 시작에 자해 2', b.player.hp <= 68, true);
 }
 // 5) 도토리 부적 — 노페어 봉인
@@ -85,7 +85,7 @@ const mk = (ids = []) => eng.createBattle({ hp: 70, maxHp: 70, act: 1, floor: 1,
 {
   const b = mk(['gate_bar']);
   b.player.block = 12;
-  b.await = 'enemy'; eng.enemyPhase(b);
+  eng.endTurnStatus(b); b.await = 'enemy'; eng.enemyPhase(b);
   eq('빗장: 방어도가 그대로 남는다 (맞은 몫 제외)', b.player.block >= 0, true);
   eq('빗장 ratio 는 1', DB.relicById.gate_bar.hook.ratio, 1);
 }
