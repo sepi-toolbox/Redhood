@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.81'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.82'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1015,7 +1015,7 @@ function renderBattle(opts = {}) {
               <small class="cat-tag${variant.base ? ' t-slot' : ''}">${variant.base ? '빈 자리' : esc(cat.short || cat.name)}</small>
             </span>
             ${comboTags(cat, variant)}
-            <span class="sheet-preview">${seal ? `<span class="seal-left">${seal}턴</span>` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
+            <span class="sheet-preview">${seal ? `<span class="seal-left">${seal >= 99 ? '잠김' : seal + '턴'}</span>` : battle.rolled ? (bd.total > 0 ? (blindMod ? '?' : bd.total) : '—') : '—'}</span>
           </button>`).join('')}
       </div>
       <div class="player-bar ${opts.playerHit ? 'hurt' : ''}">
@@ -1657,7 +1657,7 @@ function updateAfterRoll() {
     el.classList.toggle('used', !!pv.locked);
     el.dataset.locked = pv.locked ? '1' : '0';
     const prev = el.querySelector('.sheet-preview');
-    if (prev) prev.innerHTML = pv.seal ? `<span class="seal-left">${pv.seal}턴</span>` : battle.rolled ? (pv.bd.total > 0 ? pv.bd.total : '—') : '—';
+    if (prev) prev.innerHTML = pv.seal ? `<span class="seal-left">${pv.seal >= 99 ? '잠김' : pv.seal + '턴'}</span>` : battle.rolled ? (pv.bd.total > 0 ? pv.bd.total : '—') : '—';
   });
   // 3) 힌트·주사위 표시·선택 강조
   const hint = app.querySelector('.hint-line');

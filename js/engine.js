@@ -365,8 +365,11 @@ function startTurn(battle, first = false) {
     }
   }
   // v3.79 족보 봉인 — 유물이 건 것은 전투 내내 풀리지 않는다 (턴 감쇠 대상 아님)
+  // v3.82: 내가 값을 치르고 집은 유물이 건 봉인은 노페어 면제(적의 봉인을 막으려고 둔 것)를 건너뛴다.
+  //   면제는 '적이 헛방을 놓지 않게' 하려는 규칙이지, 플레이어가 고른 대가까지 무르라는 뜻이 아니다.
+  battle.relicSealed = {};
   for (const r of battle.relics) for (const h of hooksOf(r)) {
-    if (h.type === 'sealCategory' && h.category) battle.sealed[h.category] = 99;
+    if (h.type === 'sealCategory' && h.category) battle.relicSealed[h.category] = 1;
   }
   // 방어: 기본은 초기화. 문지기의 빗장(blockKeep)이 있으면 유지 + 턴 시작 방어 가산
   const keepR = findHook(battle.relics, 'blockKeep');
@@ -570,7 +573,8 @@ export function previewAll(battle, targetUid) {
   }
   for (const cat of DB.scoring.categories) {
     if (!(cat.id in battle.categories)) continue;        // v3.1 미보유 족보
-    const seal = canSeal(cat.id) ? (battle.sealed[cat.id] || 0) : 0;   // 노페어는 어떤 경로로든 잠기지 않는다
+    const seal = (battle.relicSealed && battle.relicSealed[cat.id]) ? 99
+      : (canSeal(cat.id) ? (battle.sealed[cat.id] || 0) : 0);   // 노페어는 적의 봉인으로는 안 잠긴다
     {
       const variant = variantOf(cat, battle.categories[cat.id]);
       // v1.31 일격(burst) — 이 변형만 벼름을 태우고 그만큼 증폭된다. 나머지는 벼름을 건드리지 않는다.
@@ -797,6 +801,7 @@ export function confirmCategory(battle, catId, variantId, targetUid = null) {
   const slot = battle.categories[catId] || baseIdOf(catId);
   if (variantId !== slot && variantId !== baseIdOf(catId)) return null;   // 그 자리에 없는 변형은 못 쓴다
   const variant = variantOf(cat, slot);
+  if (battle.relicSealed && battle.relicSealed[catId]) return null;
   if (canSeal(catId) && (battle.sealed[catId] || 0) > 0) return null;
 
   const alive = aliveEnemies(battle);
