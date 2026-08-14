@@ -229,7 +229,7 @@
   {
     "id": "gate_bar",
     "name": "문지기의 빗장",
-    "icon": "🚪",
+    "icon": "⚔",
     "tier": "elite",
     "desc": "턴이 지나도 방어도가 그대로 남는다.",
     "hook": {

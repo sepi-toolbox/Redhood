@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.90'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.91'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -378,7 +378,7 @@ function eventFrame(npc, linesHtml, choicesHtml) {
     <div class="screen battle-screen event-screen">
       ${bgLayer()}
       <header class="topbar">
-        <span>💬 ${run.floor > 0 ? `${run.floor}층 · ` : ''}만남</span>
+        <span>${NODE_META.event.icon} ${run.floor > 0 ? `${run.floor}층 · ` : ''}만남</span>
         <span class="relic-bar">${run.relics.map(id => relicIco(DB.relicById[id])).join('')}</span>
         <span>${run.floor > 0 ? `${uiIco("coin")}${run.coins}` : ''}</span>
       </header>
@@ -1991,13 +1991,14 @@ function finishBattle() {
 // v0.65: 전투 승리 → 전리품 목록 한 장. 항목을 누르면 페이지가 바뀌는 대신 모달이 열린다.
 // lootState.groups = [{ kind, choices, label }] — 받으면 그 묶음이 목록에서 사라진다.
 let lootState = null;
+// v3.91: 전리품 머리글의 이모지를 정식 표식으로 (런 스모크가 잡아냈다)
 const LOOT_META = {
-  coins: { icon: '\u{1FA99}', name: '재화' },
-  category: { icon: '\u{1F4DC}', name: '족보' },
-  die: { icon: '\u{1F3B2}', name: '주사위' },
-  relic: { icon: '\u{1FAAC}', name: '유물' },
-  legend: { icon: '\u{1F31F}', name: '전설의 유산' },
-  card: { icon: '\u{1F0CF}', name: '감정 카드' },
+  coins: { icon: uiIco('coin', 'ico-ui'), name: '재화' },
+  category: { icon: ico('ui_burst', 'ico-ui'), name: '족보' },
+  die: { icon: uiIco('roll', 'ico-ui'), name: '주사위' },
+  relic: { icon: ico('ui_whet', 'ico-ui'), name: '유물' },
+  legend: { icon: ico('status_blessing', 'ico-ui'), name: '전설의 유산' },
+  card: { icon: uiIco('roll', 'ico-ui'), name: '감정 카드' },
 };
 
 function showReward() {
@@ -2035,7 +2036,8 @@ function renderLoot() {
     const m = LOOT_META[g.kind];
     rows.push(lootRowHtml(itemIcon(g.kind, g.choices && g.choices.length === 1 ? g.choices[0].item : null), g.label || m.name, `${g.choices.length}개 중 하나를 고른다`, `data-act="group" data-idx="${i}"`));
   });
-  rows.push(lootRowHtml('<span class="row-ico-emoji">\u{1F6AA}</span>', '나가기', '', 'data-act="exit"'));
+  // v3.91: 전리품 창의 '나가기' 만 이모지로 남아 있었다 — 런 스모크가 잡았다
+  rows.push(lootRowHtml(uiIco('unknown', 'ico-ui row-ico-img'), '나가기', '', 'data-act="exit"'));
   // v0.67: 전투 프레임을 그대로 두고 족보 목록 영역 안만 전리품 줄로 바꾼다.
   //        화면을 덮는 오버레이·전용 화면 금지 (성권 지시).
   const zone = app.querySelector('.sheet-zone');
