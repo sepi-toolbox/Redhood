@@ -1743,11 +1743,11 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     if (e.enlightenedMove) names.push(e.enlightenedMove.name);
     for (const nm of names) {
       if (SENTENCE.test(nm)) bad.push(`${e.name}·${nm}`);
-      if ([...nm].length > 9) long.push(`${e.name}·${nm}(${[...nm].length}자)`);
+      if ([...nm].length > 6) long.push(`${e.name}·${nm}(${[...nm].length}자)`);
     }
   }
   eq('문장으로 끝나는 기술 이름 없음', bad, []);
-  eq('9자 넘는 기술 이름 없음', long, []);
+  eq('6자 넘는 기술 이름 없음', long, []);
 }
 
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);

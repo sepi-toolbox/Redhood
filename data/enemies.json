@@ -651,7 +651,7 @@
         "cooldown": 3
       },
       "mend": {
-        "name": "수액 굳히기",
+        "name": "수액 굳힘",
         "effects": [
           {
             "op": "block",
@@ -661,7 +661,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "옹이 부풀리기",
+        "name": "옹이 불림",
         "effects": [
           {
             "op": "empower",
@@ -789,7 +789,7 @@
         }
       },
       "surge": {
-        "name": "가까워진 급류",
+        "name": "거센 급류",
         "effects": [
           {
             "op": "rest",
@@ -920,7 +920,7 @@
         "cooldown": 2
       },
       "swell": {
-        "name": "대량의 피 빨기",
+        "name": "대량 흡혈",
         "effects": [
           {
             "op": "damage",
@@ -937,7 +937,7 @@
         }
       },
       "surge": {
-        "name": "심각한 피 빨기",
+        "name": "탐욕 흡혈",
         "effects": [
           {
             "op": "damage",
@@ -1058,7 +1058,7 @@
         }
       },
       "surge": {
-        "name": "무리 불리기",
+        "name": "무리 불림",
         "effects": [
           {
             "op": "empower",
@@ -1170,7 +1170,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "뻣뻣해진 솔",
+        "name": "뻣뻣한 솔",
         "effects": [
           {
             "op": "empower",
@@ -1475,7 +1475,7 @@
         "cooldown": 3
       },
       "slick": {
-        "name": "미끄러운 비늘",
+        "name": "미끈 비늘",
         "effects": [
           {
             "op": "cap",
@@ -1502,7 +1502,7 @@
       }
     },
     "enlightenedMove": {
-      "name": "통째로 삼키기",
+      "name": "통삼킴",
       "effects": [
         {
           "op": "damage",
@@ -1609,7 +1609,7 @@
         "cooldown": 3
       },
       "devour_edge": {
-        "name": "어둠의 아가리",
+        "name": "어둠 아귀",
         "effects": [
           {
             "op": "drainWhet",
@@ -1636,7 +1636,7 @@
       }
     },
     "enlightenedMove": {
-      "name": "끌고 내려가기",
+      "name": "끌어내림",
       "effects": [
         {
           "op": "damage",
@@ -1799,7 +1799,7 @@
       }
     ],
     "enlightenedMove": {
-      "name": "붉은 달의 사냥",
+      "name": "붉은 달",
       "effects": [
         {
           "op": "damage",
@@ -2433,7 +2433,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "목 부풀리기",
+        "name": "목 불림",
         "effects": [
           {
             "op": "empower",
@@ -2653,7 +2653,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "짙어진 안개",
+        "name": "짙은 안개",
         "effects": [
           {
             "op": "empower",
@@ -2886,7 +2886,7 @@
       }
     },
     "enlightenedMove": {
-      "name": "뼈 무너뜨리기",
+      "name": "뼈 사태",
       "effects": [
         {
           "op": "damage",
@@ -2971,7 +2971,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "마디 불리기",
+        "name": "마디 불림",
         "effects": [
           {
             "op": "empower",
@@ -3089,7 +3089,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "진흙 끌어모으기",
+        "name": "진흙 뭉침",
         "effects": [
           {
             "op": "empower",
@@ -3194,7 +3194,7 @@
         "cooldown": 2
       },
       "charge_up": {
-        "name": "고삐 당기기",
+        "name": "고삐 당김",
         "effects": [
           {
             "op": "block",
@@ -3223,7 +3223,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "창 고쳐쥐기",
+        "name": "창 고쳐쥠",
         "effects": [
           {
             "op": "empower",
@@ -3257,7 +3257,7 @@
       }
     },
     "enlightenedMove": {
-      "name": "목 없는 돌격",
+      "name": "무두 돌격",
       "effects": [
         {
           "op": "damage",
@@ -3351,7 +3351,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "삽자루 고쳐쥐기",
+        "name": "삽자루 힘",
         "effects": [
           {
             "op": "empower",
@@ -3505,7 +3505,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "끓어오르는 늪",
+        "name": "끓는 늪",
         "effects": [
           {
             "op": "empower",
@@ -3569,7 +3569,7 @@
       }
     ],
     "enlightenedMove": {
-      "name": "통째로 삼키기",
+      "name": "통삼킴",
       "effects": [
         {
           "op": "damage",
@@ -3858,7 +3858,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "흙 밀어내기",
+        "name": "흙 밀어냄",
         "effects": [
           {
             "op": "empower",
@@ -4121,7 +4121,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "벌어진 동공",
+        "name": "벌어진 눈",
         "effects": [
           {
             "op": "empower",
@@ -4237,7 +4237,7 @@
         ]
       },
       "surge": {
-        "name": "비늘가루 모으기",
+        "name": "비늘가루",
         "effects": [
           {
             "op": "empower",
@@ -4356,7 +4356,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "커지는 속삭임",
+        "name": "큰 속삭임",
         "effects": [
           {
             "op": "empower",
@@ -4586,7 +4586,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "갈라지는 금",
+        "name": "갈라진 금",
         "effects": [
           {
             "op": "empower",
@@ -4712,7 +4712,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "모래 끌어모으기",
+        "name": "모래 뭉침",
         "effects": [
           {
             "op": "empower",
@@ -4723,7 +4723,7 @@
         "cooldown": 3
       },
       "scatter": {
-        "name": "모래 흩어지기",
+        "name": "모래 흩기",
         "effects": [
           {
             "op": "unpin"
@@ -4860,7 +4860,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "촉수 부풀리기",
+        "name": "촉수 불림",
         "effects": [
           {
             "op": "empower",
@@ -4871,7 +4871,7 @@
         "cooldown": 3
       },
       "take_form": {
-        "name": "형태를 갖춰라",
+        "name": "형태 갖춤",
         "effects": [
           {
             "op": "status",
@@ -4895,7 +4895,7 @@
       }
     },
     "enlightenedMove": {
-      "name": "심연의 손아귀",
+      "name": "심연의 손",
       "effects": [
         {
           "op": "damage",
@@ -5009,7 +5009,7 @@
         "cooldown": 3
       },
       "toll_cage": {
-        "name": "가두는 종소리",
+        "name": "가두는 종",
         "effects": [
           {
             "op": "cap",
@@ -5101,7 +5101,7 @@
         "cooldown": 2
       },
       "rewrite": {
-        "name": "꿈 고쳐쓰기",
+        "name": "꿈 고쳐씀",
         "effects": [
           {
             "op": "block",
@@ -5145,7 +5145,7 @@
         ]
       },
       "surge": {
-        "name": "꿈 고쳐쓰기",
+        "name": "꿈 고쳐씀",
         "effects": [
           {
             "op": "empower",
@@ -5316,7 +5316,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "아가리 벌리기",
+        "name": "턱 벌리기",
         "effects": [
           {
             "op": "empower",
@@ -5480,7 +5480,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "짙어진 후광",
+        "name": "짙은 후광",
         "effects": [
           {
             "op": "empower",
@@ -5613,7 +5613,7 @@
         "cooldown": 3
       },
       "whisper": {
-        "name": "귓가의 속삭임",
+        "name": "귓속말",
         "effects": [
           {
             "op": "damage",
@@ -5746,7 +5746,7 @@
         "cooldown": 2
       },
       "strike": {
-        "name": "지팡이 내리치기",
+        "name": "내리치기",
         "effects": [
           {
             "op": "damage",
@@ -5757,7 +5757,7 @@
         "cooldown": 2
       },
       "blessing": {
-        "name": "거꾸로 된 축복",
+        "name": "역축복",
         "effects": [
           {
             "op": "block",
@@ -5772,7 +5772,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "빨라지는 설교",
+        "name": "속사 설교",
         "effects": [
           {
             "op": "empower",
@@ -5885,7 +5885,7 @@
         "hidden": true
       },
       "surge": {
-        "name": "높아지는 음",
+        "name": "높아진 음",
         "effects": [
           {
             "op": "empower",
@@ -5996,7 +5996,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "길어진 심지",
+        "name": "긴 심지",
         "effects": [
           {
             "op": "empower",
