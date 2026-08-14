@@ -58,7 +58,7 @@ export function createBattle(run, encounterIds) {
     // v3.96: 힘 = 전투 내내 남는 누적치. 집중 = 남은 턴 수(효과는 리롤 +1 고정). 재생 = 턴당 회복량.
     // v3.97: 철갑 = 턴 끝에 누적만큼 방어를 낳고 1 준다. 가시 = 맞을 때마다 때린 놈에게 누적만큼 되돌려준다(전투 내내).
     //        행운 = 상태이상이 걸리려 하면 그 '효과 하나'를 통째로 무르고 1 준다.
-    buffs: { strength: 0, focus: 0, regen: 0, ironclad: 0, thorns: 0, fortune: 0 },
+    buffs: { strength: 0, focus: 0, regen: 0, ironclad: 0, thorns: 0, fortune: 0, enrage: 0 },
     whet: 0,                              // v1.29 벼름 — 쌓았다가 족보로 터뜨리는 곱연산 자원 (턴마다 안 깎인다)
     whetGained: 0,                        // 이번 턴에 벌어들인 양 (연출용)
     enemies: encounterIds.map((id, i) => spawnEnemy(id, i, scale)),
@@ -89,7 +89,6 @@ function spawnEnemy(id, idx, scale) {
     uid: `${id}_${idx}`, defId: id, name: def.name, tier: def.tier,
     art: def.art || (def.tier === 'boss' ? '🐺' : def.tier === 'elite' ? '💀' : '🌑'),
     final: !!def.final,
-    escalation: def.escalation || 0,      // 최종 보스: 매 턴 공격력 +N
     hp, maxHpInit: hp, stunned: false,
     atkScale: (def.final ? 1 : scale.atk) * em.atk,   // v1.0: 전역 보정 제거 — 낮춘 값은 enemies.json 의 기본 피해에 이미 반영돼 있다
     enlightened,
@@ -107,7 +106,9 @@ function spawnEnemy(id, idx, scale) {
     // v1.30 정예·보스 기믹 — 머리를 써서 풀라고 거는 조건들
     // 적 자기 버프(v3.8) — 문턱·상한과 같은 문법: 행동으로도, 시작 버프로도 얻는다
     regen: (def.start || {}).regen || 0, regenLeft: (def.start || {}).regen ? 99 : 0,   // 매 행동 회복
-    enrage: (def.start || {}).enrage || 0,                                              // 맞을 때마다 힘 +N (전투 내)
+    // v4.0: 격노 = 매 턴이 끝날 때 힘 +N. 예전의 escalation(최종 보스 점진 강화)과 글자 그대로
+    //   같은 것이라 하나로 합쳤다. 오래 끌수록 위험해진다는 시계 역할을 이것 하나가 맡는다.
+    enrage: (def.start || {}).enrage || 0,
     reflect: (def.start || {}).reflect || 0, reflectLeft: (def.start || {}).reflect ? 99 : 0, // 맞으면 반사 (방어도로 막힘)
     undying: (def.start || {}).undying || 0,                                            // 죽으면 1회 부활 (비율)
   };
@@ -376,7 +377,25 @@ export function endTurnStatus(battle) {
   enemyDotTick(battle);
   if (battle.over) return;
   ironcladTick(battle);
+  enrageTick(battle);
   decayStatuses(battle);
+}
+
+/* 💢 격노 — 턴이 끝날 때마다 그만큼 사나워진다. 오래 끄는 판에 값을 매기는 시계다.
+   나와 적이 같은 장치를 쓴다 — 힘을 하나로 합쳤으니(v3.98) 그 힘을 불리는 것도 하나여야 한다. */
+function enrageTick(battle) {
+  const got = [];
+  if (battle.buffs.enrage > 0) {
+    battle.buffs.strength += battle.buffs.enrage;
+    got.push({ who: 'me', amount: battle.buffs.enrage });
+  }
+  for (const e of aliveEnemies(battle)) {
+    if (!(e.enrage > 0)) continue;
+    e.strength = (e.strength || 0) + e.enrage;
+    got.push({ uid: e.uid, amount: e.enrage });
+  }
+  battle.enrageTicks = got;
+  return got;
 }
 
 /* 🛡 철갑 — 턴이 끝나면 누적만큼 방어를 낳고 누적이 1 준다.
@@ -741,6 +760,10 @@ function applyAbility(battle, variant, bd, targets) {
         battle.buffs.fortune += ab.amount;
         battle.lastResult.bonusHits.push(`🍀행운 +${ab.amount}`);
         break;
+      case 'enrage':                                     // 💢 격노 — 턴이 끝날 때마다 힘 +N
+        battle.buffs.enrage += ab.amount;
+        battle.lastResult.bonusHits.push(`💢격노 +${ab.amount}`);
+        break;
       // v1.29 벼름 — 다음에 터뜨릴 족보의 배수를 올린다
       case 'whet':
         addWhet(battle, ab.amount);
@@ -782,11 +805,6 @@ function dealToEnemy(battle, t, amount) {
   }
   battle.lastHits.push({ uid: t.uid, amount: dealt, absorbed, killed: t.hp <= 0 });
   if (t.hp > 0 && dealt > 0) {
-    // 격노 — 맞을 때마다 사나워진다 (잔펀치가 벌을 받는다)
-    if (t.enrage > 0) {
-      t.strength = (t.strength || 0) + t.enrage;
-      if (battle.lastResult) battle.lastResult.bonusHits.push(`💢격노 +${t.enrage}`);
-    }
     // 반사 — 되받아친다. 방어도로 막힌다 (막을 수 있는 세금)
     if (t.reflectLeft > 0 && t.reflect > 0) {
       const ab = Math.min(battle.player.block, t.reflect);
@@ -1150,7 +1168,8 @@ export function enemyPhase(battle) {
         case 'regen':                                      // 💗 재생 — 자기 차례마다 amount 회복
           e.regen = ef.amount; e.regenLeft = Math.max(1, ef.turns || 3);
           break;
-        case 'enrage':                                     // 💢 격노 — 맞을 때마다 힘 +amount (전투 내)
+        case 'enrage':                                     // 💢 격노 — 매 턴 끝마다 힘 +amount
+          if (spendFortune(battle)) break;
           e.enrage = ef.amount || 1;
           break;
         case 'reflect':                                    // 🌵 반사 — 맞으면 amount 되돌려준다
@@ -1168,7 +1187,6 @@ export function enemyPhase(battle) {
           break;
       }
     }
-    if (e.escalation) e.strength += e.escalation; // 최종 보스: 매 턴 점진적으로 강해진다
     chooseMove(e, battle.turn + 1);
   }
   battle.dodgeActive = false;

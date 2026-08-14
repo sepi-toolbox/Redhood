@@ -5657,7 +5657,6 @@
       ]
     },
     "final": true,
-    "escalation": 2,
     "battleDice": {
       "faces": [
         1,
@@ -5693,7 +5692,10 @@
         "op": "damage",
         "weight": 1
       }
-    ]
+    ],
+    "start": {
+      "enrage": 2
+    }
   },
   {
     "id": "hollow_priest",
