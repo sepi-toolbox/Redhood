@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v4.8'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v4.9'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -692,7 +692,7 @@ function ico(name, cls = '') {
 const UI_ICO = { coin: 'ui_coin', unknown: 'ui_unknown', heart: 'ui_heart', roll: 'ui_roll', burst: 'ui_burst', whet: 'ui_whet' };
 /* v3.97: 철갑·가시·행운 — 전용 그림이 아직 없다. 뜻이 가장 가까운 것을 임시로 세워 둔다.
    그림이 들어오면 assets/icons 에 넣고 READY 에 이름만 적으면 갈아 끼워진다. */
-const BUFF_ART_READY = new Set();
+const BUFF_ART_READY = new Set(['status_ironclad', 'status_fortune']);
 /* 상태이상 표식 그림 — 파일 이름이 id 와 다른 둘만 여기서 잡아 준다.
    v3.99: 물림·굳음이 지속 방해에서 상태이상으로 내려오면서 예전 그림을 그대로 물려받았다. */
 const ST_ICO_FILE = { bite: 'status_lock' };
