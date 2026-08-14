@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.98'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.99'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -674,6 +674,12 @@ const UI_ICO = { coin: 'ui_coin', unknown: 'ui_unknown', heart: 'ui_heart', roll
 /* v3.97: 철갑·가시·행운 — 전용 그림이 아직 없다. 뜻이 가장 가까운 것을 임시로 세워 둔다.
    그림이 들어오면 assets/icons 에 넣고 READY 에 이름만 적으면 갈아 끼워진다. */
 const BUFF_ART_READY = new Set();
+/* 상태이상 표식 그림 — 파일 이름이 id 와 다른 둘만 여기서 잡아 준다.
+   v3.99: 물림·굳음이 지속 방해에서 상태이상으로 내려오면서 예전 그림을 그대로 물려받았다. */
+const ST_ICO_FILE = { bite: 'status_lock', petrify: 'fx_petrify' };
+const stIcoName = (kind) => ST_ICO_FILE[kind] || `status_${kind}`;
+// 주사위 칸에 얹는 그림은 assets/ui/status_die_*.png — 아직 없는 것은 가장 가까운 것을 빌려 쓴다
+const DIE_ART_ALIAS = { petrify: 'stun' };
 const BUFF_ICO = { ironclad: ['status_ironclad', 'status_block'], thorns: ['status_thorns', 'fx_reflect'],
                    fortune: ['status_fortune', 'status_blessing'] };
 const buffIco = (key, cls = 'ico') => {
@@ -1029,16 +1035,15 @@ function renderBattle(opts = {}) {
           const hidden = st && st.rule === 'hideFace';
           const sealedOff = st && st.rule === 'needReroll' && !d.st.opened;
           const pinned = !!d.pinned && def.effect && def.effect.op === 'pin';
-          return `<button class="die art ${sealedOff ? 'sealed-off' : ''} ${d.sigLock ? 'siglocked' : ''} ${pinned ? 'pinned' : ''} ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''} ${st ? 'st t-' + st.id : ''}"
+          return `<button class="die art ${sealedOff ? 'sealed-off' : ''} ${pinned ? 'pinned' : ''} ${blank ? 'blank' : ''} ${marked ? 'mark-reroll' : ''} ${d.confused ? 'confused' : ''} ${!skinned && def.gold ? 'gold' : ''} ${!skinned && def.id !== 'normal' && !def.gold ? 'special' : ''} ${st ? 'st t-' + st.id : ''}"
             data-idx="${i}" title="${esc(def.name)}${st ? ' · ' + st.name + ' — ' + st.text : ''}" style="--tilt:${blank ? 0 : dieTilts[i] || 0}deg">
             ${blank || hidden || sealedOff
               ? '<span class="pip-art empty"></span>'
               : `<img class="pip-art" src="${dieFaceSrc(def.id, d.face)}" alt="${d.face}" draggable="false">`}
             ${sealedOff ? '<span class="seal-veil"></span><img class="seal-stamp" src="assets/ui/seal_stamp.png" alt="" draggable="false">' : ''}
-            ${st ? `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>${st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''}` : ''}
+            ${st ? `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${DIE_ART_ALIAS[st.id] || st.id}.png" alt="" draggable="false"><span class="st-rim"></span>${st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''}` : ''}
             ${pinned && !st ? '<span class="st-tint"></span><span class="st-rim"></span>' : ''}
-            ${d.sigLock ? '<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_bite.png" alt="" draggable="false"><span class="st-rim"></span>' : ''}
-            <small>${d.sigLock ? esc((modOf(battle, 'lockHigh') || {}).name || '물림') : st ? esc(st.name) : marked ? '다시' : pinned ? '새김' : ''}</small>
+            <small>${st ? esc(st.name) : marked ? '다시' : pinned ? '새김' : ''}</small>
           </button>`;
         }).join('')}
       </div>
@@ -1094,13 +1099,36 @@ function renderBattle(opts = {}) {
           `행운 ${b.fortune} — 상태이상을 거는 효과 ${b.fortune}번을 무른다`));
         if (p_.dot > 0) t.push(iconTag('status_poison', 'harm', p_.dot,
           `중독 ${p_.dot} — 내 턴이 끝날 때마다 쌓인 만큼 피해 (방어도로 막힌다)`));
-        for (const k of ['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']) {
+
+        /* v3.99: 나에게 걸린 것은 붙는 자리가 어디든 전부 이 줄에 선다.
+           예전에는 주사위에 걸린 것은 주사위 위에만, 족보 봉인은 족보 줄에만 있어서
+           "지금 나에게 뭐가 걸려 있나"를 한눈에 볼 수 있는 자리가 없었다. */
+        const stCount = {};                                  // 주사위 상태이상 — 종류별로 몇 칸인가
+        battle.dice.forEach(d => { if (d.st) stCount[d.st.kind] = (stCount[d.st.kind] || 0) + 1; });
+        for (const [kind, n] of Object.entries(stCount)) {
+          const def = DB.statusById[kind];
+          if (!def) continue;
+          const left = Math.max(...battle.dice.filter(d => d.st && d.st.kind === kind)
+            .map(d => (def.rule === 'fuse' ? d.st.fuse : d.st.left) || 0));
+          t.push(iconTag(stIcoName(kind), 'harm', n,
+            `${def.name} — 주사위 ${n}칸 (남은 ${left}턴) · ${def.text}`));
+        }
+        const sealedIds = Object.keys(battle.sealed || {});
+        if (sealedIds.length) {
+          const left = Math.max(...sealedIds.map(id => battle.sealed[id]));
+          const names = sealedIds.map(id => (DB.scoring.categories.find(c => c.id === id) || {}).name || id);
+          t.push(iconTag('fx_seal_cat', 'harm', sealedIds.length,
+            `족보 봉인 — ${names.join(', ')} (남은 ${left}턴)`));
+        }
+        for (const k of ['rollTax', 'holdTax', 'blind']) {
           const m = modOf(battle, k);
           if (m) t.push(iconTag(FX_ICON[k], 'harm', m.left, `${m.name} — ${CB_MOD_KO[k]} (${m.left}턴)`));
         }
         // v3.69: 표식이 하나도 없어도 줄을 지운 채로 두면, 벼름이 붙었다 사라질 때마다
         //        체력바가 그 높이만큼 위아래로 튄다. 줄은 늘 자리를 지키고 안만 비운다.
-        return `<div class="buff-strip" id="buff-strip"><span class="my-tags">${t.join('')}</span></div>`;
+        // 표식이 많아지면 줄을 넘기지 않고 통째로 작아진다 (줄 높이는 고정 — 체력바가 튀면 안 된다)
+        const dense = t.length > 12 ? ' denser' : t.length > 9 ? ' dense' : '';
+        return `<div class="buff-strip" id="buff-strip"><span class="my-tags${dense}">${t.join('')}</span></div>`;
       })()}
     </div>`));
 
@@ -1195,8 +1223,7 @@ function updateDiceMarks() {
     //        상태이상·물림이 붙은 칸은 그 이름이 '다시'보다 우선한다.
     if (!sm) return;
     const st = d.st ? DB.statusById[d.st.kind] : null;
-    if (d.sigLock) sm.textContent = (modOf(battle, 'lockHigh') || {}).name || '물림';
-    else if (st) sm.textContent = st.name;
+    if (st) sm.textContent = st.name;
     else sm.textContent = marked ? '다시' : (d.pinned ? '새김' : '');
   });
   const rb = document.getElementById('reroll-btn');
@@ -1229,8 +1256,8 @@ const ENEMY_TIER_KO = { normal: '일반', elite: '정예', boss: '보스' };
 // v3.95: 중독은 본체(내 HP·적 HP)에, 출혈은 주사위 칸에. 붙는 자리가 곧 이름이다.
 // v3.10 상태/버프 아이콘 — 이모지 금지. (임시) 표시가 붙은 것은 전용 아트 대기 중
 const FX_ICON = {          // v3.13 전량 정식 아트
-  rollTax: 'fx_rolltax', holdTax: 'fx_holdtax', petrify: 'fx_petrify',
-  lockHigh: 'fx_bite', blind: 'fx_blind', sealLast: 'fx_seal_cat', sealCat: 'fx_seal_cat',
+  rollTax: 'fx_rolltax', holdTax: 'fx_holdtax',
+  blind: 'fx_blind', sealLast: 'fx_seal_cat', sealCat: 'fx_seal_cat',
   enrage: 'fx_enrage',
   reflect: 'fx_reflect', undying: 'fx_undying', regen: 'status_regen',
 };
@@ -1238,7 +1265,7 @@ const fxIco = (key, cls = '') => ico(FX_ICON[key] || 'status_block', cls);
 
 const CB_MOD_KO = {
   rollTax: '리롤할 때마다 피해 (방어도 무시)', holdTax: '리롤 시 지킨 주사위 2개당 피해 1',
-  petrify: '그 눈이 나오면 굳는다 (기절)', lockHigh: '매 굴림 가장 높은 눈이 물린다', blind: '족보 위력이 보이지 않는다',
+  blind: '족보 위력이 보이지 않는다',
 };
 
 function enemyEffectText(e, ef) {
@@ -1267,8 +1294,6 @@ function enemyEffectText(e, ef) {
     case 'sealCat': return `${fxIco('sealCat')} 봉인 — ${(ef.cats || []).join('·')} 족보를 ${ef.turns || 1}턴 봉인`;
     case 'rollTax': return `${fxIco('rollTax')} 이빨 자국 — ${ef.turns || 1}턴간 리롤할 때마다 피해 ${ef.amount || 1} (방어도 무시)`;
     case 'holdTax': return `${fxIco('holdTax')} 가시 — ${ef.turns || 1}턴간 리롤 시 지킨 주사위 2개당 피해 1`;
-    case 'petrify': return `${fxIco('petrify')} 굳음 — ${ef.turns || 1}턴간 ${ef.face || 6}이 나오면 굳는다(기절)`;
-    case 'lockHigh': return `${fxIco('lockHigh')} 물기 — ${ef.turns || 1}턴간 매 굴림 가장 높은 눈이 물린다${ef.heal ? ' (그만큼 회복)' : ''}`;
     case 'blind': return `${fxIco('blind')} 어둠 — ${ef.turns || 1}턴간 족보 위력이 보이지 않는다`;
     case 'regen': return `${fxIco('regen')} 재생 ${ef.amount} — ${ef.turns || 3}턴간 자기 차례마다 회복`;
     case 'enrage': return `${fxIco('enrage')} 격노 — 맞을 때마다 힘 +${ef.amount || 1} (전투 내 누적)`;
@@ -1296,7 +1321,7 @@ function showPlayerBuffs() {
     battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
     // v3.38: 칩에는 뜨는데 상세에는 없던 것들 — 지속 피해와 기믹 제약
     battle.player.dot > 0 ? `<li>${ico('status_poison')} 중독 ${battle.player.dot} — 내 턴이 끝날 때마다 ${battle.player.dot} 피해 (방어도로 막힌다)</li>` : '',
-    ...['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind'].map(k => {
+    ...['rollTax', 'holdTax', 'blind'].map(k => {
       const m = modOf(battle, k);
       return m ? `<li>${fxIco(k)} ${esc(m.name)} — ${CB_MOD_KO[k]} <small class="cat-tag">${m.left}턴</small></li>` : '';
     }),
@@ -1616,7 +1641,6 @@ function syncDieStatusDom(i) {
   el.querySelectorAll('.st-tint, .st-art, .st-rim, .st-swirlbox, .seal-veil, .seal-stamp').forEach(n => n.remove());
   [...el.classList].filter(c => c.startsWith('t-')).forEach(c => el.classList.remove(c));
   el.classList.toggle('sealed-off', sealedOff);
-  el.classList.toggle('siglocked', !!d.sigLock);
   el.classList.toggle('st', !!st);
   if (st) el.classList.add('t-' + st.id);
   if (sealedOff) {
@@ -1625,11 +1649,8 @@ function syncDieStatusDom(i) {
   }
   if (st) {
     el.insertAdjacentHTML('beforeend',
-      `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${st.id}.png" alt="" draggable="false"><span class="st-rim"></span>`
+      `<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_${DIE_ART_ALIAS[st.id] || st.id}.png" alt="" draggable="false"><span class="st-rim"></span>`
       + (st.id === 'confuse' ? '<span class="st-swirlbox"><img class="st-swirl" src="assets/ui/status_die_confuse.png" alt=""></span>' : ''));
-  } else if (d.sigLock) {
-    el.insertAdjacentHTML('beforeend',
-      '<span class="st-tint"></span><img class="st-art" src="assets/ui/status_die_bite.png" alt="" draggable="false"><span class="st-rim"></span>');
   }
 }
 

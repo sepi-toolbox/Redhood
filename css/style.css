@@ -362,11 +362,22 @@ span.enemy-art {
 .enemy-tags .tg.plain img { width: 14px; height: 14px; }
 .enemy-tags .tg b { font-size: 10.5px; right: -2px; bottom: -3px; }
 /* v3.52: 내 상태 줄도 같은 표식으로. 체력바 안에는 체력만 남았다 */
-.my-tags { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px; }
-.my-tags .tg { width: 23px; height: 23px; border-width: 1.3px; }
+.my-tags { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; gap: 4px; }
+.my-tags .tg { width: 23px; height: 23px; border-width: 1.3px; flex: none; }
 .my-tags .tg img { width: 16px; height: 16px; }
 .my-tags .tg.plain img { width: 15px; height: 15px; }
 .my-tags .tg b { font-size: 11px; right: -2px; bottom: -3px; }
+/* v3.99: 걸린 것이 전부 이 줄에 서면서 개수가 늘었다. 줄 높이는 못 늘린다 —
+   늘리면 체력바가 위아래로 튄다(v3.69). 그래서 넘칠 때는 표식을 통째로 줄인다.
+   자리를 벗어나 잘려 보이는 것보다, 작아도 전부 보이는 쪽이 낫다. */
+.my-tags.dense    { gap: 3px; }
+.my-tags.dense .tg { width: 20px; height: 20px; }
+.my-tags.dense .tg img { width: 14px; height: 14px; }
+.my-tags.dense .tg b { font-size: 10px; }
+.my-tags.denser    { gap: 2px; }
+.my-tags.denser .tg { width: 17px; height: 17px; border-width: 1.1px; }
+.my-tags.denser .tg img { width: 12px; height: 12px; }
+.my-tags.denser .tg b { font-size: 9px; right: -1px; bottom: -2px; }
 .mid-line { flex: none; min-height: 18px; text-align: center; padding: 0 12px; position: relative; z-index: 2; }
 .last-result { font-size: 12px; color: #e8b64b; }
 .last-result b { font-size: 14px; }
