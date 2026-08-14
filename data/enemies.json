@@ -651,7 +651,7 @@
         "cooldown": 3
       },
       "mend": {
-        "name": "수액을 굳힌다",
+        "name": "수액 굳히기",
         "effects": [
           {
             "op": "block",
@@ -661,7 +661,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "옹이가 굵어진다",
+        "name": "옹이 부풀리기",
         "effects": [
           {
             "op": "empower",
@@ -1058,7 +1058,7 @@
         }
       },
       "surge": {
-        "name": "무리가 불어난다",
+        "name": "무리 불리기",
         "effects": [
           {
             "op": "empower",
@@ -1170,7 +1170,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "빗자루가 뻣뻣해진다",
+        "name": "뻣뻣해진 솔",
         "effects": [
           {
             "op": "empower",
@@ -1598,7 +1598,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "어둠을 삼킨다",
+        "name": "어둠 삼키기",
         "effects": [
           {
             "op": "empower",
@@ -1609,7 +1609,7 @@
         "cooldown": 3
       },
       "devour_edge": {
-        "name": "어둠이 삼킨다",
+        "name": "어둠의 아가리",
         "effects": [
           {
             "op": "drainWhet",
@@ -2281,7 +2281,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "솜이 팽팽해진다",
+        "name": "팽팽한 솜",
         "effects": [
           {
             "op": "empower",
@@ -2292,7 +2292,7 @@
         "cooldown": 3
       },
       "pull_stuffing": {
-        "name": "솜을 뽑는다",
+        "name": "솜 뽑기",
         "effects": [
           {
             "op": "drainWhet",
@@ -2433,7 +2433,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "목이 부푼다",
+        "name": "목 부풀리기",
         "effects": [
           {
             "op": "empower",
@@ -2544,7 +2544,7 @@
         ]
       },
       "surge": {
-        "name": "날갯소리가 높아진다",
+        "name": "날갯소리",
         "effects": [
           {
             "op": "empower",
@@ -2653,7 +2653,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "안개가 짙어진다",
+        "name": "짙어진 안개",
         "effects": [
           {
             "op": "empower",
@@ -2762,7 +2762,7 @@
         "minTurn": 5
       },
       "surge": {
-        "name": "뿔이 자란다",
+        "name": "뿔 세우기",
         "effects": [
           {
             "op": "empower",
@@ -2865,7 +2865,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "뼈를 맞춘다",
+        "name": "뼈 맞추기",
         "effects": [
           {
             "op": "empower",
@@ -2971,7 +2971,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "마디가 굵어진다",
+        "name": "마디 불리기",
         "effects": [
           {
             "op": "empower",
@@ -3089,7 +3089,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "진흙을 더 끌어모은다",
+        "name": "진흙 끌어모으기",
         "effects": [
           {
             "op": "empower",
@@ -3223,7 +3223,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "창을 고쳐 쥔다",
+        "name": "창 고쳐쥐기",
         "effects": [
           {
             "op": "empower",
@@ -3351,7 +3351,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "삽자루를 고쳐 쥔다",
+        "name": "삽자루 고쳐쥐기",
         "effects": [
           {
             "op": "empower",
@@ -3362,7 +3362,7 @@
         "cooldown": 3
       },
       "cover_soil": {
-        "name": "흙을 덮는다",
+        "name": "흙 덮기",
         "effects": [
           {
             "op": "ward",
@@ -3505,7 +3505,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "늪이 끓어오른다",
+        "name": "끓어오르는 늪",
         "effects": [
           {
             "op": "empower",
@@ -3689,7 +3689,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "숨을 깊이 들이쉰다",
+        "name": "깊은 들숨",
         "effects": [
           {
             "op": "empower",
@@ -3700,7 +3700,7 @@
         "cooldown": 3
       },
       "erase": {
-        "name": "안개가 지운다",
+        "name": "백무의 손",
         "effects": [
           {
             "op": "unpin"
@@ -3858,7 +3858,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "흙을 밀어낸다",
+        "name": "흙 밀어내기",
         "effects": [
           {
             "op": "empower",
@@ -4009,7 +4009,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "귀를 세운다",
+        "name": "귀 세우기",
         "effects": [
           {
             "op": "empower",
@@ -4121,7 +4121,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "동공이 벌어진다",
+        "name": "벌어진 동공",
         "effects": [
           {
             "op": "empower",
@@ -4237,7 +4237,7 @@
         ]
       },
       "surge": {
-        "name": "비늘가루를 모은다",
+        "name": "비늘가루 모으기",
         "effects": [
           {
             "op": "empower",
@@ -4356,7 +4356,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "속삭임이 커진다",
+        "name": "커지는 속삭임",
         "effects": [
           {
             "op": "empower",
@@ -4467,7 +4467,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "기도를 삼킨다",
+        "name": "기도 삼키기",
         "effects": [
           {
             "op": "empower",
@@ -4586,7 +4586,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "금이 갈라진다",
+        "name": "갈라지는 금",
         "effects": [
           {
             "op": "empower",
@@ -4712,7 +4712,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "모래를 끌어모은다",
+        "name": "모래 끌어모으기",
         "effects": [
           {
             "op": "empower",
@@ -4723,7 +4723,7 @@
         "cooldown": 3
       },
       "scatter": {
-        "name": "모래로 흩어진다",
+        "name": "모래 흩어지기",
         "effects": [
           {
             "op": "unpin"
@@ -4860,7 +4860,7 @@
         "cooldown": 3
       },
       "surge": {
-        "name": "촉수가 굵어진다",
+        "name": "촉수 부풀리기",
         "effects": [
           {
             "op": "empower",
@@ -4998,7 +4998,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "줄을 힘껏 당긴다",
+        "name": "줄 당기기",
         "effects": [
           {
             "op": "empower",
@@ -5009,7 +5009,7 @@
         "cooldown": 3
       },
       "toll_cage": {
-        "name": "종소리가 가둔다",
+        "name": "가두는 종소리",
         "effects": [
           {
             "op": "cap",
@@ -5145,7 +5145,7 @@
         ]
       },
       "surge": {
-        "name": "꿈을 고쳐 쓴다",
+        "name": "꿈 고쳐쓰기",
         "effects": [
           {
             "op": "empower",
@@ -5316,7 +5316,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "아가리가 더 벌어진다",
+        "name": "아가리 벌리기",
         "effects": [
           {
             "op": "empower",
@@ -5327,7 +5327,7 @@
         "cooldown": 3
       },
       "not_one_bite": {
-        "name": "한 입에 삼킬 수 없다",
+        "name": "걸린 목구멍",
         "effects": [
           {
             "op": "cap",
@@ -5480,7 +5480,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "후광이 짙어진다",
+        "name": "짙어진 후광",
         "effects": [
           {
             "op": "empower",
@@ -5491,7 +5491,7 @@
         "cooldown": 3
       },
       "force_humility": {
-        "name": "겸손을 강요한다",
+        "name": "강요된 겸손",
         "effects": [
           {
             "op": "status",
@@ -5603,7 +5603,7 @@
     ],
     "moves": {
       "watch": {
-        "name": "바라본다",
+        "name": "응시",
         "effects": [
           {
             "op": "empower",
@@ -5628,7 +5628,7 @@
         "cooldown": 3
       },
       "reach": {
-        "name": "닿는다",
+        "name": "손길",
         "effects": [
           {
             "op": "damage",
@@ -5642,7 +5642,7 @@
         "cooldown": 3
       },
       "unmake": {
-        "name": "지운다",
+        "name": "말소",
         "effects": [
           {
             "op": "damage",
@@ -5668,7 +5668,7 @@
       }
     },
     "enlightenedMove": {
-      "name": "눈뜬다",
+      "name": "개안",
       "effects": [
         {
           "op": "damage",
@@ -5772,7 +5772,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "설교가 빨라진다",
+        "name": "빨라지는 설교",
         "effects": [
           {
             "op": "empower",
@@ -5885,7 +5885,7 @@
         "hidden": true
       },
       "surge": {
-        "name": "음이 높아진다",
+        "name": "높아지는 음",
         "effects": [
           {
             "op": "empower",
@@ -5996,7 +5996,7 @@
         "cooldown": 2
       },
       "surge": {
-        "name": "심지가 길어진다",
+        "name": "길어진 심지",
         "effects": [
           {
             "op": "empower",
