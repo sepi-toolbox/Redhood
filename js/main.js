@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v4.4'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v4.5'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -16,9 +16,28 @@ let selectedCat = null;
 let targetUid = null;   // 단일 공격 대상
 let busy = false;       // 연출 중 입력 잠금
 
+/* v4.5: 표식 그림 미리 받기.
+   주사위 눈만 미리 받고 있었다. 상태이상 표식은 '처음 걸리는 순간' 처음 내려받으므로,
+   그 한 판에서는 동그라미만 뜬 채 그림이 늦게 들어온다 — 무엇이 걸렸는지 못 읽는다.
+   전투가 시작되기 전에 전부 받아 둔다. (두 번째 판부터는 서비스워커가 캐시로 준다) */
+function preloadTagIcons() {
+  const names = new Set(Object.values(UI_ICO));
+  for (const s of (DB.statuses ? DB.statuses.list : [])) names.add(stIcoName(s.id));
+  for (const n of ['status_strength', 'status_focus', 'status_regen', 'status_block',
+                   'status_weak', 'status_vulnerable', 'status_poison',
+                   'fx_enrage', 'fx_rolltax', 'fx_holdtax', 'fx_blind', 'fx_seal_cat',
+                   'fx_reflect', 'fx_undying']) names.add(n);
+  for (const [, fallback] of Object.values(BUFF_ICO).map(v => v)) names.add(fallback);
+  for (const n of names) { const im = new Image(); im.src = `assets/icons/${n}.png`; }
+  for (const s of (DB.statuses ? DB.statuses.list : [])) {
+    const im = new Image(); im.src = `assets/ui/status_die_${DIE_ART_ALIAS[s.id] || s.id}.png`;
+  }
+}
+
 (async function boot() {
   try { await loadAll(); }
   catch (e) { app.innerHTML = `<div class="screen center"><p class="error">${e.message}</p></div>`; return; }
+  preloadTagIcons();
   // v0.61: SW를 캐시 없이 등록하고 새 버전이 오면 즉시 교체 (구버전 화면 고착 방지)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
