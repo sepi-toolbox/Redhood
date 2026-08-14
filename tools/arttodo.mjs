@@ -38,10 +38,8 @@ const KO = { ironclad: '철갑', fortune: '행운' };
 const SYMBOL = {
   ironclad: 'one broad iron shoulder plate of three overlapping bands, thick rivets along each band, seen head-on',
   fortune: 'one four-leaf clover with thick rounded leaves and one bright spark at its centre',
-  petrify: 'one single die pip swollen into a lump of grey stone, blunt fracture lines spreading from it, no die drawn around it',
 };
 const EFFECT = {
-  petrify: 'heavy grey-brown stone lumps swelling out of the left and bottom edges, thick blunt shapes with blunt fracture lines, the middle still open',
 };
 const items = [];
 for (const [key, { want, now }] of Object.entries(BUFF_ICO)) {

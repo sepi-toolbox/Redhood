@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v4.7'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v4.8'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -695,10 +695,10 @@ const UI_ICO = { coin: 'ui_coin', unknown: 'ui_unknown', heart: 'ui_heart', roll
 const BUFF_ART_READY = new Set();
 /* 상태이상 표식 그림 — 파일 이름이 id 와 다른 둘만 여기서 잡아 준다.
    v3.99: 물림·굳음이 지속 방해에서 상태이상으로 내려오면서 예전 그림을 그대로 물려받았다. */
-const ST_ICO_FILE = { bite: 'status_lock', petrify: 'fx_petrify' };
+const ST_ICO_FILE = { bite: 'status_lock' };
 const stIcoName = (kind) => ST_ICO_FILE[kind] || `status_${kind}`;
 // 주사위 칸에 얹는 그림은 assets/ui/status_die_*.png — 아직 없는 것은 가장 가까운 것을 빌려 쓴다
-const DIE_ART_ALIAS = { petrify: 'stun' };
+const DIE_ART_ALIAS = {};
 const BUFF_ICO = { ironclad: ['status_ironclad', 'status_block'], fortune: ['status_fortune', 'status_blessing'] };
 /* 표식의 주조색 — 아트 프롬프트의 {색코드} 자리에 그대로 들어간다 (STATUS_ART_PROMPTS 0부 규칙:
    색이 첫째다). 가시는 반사(#2fa39a)와 뜻이 같아 색을 물려받았다 — 하나는 내 줄, 하나는 적 몸이라

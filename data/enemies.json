@@ -674,8 +674,8 @@
         "effects": [
           {
             "op": "status",
-            "kind": "petrify",
-            "amount": 2
+            "kind": "stun",
+            "amount": 1
           }
         ],
         "cooldown": 2
@@ -4549,8 +4549,8 @@
           },
           {
             "op": "status",
-            "kind": "petrify",
-            "amount": 2
+            "kind": "stun",
+            "amount": 1
           }
         ],
         "followUp": {

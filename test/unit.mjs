@@ -884,11 +884,11 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
 
   // 데이터 무결성
   // v3.99: 물림·굳음이 지속 방해에서 상태이상으로 내려왔다 (이중 구조 제거)
-  eq('주사위 상태이상 14종', DB.statuses.list.length, 14);
+  eq('주사위 상태이상 13종 (v4.8: 굳음은 기절로 흡수)', DB.statuses.list.length, 13);
   eq('규칙이 전부 구현된 것만 쓴다',
     DB.statuses.list.every(s => ['onUseFaceDamage','noReroll','zeroValue','faceLow','faceHigh',
       'hideFace','needReroll','fuse','linked','rerollCost','onUseFaceCoin','spread',
-      'locked','zeroOnFace'].includes(s.rule)), true);
+      'locked'].includes(s.rule)), true);
 }
 
 
@@ -1088,7 +1088,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   {
     // v3.95: ward·cap 은 v3.90 에 제거됐다. 중독(poison)은 status 가 아니라 제 op 을 쓴다.
     const GIM = new Set(['poison', 'drainWhet', 'unpin', 'status', 'regen', 'enrage', 'reflect',
-      'sealLast', 'sealCat', 'rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']);
+      'sealLast', 'sealCat', 'rollTax', 'holdTax', 'blind']);
     const missing = DB.enemies.filter(e => !e.final && (e.tier === 'elite' || e.tier === 'boss'))
       .filter(e => !e.start && !Object.values(e.moves).some(m => (m.effects || []).some(f => GIM.has(f.op))))
       .map(e => e.name);
@@ -1268,16 +1268,14 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.reroll(b);
     eq('가시: 지킨 4개 → 피해 2', hp0 - b.player.hp, 2);
   }
-  // v3.99 굳음 — 이제 지속 방해가 아니라 칸에 붙는 상태이상이다. 그 눈이 나온 순간만 0으로 친다.
+  // v4.8 굳히기 — 굳음을 지우고 기절로 바꿨다. 조건부(6일 때만)라 읽히지 않던 효과다.
   {
     const b = mk(['twig_golem']); const e = b.enemies[0]; e.hp = 999; e.maxHpInit = 999;
-    cast(b, e, [{ op: 'status', kind: 'petrify', amount: 2 }]);
-    eq('굳음이 두 칸에 붙는다', b.dice.filter(d => d.st && d.st.kind === 'petrify').length, 2);
-    const i = b.dice.findIndex(d => d.st && d.st.kind === 'petrify');
-    b.dice.forEach((d, k) => { d.face = k === i ? 6 : 3; });
-    eq('그 눈이 나오면 0으로 친다', eng.__test_zeroed(b).has(i), true);
-    b.dice[i].face = 5;
-    eq('다른 눈이면 그대로 센다', eng.__test_zeroed(b).has(i), false);
+    cast(b, e, [{ op: 'status', kind: 'stun', amount: 2 }]);
+    eq('굳히기: 두 칸이 기절한다', b.dice.filter(d => d.st && d.st.kind === 'stun').length, 2);
+    const i = b.dice.findIndex(d => d.st && d.st.kind === 'stun');
+    b.dice.forEach(d => { d.face = 5; });
+    eq('기절한 칸은 눈이 뭐든 0으로 친다', eng.__test_zeroed(b).has(i), true);
   }
   // v3.99 물림 — 최고 눈 한 칸을 문다. 족보에서도 빠지고 손도 못 댄다.
   {
@@ -1601,7 +1599,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('main.js 가 묶음 글자를 전부 앎', COMBO.filter(c => !known.includes(c)), []);
   eq('묶음 조합은 다섯 종', COMBO.length, 5);
   // 세 갈래가 한꺼번에 오는 행동이 생기면 묶을 그림이 없다 — 생기는 순간 걸리게 둔다
-  const DIS = new Set(['confuse','poison','bleed','status','sealLast','sealCat','rollTax','holdTax','petrify','lockHigh','blind','drainWhet','unpin']);
+  const DIS = new Set(['confuse','poison','bleed','status','sealLast','sealCat','rollTax','holdTax','blind','drainWhet','unpin']);
   const triple = every.filter(([, , m]) => {
     if (m.hidden || m.intent || m.effects.some(f => f.op === 'selfDamage')) return false;
     const ops = m.effects.map(f => f.op);

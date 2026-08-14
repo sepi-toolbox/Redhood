@@ -122,15 +122,6 @@
       "turns": 2,
       "text": "족보에도 안 들어가고 다시 굴릴 수도 없다",
       "pick": "highest"
-    },
-    {
-      "id": "petrify",
-      "name": "굳음",
-      "color": "#6b6055",
-      "rule": "zeroOnFace",
-      "amount": 6,
-      "turns": 2,
-      "text": "이 칸에 수치와 같은 눈이 나오면 눈금이 0으로 계산된다"
     }
   ],
   "voidCall": {

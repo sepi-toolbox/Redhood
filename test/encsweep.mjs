@@ -84,7 +84,7 @@ function fight(ids, run0) {
 function enemyPhaseSafe(b) { b.await = 'enemy'; enemyPhase(b); }   // 낼 족보가 없으면 한 턴을 그냥 맞는다
 
 // 기믹 제거 사본 (방해율 대조군)
-const GIM = new Set(['status','sealLast','sealCat','rollTax','holdTax','petrify','lockHigh','blind','regen','enrage','reflect','ward','cap']);
+const GIM = new Set(['status','sealLast','sealCat','rollTax','holdTax','blind','regen','enrage','reflect','ward','cap']);
 function stripTheme(id) {
   const e = JSON.parse(JSON.stringify(DB.enemyById[id]));
   delete e.start;

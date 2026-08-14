@@ -50,42 +50,6 @@ decoration. Bold silhouette, readable at 20px. The dominant color of the whole i
 The symbol: one four-leaf clover with thick rounded leaves and one bright spark at its centre. No text, no letters, no watermark.
 ```
 
-## 굳음 — 덮개
-
-- 파일: `assets/ui/status_die_petrify.png`
-- 색: `#6b6055`
-- 지금: status_die_stun.png 를 빌려 쓰는 중
-
-```
-Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXACT painting style,
-angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art.
-SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture,
-no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorealistic, NOT 3D.
-Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard.
-Do NOT draw a die or any object underneath — draw ONLY the effect itself.
-The effect clings to the EDGES and CORNERS of the square frame and the CENTER of the image is
-completely EMPTY (nothing in the middle 60 percent). The dominant color of the effect must be #6b6055.
-The effect: heavy grey-brown stone lumps swelling out of the left and bottom edges, thick blunt shapes with blunt fracture lines, the middle still open.
-No text, no letters, no watermark.
-```
-
-## 굳음 — 아이콘
-
-- 파일: `assets/icons/status_petrify.png`
-- 색: `#6b6055`
-- 지금: fx_petrify.png 를 쓰는 중 — 기절과 형태가 겹친다
-
-```
-Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular
-brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
-shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
-no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
-ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
-background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
-decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be #6b6055.
-The symbol: one single die pip swollen into a lump of grey stone, blunt fracture lines spreading from it, no die drawn around it. No text, no letters, no watermark.
-```
-
 ## 넣는 법
 
 - 아이콘 — 파일을 넣고 `js/main.js` 의 `BUFF_ART_READY` 에 이름을 적는다.
