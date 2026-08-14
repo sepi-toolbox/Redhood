@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.83'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.84'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1130,6 +1130,7 @@ function renderBattle(opts = {}) {
       tryConfirm(catId, variantId, targetUid);
     });
   });
+  floatChanges();   // v3.84: 이번 렌더에서 늘어난 체력·방어도를 숫자로 띄운다
 }
 
 // v0.28: 재렌더 없는 제자리 갱신 — 주사위 마킹 상태
@@ -1375,6 +1376,40 @@ function stFloat(el, text, cls) {
   f.textContent = text;
   el.appendChild(f);
   setTimeout(() => f.remove(), 1500);
+}
+
+// v3.84: 회복·방어도 얻는 순간에도 숫자를 띄운다 — 피해만 보이고 좋은 일은 안 보였다.
+//   회복은 녹색, 방어는 회백색. 나(체력바)와 적(그림) 양쪽 같은 문법.
+function floatGain(target, kind, amount) {
+  if (!(amount > 0) || !target) return;
+  const f = document.createElement('span');
+  f.className = `gain-float ${kind}`;                 // kind: 'heal' | 'block'
+  f.textContent = `+${amount}`;
+  target.appendChild(f);
+  setTimeout(() => f.remove(), 1500);
+}
+// 이번 렌더에서 늘어난 몫을 찾아 띄운다 — 값이 오른 것만
+let lastSeen = { of: null, hp: null, block: null, foes: {} };
+function floatChanges() {
+  if (!battle || !battle.player) return;
+  // 전투가 바뀌면 기준선을 새로 잡는다 — 안 그러면 새 전투 첫 렌더에 엉뚱한 숫자가 뜬다
+  if (lastSeen.of !== battle) lastSeen = { of: battle, hp: null, block: null, foes: {} };
+  const p = battle.player;
+  const bar = app.querySelector('.battle-screen .player-bar');
+  if (bar) {
+    if (lastSeen.hp != null && p.hp > lastSeen.hp) floatGain(bar, 'heal', p.hp - lastSeen.hp);
+    if (lastSeen.block != null && p.block > lastSeen.block) floatGain(bar, 'block', p.block - lastSeen.block);
+  }
+  lastSeen.hp = p.hp; lastSeen.block = p.block;
+  for (const e of battle.enemies) {
+    const was = lastSeen.foes[e.uid];
+    const el = app.querySelector(`.enemy[data-uid="${e.uid}"]`);
+    if (was && el) {
+      if (e.hp > was.hp) floatGain(el, 'heal', e.hp - was.hp);
+      if (e.block > was.block) floatGain(el, 'block', e.block - was.block);
+    }
+    lastSeen.foes[e.uid] = { hp: e.hp, block: e.block };
+  }
 }
 
 function playStatusFx(fx) {

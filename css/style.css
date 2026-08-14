@@ -1909,3 +1909,20 @@ span.enemy-art {
 
 /* 적 바는 좁아서 방어도를 조금 더 작게 */
 .enemy .bar .bar-text .bar-block { font-size: 10px; margin-left: 4px; }
+
+/* v3.84: 좋은 일도 숫자로 — 회복은 녹색, 방어는 회백색. 피해(-N)와 같은 결로 위로 떠오른다. */
+.gain-float {
+  position: absolute; left: 50%; top: -14px; z-index: 41;
+  font-size: 19px; font-weight: 800; pointer-events: none;
+  text-shadow: 0 1px 4px #000, 0 0 6px #000;
+  animation: gainFloat 1.4s ease-out forwards;
+}
+.gain-float.heal  { color: #57d98a; }
+.gain-float.block { color: #cfd8e2; }
+.enemy .gain-float { top: 6px; font-size: 17px; }
+@keyframes gainFloat {
+  0%   { opacity: 0; transform: translate(-50%, 6px) scale(.8); }
+  18%  { opacity: 1; transform: translate(-50%, -4px) scale(1.08); }
+  35%  { transform: translate(-50%, -10px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -30px) scale(.95); }
+}
