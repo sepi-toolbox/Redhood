@@ -29,7 +29,7 @@ function scoreChoice(battle,p){
   const ab=p.variant.ability, ops=ab?(Array.isArray(ab)?ab:[ab]):[]; const p_=battle.player;
   const danger=1-p_.hp/p_.maxHp;
   const incoming=aliveEnemies(battle).reduce((s,e)=>s+(e.nextMove?.effects||[]).filter(f=>f.op==='damage')
-    .reduce((t,f)=>t+Math.round(f.amount*(e.atkScale||1))+(e.power||0),0),0);
+    .reduce((t,f)=>t+Math.round(f.amount*(e.atkScale||1))+(e.strength||0),0),0);
   const turnsLeft=Math.max(1,12-battle.turn); let v=p.bd.total;
   for(const o of ops){ const amt=o.amount||0;
     if(o.op==='block') v+=Math.min(amt,incoming)*(1+danger*2);
@@ -73,8 +73,8 @@ function fight(id,level,floor,log){
     if(e&&e.nextMove&&e.nextMove.broken) brk++;
     enemyPhase(b);
     if(nm) dmgBy[nm]=(dmgBy[nm]||0)+(hp1-b.player.hp);
-    maxPow=Math.max(maxPow,e.power||0);
-    if(log) console.log(`${String(b.turn-1).padStart(2)}턴 ${(nm||'?').padEnd(12)} 내 족보 ${String(best.bd.total).padStart(2)} (${best.variant.name}) · 맞음 ${String(hp1-b.player.hp).padStart(3)} · 내HP ${String(Math.max(0,b.player.hp)).padStart(2)} · 적HP ${String(Math.max(0,e.hp)).padStart(3)} · 적힘 ${e.power||0}`);
+    maxPow=Math.max(maxPow,e.strength||0);
+    if(log) console.log(`${String(b.turn-1).padStart(2)}턴 ${(nm||'?').padEnd(12)} 내 족보 ${String(best.bd.total).padStart(2)} (${best.variant.name}) · 맞음 ${String(hp1-b.player.hp).padStart(3)} · 내HP ${String(Math.max(0,b.player.hp)).padStart(2)} · 적HP ${String(Math.max(0,e.hp)).padStart(3)} · 적힘 ${e.strength||0}`);
   }
   return {win:b.result!=='defeat',turns:b.turn,lost:Math.min(60,60-b.player.hp),dmgBy,stSeen,maxPow,brk,
           avg:dealt.reduce((a,c)=>a+c,0)/Math.max(1,dealt.length)};

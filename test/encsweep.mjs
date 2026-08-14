@@ -38,7 +38,7 @@ function scoreChoice(battle, p) {
   const danger = 1 - p_.hp / p_.maxHp;                        // 0(만피) ~ 1(빈사)
   const incoming = aliveEnemies(battle).reduce((s, e) =>
     s + (e.nextMove?.effects || []).filter(f => f.op === 'damage')
-        .reduce((t, f) => t + Math.round(f.amount * (e.atkScale || 1)) + (e.power || 0), 0), 0);
+        .reduce((t, f) => t + Math.round(f.amount * (e.atkScale || 1)) + (e.strength || 0), 0), 0);
   const turnsLeft = Math.max(1, 12 - battle.turn);            // 장기전이면 버프 가치↑
   let v = p.bd.total;
   for (const o of ops) {

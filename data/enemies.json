@@ -24,7 +24,7 @@
         "name": "날개쉬기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 2
           }
         ],
@@ -397,7 +397,7 @@
         "name": "울부짖기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 1
           }
         ],
@@ -551,7 +551,7 @@
         "name": "급성장",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 3
           }
         ],
@@ -662,7 +662,7 @@
         "name": "옹이 불림",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -1046,7 +1046,7 @@
         "name": "불길한 찍찍",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -1059,7 +1059,7 @@
         "name": "무리 불림",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -1171,7 +1171,7 @@
         "name": "뻣뻣한 솔",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -1325,7 +1325,7 @@
           "amount": 9
         },
         {
-          "op": "empower",
+          "op": "strength",
           "amount": 2
         }
       ]
@@ -1343,7 +1343,7 @@
         "name": "궁지에 몰린 야수",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 6
           }
         ],
@@ -1594,7 +1594,7 @@
         "name": "어둠 삼키기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 7
           }
         ],
@@ -1692,7 +1692,7 @@
         "name": "경계",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 1
           }
         ],
@@ -1799,7 +1799,7 @@
           "amount": 7
         },
         {
-          "op": "empower",
+          "op": "strength",
           "amount": 1
         }
       ]
@@ -1892,7 +1892,7 @@
         "name": "힘 모으기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 6
           }
         ],
@@ -1922,7 +1922,7 @@
         "name": "압도적인 힘",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 6
           }
         ],
@@ -1959,7 +1959,7 @@
         "name": "힘 모으기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 6
           }
         ],
@@ -1977,7 +1977,7 @@
         "name": "압도적인 힘",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 6
           }
         ],
@@ -2005,7 +2005,7 @@
         "name": "힘 모으기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 6
           }
         ],
@@ -2023,7 +2023,7 @@
         "name": "압도적인 힘",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 6
           }
         ],
@@ -2276,7 +2276,7 @@
         "name": "팽팽한 솜",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 7
           }
         ],
@@ -2339,7 +2339,7 @@
           "amount": 21
         },
         {
-          "op": "empower",
+          "op": "strength",
           "amount": 2
         }
       ]
@@ -2427,7 +2427,7 @@
         "name": "목 불림",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -2538,7 +2538,7 @@
         "name": "날갯소리",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -2647,7 +2647,7 @@
         "name": "짙은 안개",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -2756,7 +2756,7 @@
         "name": "뿔 세우기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -2859,7 +2859,7 @@
         "name": "뼈 맞추기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -2965,7 +2965,7 @@
         "name": "마디 불림",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 3
           }
         ],
@@ -3083,7 +3083,7 @@
         "name": "진흙 뭉침",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 5
           }
         ],
@@ -3213,7 +3213,7 @@
         "name": "창 고쳐쥠",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 7
           }
         ],
@@ -3338,7 +3338,7 @@
         "name": "삽자루 힘",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 7
           }
         ],
@@ -3380,7 +3380,7 @@
           "amount": 22
         },
         {
-          "op": "empower",
+          "op": "strength",
           "amount": 3
         }
       ]
@@ -3491,7 +3491,7 @@
         "name": "끓는 늪",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 6
           }
         ],
@@ -3675,7 +3675,7 @@
         "name": "깊은 들숨",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 8
           }
         ],
@@ -3844,7 +3844,7 @@
         "name": "흙 밀어냄",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 3
           }
         ],
@@ -3906,7 +3906,7 @@
           "amount": 13
         },
         {
-          "op": "empower",
+          "op": "strength",
           "amount": 2
         }
       ]
@@ -3993,7 +3993,7 @@
         "name": "귀 세우기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -4105,7 +4105,7 @@
         "name": "벌어진 눈",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -4221,7 +4221,7 @@
         "name": "비늘가루",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -4340,7 +4340,7 @@
         "name": "큰 속삭임",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -4365,7 +4365,7 @@
           "amount": 13
         },
         {
-          "op": "empower",
+          "op": "strength",
           "amount": 2
         }
       ]
@@ -4422,7 +4422,7 @@
         "name": "기도",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 2
           }
         ],
@@ -4451,7 +4451,7 @@
         "name": "기도 삼키기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -4570,7 +4570,7 @@
         "name": "갈라진 금",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -4693,7 +4693,7 @@
         "name": "모래 뭉침",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 7
           }
         ],
@@ -4841,7 +4841,7 @@
         "name": "촉수 불림",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 5
           }
         ],
@@ -4979,7 +4979,7 @@
         "name": "줄 당기기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 7
           }
         ],
@@ -5121,7 +5121,7 @@
         "name": "꿈 고쳐씀",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -5292,7 +5292,7 @@
         "name": "턱 벌리기",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -5350,7 +5350,7 @@
           "amount": 15
         },
         {
-          "op": "empower",
+          "op": "strength",
           "amount": 3
         }
       ]
@@ -5454,7 +5454,7 @@
         "name": "짙은 후광",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 5
           }
         ],
@@ -5577,7 +5577,7 @@
         "name": "응시",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 2
           }
         ],
@@ -5746,7 +5746,7 @@
         "name": "속사 설교",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -5859,7 +5859,7 @@
         "name": "높아진 음",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],
@@ -5970,7 +5970,7 @@
         "name": "긴 심지",
         "effects": [
           {
-            "op": "empower",
+            "op": "strength",
             "amount": 4
           }
         ],

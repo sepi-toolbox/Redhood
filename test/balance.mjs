@@ -37,7 +37,7 @@ const { previewAll, createBattle, initialRoll, reroll, confirmCategory, enemyPha
 function gimAdjust(b,p,v){ for(const e of aliveEnemies(b)){ if(e.demand){const ok=e.demand.category?p.cat.id===e.demand.category:p.cat.kind===e.demand.kind; if(ok)v+=e.demand.damage*1.5;} if(e.wardLeft>0&&p.bd.total>0&&p.bd.total<=e.ward)v-=p.bd.total; if(e.capLeft>0&&p.bd.total>e.cap)v-=(p.bd.total-e.cap);} return v; }
 function scoreChoice(b,p){ const ab=p.variant.ability; const ops=ab?(Array.isArray(ab)?ab:[ab]):[]; const p_=b.player;
   const danger=1-p_.hp/p_.maxHp;
-  const incoming=aliveEnemies(b).reduce((s,e)=>s+(e.nextMove?.effects||[]).filter(f=>f.op==='damage').reduce((t,f)=>t+Math.round(f.amount*(e.atkScale||1))+(e.power||0),0),0);
+  const incoming=aliveEnemies(b).reduce((s,e)=>s+(e.nextMove?.effects||[]).filter(f=>f.op==='damage').reduce((t,f)=>t+Math.round(f.amount*(e.atkScale||1))+(e.strength||0),0),0);
   const turnsLeft=Math.max(1,12-b.turn); let v=p.bd.total;
   for(const o of ops){ const amt=o.amount||0;
     if(o.op==='block')v+=Math.min(amt,incoming)*(1+danger*2);

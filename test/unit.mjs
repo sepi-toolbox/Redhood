@@ -347,7 +347,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const hp0 = b.player.hp, ehp0 = e.hp;
   for (let t = 0; t < 8; t++) { endTurn(b); }
   eq('휴식은 플레이어 HP를 안 깎음', b.player.hp, hp0);
-  eq('휴식은 적 방어·힘을 안 올림', [e.block, e.power], [0, 0]);
+  eq('휴식은 적 방어·힘을 안 올림', [e.block, e.strength], [0, 0]);
   eq('휴식은 적 HP를 안 바꿈', e.hp, ehp0);
   eq('휴식 중에도 전투는 계속됨', b.over, false);
   eq('휴식의 의도 표시는 💤', eng.intentOf(e), '💤');
@@ -363,9 +363,9 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   const run = (id, turns, power) => {
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
       dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, [id], 'battle');
-    b.enemies[0].power = power;
+    b.enemies[0].strength = power;
     const hp0 = b.player.hp;
-    for (let t = 0; t < turns; t++) { endTurn(b); b.enemies[0].power = power; }
+    for (let t = 0; t < turns; t++) { endTurn(b); b.enemies[0].strength = power; }
     return hp0 - b.player.hp;
   };
   mkEnemy('__once', { op: 'damage', amount: 12 });            // 한 방 12
@@ -395,7 +395,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = eng.createBattle({ hp: 9e6, maxHp: 9e6, act: 1, floor: 1, enlight: 0, relics: [],
       dice: ['normal','normal','normal','normal','normal'], categories: { onePair: 'clasped_hands' } }, ['__multi'], 'battle');
     eq('의도에 타수 표기', eng.intentOf(b.enemies[0]), '⚔️4×3');
-    b.enemies[0].power = 6;
+    b.enemies[0].strength = 6;
     eq('강화가 반영된 한 대 피해로 표기', eng.intentOf(b.enemies[0]), '⚔️10×3');
   }
   eq('hits 없으면 1타로 동작', eng.hitCount({ op: 'damage', amount: 3 }), 1);
@@ -450,7 +450,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   // --- 국면 전환: HP가 임계를 지나면 예고가 강제 교체된다
   DB.enemyById.__ph = { id: '__ph', name: '국면', tier: 'boss', art: '🧪', hp: [100, 100],
     moves: { a: { name: 'A', effects: D(1) }, b: { name: 'B', effects: D(1) } },
-    uniqueMoves: { awaken: { name: '각성', effects: [{ op: 'empower', amount: 9 }] } },
+    uniqueMoves: { awaken: { name: '각성', effects: [{ op: 'strength', amount: 9 }] } },
     phases: [ { untilHpRatio: 0.5, pattern: { mode: 'weighted', weights: { a: 1 } } },
               { untilHpRatio: 0.0, pattern: { mode: 'weighted', weights: { b: 1 } }, enter: 'awaken' } ] };
   {
@@ -461,7 +461,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eng.__test_deal(b, e, 15);                    // HP 45% — 2국면 진입
     eq('임계를 지나면 예고가 강제 교체', [e.nextMove.id, !!e.nextMove.phaseShift], ['awaken', true]);
     endTurn(b);
-    eq('전환 행동이 실제로 발동', e.power, 9);
+    eq('전환 행동이 실제로 발동', e.strength, 9);
     eq('이후에는 2국면 행동', e.nextMove.id, 'b');
     eng.__test_deal(b, e, 20);
     eq('전환은 한 번만', e.nextMove.id, 'b');
@@ -1309,7 +1309,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     const b = mk(['crow']); const e = b.enemies[0]; e.hp = 200; e.maxHpInit = 200;
     e.enrage = 1; b.lastResult = { bonusHits: [] };
     eng.__test_deal(b, e, 10);
-    eq('격노: 맞으면 힘이 오른다', e.power, 1);
+    eq('격노: 맞으면 힘이 오른다', e.strength, 1);
     e.reflect = 3; e.reflectLeft = 2; b.player.block = 1;
     const hp0 = b.player.hp;
     eng.__test_deal(b, e, 10);
@@ -1516,7 +1516,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   // empower: 다음 턴 자기 주사위 전부 강화
   {
     const [b, e] = mk();
-    e.move = { id: 't', name: '시험', op: 'empower', mult: 0.25 };
+    e.move = { id: 't', name: '시험', op: 'empower', mult: 0.25 };   // 카드 전투는 별개 체계 — 여기 empower 는 그대로다
     e.dice = [{ v: 8, orig: 8, dead: false }];
     b.myDice = [{ v: 1, orig: 1, dead: true }];
     CB.endCardTurn(b);   // power = round(8×0.25) = 2 → 다음 굴림 rng 0.5 → 눈 5 → 7

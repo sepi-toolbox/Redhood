@@ -94,7 +94,10 @@ function spawnEnemy(id, idx, scale) {
     atkScale: (def.final ? 1 : scale.atk) * em.atk,   // v1.0: 전역 보정 제거 — 낮춘 값은 enemies.json 의 기본 피해에 이미 반영돼 있다
     enlightened,
     block: (def.start || {}).block || 0,  // 방어: 자기 다음 행동 때까지 피해 흡수 (start.block 으로 시작 부여 가능)
-    power: (def.start || {}).power || 0,  // 강화: 이후 모든 공격 피해 +power (전투 내 누적)
+    // v3.98: 적의 '힘'은 플레이어의 힘과 같은 것이다 — 이름도 규칙도 하나로 맞췄다.
+    //   때리는 한 방마다 +N (플레이어는 대상 하나당 한 방, 적은 연타 한 대가 한 방), 배율 뒤·증감 앞.
+    //   예고 갈래의 '강화'는 이것을 부여하는 행동 분류지 효과 이름이 아니다.
+    strength: (def.start || {}).strength || 0,
     // v3.95: 중독은 '본체'에, 출혈은 '주사위'에 — 붙는 자리로 두 상태를 가른다.
     //   적에게는 주사위가 없으므로 적이 지는 지속 피해는 중독뿐이고, 출혈은 내 주사위 위에서만 산다.
     debuffs: { weak: 0, poison: 0, vulnerable: 0 }, // 약화(주는 피해 ×0.75)/중독(턴 끝 누적 피해)/취약(받는 피해 ×1.5)
@@ -801,7 +804,7 @@ function dealToEnemy(battle, t, amount) {
   if (t.hp > 0 && dealt > 0) {
     // 격노 — 맞을 때마다 사나워진다 (잔펀치가 벌을 받는다)
     if (t.enrage > 0) {
-      t.power = (t.power || 0) + t.enrage;
+      t.strength = (t.strength || 0) + t.enrage;
       if (battle.lastResult) battle.lastResult.bonusHits.push(`💢격노 +${t.enrage}`);
     }
     // 반사 — 되받아친다. 방어도로 막힌다 (막을 수 있는 세금)
@@ -1044,7 +1047,7 @@ export function tickDot(battle) {
 function decayStatuses(battle) {
   const snap = battle.decaySnap;
   if (!snap) return;
-  // v3.96: 힘은 적의 강화(empower)와 같이 전투 내내 남는다 — 여기서 안 깎는다.
+  // v3.96: 힘은 적이 지닌 힘과 똑같이 전투 내내 남는다 — 여기서 안 깎는다.
   for (const k of ['focus', 'regen']) {
     if (snap.buffs[k] > 0 && battle.buffs[k] > 0) battle.buffs[k] -= 1;
   }
@@ -1125,8 +1128,8 @@ export function enemyPhase(battle) {
           if (spendFortune(battle)) break;
           applyStatus(battle, ef.kind, Math.max(1, ef.amount || 1), ef.power || 0);
           break;
-        case 'empower':                                    // 💪 강화 — 전투 내 공격력 누적
-          e.power = (e.power || 0) + ef.amount;
+        case 'strength':                                   // 💪 힘 — 때리는 한 방마다 +N (전투 내내 남는다)
+          e.strength = (e.strength || 0) + ef.amount;
           break;
         case 'heal':                                       // 💚 치료
           e.hp = Math.min(e.maxHpInit, e.hp + ef.amount);
@@ -1184,7 +1187,7 @@ export function enemyPhase(battle) {
           break;
       }
     }
-    if (e.escalation) e.power += e.escalation; // 최종 보스: 매 턴 점진적으로 강해진다
+    if (e.escalation) e.strength += e.escalation; // 최종 보스: 매 턴 점진적으로 강해진다
     chooseMove(e, battle.turn + 1);
   }
   battle.dodgeActive = false;
@@ -1324,7 +1327,7 @@ function chooseMove(enemy, turn = 1) {
 export const weakMult = () => (DB.scoring && DB.scoring.weakMult != null) ? DB.scoring.weakMult : 0.75;
 export function hitDamage(enemy, ef) {
   const weak = (enemy.debuffs && enemy.debuffs.weak) || 0; // 약화 칸이 아직 안 생겼어도 NaN 이 되지 않게
-  const base = Math.round(ef.amount * (enemy.atkScale || 1)) + (enemy.power || 0);
+  const base = Math.round(ef.amount * (enemy.atkScale || 1)) + (enemy.strength || 0);
   return Math.max(0, weak > 0 ? Math.floor(base * weakMult()) : base);
 }
 export const hitCount = (ef) => Math.max(1, Math.floor(ef.hits || 1));
@@ -1368,7 +1371,7 @@ export function intentOf(enemy) {
       const per = hitDamage(enemy, ef), n = hitCount(ef);
       if (per * n > 0) dmg.push(n > 1 ? `${per}×${n}` : `${per}`);
     } else if (ef.op === 'block') blockAmt = (blockAmt || 0) + ef.amount;
-    else if (ef.op === 'empower') emp = true;
+    else if (ef.op === 'strength') emp = true;
     // v3.59: 치유는 예고에 그리지 않는다 — 적이 제 몸을 아무는 건 이번 턴 내 선택을 바꾸지 않는다
     else if (ef.op === 'heal') { /* 표기 없음 */ }
     // 방해 효과는 종류를 뭉뚱그려 🌀 하나로만 예고한다 — 행동의 정체는 이름이 말하고,

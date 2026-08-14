@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.97'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.98'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -312,7 +312,7 @@ function enemyTags(e) {
   const d = e.debuffs || {};
   const t = [];
   // 적이 두르거나 적을 지켜 주는 것 — 나에게는 전부 해롭다
-  if (e.power > 0) t.push(iconTag('status_strength', 'harm', e.power, `힘 +${e.power} — 모든 공격 피해가 그만큼 늘어난다`));
+  if (e.strength > 0) t.push(iconTag('status_strength', 'harm', e.strength, `힘 +${e.strength} — 때리는 한 방마다 그만큼 늘어난다 (전투 내내 남는다)`));
   if (e.regenLeft > 0 && e.regen > 0) t.push(iconTag(FX_ICON.regen, 'harm', e.regen, `재생 ${e.regen} — 자기 차례마다 아문다 (${e.regenLeft}턴)`));
   if (e.enrage > 0) t.push(iconTag(FX_ICON.enrage, 'harm', e.enrage, '격노 — 맞을 때마다 힘이 오른다'));
   if (e.reflectLeft > 0 && e.reflect > 0) t.push(iconTag(FX_ICON.reflect, 'harm', e.reflect, `반사 ${e.reflect} — 때리면 되받는다 (방어도로 막힌다)`));
@@ -1246,10 +1246,10 @@ function enemyEffectText(e, ef) {
   switch (ef.op) {
     case 'damage': {
       const base = Math.round(ef.amount * (e.atkScale || 1));
-      const final = Math.max(0, base + (e.power || 0) - weak);
+      const final = Math.max(0, base + (e.strength || 0) - weak);
       const n = Math.max(1, Math.floor(ef.hits || 1));
       const parts = [];
-      if (e.power > 0) parts.push(`+강화 ${e.power}`);
+      if (e.strength > 0) parts.push(`+힘 ${e.strength}`);
       if (weak > 0) parts.push(`×0.75 약화`);
       const head = n > 1 ? `피해 ${final} × ${n}타 = ${final * n}` : `피해 ${final}`;
       return `${ico('intent_attack')} ${head}` + (parts.length ? ` (한 대당 기본 ${base} ${parts.join(' ')})` : '');
@@ -1261,7 +1261,7 @@ function enemyEffectText(e, ef) {
     case 'selfDamage': return `${uiIco('unknown')} 자해 — 스스로 ${ef.amount} 피해를 입는다 (방어도 무시)`;
     case 'block': return `${ico('status_block')} 방어 ${ef.amount} 획득`;
     case 'confuse': return `${ico('status_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
-    case 'empower': return `${ico('status_strength')} 힘 +${ef.amount} — 공격력이 그만큼 오른다 (전투 내 누적)`;
+    case 'strength': return `${ico('status_strength')} 힘 +${ef.amount} — 때리는 한 방마다 그만큼 (전투 내내 남는다)`;
     case 'heal': return `${ico('status_regen')} 자신 HP ${ef.amount} 회복`;   // v3.61: intent_heal 폐기
     case 'sealLast': return `${fxIco('sealLast')} 흉내 — 직전에 쓴 족보를 ${ef.turns || 1}턴 봉인`;
     case 'sealCat': return `${fxIco('sealCat')} 봉인 — ${(ef.cats || []).join('·')} 족보를 ${ef.turns || 1}턴 봉인`;
@@ -1345,7 +1345,7 @@ function showEnemyInfo(uid) {
   const d = e.debuffs || {};
   const status = [
     e.block > 0 ? `<li>${ico('status_block')} 방어 ${e.block} — 다음 행동까지 받는 피해 흡수</li>` : '',
-    e.power > 0 ? `<li>${ico('status_strength')} 힘 +${e.power} — 공격력 증가 (전투 내 누적)</li>` : '',
+    e.strength > 0 ? `<li>${ico('status_strength')} 힘 +${e.strength} — 때리는 한 방마다 그만큼 (전투 내내 남는다)</li>` : '',
     d.weak > 0 ? `<li>${ico('status_weak')} 약화 — 주는 피해 ×0.75 (${d.weak}턴 남음, 매 턴 1 소멸)</li>` : '',
     d.bleed > 0 ? `<li>${ico('status_bleed')} 출혈 ${d.bleed} — 행동할 때마다 ${d.bleed} 피해, 스택 -1씩 감소</li>` : '',
     d.vulnerable > 0 ? `<li>${ico('status_vulnerable')} 취약 — 받는 피해 ×1.5 (${d.vulnerable}턴 남음, 매 턴 1 소멸)</li>` : '',
