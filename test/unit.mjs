@@ -1732,6 +1732,24 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('예고를 덮어쓴 행동이 실제와 어긋나지 않음', lies, []);
 }
 
+// v3.85: 적 기술 이름은 단어형이어야 한다 (할퀴기·물기·어둠의 탄환 …).
+// 「~한다」 처럼 문장으로 끝나면 예고 줄에서 기술이 아니라 설명처럼 읽힌다.
+{
+  const { DB } = await import('../js/data.js');
+  const SENTENCE = /(?:ㄴ다|는다|린다|한다|진다|온다|친다|난다|든다|킨다|운다|쥔다|본다|쓴다|없다)$/;
+  const bad = [], long = [];
+  for (const e of DB.enemies) {
+    const names = Object.values(e.moves || {}).map(m => m.name).filter(Boolean);
+    if (e.enlightenedMove) names.push(e.enlightenedMove.name);
+    for (const nm of names) {
+      if (SENTENCE.test(nm)) bad.push(`${e.name}·${nm}`);
+      if ([...nm].length > 9) long.push(`${e.name}·${nm}(${[...nm].length}자)`);
+    }
+  }
+  eq('문장으로 끝나는 기술 이름 없음', bad, []);
+  eq('9자 넘는 기술 이름 없음', long, []);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
 
