@@ -138,8 +138,7 @@ export function computeDamage(cat, faces, diceDefs, relics, zeroed = null, opts 
   }
   let mult = 1, bonus = 0, flat = 0;
   const hpRatio = opts.hpRatio != null ? opts.hpRatio : 1;
-  for (const r of relics) {
-    const h = r.hook;
+  for (const r of relics) for (const h of (r.hooks || (r.hook ? [r.hook] : []))) {
     if (h.type === 'categoryMult' && h.category === cat.id) mult *= h.mult;
     if (h.type === 'categoryBonus' && h.category === cat.id) bonus += h.bonus;
     if (h.type === 'kindBonus' && h.kind === cat.kind) bonus += h.bonus;      // 족보군 보너스
@@ -160,9 +159,10 @@ export function rollFace(dieDef, rngf) {
 
 export function relicValue(relics, type, dflt) {
   let v = dflt;
-  for (const r of relics) if (r.hook.type === type) {
-    if (type === 'extraReroll') v += r.hook.amount;
-    else v = r.hook.value !== undefined ? r.hook.value : r.hook.amount;
+  // v3.81: 유물 하나가 훅을 여러 개 가질 수 있다 (이득 + 대가)
+  for (const r of relics) for (const h of (r.hooks || (r.hook ? [r.hook] : []))) if (h.type === type) {
+    if (type === 'extraReroll') v += h.amount;
+    else v = h.value !== undefined ? h.value : h.amount;
   }
   return v;
 }

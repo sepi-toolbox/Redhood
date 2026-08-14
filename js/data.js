@@ -79,9 +79,19 @@ function validate() {
     if (!Array.isArray(d.faces) || d.faces.length !== 6) throw new Error(`dice.json: ${d.id} faces는 6면이어야 함`);
   }
   const catIds = new Set(DB.scoring.categories.map(c => c.id));
+  // v3.81: 유물은 훅을 여러 개 가질 수 있다 (이득 + 대가)
+  const HOOK_TYPES = new Set(['flatDamage','healOnVictory','categoryBonus','turnHeal','turnBlock','shopDiscount',
+    'aoeBonus','coinBonus','confuseImmune','kindBonus','maxHp','healOnKill','lowHpDamage','extraReroll',
+    'categoryMult','blockKeep','luck','turnWhet','whetOnKind','rerollOnCategory','blockScaleDamage','lowHpMult',
+    'whetOnSelfDamage','healBonus','noBlock','whetOnReroll','maxHpOnKill','turnSelfDamage','sealCategory','whetScaleDamage']);
   for (const r of DB.relics) {
-    if (r.hook.category && !catIds.has(r.hook.category)) {
-      throw new Error(`relics.json: ${r.id}가 없는 족보 "${r.hook.category}" 참조`);
+    const hooks = r.hooks || (r.hook ? [r.hook] : []);
+    if (!hooks.length) throw new Error(`relics.json: ${r.id}에 훅이 없다`);
+    for (const h of hooks) {
+      if (!HOOK_TYPES.has(h.type)) throw new Error(`relics.json: ${r.id}가 모르는 훅 "${h.type}"`);
+      if (h.category && !catIds.has(h.category)) {
+        throw new Error(`relics.json: ${r.id}가 없는 족보 "${h.category}" 참조`);
+      }
     }
     if (r.tier !== 'normal' && r.tier !== 'elite') {
       throw new Error(`relics.json: ${r.id} 등급은 normal/elite 2단계 (현재 "${r.tier}")`);
