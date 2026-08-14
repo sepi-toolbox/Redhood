@@ -16,39 +16,7 @@ python3 tools/make_icon.py <원본.png> status_ironclad          # 아이콘
 python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.build_die('<원본.png>','petrify')"   # 덮개
 ```
 
-## 철갑 — 아이콘
-
-- 파일: `assets/icons/status_ironclad.png`
-- 색: `#4a6fa0`
-- 지금: status_block.png 를 빌려 쓰는 중
-
-```
-Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular
-brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
-shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
-no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
-ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
-background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
-decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be #4a6fa0.
-The symbol: one broad iron shoulder plate of three overlapping bands, thick rivets along each band, seen head-on. No text, no letters, no watermark.
-```
-
-## 행운 — 아이콘
-
-- 파일: `assets/icons/status_fortune.png`
-- 색: `#cfe07a`
-- 지금: status_blessing.png 를 빌려 쓰는 중
-
-```
-Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular
-brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
-shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
-no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
-ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
-background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
-decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be #cfe07a.
-The symbol: one four-leaf clover with thick rounded leaves and one bright spark at its centre. No text, no letters, no watermark.
-```
+- 없음
 
 ## 넣는 법
 
