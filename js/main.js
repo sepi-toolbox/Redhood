@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.92'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.93'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -49,7 +49,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
 function h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content; }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-const PIPS = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' };
+// v3.93: 주사위 눈 이모지(⚀…)는 폰트마다 모양이 제각각이라 게임 주사위와 따로 놀았다 — 실제 눈 그림을 쓴다
+const pipIco = (f) => `<img class="pip-ico" src="assets/dice/pip${f}.png" alt="${f}" draggable="false">`;
 // 등급 표기 (성권 지시: 족보·주사위 4등급, 유물은 일반/정예 2등급, epic=전설)
 const TIER_KO = { common: '커먼', uncommon: '언커먼', rare: '레어', epic: '전설', normal: '일반', elite: '정예' };
 const SHINY = { uncommon: 'shiny-un', rare: 'shiny-rare', epic: 'shiny-epic', elite: 'shiny-epic', normal: '' };
@@ -113,9 +114,9 @@ function showCategoryInfo(catId, variantId) {
     <div class="modal-back" id="cat-info">
       <div class="modal">
         <h3>${esc(v.name || cat.name)} <small class="cat-tag">${esc(cat.name)}</small>${isAoE(cat) ? ' <small class="aoe-tag">전체 공격</small>' : ''}</h3>
-        <p class="info-rule">${esc(cat.ruleText || '')}</p>
-        <p class="info-ability">✨ ${esc(v.abilityText || '부가 없음')}</p>
-        <p class="modal-text">예시: ${(cat.example || []).map(f => PIPS[f]).join(' ')} · 등급: ${esc(TIER_KO[v.tier] || v.tier || '')}</p>
+        <p class="info-rule">${esci(cat.ruleText || '')}</p>
+        <p class="info-ability"><b class="ab-tag">부가</b> ${esci(v.abilityText || '부가 없음')}</p>
+        <p class="modal-text">예시: ${(cat.example || []).map(pipIco).join('')} · 등급: ${esc(TIER_KO[v.tier] || v.tier || '')}</p>
         <p class="modal-text">성립하지 않으면 선택할 수 없다. 같은 족보의 다른 변형을 얻으면 나란히 추가된다.</p>
         <button class="btn primary" id="cat-info-close">닫기</button>
       </div>
@@ -147,15 +148,15 @@ function showTitle() {
       <p class="subtitle">빨간망토의 모험 — 주사위판</p>
       ${hasSave() ? `<button class="btn primary" id="continue-btn">이어하기</button>` : ''}
       <button class="btn primary" id="start-btn">숲으로 들어간다</button>
-      <button class="btn ghost" id="enlight-btn">🔮 계몽 ${enlight}</button>
-      <button class="btn ghost hidden" id="install-btn">📲 홈 화면에 설치</button>
-      <button class="btn ghost" id="mute-btn">${isMuted() ? '🔇 소리 꺼짐' : '🔊 소리 켜짐'}</button>
+      <button class="btn ghost" id="enlight-btn">계몽 ${enlight}</button>
+      <button class="btn ghost hidden" id="install-btn">홈 화면에 설치</button>
+      <button class="btn ghost" id="mute-btn">${isMuted() ? '소리 꺼짐' : '소리 켜짐'}</button>
       <p class="hint notice">이 앱은 AI를 이용해 제작되었습니다</p>
       <p class="hint">${VERSION}</p>
     </div>`));
   document.getElementById('start-btn').addEventListener('click', () => { run = newRun(); showIntro(); });
   document.getElementById('enlight-btn').addEventListener('click', showEnlightModal);
-  bindMute('mute-btn', (m) => (m ? '🔇 소리 꺼짐' : '🔊 소리 켜짐'));
+  bindMute('mute-btn', (m) => (m ? '소리 꺼짐' : '소리 켜짐'));
   const cont = document.getElementById('continue-btn');
   if (cont) cont.addEventListener('click', () => { const r = loadRun(); if (r) { run = r; showMap(); } });
   const install = document.getElementById('install-btn');
@@ -173,6 +174,9 @@ if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
     get battle() { return battle; }, redraw: () => (battle && battle.myDice ? renderCardBattle() : renderBattle()), DB,
     // v3.38: 화면 검증용 — 지도를 거치지 않고 곧장 전투로 들어간다
     itemIcon, comboIcon,
+    // v3.93: 봇이 연출 도중에 눌러 입력이 통째로 씹히던 걸 막는다 — 조용해질 때까지 기다릴 근거
+    get busy() { return busy; },
+    get selected() { return selectedCat; },
     fight: (type = 'battle', weapon) => {
       if (!run) run = newRun();
       if (!run.weapon) chooseWeapon(run, weapon || DB.events.weapons[0].id);
@@ -346,6 +350,26 @@ const RELIC_ART_READY = new Set([
   'ember_jar',
 ]);
 // v3.88: 헤더·상세의 유물 표시도 그림으로. 그림이 없는 유물만 이모지로 남는다.
+/* v3.93: 문장 속에 남아 있던 이모지 — 유물·주사위 설명, 결과 줄, 상점 설명.
+   예고 줄만 갈아 끼우고(iconifyIntent) 산문은 손대지 않아서, 봇이 상세 창에 들어가고 나서야 드러났다.
+   '무슨 효과인가'를 말하는 글자만 그림으로 바꾼다. 배경 장식이나 NPC 얼굴은 대상이 아니다. */
+const TEXT_ICO = [
+  ['\u{1F525}', 'ui_whet'], ['\u{1F3B2}', 'ui_roll'], ['\u{1FA99}', 'ui_coin'], ['\u2764\uFE0F', 'ui_heart'],
+  ['\u{1FA78}', 'status_bleed'], ['\u{1F6E1}', 'status_block'], ['\u{1F300}', 'status_confuse'],
+  ['\u{1F53B}', 'status_weak'], ['\u{1F3AF}', 'status_vulnerable'],
+  ['\u2694\uFE0F', 'intent_attack'], ['\u{1F5E1}\uFE0F', 'intent_attack'], ['\u2694', 'intent_attack'],
+  ['\u{1F4A2}', 'fx_enrage'], ['\u{1F335}', 'fx_reflect'], ['\u{1F480}', 'fx_undying'],
+];
+function iconifyText(s) {
+  let out = String(s);
+  for (const [ch, name] of TEXT_ICO) out = out.replaceAll(ch, ico(name, 'ico-inline'));
+  // 늑대달 목걸이가 문 자리 — 어느 유물이 한 일인지 그림으로 바로 읽힌다
+  if (out.includes('\u{1F43A}')) out = out.replaceAll('\u{1F43A}', relicIco((DB.relicById || {}).wolfmoon_pendant, 'ico-inline'));
+  return out;
+}
+// 글자를 안전하게 감싸고 그 위에 그림을 얹는다 — 순서를 바꾸면 <img> 가 통째로 escape 된다
+const esci = (s) => iconifyText(esc(s));
+
 function relicIco(r, cls = 'relic-mini') {
   if (!r) return '';
   return RELIC_ART_READY.has(r.id)
@@ -419,7 +443,7 @@ function showIntro() {
         ${rowIcon(`<img class="row-ico-img" src="assets/icons/weapon_${w.id}.png" alt="" draggable="false">`)}
         <span class="row-body">
           <span class="choice-main">${esc(w.name)}</span>
-          <span class="choice-sub">${esc(w.desc)}</span>
+          <span class="choice-sub">${esci(w.desc)}</span>
         </span>
       </button>`).join(''))));
   app.querySelectorAll('.weapon-choice').forEach(el => {
@@ -445,7 +469,7 @@ function showEvent(ev) {
         ${(() => { const { icon, text } = splitLeadEmoji(ch.text); return rowIcon(icon || '·') + `
         <span class="row-body">
           <span class="choice-main">${esc(text)}</span>
-          ${ch.sub ? `<span class="choice-sub">${esc(ch.sub)}</span>` : ''}
+          ${ch.sub ? `<span class="choice-sub">${esci(ch.sub)}</span>` : ''}
         </span>`; })()}
       </button>`).join(''))));
   app.querySelectorAll('.choice-row').forEach(el => {
@@ -490,8 +514,8 @@ function showEnlightModal() {
     app.append(h(`
       <div class="modal-back" id="enlight-modal">
         <div class="modal">
-          <h3>🔮 계몽 — 현재 ${cur}단계</h3>
-          <p class="modal-text">3막 보스를 처치할 때마다 +1. 높을수록 숲이 가혹해진다.<br>⚠ 아래 버튼은 테스트용 치트 — 다음 런부터 적용.</p>
+          <h3>계몽 — 현재 ${cur}단계</h3>
+          <p class="modal-text">3막 보스를 처치할 때마다 +1. 높을수록 숲이 가혹해진다.<br>주의 — 아래 버튼은 테스트용 치트 — 다음 런부터 적용.</p>
           <div class="enlight-ctl">
             <button class="btn" id="enl-minus">−</button>
             <span class="enlight-num">${cur}</span>
@@ -533,10 +557,10 @@ function showShop() {
           ${rowIcon(icon)}
           <span class="row-body">
             <span class="choice-main"><span class="shop-name">${esc(s.item.name)}</span><small class="cat-tag">${esc(tierTag)}</small><span class="shop-price">${isSold ? '판매됨' : `${uiIco('coin')}${s.price}`}</span></span>
-            <span class="choice-sub">${esc(sub)}</span>
+            <span class="choice-sub">${esci(sub)}</span>
           </span>
         </button>`;
-    }).join('') + `<button class="btn ghost" id="shop-leave">🌲 떠난다</button>`;
+    }).join('') + `<button class="btn ghost" id="shop-leave">떠난다</button>`;
     app.innerHTML = '';
     app.append(h(eventFrame(merchant,
       `<p class="npc-line">"또 만났구나, 빨간 두건. 골라 보렴 — 이번엔 값을 먼저 받으마."</p>`,
@@ -600,7 +624,7 @@ function afterBossVictory() {
     app.innerHTML = '';
     app.append(h(`
       <div class="screen center end-screen">
-        <div class="rest-art">🔮</div>
+        <div class="rest-art">${ico('node_boss', 'ico-big')}</div>
         <h2>계몽 — ${n}단계</h2>
         <p>세 번째 어둠이 걷혔다. 빨간 두건은 알게 되었다.<br>
         숲의 끝에서, <b>이름 없는 공포</b>가 기다린다는 것을.</p>
@@ -626,9 +650,9 @@ function showFinalEnd(turns) {
   app.innerHTML = '';
   app.append(h(`
     <div class="screen center end-screen">
-      <div class="rest-art">🌑</div>
+      <div class="rest-art">${ico('doodle_boss', 'ico-big')}</div>
       <h2>심연에 삼켜졌다</h2>
-      <p>이름 없는 공포 앞에서 <b class="coin-gain">${turns}턴</b>을 버텼다.<br>숲은 끝났고, 빨간 두건은 계몽했다. (🔮 ${enlight})</p>
+      <p>이름 없는 공포 앞에서 <b class="coin-gain">${turns}턴</b>을 버텼다.<br>숲은 끝났고, 빨간 두건은 계몽했다. (계몽 ${enlight})</p>
       <button class="btn primary" id="restart-btn">새로운 런</button>
     </div>`));
   document.getElementById('restart-btn').addEventListener('click', showTitle);
@@ -689,7 +713,7 @@ const NODE_META = {
   event: { icon: ico('node_event', 'ico-node'), label: '만남' },
   shop: { icon: ico('node_shop', 'ico-node'), label: '상점' },
   boss: { icon: ico('node_boss', 'ico-node'), label: '보스' },
-  final: { icon: '🌑', label: '최후' },
+  final: { icon: ico('node_boss', 'ico-node'), label: '최후' },
 };
 
 // v0.26: 슬더스식 분기 지도 — 양피지 위 점선 잉크 길 + 메달 도장 노드
@@ -744,7 +768,7 @@ function showMap() {
         <button class="btn ghost tiny" id="abandon-btn">런 포기</button>
         <span class="relic-bar">${run.relics.map(id => relicIco(DB.relicById[id])).join('')}</span>
         <span class="coin-slot">${uiIco("coin")}${run.coins}</span>
-        <button class="mute-mini" id="map-mute">${isMuted() ? '🔇' : '🔊'}</button>
+        <button class="mute-mini ${isMuted() ? 'off' : ''}" id="map-mute">소리</button>
       </header>
       <div class="map-scroll parchment">
         <div class="map-grid">
@@ -779,7 +803,7 @@ function showMap() {
     });
   });
   document.getElementById('bag-btn').addEventListener('click', showBagModal);
-  bindMute('map-mute', (m) => (m ? '🔇' : '🔊'));
+  bindMute('map-mute', (m) => { const b = document.getElementById('map-mute'); if (b) b.classList.toggle('off', m); return '소리'; });
   document.getElementById('abandon-btn').addEventListener('click', () => {
     if (confirm('런을 포기할까요?')) { clearSave(); showTitle(); }
   });
@@ -828,7 +852,7 @@ function drawMapLinks() {
 function showBagModal() {
   const diceItems = run.dice.map(id => {
     const d = DB.diceById[id];
-    return `<li><b>${esc(d.name)}</b> <span class="modal-text">[${d.faces.join(',')}] ${esc(d.desc)}</span></li>`;
+    return `<li><b>${esc(d.name)}</b> <span class="modal-text">[${d.faces.join(',')}] ${esci(d.desc)}</span></li>`;
   }).join('');
   // v3.1 수집제: 가진 족보만 보여준다
   const catItems = DB.scoring.categories.filter(c => c.id in run.categories).map(c => {
@@ -839,7 +863,7 @@ function showBagModal() {
       + `<span class="modal-text">${esc(v.abilityText || '')}</span></li>`;
   }).join('');
   const relicItems = run.relics.length
-    ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${relicIco(r, 'relic-mini lg')} <b>${esc(r.name)}</b> <span class="modal-text">${esc(r.desc)}</span></li>`; }).join('')
+    ? run.relics.map(id => { const r = DB.relicById[id]; return `<li>${relicIco(r, 'relic-mini lg')} <b>${esc(r.name)}</b> <span class="modal-text">${esci(r.desc)}</span></li>`; }).join('')
     : '<li class="modal-text">유물 없음</li>';
   app.append(h(`
     <div class="modal-back">
@@ -882,7 +906,7 @@ function showRest() {
   document.getElementById('rest-btn').addEventListener('click', () => {
     const healed = applyRest(run); saveRun(run);
     app.querySelector('.rest-screen').innerHTML =
-      `<div class="rest-art">✨</div><h2>+${healed} HP</h2><p>${uiIco("heart")} ${run.hp}/${run.maxHp}</p>
+      `<div class="rest-art">${ico('node_rest', 'ico-big')}</div><h2>+${healed} HP</h2><p>${uiIco("heart")} ${run.hp}/${run.maxHp}</p>
        <button class="btn primary" id="rest-done">숲으로</button>`;
     document.getElementById('rest-done').addEventListener('click', showMap);
   });
@@ -979,7 +1003,7 @@ function renderBattle(opts = {}) {
         }).join('')}
       </div>
       <div class="mid-line">
-        ${lastR ? `<span class="last-result">${esc(lastR.catName)}: ${breakdownText(lastR)} = <b>${lastR.total}</b> ${lastR.bonusHits.map(esc).join(' ')}</span>` : '<span class="last-result"></span>'}
+        ${lastR ? `<span class="last-result">${esc(lastR.catName)}: ${breakdownText(lastR)} = <b>${lastR.total}</b> ${lastR.bonusHits.map(esci).join(' ')}</span>` : '<span class="last-result"></span>'}
       </div>
       <div class="dice-zone">
         ${battle.dice.map((d, i) => {
@@ -1228,8 +1252,8 @@ function enemyEffectText(e, ef) {
     case 'enrage': return `${fxIco('enrage')} 격노 — 맞을 때마다 힘 +${ef.amount || 1} (전투 내 누적)`;
     case 'reflect': return `${fxIco('reflect')} 반사 ${ef.amount} — ${ef.turns || 3}턴간 때리면 되받는다`;
     case 'rest': return `${ico('intent_rest')} 휴식`;
-    case 'drainWhet': return `🌀 벼름을 빼앗는다`;
-    case 'unpin': return `💨 새김을 흩는다`;
+    case 'drainWhet': return `${uiIco('whet')} 벼름을 빼앗는다`;
+    case 'unpin': return `${uiIco('roll')} 새김을 흩는다`;
     case 'status': { const st = DB.statusById[ef.kind]; return `${ico('status_' + ef.kind)} ${st ? st.name : ef.kind} ×${ef.amount || 1} — ${st ? st.text : ''}`; }
     default: return ef.op;
   }
@@ -1276,7 +1300,7 @@ function showPlayerBuffs() {
   app.append(h(`
     <div class="modal-back" id="pbuff-info">
       <div class="modal">
-        <h3>🧣 빨간 두건 <small class="cat-tag">걸린 효과</small></h3>
+        <h3>빨간 두건 <small class="cat-tag">걸린 효과</small></h3>
         <ul class="deck-list">${items || '<li class="modal-text">걸린 효과 없음</li>'}</ul>
         ${stItems ? `<p class="info-ability">주사위에 붙은 상태이상</p><ul class="deck-list">${stItems}</ul>` : ''}
         <p class="hint">힘·집중·재생은 이번 전투가 끝날 때까지 유지된다${stItems ? ' · 주사위 한 칸에는 상태이상이 하나만 붙는다. 새로 걸리면 앞의 것이 밀려나 풀린다' : ''}</p>
@@ -1304,7 +1328,7 @@ function showEnemyInfo(uid) {
     e.enrage > 0 ? `<li>${fxIco('enrage')} 격노 — 피해를 받을 때마다 힘 +${e.enrage} (전투 내 누적). 잔펀치가 벌을 받는다</li>` : '',
     e.reflectLeft > 0 && e.reflect > 0 ? `<li>${fxIco('reflect')} 반사 ${e.reflect} — 때릴 때마다 되받는다 (${e.reflectLeft}턴, 방어도로 막힘)</li>` : '',
     e.undying > 0 ? `<li>${fxIco('undying')} 불사 — 처음 쓰러질 때 한 번 다시 일어선다</li>` : '',
-    e.stunned ? '<li>💫 다음 행동 취소됨</li>' : '',
+    e.stunned ? `<li>${ico('status_stun', 'ico-inline')} 다음 행동 취소됨</li>` : '',
   ].filter(Boolean).join('');
   app.append(h(`
     <div class="modal-back" id="enemy-info">
@@ -1312,18 +1336,18 @@ function showEnemyInfo(uid) {
         <h3>${e.art} ${esc(e.name)} <small class="cat-tag">${ENEMY_TIER_KO[e.tier] || e.tier}${e.final ? ' · 무한' : ''}</small></h3>
         <p class="modal-text">${e.final ? '체력 ∞' : `HP ${e.hp}/${e.maxHpInit}`}</p>
         ${status ? `<p class="info-ability">걸린 효과</p><ul class="deck-list">${status}</ul>` : ''}
-        <p class="info-ability">🔍 예고 행동: <b>${esc(mv.name)}</b>${mv.hidden ? ` <small class="cat-tag">(${uiIco('unknown')} 의문 — 치트로 공개)</small>` : ''}${mv.phaseShift ? ' <small class="cat-tag">(국면 전환)</small>' : ''}${mv.broken ? ' <small class="cat-tag">(파쇄됨)</small>' : ''}</p>
+        <p class="info-ability">예고 행동: <b>${esc(mv.name)}</b>${mv.hidden ? ` <small class="cat-tag">(${uiIco('unknown')} 의문 — 치트로 공개)</small>` : ''}${mv.phaseShift ? ' <small class="cat-tag">(국면 전환)</small>' : ''}${mv.broken ? ' <small class="cat-tag">(파쇄됨)</small>' : ''}</p>
         <ul class="deck-list">${effects || '<li class="modal-text">아무것도 하지 않는다</li>'}</ul>
         ${(() => {
           const br = mv.break;
           if (!br || !(br.damage > 0) || mv.phaseShift || mv.broken) return '';
           const left = Math.max(0, br.damage - (e.breakTaken || 0));
           const alt = (DB.enemyById[e.defId].uniqueMoves || {})[br.move];
-          return `<p class="modal-text">🔨 파쇄 — 앞으로 <b>${left}</b> 피해를 더 주면 이 행동이 무너지고 <b>${esc(alt ? alt.name : br.move)}</b>(으)로 바뀐다. 방어도로 막힌 피해는 세지 않는다.</p>`;
+          return `<p class="modal-text">파쇄 — 앞으로 <b>${left}</b> 피해를 더 주면 이 행동이 무너지고 <b>${esc(alt ? alt.name : br.move)}</b>(으)로 바뀐다. 방어도로 막힌 피해는 세지 않는다.</p>`;
         })()}
-        ${e.escalation ? `<p class="modal-text">⚠ 매 턴 공격력 +${e.escalation} 누적 — 점점 강해진다</p>` : ''}
-        ${e.enlightened ? `<p class="modal-text">🔮 계몽 상태 — 3번째 행동마다 강화 기술 사용</p>` : ''}
-        <p class="hint">⚠ 치트 보기 — 숨겨진 정보(${uiIco('unknown')})까지 공개된다</p>
+        ${e.escalation ? `<p class="modal-text">매 턴 공격력 +${e.escalation} 누적 — 점점 강해진다</p>` : ''}
+        ${e.enlightened ? `<p class="modal-text">계몽 상태 — 3번째 행동마다 강화 기술 사용</p>` : ''}
+        <p class="hint">치트 보기 — 숨겨진 정보(${uiIco('unknown')})까지 공개된다</p>
         <button class="btn primary" id="enemy-info-close">닫기</button>
       </div>
     </div>`));
@@ -1389,6 +1413,34 @@ function floatGain(target, kind, amount) {
   target.appendChild(f);
   setTimeout(() => f.remove(), 1500);
 }
+
+/* v3.93: 상태이상으로 깎이는 피해 — 때린 사람이 없어서 화면에 아무 일도 일어나지 않았다.
+   출혈·독·부패는 조용히 숫자만 줄어들었고, 무엇 때문에 줄었는지 읽을 수가 없었다.
+   나(체력바)와 적(그림) 양쪽에 같은 문법으로 색을 띄우고 한 번 움찔하게 한다. */
+function dotHitFx(target, amount, kind = 'bleed', flashEl = null) {
+  if (!target || !(amount > 0)) return;
+  const fe = flashEl || target;
+  fe.classList.remove('dot-hit'); void fe.offsetWidth; fe.classList.add('dot-hit');
+  setTimeout(() => fe.classList.remove('dot-hit'), 560);
+  const f = document.createElement('span');
+  f.className = `dot-float ${kind}`;
+  f.textContent = `-${amount}`;
+  target.appendChild(f);
+  setTimeout(() => f.remove(), 1400);
+}
+
+/* 내가 상태이상·자해로 한 대 맞았을 때. 적의 공격만큼 요란하진 않지만 분명히 아프다.
+   v3.93: 이 함수는 리롤 세금 쪽에서 호출만 되고 정의가 없어 그 자리에서 예외가 났다. */
+function sigHurtFx(dmg, kind = 'bleed') {
+  if (!(dmg > 0)) return;
+  const screen = app.querySelector('.battle-screen');
+  if (screen) {
+    screen.classList.add('micro-shake');
+    setTimeout(() => screen.classList.remove('micro-shake'), 320);
+  }
+  dotHitFx(app.querySelector('.battle-screen .player-bar'), dmg, kind);
+}
+
 // 이번 렌더에서 늘어난 몫을 찾아 띄운다 — 값이 오른 것만
 let lastSeen = { of: null, hp: null, block: null, foes: {} };
 function floatChanges() {
@@ -1722,12 +1774,28 @@ function tryConfirm(catId, variantId, uid) {
   const fxTotal = playAttackSequence(); // 기여 주사위 발광 → 타격
 
   setTimeout(() => {
+    // 🩸 내 행동이 끝난 직후 무는 독·출혈 — 타격이 끝난 자리에서 대가를 보여준다
+    const dh = (res && res.dotHit) || null;
+    if (dh && dh.amount > 0) sigHurtFx(dh.amount, dh.kind);
+    const dotWait = (dh && dh.amount > 0) ? 520 : 0;
+
     if (battle.over) {
       // v3.92: 여기로 오는 죽음은 상태이상·자해로 내 턴에 쓰러진 경우다.
       //   예전엔 승리와 한 갈래로 묶여 있어 사망 연출 없이 결과 화면으로 튀었다.
-      if (battle.result === 'defeat') { playerDeathFx(); return; }
+      if (battle.result === 'defeat') { setTimeout(() => playerDeathFx(), dotWait); return; }
       finishBattle(); return;                    // 승리 — 처치 연출이 재생된 뒤 전환
     }
+
+    // 🩸 적 출혈: 자기 차례가 돌아오는 순간 스택만큼 깎인다(방어 무시).
+    //   때린 사람이 없어 조용히 사라지던 피해라, 행동을 시작하는 타이밍에 맞춰 보여준다.
+    aliveEnemies(battle)
+      .filter(e => e.debuffs.bleed > 0)
+      .map(e => ({ uid: e.uid, amount: e.debuffs.bleed }))
+      .forEach((b, i) => setTimeout(() => {
+        const el = app.querySelector(`.enemy[data-uid="${b.uid}"]`);
+        if (!el) return;
+        dotHitFx(el, b.amount, 'bleed', el.querySelector('.enemy-art'));
+      }, dotWait + 120 + i * 160));
 
     // 적 공격 연출: 행동하는 적이 순서대로 윈드업 → 내려찍기 (준비 행동은 은은한 충전 발광)
     const ATK_MS = 780;
@@ -1739,8 +1807,8 @@ function tryConfirm(catId, variantId, uid) {
       if (!el) return;
       el.classList.add(a.isAtk ? 'attacking' : 'charging');
       setTimeout(() => el.classList.remove('attacking', 'charging'), 740);
-    }, i * ATK_MS));
-    const atkTotal = actors.length > 0 ? actors.length * ATK_MS + 200 : 300;
+    }, dotWait + i * ATK_MS));
+    const atkTotal = dotWait + (actors.length > 0 ? actors.length * ATK_MS + 200 : 300);
 
     setTimeout(() => {
       const hpBefore = battle.player.hp;
@@ -2029,7 +2097,7 @@ function lootRowHtml(iconHtml, name, sub, attrs) {
       ${rowIcon(iconHtml)}
       <span class="row-body">
         <span class="choice-main">${esc(name)}</span>
-        ${sub ? `<span class="choice-sub">${esc(sub)}</span>` : ''}
+        ${sub ? `<span class="choice-sub">${esci(sub)}</span>` : ''}
       </span>
     </button>`;
 }
@@ -2123,14 +2191,14 @@ function showLootModal(gi) {
             const sub = c.kind === 'die' ? `[${c.item.faces.join(',')}] ${c.item.desc || ''}`
               : c.kind === 'relic' ? (c.item.desc || '')
               : c.kind === 'card' ? `자원 ${c.item.cost} · ${c.item.desc || ''}`
-              : c.item.newCat ? `✨ 새 족보 — ${c.item.cat.name} 을(를) 쓸 수 있게 된다 · ${c.item.variant.abilityText || '부가 없음'}`
+              : c.item.newCat ? `새 족보 — ${c.item.cat.name} 을(를) 쓸 수 있게 된다 · ${c.item.variant.abilityText || '부가 없음'}`
               : `${c.item.cat.name} 자리 · ${c.item.replaces ? `${c.item.replaces.name} 을(를) 대신한다` : '지금은 기본'} · ${c.item.variant.abilityText || '부가 없음'}`;
             return `
               <button class="sheet-row choice-row loot-choice t-${c.item.tier}" data-idx="${i}">
                 ${rowIcon(itemIcon(c.kind, c.item))}
                 <span class="row-body">
                   <span class="choice-main">${esc(name)} <small class="cat-tag">${esc(TIER_KO[c.item.tier] || '')}</small>${isCat && c.item.variant.burst ? `<small class="cat-tag t-burst">${uiIco('burst')}일격</small>` : ''}</span>
-                  <span class="choice-sub">${esc(sub)}</span>
+                  <span class="choice-sub">${esci(sub)}</span>
                 </span>
               </button>`;
           }).join('')}
@@ -2164,7 +2232,7 @@ function showReplaceDie(newDie, onDone = null, onCancel = null) {
     <div class="modal-back" id="replace-modal">
       <div class="modal">
         <h3>${esc(newDie.name)} 획득 — 어느 주사위와 교체?</h3>
-        <p class="modal-text">${esc(newDie.desc || '')}</p>
+        <p class="modal-text">${esci(newDie.desc || '')}</p>
         <ul class="deck-list">
           ${run.dice.map((id, i) => {
             const d = DB.diceById[id];
@@ -2238,7 +2306,7 @@ function renderCardBattle() {
             <span class="target-pin">▼</span>
             <span class="enemy-name">${esc(e.name)}</span>
             <span class="bar t-${e.tier}"><i style="width:${e.final ? 100 : Math.max(0, e.hp / e.maxHpInit * 100)}%"></i></span>
-            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${e.block > 0 ? ` <b class="fshield">🛡${e.block}</b>` : ''}${e.rage > 0 ? ` <b class="frage">${fxIco('enrage')}+${e.rage}</b>` : ''}</span>
+            <span class="enemy-hp">${e.final ? '∞' : `${e.hp}/${e.maxHpInit}`}${e.block > 0 ? ` <b class="fshield">${ico('status_block', 'ico-inline')}${e.block}</b>` : ''}${e.rage > 0 ? ` <b class="frage">${fxIco('enrage')}+${e.rage}</b>` : ''}</span>
             <span class="cb-intent" data-uid="${e.uid}"></span>
             ${enemyArtHtml(e)}
             <span class="fdice" data-uid="${e.uid}"></span>
@@ -2300,7 +2368,7 @@ function cbIntentHtml(e) {
   const P = movePower(e);
   if (mv.op === 'damage') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
   if (mv.op === 'bleed') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>${ico('status_bleed', 'ico-ui')}${mv.amount ?? 2}</small>`;
-  if (mv.op === 'lifesteal') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>💚흡혈</small>`;
+  if (mv.op === 'lifesteal') return `${ico('intent_attack', 'ico-intent')} ${esc(mv.name)} <b>${P}</b> <small>${ico('ui_heart', 'ico-inline')}흡혈</small>`;
   if (mv.op === 'armor') return `${ico('intent_defend', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
   if (mv.op === 'heal') return `${ico('status_regen', 'ico-intent')} ${esc(mv.name)} <b>${P}</b>`;
   if (mv.op === 'empower') return `${ico('intent_empower', 'ico-intent')} ${esc(mv.name)} <b>+${Math.max(1, P)}</b>`;
@@ -2424,10 +2492,10 @@ window.addEventListener('resize', () => { if (battle && battle.myDice) cbFitEnem
 function cbPreviewUpdate() {
   const pv = document.getElementById('cb-preview');
   if (!pv) return;
-  if (cbSel >= 0) { pv.innerHTML = '🛡 <b class="kill">방어할 주사위를 골라주세요</b>'; return; }
+  if (cbSel >= 0) { pv.innerHTML = `${ico('status_block', 'ico-inline')} <b class="kill">방어할 주사위를 골라주세요</b>`; return; }
   const p = previewTurn(battle);
   const tgt = battle.enemies.find(e => e.uid === p.targetUid);
-  pv.innerHTML = `턴 종료 → 내 공격 <b class="atk">${p.atk}</b>${tgt ? ` (🎯${esc(tgt.name)})` : ''}`
+  pv.innerHTML = `턴 종료 → 내 공격 <b class="atk">${p.atk}</b>${tgt ? ` (${esc(tgt.name)})` : ''}`
     + `${p.kills ? ' <b class="kill">처치! 공격 불발</b>' : ''} · 예상 피격 <b class="dmg">${p.take}</b>`;
 }
 
@@ -2546,7 +2614,7 @@ function cbZoom(key) {
     ? `<div class="zart" style="background-image:url('assets/cards/card_${key}.webp')"></div>`
     : `<div class="zart">${c.icon}</div>`;
   z.innerHTML = `<div class="zbig t-${c.tier || 'common'}${tierFrameCls(c.tier)}">${art}<div class="ztt">${esc(c.name)}</div>
-    <div class="zcc" title="자원">${c.cost}</div><div class="zdd">${esc(c.desc)}</div></div>`;
+    <div class="zcc" title="자원">${c.cost}</div><div class="zdd">${esci(c.desc)}</div></div>`;
   z.classList.add('on');
 }
 
@@ -2661,7 +2729,7 @@ function cbEndTurn() {
     const eff = script.atk - script.blocked;
     setTimeout(() => {
       playHitEffects([{ uid: script.targetUid, amount: eff, killed: script.killed }], 'slash');
-      if (script.blocked > 0) cbBanner(`🛡 방어도가 ${script.blocked} 막음`, 1300);
+      if (script.blocked > 0) cbBanner(`${ico('status_block', 'ico-inline')} 방어도가 ${script.blocked} 막음`, 1300);
     }, impact);
     setTimeout(() => cbSetFoeHp(script.targetUid, Math.max(0, (foeHpBefore[script.targetUid] || 0) - eff)), impact + 300);
     if (script.killed) setTimeout(() => cbBanner('처치! 공격 불발', 1400), impact + 350);
@@ -2675,10 +2743,10 @@ function cbEndTurn() {
       const el = app.querySelector(`.enemy[data-uid="${hit.uid}"]`);
       if (el) { el.classList.add('attacking'); setTimeout(() => el.classList.remove('attacking'), 700); }
       if (hit.dmg > 0) { hpShown = Math.max(0, hpShown - hit.dmg); cbShowPlayerHit(hit.dmg, hpShown); }
-      const extra = mv.op === 'bleed' ? ` · 🩸출혈 ${mv.amount ?? 2}`
-        : mv.op === 'lifesteal' ? (mv.heal ? ` · 💚흡혈 ${mv.heal}` : '')
-        : mv.op === 'armor' ? ` 🛡${mv.block ?? 0}`
-        : mv.op === 'heal' ? ` 💚${mv.heal ?? 0}`
+      const extra = mv.op === 'bleed' ? ` · ${ico('status_bleed', 'ico-inline')}출혈 ${mv.amount ?? 2}`
+        : mv.op === 'lifesteal' ? (mv.heal ? ` · ${ico('ui_heart', 'ico-inline')}흡혈 ${mv.heal}` : '')
+        : mv.op === 'armor' ? ` ${ico('status_block', 'ico-inline')}${mv.block ?? 0}`
+        : mv.op === 'heal' ? ` ${ico('ui_heart', 'ico-inline')}${mv.heal ?? 0}`
         : mv.op === 'empower' ? ` — 다음 턴 주사위 +${mv.power ?? 1}` : '';
       cbBanner(`${esc(mv.name || '공격')}${hit.dmg > 0 ? ` ${hit.dmg}` : ''}${extra}`, 1250);
       const foe = battle.enemies.find(x => x.uid === hit.uid);   // 회복·흡혈이 게이지에 보이게
@@ -2687,7 +2755,7 @@ function cbEndTurn() {
     t += 760;
   }
   if (script.bleed > 0) {
-    setTimeout(() => { hpShown = Math.max(0, hpShown - script.bleed); cbShowPlayerHit(script.bleed, hpShown); cbBanner(`🩸 출혈 ${script.bleed}`, 1100); }, t);
+    setTimeout(() => { hpShown = Math.max(0, hpShown - script.bleed); cbShowPlayerHit(script.bleed, hpShown); cbBanner(`${ico('status_bleed', 'ico-inline')} 출혈 ${script.bleed}`, 1100); }, t);
     t += 700;
   }
   // 3) 마무리
@@ -2816,7 +2884,7 @@ function showEnd(victory) {
   app.innerHTML = '';
   app.append(h(`
     <div class="screen center end-screen">
-      <div class="rest-art">${victory ? '🌅' : '🥀'}</div>
+      <div class="rest-art">${ico(victory ? 'doodle_boss_wolf' : 'doodle_boss', 'ico-big')}</div>
       <h2>${victory ? '늑대를 쓰러뜨렸다' : '숲에 삼켜졌다'}</h2>
       <p>${victory ? '운명의 주사위는 소녀의 편이었다. — 1막 클리어' : `${run.floor}층에서 쓰러짐`}</p>
       <button class="btn primary" id="restart-btn">${victory ? '새로운 런' : '다시 도전'}</button>
