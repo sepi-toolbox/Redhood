@@ -18,7 +18,7 @@ const cases = await pg.evaluate(() => {
   const D = window.__dev, out = [];
   const strip = () => document.querySelectorAll('.buff-strip .tg').length;
   const reset = () => { const b = D.battle;
-    b.buffs = { strength:0, focus:0, regen:0, ironclad:0, thorns:0, fortune:0, enrage:0 };
+    b.buffs = { strength:0, focus:0, regen:0, ironclad:0, reflect:0, fortune:0, enrage:0 };
     b.whet = 0; b.player.dot = 0; b.sealed = {}; b.relicSealed = {}; b.mods = {};
     b.voidLocked = false;
     b.dice.forEach(d => { d.st = null; d.confused = false; });
@@ -26,7 +26,7 @@ const cases = await pg.evaluate(() => {
   const test = (label, fn) => { reset(); const before = strip(); fn(D.battle); D.redraw();
     out.push([label, strip() - before]); };
 
-  for (const k of ['strength','focus','regen','ironclad','thorns','fortune','enrage'])
+  for (const k of ['strength','focus','regen','ironclad','reflect','fortune','enrage'])
     test(`버프 ${k}`, b => { b.buffs[k] = 2; });
   test('벼름', b => { b.whet = 2; });
   test('중독(본체)', b => { b.player.dot = 3; });

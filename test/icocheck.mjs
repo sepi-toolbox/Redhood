@@ -1,7 +1,7 @@
 // icocheck.mjs — 화면에 뜨는 '걸리는 것'이 전부 제 그림을 가졌는지 본다 (v4.1)
 //
 //   왜 있나: 상태이상이 계속 늘고 옮겨 다닌다. 지속 방해였던 것이 주사위 상태이상이 되고(v3.99),
-//   버프가 새로 생기고(v3.97 철갑·가시·행운), 본체로 나간 것도 있다(v3.95 중독).
+//   버프가 새로 생기고(v3.97 철갑·반사·행운), 본체로 나간 것도 있다(v3.95 중독).
 //   그때마다 "일단 비슷한 그림을 빌려 두자"가 쌓이는데, 빌린 그림은 조용하다 —
 //   404 도 안 나고 테스트도 안 깨지고, 화면에서 두 상태가 같은 얼굴로 서 있을 뿐이다.
 //   assetcheck 는 '파일이 있느냐'만 본다. 여기서는 '제 얼굴이냐'를 본다.
@@ -37,16 +37,17 @@ for (const s of ST.list) rows.push({ ko: s.name, id: s.id, where: '주사위', i
 rows.push({ ko: '중독', id: 'poison', where: '본체', ico: 'status_poison' });
 for (const [ko, key] of [['힘', 'strength'], ['집중', 'focus'], ['재생', 'regen']])
   rows.push({ ko, id: key, where: '본체', ico: `status_${key}` });
-for (const [ko, key] of [['철갑', 'ironclad'], ['가시', 'thorns'], ['행운', 'fortune']]) {
+for (const [ko, key] of [['철갑', 'ironclad'], ['행운', 'fortune']]) {
   const want = BUFF_ICO[key];                       // [원하는 것, 대신 세운 것] 중 첫 번째만 잡힌다
   rows.push({ ko, id: key, where: '본체', ico: BUFF_READY.has(want) ? want : null, want });
 }
 rows.push({ ko: '격노', id: 'enrage', where: '본체', ico: 'fx_enrage' });
+rows.push({ ko: '반사', id: 'reflect', where: '본체·적', ico: 'fx_reflect' });   // 나와 적이 같은 그림을 쓴다
 rows.push({ ko: '방어도', id: 'block', where: '본체', ico: 'status_block' });
 rows.push({ ko: '벼름', id: 'whet', where: '본체', ico: 'ui_whet' });
 for (const [ko, key] of [['약화', 'weak'], ['취약', 'vulnerable']])
   rows.push({ ko, id: key, where: '적', ico: `status_${key}` });
-for (const [ko, key] of [['이빨 자국', 'rolltax'], ['가시덩굴', 'holdtax'], ['스멀거림', 'blind']])
+for (const [ko, key] of [['이빨 자국', 'rolltax'], ['가시', 'holdtax'], ['스멀거림', 'blind']])
   rows.push({ ko, id: key, where: '판', ico: `fx_${key}` });
 rows.push({ ko: '족보 봉인', id: 'sealCat', where: '판', ico: 'fx_seal_cat' });
 

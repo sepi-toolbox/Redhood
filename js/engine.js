@@ -57,7 +57,7 @@ export function createBattle(run, encounterIds) {
     // v3.96: 힘 = 전투 내내 남는 누적치. 집중 = 남은 턴 수(효과는 리롤 +1 고정). 재생 = 턴당 회복량.
     // v3.97: 철갑 = 턴 끝에 누적만큼 방어를 낳고 1 준다. 가시 = 맞을 때마다 때린 놈에게 누적만큼 되돌려준다(전투 내내).
     //        행운 = 상태이상이 걸리려 하면 그 '효과 하나'를 통째로 무르고 1 준다.
-    buffs: { strength: 0, focus: 0, regen: 0, ironclad: 0, thorns: 0, fortune: 0, enrage: 0 },
+    buffs: { strength: 0, focus: 0, regen: 0, ironclad: 0, reflect: 0, fortune: 0, enrage: 0 },
     whet: 0,                              // v1.29 벼름 — 쌓았다가 족보로 터뜨리는 곱연산 자원 (턴마다 안 깎인다)
     whetGained: 0,                        // 이번 턴에 벌어들인 양 (연출용)
     enemies: encounterIds.map((id, i) => spawnEnemy(id, i, scale)),
@@ -108,7 +108,7 @@ function spawnEnemy(id, idx, scale) {
     // v4.0: 격노 = 매 턴이 끝날 때 힘 +N. 예전의 escalation(최종 보스 점진 강화)과 글자 그대로
     //   같은 것이라 하나로 합쳤다. 오래 끌수록 위험해진다는 시계 역할을 이것 하나가 맡는다.
     enrage: (def.start || {}).enrage || 0,
-    reflect: (def.start || {}).reflect || 0, reflectLeft: (def.start || {}).reflect ? 99 : 0, // 맞으면 반사 (방어도로 막힘)
+    reflect: (def.start || {}).reflect || 0,   // 맞으면 그만큼 되돌려준다 (때린 쪽 방어도로 막힌다)
     undying: (def.start || {}).undying || 0,                                            // 죽으면 1회 부활 (비율)
   };
 }
@@ -738,9 +738,9 @@ function applyAbility(battle, variant, bd, targets) {
         battle.buffs.ironclad += ab.amount;
         battle.lastResult.bonusHits.push(`🛡철갑 +${ab.amount}`);
         break;
-      case 'thorns':                                     // 🌵 가시 — 맞으면 되돌려준다 (전투 내내)
-        battle.buffs.thorns += ab.amount;
-        battle.lastResult.bonusHits.push(`🌵가시 +${ab.amount}`);
+      case 'reflect':                                    // 🌵 반사 — 맞으면 되돌려준다 (전투 내내)
+        battle.buffs.reflect += ab.amount;
+        battle.lastResult.bonusHits.push(`🌵반사 +${ab.amount}`);
         break;
       case 'fortune':                                    // 🍀 행운 — 걸리려는 상태이상을 무른다
         battle.buffs.fortune += ab.amount;
@@ -792,7 +792,7 @@ function dealToEnemy(battle, t, amount) {
   battle.lastHits.push({ uid: t.uid, amount: dealt, absorbed, killed: t.hp <= 0 });
   if (t.hp > 0 && dealt > 0) {
     // 반사 — 되받아친다. 방어도로 막힌다 (막을 수 있는 세금)
-    if (t.reflectLeft > 0 && t.reflect > 0) {
+    if (t.reflect > 0) {
       const ab = Math.min(battle.player.block, t.reflect);
       battle.player.block -= ab;
       battle.player.hp -= (t.reflect - ab);
@@ -803,16 +803,17 @@ function dealToEnemy(battle, t, amount) {
   }
 }
 
-/* 🌵 가시 — 나를 때린 그 적에게 누적만큼 돌려준다. 적의 방어도가 먼저 막는다.
+/* 🌵 반사 — 나를 때린 그 적에게 누적만큼 돌려준다. 적의 방어도가 먼저 막는다.
+   v4.7: 적이 지닌 반사와 정확히 대칭인 같은 물건이라, 이름도 규칙도 하나로 맞췄다.
    전투 내내 남는다(힘과 같은 결) — 턴마다 깎이지 않는다. */
-export function thornsBack(battle, enemy) {
-  const n = battle.buffs.thorns;
+export function reflectBack(battle, enemy) {
+  const n = battle.buffs.reflect;
   if (!(n > 0) || !enemy || enemy.hp <= 0) return 0;
   const ab = Math.min(enemy.block, n);
   enemy.block -= ab;
   const dealt = n - ab;
   if (dealt > 0) enemy.hp -= dealt;
-  (battle.thornsHits ||= []).push({ uid: enemy.uid, amount: n, dealt });
+  (battle.reflectHits ||= []).push({ uid: enemy.uid, amount: n, dealt });
   if (enemy.hp <= 0 && !battle.over && aliveEnemies(battle).length === 0) {
     battle.over = true; battle.result = 'victory';
   }
@@ -1061,12 +1062,11 @@ export function enemyPhase(battle) {
   if (battle.over || battle.await !== 'enemy') return;
   battle.lastHits = []; // 사체 연출 종료 — 다음 렌더부터 죽은 적 제거
   battle.enemyHits = [];  // v3.26: 연타를 한 대씩 기록한다 — 화면에서 따로따로 때려야 한다
-  battle.thornsHits = [];
+  battle.reflectHits = [];
   for (const e of aliveEnemies(battle)) {
     if (battle.over) break;
     e.block = 0; // 자기 차례가 돌아오면 이전 방어는 소멸
     // v3.94: 출혈은 내 턴 끝(endTurnStatus)으로 옮겼다 — 상태이상은 전부 한 자리에서 돈다
-    if (e.reflectLeft > 0) { e.reflectLeft -= 1; if (e.reflectLeft <= 0) e.reflect = 0; }
     // 재생 — 자기 차례마다 아문다. 순 피해가 이걸 못 넘으면 영원히 못 잡는다
     if (e.regenLeft > 0 && e.regen > 0 && e.hp > 0) {
       e.hp = Math.min(e.maxHpInit, e.hp + e.regen);
@@ -1095,7 +1095,7 @@ export function enemyPhase(battle) {
               }
               // 🌵 가시 — 때린 놈에게 누적만큼 되돌려준다. 적의 반사와 같은 문법(방어도로 막힌다).
               //   주체가 없는 피해(중독·부패·자해·리롤 세금)는 되돌려줄 상대가 없으므로 여기 안 온다.
-              thornsBack(battle, e);
+              reflectBack(battle, e);
               if (e.hp <= 0) break;
             }
           }
@@ -1155,8 +1155,9 @@ export function enemyPhase(battle) {
           if (spendFortune(battle)) break;
           e.enrage = ef.amount || 1;
           break;
-        case 'reflect':                                    // 🌵 반사 — 맞으면 amount 되돌려준다
-          e.reflect = ef.amount; e.reflectLeft = Math.max(1, ef.turns || 3);
+        case 'reflect':                                    // 🌵 반사 — 맞으면 amount 되돌려준다 (전투 내내)
+          if (spendFortune(battle)) break;
+          e.reflect = ef.amount;
           break;
         case '__removed_ward':
           break;

@@ -23,20 +23,20 @@ const eq=(l,a,e)=>{const ok=JSON.stringify(a)===JSON.stringify(e);console.log(`$
   const hp0=b.player.hp; eng.endTurnStatus(b);
   eq('중독이 먼저 아프고 그 뒤에 갑옷을 두른다', [hp0-b.player.hp, b.player.block], [5,2]);
 }
-// ── 가시 ──
+// ── 반사 ──
 { DB.enemyById.__hitter={id:'__hitter',name:'때리는놈',tier:'normal',art:'x',hp:[40,40],
     moves:{hit:{name:'치기',effects:[{op:'damage',amount:6}]}},pattern:{mode:'weighted',weights:{hit:1}}};
-  const b=mk('__hitter'); b.buffs.thorns=4; b.player.block=0;
+  const b=mk('__hitter'); b.buffs.reflect=4; b.player.block=0;
   const ehp=b.enemies[0].hp, hp0=b.player.hp;
   end(b);
-  eq('맞으면 때린 적이 가시만큼 아프다', [hp0-b.player.hp, ehp-b.enemies[0].hp], [6,4]);
-  eq('가시는 턴이 지나도 안 깎인다', b.buffs.thorns, 4);
+  eq('맞으면 때린 적이 반사만큼 아프다', [hp0-b.player.hp, ehp-b.enemies[0].hp], [6,4]);
+  eq('반사는 턴이 지나도 안 깎인다', b.buffs.reflect, 4);
 }
-{ const b=mk('__hitter'); b.buffs.thorns=4; b.player.block=99;
+{ const b=mk('__hitter'); b.buffs.reflect=4; b.player.block=99;
   const ehp=b.enemies[0].hp; end(b);
   eq('다 막아내면 되돌려줄 것도 없다', ehp-b.enemies[0].hp, 0);
 }
-{ const b=mk(); b.buffs.thorns=5; b.player.dot=4; b.player.block=0;
+{ const b=mk(); b.buffs.reflect=5; b.player.dot=4; b.player.block=0;
   const ehp=b.enemies[0].hp; eng.endTurnStatus(b);
   eq('중독처럼 주체 없는 피해는 반사하지 않는다', ehp-b.enemies[0].hp, 0);
 }

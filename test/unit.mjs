@@ -1322,7 +1322,7 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
     eq('격노: 턴이 끝나면 그만큼 오른다', e.strength, 2);
     b.await = 'enemy'; eng.enemyPhase(b); eng.endTurnStatus(b);
     eq('격노: 계속 쌓인다', e.strength, 4);
-    e.reflect = 3; e.reflectLeft = 2; b.player.block = 1;
+    e.reflect = 3; b.player.block = 1;   // v4.7: 반사는 전투 내내 남는다 (reflectLeft 폐지)
     const hp0 = b.player.hp;
     eng.__test_deal(b, e, 10);
     eq('반사: 방어도 1을 뚫고 2가 박힌다', hp0 - b.player.hp, 2);

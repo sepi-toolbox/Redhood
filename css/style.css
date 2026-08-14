@@ -1948,7 +1948,7 @@ span.enemy-art {
 .dot-float.bleed  { color: #ff6b5a; }
 .dot-float.poison { color: #9ad257; }
 .dot-float.rot    { color: #b98ad6; }
-.dot-float.thorns { color: #6fd8c4; }   /* v3.97: 가시가 되받은 몫 — 내가 준 피해라 적의 붉은 피해와 색을 가른다 */
+.dot-float.reflect { color: #6fd8c4; }  /* 반사가 되받은 몫 — 내가 준 피해라 적의 붉은 피해와 색을 가른다 */
 .gain-float.fortune { color: #f0d27a; font-size: 16px; }
 .enemy .dot-float { top: 2px; font-size: 17px; }
 @keyframes dotHit {

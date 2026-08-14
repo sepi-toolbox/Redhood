@@ -33,23 +33,6 @@ decoration. Bold silhouette, readable at 20px. The dominant color of the whole i
 The symbol: one broad iron shoulder plate of three overlapping bands, thick rivets along each band, seen head-on. No text, no letters, no watermark.
 ```
 
-## 가시 — 아이콘
-
-- 파일: `assets/icons/status_thorns.png`
-- 색: `#2fa39a`
-- 지금: fx_reflect.png 를 빌려 쓰는 중
-
-```
-Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular
-brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
-shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
-no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
-ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
-background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
-decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be #2fa39a.
-The symbol: one closed ring of thick bramble thorns, sharp points turned outward, two heavy stems crossing behind. No text, no letters, no watermark.
-```
-
 ## 행운 — 아이콘
 
 - 파일: `assets/icons/status_fortune.png`
