@@ -536,6 +536,8 @@ function situationalFlat(battle) {
     if (h.type === 'lowHpDamage' && battle.player.hp <= battle.player.maxHp * h.ratio) v += h.amount;
     // 곰의 등 — 지금 두른 방어도 per 마다 amount
     if (h.type === 'blockScaleDamage') v += Math.floor(battle.player.block / (h.per || 10)) * h.amount;
+    // v3.81 늑대달 목걸이 — 지금 쌓인 벼름 1당 amount (일격이 아니어도 켜진다)
+    if (h.type === 'whetScaleDamage') v += (battle.whet || 0) * h.amount;
   }
   return v;
 }

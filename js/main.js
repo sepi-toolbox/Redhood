@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.80'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.81'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -345,6 +345,7 @@ const RELIC_ART_READY = new Set([
   'silver_knife', 'silver_bullet', 'fate_thimble', 'wolfmoon_pendant',
   'grandma_book', 'dried_heart', 'leech_ring', 'honey_pot',
   'red_cloak', 'whetstone', 'hunters_eye', 'bears_back',
+  'ember_jar',
 ]);
 function itemIcon(kind, item) {
   // 주사위는 묶음 머리(무엇을 고를지 아직 모를 때)도 나무 주사위 그림으로 — 🎲 를 쓸 일이 없다
