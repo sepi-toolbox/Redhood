@@ -125,3 +125,60 @@ HP를 깎는 정예(운명의 골무·은탄환)가 저체력 축의 **연료**�
 `turnSelfDamage`(매 턴 자해)와 `sealCategory`(특정 족보 봉인).
 
 **여기까지가 설계다. 좋다고 하면 붙이고 400판 돌려서 수치를 맞춘다.**
+
+
+---
+
+# 수정 (2차)
+
+## 길표 승격 취소
+
+일반에 그대로 둔다. 정예와 일반은 그림 결이 달라서(정예는 금빛 테두리) 승격하면 그림을 다시 뽑아야 하고,
+무엇보다 **길표는 조건부라 일반이 맞다** — 스트레이트를 확정해야만 켜진다.
+정예 ② 자리는 아래 새 유물로 채운다.
+
+## 문지기의 빗장 — 방어도를 다 남긴다
+
+절반은 효율이 너무 낮았다. `ratio: 1.0` 으로 올린다.
+그 대신 이게 방어 축의 지붕이 되므로, 곰의 등(방어도 10마다 +3)과 묶었을 때가 이 유물의 전성기다.
+쌓아 둔 방어도가 안 사라지니 곰의 등의 값이 매 턴 누적된다 — 의도한 폭발이다.
+
+## 새 정예 — 불씨 항아리 `ember_jar`
+
+<small>② 코어 자원 · 벼름 축의 지붕</small>
+
+> **리롤할 때마다 🔥벼름 +1. 대신 최대 HP -8.**
+
+숫돌(매 턴 벼름 +1)의 상위호환이 되지 않게 **방식을 갈랐다.** 숫돌은 시간이 주고,
+불씨 항아리는 **리롤을 태워서** 준다. 그래서 붉은 망토·운명의 골무(리롤 유물)와 한 축으로 묶이고,
+리롤을 아껴 쓰는 판에서는 값이 안 난다 — 빌드를 틀어야 켜지는 물건이다.
+
+필요한 훅: `whetOnReroll` (새로 하나) + `maxHp: -8`.
+
+### 그림 프롬프트 (정예 결)
+
+```
+Stylized dark fairytale item illustration for the dice game REDHOOD. Match the EXACT painting style, angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter, no thin hatching lines. NOT photorealistic, NOT 3D. Square 1:1 image. ONE single object centered, filling about 80 percent of the frame, on one plain flat mid-grey background — solid color, no gradient, no checkerboard. No frame, no border, no ground plane, no cast shadow, no background decoration. The object must be BRIGHT and vivid against the grey background, clearly lighter than mid-grey — do NOT make it dark or muddy. Bold silhouette, readable at 40px. The object: a squat iron-banded clay jar with its lid ajar, hot orange embers glowing inside and two or three sparks drifting up out of the opening. The object is a little more ornate than an everyday thing and carries a faint warm golden rim-light along one edge. No text, no letters, no watermark.
+```
+
+## 자해는 지금 어디서 나나 — 셋뿐이다
+
+| 자해가 나는 자리 | 언제 |
+|---|---|
+| **출혈·독 주사위** | 그 주사위를 족보에 쓰면 눈금만큼 (방어도로 막힘) |
+| **부패 주사위** | 턴이 다 차면 터진다. 그 전에 쓰면 해제 |
+| **공허의 부름** | 잠식이 다섯 칸을 다 먹었을 때. 눈 합만큼 자해 |
+
+앞의 둘은 **적이 걸어 주는 것**이라 내가 만들 수 없고, 셋째는 판이 망했을 때만 나온다.
+그래서 거머리 반지(자해할 때마다 벼름 +2)는 **능동적으로 켤 수단이 없는 수동 유물**이다 —
+네 말대로 범용성이 낮다.
+
+두 가지 길이 있다.
+
+1. **거머리 반지를 바꾼다** — 자해 대신 「출혈·독 주사위를 족보에 쓰면 벼름 +2」로 좁히면
+   뜻은 같은데 플레이어가 **일부러 나쁜 주사위를 쓰는** 결정이 생긴다. 훅 하나로 끝난다.
+2. **자해를 내가 켤 수 있게 만든다** — 정예 리스크로 「매 턴 자해」를 넣으면 거머리 반지가
+   그 리스크를 이득으로 뒤집는 짝이 된다. 다만 유물 두 개가 모여야 켜져서 잘 안 만난다.
+
+**1번을 권한다.** 리스크로서의 「매 턴 자해」는 그대로 두되(할머니의 동화책),
+거머리 반지는 자기 힘으로 켜지는 물건으로 바꾸는 쪽이다.
