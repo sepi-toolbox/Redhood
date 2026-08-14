@@ -1,11 +1,11 @@
 // main.js — 부트스트랩 + 화면(UI) 렌더링 (v0.5: 다중 적·타겟팅·연출)
 import { loadAll, DB } from './data.js';
-import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf, modOf, takeFx, takeSealFx } from './engine.js';
+import { createBattle, initialRoll, reroll, toggleHold, confirmCategory, enemyPhase, previewAll, intentOf, aliveEnemies, isAoE, rerollCost, confirmVoidCall, variantOf, modOf, takeFx, takeSealFx, healPlayer } from './engine.js';
 import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.78'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.79'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1922,7 +1922,9 @@ let lastCoinGain = 0;
 function finishBattle() {
   setTimeout(() => {
     busy = false;
-    run.hp = battle.player.hp;
+    // v3.79: 늑대 가죽이 전투 중에 키운 최대 HP 를 런에 얹는다
+    if (battle.grownMaxHp > 0) { run.maxHp += battle.grownMaxHp; battle.grownMaxHp = 0; }
+    run.hp = Math.min(run.maxHp, battle.player.hp);
     if (battle.coinsLost > 0) {                    // v1.17 약탈로 뺏긴 코인
       run.coins = Math.max(0, run.coins - battle.coinsLost);
       battle.coinsLost = 0;
@@ -1936,9 +1938,10 @@ function finishBattle() {
     // (승리 시 처치 연출을 여유 있게 재생)
     // 승리 시 회복 유물 (빵부스러기·꿀단지)
     const heal = run.relics.map(id => DB.relicById[id])
-      .filter(r => r.hook.type === 'healOnVictory')
-      .reduce((s, r) => s + r.hook.amount, 0);
-    if (heal > 0) run.hp = Math.min(run.maxHp, run.hp + heal);
+      .flatMap(r => (r.hooks || [r.hook]))
+      .filter(h => h && h.type === 'healOnVictory')
+      .reduce((s, h) => s + (h.amount || 0), 0);
+    if (heal > 0) healPlayer(run, run.relics.map(id => DB.relicById[id]), heal);
     if (currentNodeType === 'boss') { showBossReward(afterBossVictory); return; }
     // 코인 획득 (v0.13 — 계몽 13: -25%)
     lastCoinGain = coinReward(run, currentNodeType);
@@ -2690,14 +2693,17 @@ function cbDeathFx() {
 function finishCardBattle() {
   setTimeout(() => {
     busy = false;
-    run.hp = battle.player.hp;
+    // v3.79: 늑대 가죽이 전투 중에 키운 최대 HP 를 런에 얹는다
+    if (battle.grownMaxHp > 0) { run.maxHp += battle.grownMaxHp; battle.grownMaxHp = 0; }
+    run.hp = Math.min(run.maxHp, battle.player.hp);
     // 승리 회복 (기본) — 소모전 완화, cards.json config.victoryHeal
-    run.hp = Math.min(run.maxHp, run.hp + (DB.cards.config.victoryHeal || 0));
+    healPlayer(run, run.relics.map(id => DB.relicById[id]), DB.cards.config.victoryHeal || 0);
     // 승리 시 회복 유물 (빵부스러기·꿀단지)
     const heal = run.relics.map(id => DB.relicById[id])
-      .filter(r => r.hook.type === 'healOnVictory')
-      .reduce((s, r) => s + r.hook.amount, 0);
-    if (heal > 0) run.hp = Math.min(run.maxHp, run.hp + heal);
+      .flatMap(r => (r.hooks || [r.hook]))
+      .filter(h => h && h.type === 'healOnVictory')
+      .reduce((s, h) => s + (h.amount || 0), 0);
+    if (heal > 0) healPlayer(run, run.relics.map(id => DB.relicById[id]), heal);
     if (currentNodeType === 'boss') { showBossReward(afterBossVictory); return; }
     lastCoinGain = coinReward(run, currentNodeType);
     run.coins -= lastCoinGain;  // 전리품 창에서 눌러 받는다
