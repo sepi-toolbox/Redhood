@@ -1931,3 +1931,12 @@ span.enemy-art {
   35%  { transform: translate(-50%, -10px) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -30px) scale(.95); }
 }
+
+/* v3.88: 헤더 유물 줄 — 32종이 제 그림을 가졌으니 이모지 대신 그림으로 */
+.relic-mini {
+  width: 21px; height: 21px; object-fit: contain; vertical-align: -4px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6));
+}
+.relic-mini + .relic-mini { margin-left: 2px; }
+.relic-mini.as-emoji { display: inline-block; font-size: 15px; line-height: 21px; text-align: center; }
+.relic-mini.lg { width: 26px; height: 26px; vertical-align: -6px; margin-right: 4px; }
