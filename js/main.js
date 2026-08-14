@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v4.5'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v4.6'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -701,6 +701,10 @@ const stIcoName = (kind) => ST_ICO_FILE[kind] || `status_${kind}`;
 const DIE_ART_ALIAS = { petrify: 'stun' };
 const BUFF_ICO = { ironclad: ['status_ironclad', 'status_block'], thorns: ['status_thorns', 'fx_reflect'],
                    fortune: ['status_fortune', 'status_blessing'] };
+/* 표식의 주조색 — 아트 프롬프트의 {색코드} 자리에 그대로 들어간다 (STATUS_ART_PROMPTS 0부 규칙:
+   색이 첫째다). 가시는 반사(#2fa39a)와 뜻이 같아 색을 물려받았다 — 하나는 내 줄, 하나는 적 몸이라
+   같은 자리에 서지 않는다. */
+const BUFF_TONE = { ironclad: '#4a6fa0', thorns: '#2fa39a', fortune: '#cfe07a' };
 const buffIco = (key, cls = 'ico') => {
   const [want, fallback] = BUFF_ICO[key];
   return ico(BUFF_ART_READY.has(want) ? want : fallback, cls);

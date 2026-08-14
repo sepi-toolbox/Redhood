@@ -126,7 +126,7 @@
     {
       "id": "petrify",
       "name": "굳음",
-      "color": "#55606b",
+      "color": "#6b6055",
       "rule": "zeroOnFace",
       "amount": 6,
       "turns": 2,

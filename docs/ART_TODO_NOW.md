@@ -1,27 +1,119 @@
 # 지금 그려야 하는 리소스
 
 `node tools/arttodo.mjs` 로 코드·데이터에서 다시 뽑는다. 손으로 고치지 말 것.
-규격은 같은 갈래의 기존 그림을 따른다 — 배경 투명, 여백 최소, 단색 심볼.
+머리 블록은 `docs/STATUS_ART_PROMPTS.md` 에서 그대로 읽어 온다 — 규격을 바꾸려면 그쪽을 고친다.
 
-| 갈래 | 이름 | 넣을 곳 | 지금은 | 프롬프트 |
-|---|---|---|---|---|
-| 표식 | 철갑 | `assets/icons/status_ironclad.png` | status_block.png 를 빌림 | `a layered iron plate pauldron, riveted bands, seen head-on` |
-| 표식 | 가시 | `assets/icons/status_thorns.png` | fx_reflect.png 를 빌림 | `a ring of sharp bramble thorns curving outward` |
-| 표식 | 행운 | `assets/icons/status_fortune.png` | status_blessing.png 를 빌림 | `a four-leaf clover with a faint spark at its centre` |
-| 주사위 판 | 굳음 | `assets/ui/status_die_petrify.png` | status_die_stun.png 를 빌림 | `a die face crusted over with grey stone, cracks spreading from the centre` |
-| 족보 판 | 독버섯 | `assets/ui/paper_deathcap.png` | 네 송곳니 그림 그대로 | `four speckled death-cap mushrooms in a row, caps tilted` |
-| 족보 판 | 역병의 달 | `assets/ui/paper_plague_moon.png` | 핏빛 만월 그림 그대로 | `a full moon veined with sickly green rot, faint vapour rising` |
+| 종류 | 파일 | 규격 |
+|---|---|---|
+| **덮개** | `assets/ui/status_die_*.png` | 256×256, 알파, 가장자리에 붙고 **가운데는 비운다** |
+| **아이콘** | `assets/icons/status_*.png` | 96×96, 심볼 하나, 메달 테는 게임이 씌운다 |
+
+**첨부**: `docs/keyart/keyart_stilllife.jpg` — 머리 블록의 `the attached key art` 가 이걸 가리킨다.
+**배경**: 중간 회색으로 뽑는다. 받은 뒤 아래 한 줄로 붙인다.
+
+```
+python3 tools/make_icon.py <원본.png> status_ironclad          # 아이콘
+python3 -c "import sys;sys.path.insert(0,'tools');import make_icon;make_icon.build_die('<원본.png>','petrify')"   # 덮개
+```
+
+## 철갑 — 아이콘
+
+- 파일: `assets/icons/status_ironclad.png`
+- 색: `#4a6fa0`
+- 지금: status_block.png 를 빌려 쓰는 중
+
+```
+Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular
+brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
+shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
+no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
+ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
+background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
+decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be #4a6fa0.
+The symbol: one broad iron shoulder plate of three overlapping bands, thick rivets along each band, seen head-on. No text, no letters, no watermark.
+```
+
+## 가시 — 아이콘
+
+- 파일: `assets/icons/status_thorns.png`
+- 색: `#2fa39a`
+- 지금: fx_reflect.png 를 빌려 쓰는 중
+
+```
+Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular
+brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
+shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
+no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
+ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
+background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
+decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be #2fa39a.
+The symbol: one closed ring of thick bramble thorns, sharp points turned outward, two heavy stems crossing behind. No text, no letters, no watermark.
+```
+
+## 행운 — 아이콘
+
+- 파일: `assets/icons/status_fortune.png`
+- 색: `#cfe07a`
+- 지금: status_blessing.png 를 빌려 쓰는 중
+
+```
+Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular
+brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
+shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
+no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
+ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
+background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
+decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be #cfe07a.
+The symbol: one four-leaf clover with thick rounded leaves and one bright spark at its centre. No text, no letters, no watermark.
+```
+
+## 굳음 — 덮개
+
+- 파일: `assets/ui/status_die_petrify.png`
+- 색: `#6b6055`
+- 지금: status_die_stun.png 를 빌려 쓰는 중
+
+```
+Stylized dark fairytale overlay effect for the dice game REDHOOD. Match the EXACT painting style,
+angular brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art.
+SIMPLE bold shapes, LARGE flat color planes, LOW detail density — no dense repeating texture,
+no tiny clutter, no thin hatching lines, no thin scribbled strands. NOT photorealistic, NOT 3D.
+Square 1:1 image on one plain flat mid-grey background — solid color, no gradient, no checkerboard.
+Do NOT draw a die or any object underneath — draw ONLY the effect itself.
+The effect clings to the EDGES and CORNERS of the square frame and the CENTER of the image is
+completely EMPTY (nothing in the middle 60 percent). The dominant color of the effect must be #6b6055.
+The effect: heavy grey-brown stone lumps swelling out of the left and bottom edges, thick blunt shapes with blunt fracture lines, the middle still open.
+No text, no letters, no watermark.
+```
+
+## 굳음 — 아이콘
+
+- 파일: `assets/icons/status_petrify.png`
+- 색: `#6b6055`
+- 지금: fx_petrify.png 를 쓰는 중 — 기절과 형태가 겹친다
+
+```
+Stylized dark fairytale UI icon for the dice game REDHOOD. Match the EXACT painting style, angular
+brushwork, EXTRA-THICK bold black outlines and muted palette of the attached key art. SIMPLE bold
+shapes, LARGE flat color planes, LOW detail density — no dense repeating texture, no tiny clutter,
+no thin hatching lines, no engraved line work. NOT photorealistic, NOT 3D. Square 1:1 image.
+ONE single symbol centered, filling about 78 percent of the frame, on one plain flat mid-grey
+background — solid color, no gradient, no checkerboard. No circular frame, no border, no background
+decoration. Bold silhouette, readable at 20px. The dominant color of the whole icon must be #6b6055.
+The symbol: one single die pip swollen into a lump of grey stone, blunt fracture lines spreading from it, no die drawn around it. No text, no letters, no watermark.
+```
 
 ## 넣는 법
 
-- 표식(`assets/icons/`) — 파일을 넣고 `js/main.js` 의 `BUFF_ART_READY` 에 이름을 적는다.
-- 주사위 판(`assets/ui/status_die_*.png`) — 파일을 넣고 `DIE_ART_ALIAS` 에서 그 줄을 지운다.
-- 족보 판(`assets/ui/paper_*.png`) — 같은 이름으로 덮어쓰면 끝. READY 는 이미 올라 있다.
-- 유물(`assets/relics/`) — 파일을 넣고 `RELIC_ART_READY` 에 id 를 적는다.
-
-넣은 뒤 `node test/icocheck.mjs` 로 확인한다.
+- 아이콘 — 파일을 넣고 `js/main.js` 의 `BUFF_ART_READY` 에 이름을 적는다.
+- 덮개 — 파일을 넣고 `DIE_ART_ALIAS` 에서 그 줄을 지운다.
+- 넣은 뒤 `node test/icocheck.mjs` 로 확인한다.
 
 ## 급하지 않은 것
 
-- 판 없는 족보 변형 7종 — 기본 종이(paper_row)로 나간다: 숨 고르기(catch_breath), 부싯돌(clash), 도끼날 벼리기(chopping), 쐐기풀(nettle), 벌어진 틈(wedge), 올가미(snare), 굶주림(hunger)
-- 껍데기 없는 주사위 6종 — 기본 눈 그림을 쓴다: 못 주사위(nail), 길잡이 주사위(guide), 되비침 주사위(mirror), 불티 주사위(spark), 쌍눈 주사위(twin), 이음 주사위(chainlink)
+- **개명분 족보 판 2장** — 파일 이름은 맞는데 그림이 옛것이다. 같은 이름으로 덮어쓰면 끝.
+  - `assets/ui/paper_deathcap.png` (독버섯) — 지금 네 송곳니 그림
+  - `assets/ui/paper_plague_moon.png` (역병의 달) — 지금 핏빛 만월 그림
+- 판 없는 족보 변형 7종 — 기본 종이로 나간다: 숨 고르기, 부싯돌, 도끼날 벼리기, 쐐기풀, 벌어진 틈, 올가미, 굶주림
+- 껍데기 없는 주사위 6종 — 기본 눈 그림을 쓴다: 못 주사위, 길잡이 주사위, 되비침 주사위, 불티 주사위, 쌍눈 주사위, 이음 주사위
+- 그림 없는 유물 0종
