@@ -46,7 +46,7 @@ rows.push({ ko: '방어도', id: 'block', where: '본체', ico: 'status_block' }
 rows.push({ ko: '벼름', id: 'whet', where: '본체', ico: 'ui_whet' });
 for (const [ko, key] of [['약화', 'weak'], ['취약', 'vulnerable']])
   rows.push({ ko, id: key, where: '적', ico: `status_${key}` });
-for (const [ko, key] of [['이빨 자국', 'rolltax'], ['가시(리롤세)', 'holdtax'], ['스멀거림', 'blind']])
+for (const [ko, key] of [['이빨 자국', 'rolltax'], ['가시덩굴', 'holdtax'], ['스멀거림', 'blind']])
   rows.push({ ko, id: key, where: '판', ico: `fx_${key}` });
 rows.push({ ko: '족보 봉인', id: 'sealCat', where: '판', ico: 'fx_seal_cat' });
 
@@ -61,6 +61,12 @@ const say = (msg, list, hard = true) => {
 // 1) 그림이 아예 없는 것
 say('제 그림이 없는 상태이상 (남의 것을 빌려 쓰는 중)',
   rows.filter(r => !r.ico).map(r => `${r.ko}(${r.where}) — ${r.want}.png 를 그려야 한다`), false);
+
+/* 파일 이름이 status_<id> 규칙과 다를 뿐, 제 그림을 가진 것들.
+   이건 문제가 아니다 — 별칭표가 이어 주면 그만이다. 문제로 읽히지 않게 따로 적어 둔다. */
+const aliased = Object.entries(ST_ICO_FILE).map(([id, f]) =>
+  `${(ST.list.find(s => s.id === id) || {}).name || id} → ${f}.png (제 그림, 이름만 다름)`);
+if (aliased.length) { console.log(`✅ 이름만 다른 전용 그림: ${aliased.length}개`); for (const a of aliased) console.log(`     ${a}`); }
 
 // 2) 파일이 실재하는가
 say('그림 파일이 없는 것', rows.filter(r => r.ico && !hasIco(r.ico)).map(r => `${r.ko} → ${r.ico}.png`));

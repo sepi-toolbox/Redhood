@@ -413,6 +413,12 @@ Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown i
 | 행운 | `assets/icons/status_fortune.png` | 축복(status_blessing) | `a four-leaf clover with a faint spark at its centre` |
 | 굳음(주사위 판) | `assets/ui/status_die_petrify.png` | 기절 판(status_die_stun) | `a die face crusted over with grey stone, cracks spreading from the centre` |
 
+물림·굳음의 **표식 아이콘은 전용 그림이 이미 있다** (`status_lock.png`, `fx_petrify.png`).
+파일 이름이 `status_<id>` 규칙과 다를 뿐이라 `ST_ICO_FILE` 이 이어 준다 — 다시 그릴 필요 없다.
+물림은 주사위 판(`status_die_bite.png`)도 있다. 굳음만 판이 없는데, 예전에는 굳음이
+제 판을 가질 일이 없었기 때문이다(그 자리에 기절을 붙였으니까). v3.99 에 굳음이
+직접 칸에 붙게 되면서 처음 필요해졌다.
+
 넣는 법:
 - 앞의 셋 — 파일을 넣고 `js/main.js` 의 `BUFF_ART_READY` 에 이름을 적는다.
 - 굳음 판 — 파일을 넣고 `DIE_ART_ALIAS` 에서 `petrify` 줄을 지운다.

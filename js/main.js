@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v4.2'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v4.3'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1132,7 +1132,8 @@ function renderBattle(opts = {}) {
           `혼란 예약 ${battle.pendingConfuse} — 다음 턴이 시작될 때 주사위 ${battle.pendingConfuse}개가 뒤틀린다`));
         for (const k of ['rollTax', 'holdTax', 'blind']) {
           const m = modOf(battle, k);
-          if (m) t.push(iconTag(FX_ICON[k], 'harm', m.left, `${m.name} — ${CB_MOD_KO[k]} (${m.left}턴)`));
+          if (m) t.push(iconTag(FX_ICON[k], 'harm', m.left,
+            `${MOD_KO[k]} ${m.left}턴 — ${CB_MOD_KO[k]}${m.name ? ` (${m.name})` : ''}`));
         }
         // v3.69: 표식이 하나도 없어도 줄을 지운 채로 두면, 벼름이 붙었다 사라질 때마다
         //        체력바가 그 높이만큼 위아래로 튄다. 줄은 늘 자리를 지키고 안만 비운다.
@@ -1277,6 +1278,9 @@ const CB_MOD_KO = {
   rollTax: '리롤할 때마다 피해 (방어도 무시)', holdTax: '리롤 시 지킨 주사위 2개당 피해 1',
   blind: '족보 위력이 보이지 않는다',
 };
+/* v4.3: 지속 방해도 상태이상이다 — 다른 것들처럼 제 이름으로 선다.
+   예전에는 표식에 '적 기술명'만 떠서, 같은 방해라도 건 적이 다르면 다른 것처럼 읽혔다. */
+const MOD_KO = { rollTax: '이빨 자국', holdTax: '가시덩굴', blind: '스멀거림' };
 
 function enemyEffectText(e, ef) {
   const weak = e.debuffs ? e.debuffs.weak : 0;
@@ -1303,8 +1307,8 @@ function enemyEffectText(e, ef) {
     case 'sealLast': return `${fxIco('sealLast')} 흉내 — 직전에 쓴 족보를 ${ef.turns || 1}턴 봉인`;
     case 'sealCat': return `${fxIco('sealCat')} 봉인 — ${(ef.cats || []).join('·')} 족보를 ${ef.turns || 1}턴 봉인`;
     case 'rollTax': return `${fxIco('rollTax')} 이빨 자국 — ${ef.turns || 1}턴간 리롤할 때마다 피해 ${ef.amount || 1} (방어도 무시)`;
-    case 'holdTax': return `${fxIco('holdTax')} 가시 — ${ef.turns || 1}턴간 리롤 시 지킨 주사위 2개당 피해 1`;
-    case 'blind': return `${fxIco('blind')} 어둠 — ${ef.turns || 1}턴간 족보 위력이 보이지 않는다`;
+    case 'holdTax': return `${fxIco('holdTax')} 가시덩굴 — ${ef.turns || 1}턴간 리롤 시 지킨 주사위 2개당 피해 1`;
+    case 'blind': return `${fxIco('blind')} 스멀거림 — ${ef.turns || 1}턴간 족보 위력이 보이지 않는다`;
     case 'regen': return `${fxIco('regen')} 재생 ${ef.amount} — ${ef.turns || 3}턴간 자기 차례마다 회복`;
     case 'enrage': return `${fxIco('enrage')} 격노 ${ef.amount || 1} — 턴이 끝날 때마다 힘 +${ef.amount || 1} (계속 쌓인다)`;
     case 'reflect': return `${fxIco('reflect')} 반사 ${ef.amount} — ${ef.turns || 3}턴간 때리면 되받는다`;
