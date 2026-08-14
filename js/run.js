@@ -191,7 +191,7 @@ export function applyEventEffects(run, effects) {
         const had = c.id in run.categories;
         const before = had ? run.categories[c.id] : null;
         run.categories[c.id] = v.id;
-        messages.push(had ? `📜 ${c.name} 자리에 ${v.name}${before ? ' (앞의 것을 대신한다)' : ''}` : `✨ 새 족보 — ${c.name}: ${v.name}`);
+        messages.push(had ? `${c.name} 자리에 ${v.name}${before ? ' (앞의 것을 대신한다)' : ''}` : `새 족보 — ${c.name}: ${v.name}`);
         break;
       }
       case 'gainDie': {
