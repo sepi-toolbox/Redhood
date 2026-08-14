@@ -55,7 +55,10 @@ export function createBattle(run, encounterIds) {
     pendingBuff: 0,
     pendingConfuse: 0,                    // 적 혼란 예약 — 다음 턴 시작 시 주사위 잠금 수
     dodgeActive: false,
-    buffs: { strength: 0, focus: 0, regen: 0 }, // v0.19: 전투 내 지속 버프 (스택)
+    // v3.96: 힘 = 전투 내내 남는 누적치. 집중 = 남은 턴 수(효과는 리롤 +1 고정). 재생 = 턴당 회복량.
+    // v3.97: 철갑 = 턴 끝에 누적만큼 방어를 낳고 1 준다. 가시 = 맞을 때마다 때린 놈에게 누적만큼 되돌려준다(전투 내내).
+    //        행운 = 상태이상이 걸리려 하면 그 '효과 하나'를 통째로 무르고 1 준다.
+    buffs: { strength: 0, focus: 0, regen: 0, ironclad: 0, thorns: 0, fortune: 0 },
     whet: 0,                              // v1.29 벼름 — 쌓았다가 족보로 터뜨리는 곱연산 자원 (턴마다 안 깎인다)
     whetGained: 0,                        // 이번 턴에 벌어들인 양 (연출용)
     enemies: encounterIds.map((id, i) => spawnEnemy(id, i, scale)),
@@ -365,13 +368,27 @@ export function endTurnStatus(battle) {
   //   (테스트나 화면이 실수로 한 번 더 불러도 두 번 깎이지 않게)
   if (battle.over || battle.await === 'enemy') return;
   battle.enemyDots = [];
+  battle.fortuneBlocked = 0;
   diceStatusTick(battle);
   if (battle.over) return;
   tickDot(battle);
   if (battle.over) return;
   enemyDotTick(battle);
   if (battle.over) return;
+  ironcladTick(battle);
   decayStatuses(battle);
+}
+
+/* 🛡 철갑 — 턴이 끝나면 누적만큼 방어를 낳고 누적이 1 준다.
+   방어도는 내 턴 시작에 초기화되므로, 이 방어는 곧바로 다가오는 적 턴을 위한 것이다.
+   독이 다 지나간 뒤에 두른다 — 이번 턴에 이미 몸에 퍼진 독까지 갑옷이 막아주지는 않는다. */
+function ironcladTick(battle) {
+  const n = battle.buffs.ironclad;
+  if (!(n > 0)) return 0;
+  if (canBlock(battle.relics)) battle.player.block += n;   // 거머리 반지처럼 방어를 못 얻는 몸이면 헛돈다
+  battle.buffs.ironclad -= 1;
+  battle.ironcladGain = n;
+  return n;
 }
 
 // 🩸 적 출혈 — 쌓인 만큼 방어를 무시하고 깎고 누적이 1 준다. 여기서 쓰러지면 행동하지 못한다.
@@ -424,7 +441,7 @@ function startTurn(battle, first = false) {
   }
   // 리롤: 기본 + 유물 + 주사위 패시브 + 집중 버프
   battle.rollsLeft = relicValue(battle.relics, 'extraReroll', DB.scoring.rerollsPerTurn)
-    + dicePassive(battle, 'extraReroll') + battle.buffs.focus + battle.nextTurnRerolls;
+    + dicePassive(battle, 'extraReroll') + (battle.buffs.focus > 0 ? 1 : 0) + battle.nextTurnRerolls;
   battle.nextTurnRerolls = 0;
   battle.rolled = false;
   // 못 주사위(pin): 확정 때 새겨둔 눈을 지우지 않고 그대로 가지고 간다
@@ -719,13 +736,27 @@ function applyAbility(battle, variant, bd, targets) {
         battle.lastResult.bonusHits.push(`🗡️+${ab.amount}`);
         break;
       case 'focus':
+        // v3.96: 효과는 리롤 +1 고정이고 겹치면 턴만 는다 — 이번 턴 즉시 반영도 '꺼져 있던 것을 켤 때'만 한 번.
+        if (battle.buffs.focus === 0) battle.rollsLeft += 1;
         battle.buffs.focus += ab.amount;
-        battle.rollsLeft += ab.amount; // 이번 턴 남은 시간에도 즉시 반영
-        battle.lastResult.bonusHits.push(`🎲+${ab.amount}`);
+        battle.lastResult.bonusHits.push(`🎲+${ab.amount}턴`);
         break;
       case 'regen':
         battle.buffs.regen += ab.amount;
         battle.lastResult.bonusHits.push(`❤️+${ab.amount}`);
+        break;
+      // ---- v3.97 새 지속 버프 ----
+      case 'ironclad':                                   // 🛡 철갑 — 턴 끝마다 방어를 낳는다
+        battle.buffs.ironclad += ab.amount;
+        battle.lastResult.bonusHits.push(`🛡철갑 +${ab.amount}`);
+        break;
+      case 'thorns':                                     // 🌵 가시 — 맞으면 되돌려준다 (전투 내내)
+        battle.buffs.thorns += ab.amount;
+        battle.lastResult.bonusHits.push(`🌵가시 +${ab.amount}`);
+        break;
+      case 'fortune':                                    // 🍀 행운 — 걸리려는 상태이상을 무른다
+        battle.buffs.fortune += ab.amount;
+        battle.lastResult.bonusHits.push(`🍀행운 +${ab.amount}`);
         break;
       // v1.29 벼름 — 다음에 터뜨릴 족보의 배수를 올린다
       case 'whet':
@@ -783,6 +814,22 @@ function dealToEnemy(battle, t, amount) {
     }
     interrupt(t, dealt);
   }
+}
+
+/* 🌵 가시 — 나를 때린 그 적에게 누적만큼 돌려준다. 적의 방어도가 먼저 막는다.
+   전투 내내 남는다(힘과 같은 결) — 턴마다 깎이지 않는다. */
+export function thornsBack(battle, enemy) {
+  const n = battle.buffs.thorns;
+  if (!(n > 0) || !enemy || enemy.hp <= 0) return 0;
+  const ab = Math.min(enemy.block, n);
+  enemy.block -= ab;
+  const dealt = n - ab;
+  if (dealt > 0) enemy.hp -= dealt;
+  (battle.thornsHits ||= []).push({ uid: enemy.uid, amount: n, dealt });
+  if (enemy.hp <= 0 && !battle.over && aliveEnemies(battle).length === 0) {
+    battle.over = true; battle.result = 'victory';
+  }
+  return n;
 }
 
 // HP에 실제로 들어간 피해만 받아서 국면 전환과 파쇄를 판정한다 (방어도로 막힌 몫은 넘어오지 않는다)
@@ -997,7 +1044,8 @@ export function tickDot(battle) {
 function decayStatuses(battle) {
   const snap = battle.decaySnap;
   if (!snap) return;
-  for (const k of ['strength', 'focus', 'regen']) {
+  // v3.96: 힘은 적의 강화(empower)와 같이 전투 내내 남는다 — 여기서 안 깎는다.
+  for (const k of ['focus', 'regen']) {
     if (snap.buffs[k] > 0 && battle.buffs[k] > 0) battle.buffs[k] -= 1;
   }
   for (const e of battle.enemies) {
@@ -1010,11 +1058,22 @@ function decayStatuses(battle) {
   battle.decaySnap = null;
 }
 
+/* 🍀 행운 — 상태이상을 거는 효과 하나를 통째로 무르고 누적이 1 준다.
+   세는 단위는 '효과'다. 주사위 세 칸에 거는 혼란도 하나, 중독 4를 한꺼번에 얹는 것도 하나.
+   주사위든 본체든 가리지 않는다 — 걸리는 자리가 아니라 거는 행위를 막는 것이기 때문이다. */
+function spendFortune(battle) {
+  if (!(battle.buffs.fortune > 0)) return false;
+  battle.buffs.fortune -= 1;
+  battle.fortuneBlocked = (battle.fortuneBlocked || 0) + 1;
+  return true;
+}
+
 // ---------- 적 페이즈 ----------
 export function enemyPhase(battle) {
   if (battle.over || battle.await !== 'enemy') return;
   battle.lastHits = []; // 사체 연출 종료 — 다음 렌더부터 죽은 적 제거
   battle.enemyHits = [];  // v3.26: 연타를 한 대씩 기록한다 — 화면에서 따로따로 때려야 한다
+  battle.thornsHits = [];
   for (const e of aliveEnemies(battle)) {
     if (battle.over) break;
     e.block = 0; // 자기 차례가 돌아오면 이전 방어는 소멸
@@ -1046,6 +1105,10 @@ export function enemyPhase(battle) {
                 battle.player.hp = 0; battle.over = true; battle.result = 'defeat';
                 return;
               }
+              // 🌵 가시 — 때린 놈에게 누적만큼 되돌려준다. 적의 반사와 같은 문법(방어도로 막힌다).
+              //   주체가 없는 피해(중독·부패·자해·리롤 세금)는 되돌려줄 상대가 없으므로 여기 안 온다.
+              thornsBack(battle, e);
+              if (e.hp <= 0) break;
             }
           }
           break;
@@ -1058,6 +1121,8 @@ export function enemyPhase(battle) {
           break;
         case 'status':                                     // v1.17 주사위에 상태이상을 건다
           // amount = 몇 칸에 거는가 · power = 부패의 폭발 피해(0이면 기본값)
+          //   🍀 행운은 '몇 칸에 걸리는가'와 무관하게 이 효과 하나를 통째로 무른다
+          if (spendFortune(battle)) break;
           applyStatus(battle, ef.kind, Math.max(1, ef.amount || 1), ef.power || 0);
           break;
         case 'empower':                                    // 💪 강화 — 전투 내 공격력 누적
@@ -1069,6 +1134,8 @@ export function enemyPhase(battle) {
         case 'rest':                                       // 💤 휴식 — 아무것도 하지 않고 턴을 넘긴다
           break;                                           //   (숨 고르는 틈을 의도적으로 만들 때 쓴다)
         case 'poison':                                     // 🌀 중독 — 내 본체에 쌓인다. 턴 끝마다 쌓인 만큼 아프고 1 준다
+          //   🍀 누적을 한꺼번에 얹는 효과도 '하나'로 친다 — 중독 4든 1이든 행운 하나가 막는다
+          if (spendFortune(battle)) break;
           battle.player.dot += ef.amount;
           break;
         case 'selfDamage':                                 // ❓ 자해 — 제 HP를 깎는다 (방어도 무시, 죽을 수도 있다)

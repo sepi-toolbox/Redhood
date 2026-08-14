@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v3.95'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v3.97'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -264,6 +264,7 @@ const COMBO_ICON_READY = new Set();
 const ABILITY_ICON = {
   strength: 'status_strength', focus: 'status_focus', regen: 'status_regen',
   block: 'status_block', weakEnemy: 'status_weak', poison: 'status_poison',
+  ironclad: 'status_block', thorns: 'fx_reflect', fortune: 'status_blessing',
   vulnerable: 'status_vulnerable',
 };
 function comboIcon(cat, variant) {
@@ -280,11 +281,13 @@ function comboIcon(cat, variant) {
 const TAG_ICON = {
   whet: 'ui_whet', focus: 'status_focus', strength: 'status_strength', block: 'status_block',
   regen: 'status_regen', weakEnemy: 'status_weak', vulnerable: 'status_vulnerable', poison: 'status_poison',
+  ironclad: 'status_block', thorns: 'fx_reflect', fortune: 'status_blessing',
   burst: 'ui_burst', aoe: 'ui_aoe',
 };
 const TAG_KO = {
   whet: '벼름', focus: '집중', strength: '힘', block: '방어', regen: '재생',
   weakEnemy: '약화', vulnerable: '취약', poison: '중독', burst: '일격', aoe: '전체 공격',
+  ironclad: '철갑', thorns: '가시', fortune: '행운',
 };
 /* 어떤 표식이든 같은 얼굴로 — 동그라미에 그림, 필요하면 그 안에 수치.
    족보 줄·적 상태 줄이 같은 언어를 쓰게 한다 (v3.51). */
@@ -359,6 +362,7 @@ const TEXT_ICO = [
   ['\u{1F53B}', 'status_weak'], ['\u{1F3AF}', 'status_vulnerable'],
   ['\u2694\uFE0F', 'intent_attack'], ['\u{1F5E1}\uFE0F', 'intent_attack'], ['\u2694', 'intent_attack'],
   ['\u{1F4A2}', 'fx_enrage'], ['\u{1F335}', 'fx_reflect'], ['\u{1F480}', 'fx_undying'],
+  ['\u{1F340}', 'status_blessing'],
 ];
 function iconifyText(s) {
   let out = String(s);
@@ -667,6 +671,16 @@ function ico(name, cls = '') {
 }
 // v3.14: 전투·상점·지도에 남아 있던 이모지를 정식 표식 아트로 (C절 — 메달 없이 심볼만)
 const UI_ICO = { coin: 'ui_coin', unknown: 'ui_unknown', heart: 'ui_heart', roll: 'ui_roll', burst: 'ui_burst', whet: 'ui_whet' };
+/* v3.97: 철갑·가시·행운 — 전용 그림이 아직 없다. 뜻이 가장 가까운 것을 임시로 세워 둔다.
+   그림이 들어오면 assets/icons 에 넣고 READY 에 이름만 적으면 갈아 끼워진다. */
+const BUFF_ART_READY = new Set();
+const BUFF_ICO = { ironclad: ['status_ironclad', 'status_block'], thorns: ['status_thorns', 'fx_reflect'],
+                   fortune: ['status_fortune', 'status_blessing'] };
+const buffIco = (key, cls = 'ico') => {
+  const [want, fallback] = BUFF_ICO[key];
+  return ico(BUFF_ART_READY.has(want) ? want : fallback, cls);
+};
+const buffIcoName = (key) => (BUFF_ART_READY.has(BUFF_ICO[key][0]) ? BUFF_ICO[key][0] : BUFF_ICO[key][1]);
 const uiIco = (key, cls = 'ico-ui') => ico(UI_ICO[key], cls);
 // v3.59: 두 갈래가 한꺼번에 오는 예고는 표식 하나로 묶는다.
 // engine 이 사설 사용 영역 글자(U+E001~E005)로 '무슨 조합인가'만 말해 주고, 그림은 여기서 고른다.
@@ -1069,9 +1083,15 @@ function renderBattle(opts = {}) {
         const t = [];
         if (battle.whet > 0) t.push(iconTag(UI_ICO.whet, 'good', battle.whet,
           `벼름 ${battle.whet} — 일격 족보로만 터뜨린다 (지금 ×${whetMultOf(battle.whet).toFixed(2).replace(/0$/, '')})`));
-        if (b.strength > 0) t.push(iconTag('status_strength', 'good', b.strength, `힘 +${b.strength} — 확정할 때마다 피해 +${b.strength}`));
-        if (b.focus > 0) t.push(iconTag('status_focus', 'good', b.focus, `집중 +${b.focus} — 매 턴 리롤 +${b.focus}`));
+        if (b.strength > 0) t.push(iconTag('status_strength', 'good', b.strength, `힘 +${b.strength} — 확정할 때마다 피해 +${b.strength} (전투 내내 남는다)`));
+        if (b.focus > 0) t.push(iconTag('status_focus', 'good', b.focus, `집중 ${b.focus}턴 — 그동안 매 턴 리롤 +1`));
         if (b.regen > 0) t.push(iconTag('status_regen', 'good', b.regen, `재생 +${b.regen} — 턴마다 회복`));
+        if (b.ironclad > 0) t.push(iconTag(buffIcoName('ironclad'), 'good', b.ironclad,
+          `철갑 ${b.ironclad} — 턴이 끝날 때 방어 ${b.ironclad} 획득, 그 뒤 1 감소`));
+        if (b.thorns > 0) t.push(iconTag(buffIcoName('thorns'), 'good', b.thorns,
+          `가시 ${b.thorns} — 맞을 때마다 때린 적에게 ${b.thorns} 피해 (전투 내내 남는다)`));
+        if (b.fortune > 0) t.push(iconTag(buffIcoName('fortune'), 'good', b.fortune,
+          `행운 ${b.fortune} — 상태이상을 거는 효과 ${b.fortune}번을 무른다`));
         if (p_.dot > 0) t.push(iconTag('status_poison', 'harm', p_.dot,
           `중독 ${p_.dot} — 내 턴이 끝날 때마다 쌓인 만큼 피해 (방어도로 막힌다)`));
         for (const k of ['rollTax', 'holdTax', 'petrify', 'lockHigh', 'blind']) {
@@ -1235,6 +1255,9 @@ function enemyEffectText(e, ef) {
       return `${ico('intent_attack')} ${head}` + (parts.length ? ` (한 대당 기본 ${base} ${parts.join(' ')})` : '');
     }
     case 'poison': return `${ico('status_poison')} 중독 ${ef.amount} — 내 턴이 끝날 때마다 쌓인 만큼 피해, 그 뒤 1 감소 (방어도로 막힘)`;
+    case 'ironclad': return `${buffIco('ironclad')} 철갑 ${ef.amount} — 턴이 끝날 때 방어를 누적만큼 얻고 1 감소`;
+    case 'thorns': return `${buffIco('thorns')} 가시 ${ef.amount} — 맞을 때마다 때린 적에게 그만큼 (전투 내내 남는다)`;
+    case 'fortune': return `${buffIco('fortune')} 행운 ${ef.amount} — 상태이상을 거는 효과를 그만큼 무른다`;
     case 'selfDamage': return `${uiIco('unknown')} 자해 — 스스로 ${ef.amount} 피해를 입는다 (방어도 무시)`;
     case 'block': return `${ico('status_block')} 방어 ${ef.amount} 획득`;
     case 'confuse': return `${ico('status_confuse')} 혼란 — 다음 턴 내 주사위 ${ef.amount}개 뒤틀림`;
@@ -1263,8 +1286,11 @@ function showPlayerBuffs() {
   const b = battle.buffs;
   const confusedNow = battle.dice.filter(d => d.confused).length;
   const items = [
-    b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 모든 족보 피해 +${b.strength} · 매 턴 1 소멸</li>` : '',
-    b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus} — 매 턴 리롤 +${b.focus} · 매 턴 1 소멸</li>` : '',
+    b.strength > 0 ? `<li>${ico('status_strength')} 힘 ${b.strength} — 모든 족보 피해 +${b.strength} (이번 전투가 끝날 때까지 남는다)</li>` : '',
+    b.focus > 0 ? `<li>${ico('status_focus')} 집중 ${b.focus}턴 — 그동안 매 턴 리롤 +1 (겹쳐 얻으면 세기가 아니라 턴이 늘어난다)</li>` : '',
+    b.ironclad > 0 ? `<li>${buffIco('ironclad')} 철갑 ${b.ironclad} — 턴이 끝날 때 방어 ${b.ironclad}를 얻고 누적이 1 준다. 그 방어로 다가오는 적 턴을 받는다</li>` : '',
+    b.thorns > 0 ? `<li>${buffIco('thorns')} 가시 ${b.thorns} — 적의 공격이 내 체력을 깎을 때마다 그 적에게 ${b.thorns} 피해 (적 방어도로 막힌다). 중독·부패처럼 때린 주체가 없는 피해는 되돌려주지 않는다. 이번 전투가 끝날 때까지 남는다</li>` : '',
+    b.fortune > 0 ? `<li>${buffIco('fortune')} 행운 ${b.fortune} — 상태이상을 거는 효과를 통째로 무르고 1 준다. 주사위 세 칸에 거는 혼란도 하나, 중독 4를 한꺼번에 얹는 것도 하나로 친다</li>` : '',
     b.regen > 0 ? `<li>${ico('status_regen')} 재생 ${b.regen} — 매 턴 시작 시 HP +${b.regen} · 매 턴 1 소멸</li>` : '',
     battle.whet > 0 ? `<li>${uiIco('whet')} 벼름 ${battle.whet} — <b>${uiIco('burst')}일격</b> 족보로 터뜨리면 피해 <b>×${whetMultOf(battle.whet).toFixed(2).replace(/0$/, '')}</b>. 일격이 아닌 족보로는 쓰이지도 깎이지도 않는다</li>` : '',
     battle.player.block > 0 ? `<li>${ico('status_block')} 방어 ${battle.player.block} — 다음 적 행동까지 받는 피해 흡수</li>` : '',
@@ -1302,7 +1328,7 @@ function showPlayerBuffs() {
         <h3>빨간 두건 <small class="cat-tag">걸린 효과</small></h3>
         <ul class="deck-list">${items || '<li class="modal-text">걸린 효과 없음</li>'}</ul>
         ${stItems ? `<p class="info-ability">주사위에 붙은 상태이상</p><ul class="deck-list">${stItems}</ul>` : ''}
-        <p class="hint">힘·집중·재생은 이번 전투가 끝날 때까지 유지된다${stItems ? ' · 주사위 한 칸에는 상태이상이 하나만 붙는다. 새로 걸리면 앞의 것이 밀려나 풀린다' : ''}</p>
+        <p class="hint">힘은 이번 전투가 끝날 때까지 남고, 집중·재생은 턴마다 1씩 준다${stItems ? ' · 주사위 한 칸에는 상태이상이 하나만 붙는다. 새로 걸리면 앞의 것이 밀려나 풀린다' : ''}</p>
         <button class="btn primary" id="pbuff-close">닫기</button>
       </div>
     </div>`));
@@ -1833,6 +1859,23 @@ function tryConfirm(catId, variantId, uid) {
       popNewChips();
       setTimeout(() => playStatusFx(stfx), 120);
       if (sfx.length) setTimeout(() => playSealFx(sfx), 160);
+      // 🌵 가시 — 나를 때린 적이 되받은 몫. 🍀 행운 — 걸릴 뻔한 것을 무른 횟수.
+      (battle.thornsHits || []).forEach((th, i) => setTimeout(() => {
+        const el = app.querySelector(`.enemy[data-uid="${th.uid}"]`);
+        if (!el) return;
+        dotHitFx(el, th.amount, 'thorns', el.querySelector('.enemy-art'));
+      }, 260 + i * 150));
+      for (let i = 0; i < (battle.fortuneBlocked || 0); i++) {
+        setTimeout(() => {
+          const bar = app.querySelector('.battle-screen .player-bar');
+          if (!bar) return;
+          const f = document.createElement('span');
+          f.className = 'gain-float fortune';
+          f.innerHTML = `${buffIco('fortune', 'ico-inline')}무효`;
+          bar.appendChild(f);
+          setTimeout(() => f.remove(), 1500);
+        }, 200 + i * 260);
+      }
       const hits = (battle.enemyHits || []).filter(h => h.taken > 0 || h.blocked > 0);
       if (hits.length > 1) { playMultiHit(hits, hpBefore); busy = false; return; }
       const dmgTaken = hpBefore - battle.player.hp;

@@ -396,3 +396,15 @@ Rough hand-drawn map doodle icons for REDHOOD. Muted palette: dark sepia brown i
 | (선택) 쐐기풀 | `assets/ui/paper_nettle.png` | `a sprig of stinging nettle, serrated leaves with fine hairs` |
 
 나머지 조건(테두리 장식·해상도·여백)은 위 콤보 판 항목과 동일하다.
+
+## v3.97 새 버프 표식 3장
+
+`assets/icons/` 에 넣고 `js/main.js` 의 `BUFF_ART_READY` 에 이름을 적으면 갈아 끼워진다.
+지금은 뜻이 가장 가까운 그림(방어·반사·축복)을 임시로 세워 두었다.
+다른 상태이상 표식과 같은 규격 — 단색 심볼, 여백 최소, 배경 투명.
+
+| 이름 | 파일 | 프롬프트 |
+|---|---|---|
+| 철갑 | `status_ironclad.png` | `a layered iron plate pauldron, riveted bands, seen head-on` |
+| 가시 | `status_thorns.png` | `a ring of sharp bramble thorns curving outward` |
+| 행운 | `status_fortune.png` | `a four-leaf clover with a faint spark at its centre` |

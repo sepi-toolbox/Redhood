@@ -121,16 +121,23 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('집중 효과가 실제로 적용됨', b.rollsLeft, baseRerolls + 1);
   endTurn(b);                       // 2턴 종료 → 3턴
   eq('한 턴 뒤 집중 소멸', b.buffs.focus, 0);
-  eq('한 턴 뒤 힘 1 감소', b.buffs.strength, 1);
+  eq('힘은 턴이 지나도 그대로 (v3.96)', b.buffs.strength, 2);
   eq('한 턴 뒤 재생 소멸', b.buffs.regen, 0);
   eq('한 턴 뒤 약화 1 감소', b.enemies[0].debuffs.weak, 1);
   eq('한 턴 뒤 취약 1 감소', b.enemies[0].debuffs.vulnerable, 1);
   eq('집중 소멸 후 리롤 원복', b.rollsLeft, baseRerolls);
   endTurn(b);                       // 3턴 종료 → 4턴
-  eq('두 턴 뒤 힘 소멸', b.buffs.strength, 0);
+  eq('두 턴 뒤에도 힘은 그대로', b.buffs.strength, 2);
   eq('두 턴 뒤 약화 소멸', b.enemies[0].debuffs.weak, 0);
   endTurn(b);
-  eq('0에서 더 내려가지 않음', b.buffs.strength, 0);
+  eq('전투 내내 안 깎인다', b.buffs.strength, 2);
+  // 집중은 겹쳐도 리롤은 +1 고정, 늘어나는 건 턴뿐
+  b.buffs.focus = 3;
+  endTurn(b);                       // 이번 턴 시작엔 없던 것이라 아직 안 깎인다
+  eq('집중 3턴이어도 리롤은 +1', b.rollsLeft, baseRerolls + 1);
+  endTurn(b);
+  eq('집중은 세기가 아니라 턴이 준다', b.buffs.focus, 2);
+  eq('턴이 줄어도 리롤은 여전히 +1', b.rollsLeft, baseRerolls + 1);
 }
 
 // v1.03: 강화 행동은 일반 행동으로 흡수됐다 — 해금 턴 4 + 쿨다운 4 + 가중치로 표현된다

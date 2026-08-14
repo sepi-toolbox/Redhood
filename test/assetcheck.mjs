@@ -42,7 +42,17 @@ for (const re of [/ico\('([a-z0-9_]+)'/g, /'(intent_[a-z0-9_]+)'/g, /'(status_[a
 // 'status_' + ef.kind 처럼 이어 붙이는 자리는 데이터에서 종류를 끌어와 확인한다
 const statuses = JSON.parse(read('data/statuses.json')).list.map(s => `status_${s.id}`);
 for (const n of statuses) names.add(n);
-bad('코드가 부르는데 없는 아이콘', [...names].filter(n => !have.has(n)));
+/* v3.97: 아직 안 그린 그림은 READY 에 올라야만 실제로 불린다 (BUFF_ICO 의 [원하는 것, 대신 세울 것]).
+   READY 밖에 있는 이름은 코드에 적혀 있어도 화면에 안 나가므로 '없는 아이콘'이 아니다. */
+const mainSrc = read('js/main.js');
+const buffWant = [...(mainSrc.match(/const BUFF_ICO = \{([\s\S]*?)\};/)?.[1] || '')
+  .matchAll(/\['([a-z0-9_]+)',\s*'([a-z0-9_]+)'\]/g)].map(m => m[1]);
+const buffReady = [...(mainSrc.match(/const BUFF_ART_READY = new Set\(\[([\s\S]*?)\]\)/)?.[1] || '')
+  .matchAll(/'([a-z0-9_]+)'/g)].map(m => m[1]);
+const pending = new Set(buffWant.filter(n => !buffReady.includes(n)));
+bad('코드가 부르는데 없는 아이콘', [...names].filter(n => !have.has(n) && !pending.has(n)));
+bad('READY 에 올랐는데 그림이 없는 버프', buffReady.filter(n => !have.has(n)));
+if (pending.size) console.log(`ℹ️  아직 안 그린 버프 그림 ${pending.size}개 (대신 세운 그림으로 나간다): ${[...pending].join(', ')}`);
 
 // 3) 예고 조합 표식은 그림이 있어야만 READY 에 오른다
 const main = read('js/main.js');
