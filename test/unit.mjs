@@ -1711,6 +1711,27 @@ eq('찬스 무보정', computeDamage(C.chance, [6, 6, 5, 4, 1], plain5, []).tota
   eq('보통은 얻을 수 있다', eng.canBlock([MILK]), true);
 }
 
+// v3.83: 예고와 실제가 어긋나면 안 된다.
+// 옹이 골렘 「수액 빨아올리기」가 예고는 방어인데 실제로는 회복이었다 —
+// intent 덮어쓰기로 화면만 속이고 있었다. 덮어쓴 예고는 실제 효과와 맞아야 한다.
+{
+  const { DB } = await import('../js/data.js');
+  const WANT = { attack: 'damage', defend: 'block', empower: 'empower', rest: 'rest' };
+  const lies = [];
+  for (const e of DB.enemies) {
+    const pool = Object.entries(e.moves || {}).map(([id, m]) => [m.name || id, m]);
+    if (e.enlightenedMove) pool.push([e.enlightenedMove.name + '(각성)', e.enlightenedMove]);
+    for (const [nm, m] of pool) {
+      if (!m.intent) continue;
+      const want = WANT[m.intent];
+      if (!want) continue;                       // confuse·unknown 은 뭉뚱그리는 예고라 대조 대상이 아니다
+      const ops = (m.effects || []).map(f => f.op);
+      if (!ops.includes(want)) lies.push(`${e.name}·${nm} 예고=${m.intent} 실제=[${ops}]`);
+    }
+  }
+  eq('예고를 덮어쓴 행동이 실제와 어긋나지 않음', lies, []);
+}
+
 console.log(fails === 0 ? 'ALL UNIT PASS' : `UNIT FAILS: ${fails}`);
 process.exit(fails === 0 ? 0 : 1);
 

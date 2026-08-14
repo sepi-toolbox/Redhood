@@ -651,15 +651,14 @@
         "cooldown": 3
       },
       "mend": {
-        "name": "수액 빨아올리기",
+        "name": "수액을 굳힌다",
         "effects": [
           {
-            "op": "heal",
-            "amount": 7
+            "op": "block",
+            "amount": 8
           }
         ],
-        "cooldown": 3,
-        "intent": "defend"
+        "cooldown": 3
       },
       "surge": {
         "name": "옹이가 굵어진다",
