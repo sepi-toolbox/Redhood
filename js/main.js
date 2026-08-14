@@ -5,7 +5,7 @@ import { whetMultOf } from './yahtzee.js';
 import { newRun, rollEncounter, rollRewards, applyRest, restHealAmount, saveRun, loadRun, clearSave, hasSave, chooseWeapon, offerWeapons, pickEvent, applyEventEffects, applyRelicPickup, rollShopStock, bossRelicChoices, bossLegendaryChoices, eliteRelicChoices, loadMeta, setEnlight, gainEnlight, advanceAct, themeOf, finalEncounter, coinReward, reachableNodes, rollCardRewards } from './run.js';
 import { createCardBattle, clashDice, playCard, endCardTurn, previewTurn, setTarget, aliveFoes, cardOf, cardTargetKind, movePower, moveHurts } from './cardbattle.js';
 
-export const VERSION = 'v4.1'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
+export const VERSION = 'v4.2'; // 로비 하단 표기 — 판을 올릴 때 함께 올린다
 import { setScene, toggleMute, isMuted, prefetch } from './audio.js';
 
 const app = document.getElementById('app');
@@ -1115,13 +1115,21 @@ function renderBattle(opts = {}) {
           t.push(iconTag(stIcoName(kind), 'harm', n,
             `${def.name} — 주사위 ${n}칸 (남은 ${left}턴) · ${def.text}`));
         }
+        /* 족보 봉인 — 적이 건 것(턴이 지나면 풀린다)과 유물이 건 것(전투 내내 잠긴다)을
+           한 표식으로 묶되, 설명에서 갈라 준다. v4.2: 유물 봉인이 여기 안 서 있었다. */
         const sealedIds = Object.keys(battle.sealed || {});
-        if (sealedIds.length) {
-          const left = Math.max(...sealedIds.map(id => battle.sealed[id]));
-          const names = sealedIds.map(id => (DB.scoring.categories.find(c => c.id === id) || {}).name || id);
-          t.push(iconTag('fx_seal_cat', 'harm', sealedIds.length,
-            `족보 봉인 — ${names.join(', ')} (남은 ${left}턴)`));
+        const relicSealedIds = Object.keys(battle.relicSealed || {});
+        const catKo = (id) => (DB.scoring.categories.find(c => c.id === id) || {}).name || id;
+        if (sealedIds.length || relicSealedIds.length) {
+          const parts = [];
+          if (sealedIds.length) parts.push(`${sealedIds.map(catKo).join(', ')} (남은 ${Math.max(...sealedIds.map(id => battle.sealed[id]))}턴)`);
+          if (relicSealedIds.length) parts.push(`${relicSealedIds.map(catKo).join(', ')} (유물 — 전투 내내)`);
+          t.push(iconTag('fx_seal_cat', 'harm', sealedIds.length + relicSealedIds.length,
+            `족보 봉인 — ${parts.join(' · ')}`));
         }
+        // 예약된 혼란 — 적이 걸어 두고 내 턴이 시작될 때 터진다. 걸린 뒤에야 보이면 늦다.
+        if (battle.pendingConfuse > 0) t.push(iconTag('status_confuse', 'harm', battle.pendingConfuse,
+          `혼란 예약 ${battle.pendingConfuse} — 다음 턴이 시작될 때 주사위 ${battle.pendingConfuse}개가 뒤틀린다`));
         for (const k of ['rollTax', 'holdTax', 'blind']) {
           const m = modOf(battle, k);
           if (m) t.push(iconTag(FX_ICON[k], 'harm', m.left, `${m.name} — ${CB_MOD_KO[k]} (${m.left}턴)`));
