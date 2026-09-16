@@ -7,7 +7,6 @@
 | 1 | **유물** | 32 | `keyart_stilllife` |
 | 2 | **보물상자** | 3 | `keyart_stilllife` |
 | 3 | ~~앱 아이콘~~ | 1 | ✅ 완료 — 빨간망토 삽화에서 잘라 씀 |
-| 4 | 감정 카드 (카드판 · 잠자는 중) | 6 | `keyart_redhood` |
 
 키아트 원본은 `docs/keyart/`에 있다. **프롬프트를 복사할 때 그 계열 키아트를 반드시 같이 첨부한다** —
 안 붙이면 화풍이 매번 다르게 나온다.
@@ -133,13 +132,6 @@ Stylized dark fairytale object for the dice game REDHOOD. Match the EXACT painti
 초상 부분을 잘라 썼다. 프롬프트 불필요.
 
 파일: `assets/icon-192.png` · `assets/icon-512.png`
-
----
-
-# 4. 감정 카드 6종 (카드판 · 급하지 않음)
-
-카드판은 지금 잠자는 중이라 마지막이다. 프롬프트는 `docs/CARD_PROMPTS.md`에 그대로 있다.
-족보판을 마무리한 다음에 손대면 된다.
 
 ---
 
