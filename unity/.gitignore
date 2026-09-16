@@ -1,0 +1,10 @@
+/Library/
+/Temp/
+/Obj/
+/Logs/
+/UserSettings/
+/Builds/
+/Assets/StreamingAssets/Data/
+*.csproj
+*.sln
+*.user

@@ -1,0 +1,8 @@
+{
+  "name": "Redhood.Core",
+  "rootNamespace": "Redhood",
+  "references": [
+    "Unity.Newtonsoft.Json"
+  ],
+  "autoReferenced": true
+}
