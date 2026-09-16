@@ -9,7 +9,7 @@ static func load_json(path: String):
 
 static func load_all(base := "res://data/") -> Dictionary:
 	var db := {}
-	for name in ["dice", "relics", "scoring", "enemies", "act1", "events", "acts", "statuses", "cards", "layout"]:
+	for name in ["dice", "relics", "scoring", "enemies", "act1", "events", "acts", "statuses"]:
 		db[name] = load_json(base + name + ".json")
 	db["dice_by_id"] = {}
 	for d in db.dice: db.dice_by_id[d.id] = d

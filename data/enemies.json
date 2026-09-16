@@ -77,36 +77,7 @@
           "amount": 1
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        3
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "peck",
-        "name": "쪼기",
-        "op": "damage",
-        "weight": 3
-      },
-      {
-        "id": "rest",
-        "name": "날개쉬기",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.25
-      },
-      {
-        "id": "surge",
-        "name": "마구 쪼기",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 1
-      }
-    ]
+    }
   },
   {
     "id": "will_o_wisp",
@@ -235,28 +206,7 @@
           }
         ]
       }
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "flare",
-        "name": "홀리기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "waver",
-        "name": "일렁임",
-        "op": "heal",
-        "weight": 2
-      }
-    ]
+    }
   },
   {
     "id": "forest_spider",
@@ -342,35 +292,7 @@
           "amount": 1
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        5
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "bite",
-        "name": "물기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "venom",
-        "name": "독니",
-        "op": "bleed",
-        "weight": 2,
-        "amount": 2
-      },
-      {
-        "id": "web",
-        "name": "거미줄 치기",
-        "op": "armor",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "stray_dog",
@@ -463,42 +385,7 @@
           "amount": 5
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        5,
-        6
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "bite",
-        "name": "물어뜯기",
-        "op": "damage",
-        "weight": 3
-      },
-      {
-        "id": "growl",
-        "name": "울부짖기",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.25
-      },
-      {
-        "id": "lick",
-        "name": "상처 핥기",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "hunger",
-        "name": "허기",
-        "op": "lifesteal",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "thorn_bush",
@@ -580,28 +467,7 @@
           "amount": 6
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        2,
-        3,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "whip",
-        "name": "가시 채찍",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "bristle",
-        "name": "가시 돋기",
-        "op": "armor",
-        "weight": 2
-      }
-    ]
+    }
   },
   {
     "id": "twig_golem",
@@ -704,33 +570,7 @@
           "amount": 8
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        5
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "slam",
-        "name": "후려치기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "rebuild",
-        "name": "재조립",
-        "op": "armor",
-        "weight": 1
-      },
-      {
-        "id": "gather",
-        "name": "가지 그러모으기",
-        "op": "heal",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "brook_sprite",
@@ -839,36 +679,7 @@
           "amount": 1
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        3,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "splash",
-        "name": "물장구",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "play",
-        "name": "물장난",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "glitter",
-        "name": "반짝임",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.25
-      }
-    ]
+    }
   },
   {
     "id": "leech",
@@ -994,28 +805,7 @@
           }
         ]
       }
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        3
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "suck",
-        "name": "흡착",
-        "op": "lifesteal",
-        "weight": 3
-      },
-      {
-        "id": "wriggle",
-        "name": "꿈틀거림",
-        "op": "damage",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "rat_swarm",
@@ -1101,29 +891,7 @@
           "amount": 20
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2
-      ],
-      "n": 6
-    },
-    "battleMoves": [
-      {
-        "id": "gnaw",
-        "name": "갉기",
-        "op": "bleed",
-        "weight": 2,
-        "amount": 1
-      },
-      {
-        "id": "rush",
-        "name": "우르르 몰리기",
-        "op": "damage",
-        "weight": 2
-      }
-    ]
+    }
   },
   {
     "id": "living_broom",
@@ -1212,28 +980,7 @@
           "amount": 27
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "sweep",
-        "name": "쓸기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "guard",
-        "name": "쓸어내기",
-        "op": "armor",
-        "weight": 2
-      }
-    ]
+    }
   },
   {
     "id": "alpha_dog",
@@ -1385,43 +1132,6 @@
         },
         "enter": "unique2"
       }
-    ],
-    "battleDice": {
-      "faces": [
-        2,
-        4,
-        6,
-        8
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "bite",
-        "name": "물어뜯기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "howl",
-        "name": "울부짖음",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "frenzy",
-        "name": "광란",
-        "op": "bleed",
-        "weight": 2,
-        "amount": 3
-      },
-      {
-        "id": "rule",
-        "name": "무리의 규칙",
-        "op": "armor",
-        "weight": 1
-      }
     ]
   },
   {
@@ -1517,36 +1227,7 @@
           }
         ]
       }
-    },
-    "battleDice": {
-      "faces": [
-        3,
-        5,
-        9
-      ],
-      "n": 3
-    },
-    "battleMoves": [
-      {
-        "id": "snap",
-        "name": "물어채기",
-        "op": "bleed",
-        "weight": 2,
-        "amount": 3
-      },
-      {
-        "id": "gulp",
-        "name": "삼키기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "scale",
-        "name": "비늘 세우기",
-        "op": "armor",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "cellar_thing",
@@ -1645,42 +1326,7 @@
           "amount": 1
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        4,
-        8
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "pounce",
-        "name": "덮침",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "creep",
-        "name": "스멀거림",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "coil",
-        "name": "웅크림",
-        "op": "armor",
-        "weight": 1
-      },
-      {
-        "id": "gaze",
-        "name": "응시",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.25
-      }
-    ]
+    }
   },
   {
     "id": "wolf",
@@ -1831,44 +1477,7 @@
           }
         ]
       }
-    },
-    "battleDice": {
-      "faces": [
-        2,
-        4,
-        6,
-        7
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "pounce",
-        "name": "덮치기",
-        "op": "damage",
-        "weight": 3
-      },
-      {
-        "id": "claw",
-        "name": "핏빛 발톱",
-        "op": "bleed",
-        "weight": 2,
-        "amount": 2
-      },
-      {
-        "id": "watch",
-        "name": "경계",
-        "op": "armor",
-        "weight": 1
-      },
-      {
-        "id": "howl",
-        "name": "울음",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      }
-    ]
+    }
   },
   {
     "id": "river_hag",
@@ -2173,44 +1782,7 @@
           "chance": 1
         }
       }
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        5,
-        7
-      ],
-      "n": 5
-    },
-    "battleMoves": [
-      {
-        "id": "grab",
-        "name": "낚아채기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "bubble",
-        "name": "물거품",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "drown",
-        "name": "익사시키기",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 3
-      },
-      {
-        "id": "song",
-        "name": "강의 노래",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      }
-    ]
+    }
   },
   {
     "id": "old_teddy",
@@ -2347,36 +1919,7 @@
           "amount": 2
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        2,
-        5,
-        8
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "crush",
-        "name": "으스러뜨리기",
-        "op": "damage",
-        "weight": 3
-      },
-      {
-        "id": "stuff",
-        "name": "솜 채우기",
-        "op": "armor",
-        "weight": 2
-      },
-      {
-        "id": "button",
-        "name": "단추 눈 빛냄",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      }
-    ]
+    }
   },
   {
     "id": "bog_toad",
@@ -2460,35 +2003,7 @@
           "amount": 5
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        5
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "tongue",
-        "name": "혀 채찍",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "puff",
-        "name": "부풀리기",
-        "op": "armor",
-        "weight": 1
-      },
-      {
-        "id": "spit",
-        "name": "독 뱉기",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 2
-      }
-    ]
+    }
   },
   {
     "id": "mosquito_swarm",
@@ -2573,28 +2088,7 @@
           "amount": 1
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2
-      ],
-      "n": 6
-    },
-    "battleMoves": [
-      {
-        "id": "drain",
-        "name": "흡혈",
-        "op": "lifesteal",
-        "weight": 3
-      },
-      {
-        "id": "buzz",
-        "name": "앵앵거림",
-        "op": "damage",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "mist_wraith",
@@ -2681,35 +2175,7 @@
           "amount": 1
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "graze",
-        "name": "스치기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "blur",
-        "name": "흐려지기",
-        "op": "armor",
-        "weight": 1
-      },
-      {
-        "id": "chill",
-        "name": "한기",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 2
-      }
-    ]
+    }
   },
   {
     "id": "pale_stag",
@@ -2786,28 +2252,7 @@
           "amount": 16
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        2,
-        3,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "ram",
-        "name": "들이받기",
-        "op": "damage",
-        "weight": 3
-      },
-      {
-        "id": "breath",
-        "name": "안개 숨",
-        "op": "heal",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "skeleton",
@@ -2893,27 +2338,6 @@
         }
       ]
     },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        5
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "cut",
-        "name": "뼈칼",
-        "op": "damage",
-        "weight": 3
-      },
-      {
-        "id": "mend",
-        "name": "뼈 맞추기",
-        "op": "heal",
-        "weight": 1
-      }
-    ],
     "start": {
       "undying": 0.25
     }
@@ -2998,35 +2422,7 @@
           "amount": 6
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        3
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "burrow",
-        "name": "파고들기",
-        "op": "bleed",
-        "weight": 2,
-        "amount": 2
-      },
-      {
-        "id": "swallow",
-        "name": "삼키기",
-        "op": "lifesteal",
-        "weight": 1
-      },
-      {
-        "id": "squirm",
-        "name": "꿈틀거림",
-        "op": "damage",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "mud_golem",
@@ -3134,35 +2530,7 @@
           "amount": 1
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        2,
-        4,
-        6
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "fist",
-        "name": "진흙 주먹",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "reform",
-        "name": "재형성",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "harden",
-        "name": "굳히기",
-        "op": "armor",
-        "weight": 2
-      }
-    ]
+    }
   },
   {
     "id": "headless_knight",
@@ -3255,36 +2623,7 @@
           "amount": 28
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        3,
-        5,
-        8
-      ],
-      "n": 3
-    },
-    "battleMoves": [
-      {
-        "id": "sword",
-        "name": "대검 휘두르기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "dignity",
-        "name": "목 없는 위엄",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "shield",
-        "name": "방패 들기",
-        "op": "armor",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "grave_keeper",
@@ -3388,42 +2727,7 @@
           "amount": 3
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        4,
-        6
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "shovel",
-        "name": "삽질",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "bury",
-        "name": "매장",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 3
-      },
-      {
-        "id": "mound",
-        "name": "봉분 쌓기",
-        "op": "armor",
-        "weight": 1
-      },
-      {
-        "id": "mourn",
-        "name": "애도",
-        "op": "heal",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "swamp_king",
@@ -3567,43 +2871,7 @@
           "amount": 8
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        4,
-        7
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "grip",
-        "name": "왕의 손아귀",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "mire",
-        "name": "수렁",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 3
-      },
-      {
-        "id": "crown",
-        "name": "왕관 빛",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "mail",
-        "name": "진흙 갑주",
-        "op": "armor",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "fog_mother",
@@ -3746,43 +3014,7 @@
           "amount": 2
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        6
-      ],
-      "n": 5
-    },
-    "battleMoves": [
-      {
-        "id": "touch",
-        "name": "안개 손길",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "lullaby",
-        "name": "자장가",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "fade",
-        "name": "안개 속으로",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "smother",
-        "name": "숨 막는 안개",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 3
-      }
-    ]
+    }
   },
   {
     "id": "the_buried",
@@ -3914,36 +3146,7 @@
           "amount": 2
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        2,
-        5,
-        7
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "hands",
-        "name": "무덤의 손",
-        "op": "damage",
-        "weight": 3
-      },
-      {
-        "id": "dirt",
-        "name": "흙비",
-        "op": "armor",
-        "weight": 1
-      },
-      {
-        "id": "grudge",
-        "name": "원한",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      }
-    ]
+    }
   },
   {
     "id": "nightmare_hare",
@@ -4023,35 +3226,7 @@
           "amount": 19
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "kick",
-        "name": "악몽 발길질",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "eyes",
-        "name": "홀린 눈",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "hop",
-        "name": "깡총 물러서기",
-        "op": "armor",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "floating_eye",
@@ -4139,35 +3314,7 @@
           "amount": 2
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "stare",
-        "name": "응시",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "tear",
-        "name": "눈물",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "hypno",
-        "name": "최면",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      }
-    ]
+    }
   },
   {
     "id": "dream_moth",
@@ -4255,35 +3402,7 @@
           "amount": 8
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        3
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "dust",
-        "name": "인분 가루",
-        "op": "bleed",
-        "weight": 2,
-        "amount": 2
-      },
-      {
-        "id": "flap",
-        "name": "날갯짓",
-        "op": "damage",
-        "weight": 1
-      },
-      {
-        "id": "cocoon",
-        "name": "고치",
-        "op": "armor",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "whisper_polyp",
@@ -4373,35 +3492,7 @@
           "amount": 2
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        5
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "whisper",
-        "name": "속삭임",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "bud",
-        "name": "증식",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "spore",
-        "name": "포자",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 2
-      }
-    ]
+    }
   },
   {
     "id": "faceless_cultist",
@@ -4485,35 +3576,7 @@
           "amount": 10
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "knife",
-        "name": "제물 칼",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "pray",
-        "name": "기도",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "zeal",
-        "name": "광신",
-        "op": "lifesteal",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "screaming_stone",
@@ -4604,27 +3667,7 @@
           "amount": 2
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        2,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "scream",
-        "name": "비명",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "skin",
-        "name": "돌의 살갗",
-        "op": "armor",
-        "weight": 2
-      }
-    ]
+    }
   },
   {
     "id": "sandman",
@@ -4744,42 +3787,7 @@
           "amount": 2
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        2,
-        4,
-        6
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "sand",
-        "name": "모래 뿌리기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "sleep",
-        "name": "잠재우기",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "wall",
-        "name": "모래벽",
-        "op": "armor",
-        "weight": 1
-      },
-      {
-        "id": "glass",
-        "name": "모래시계 뒤집기",
-        "op": "heal",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "hill_tentacle",
@@ -4885,35 +3893,6 @@
         }
       ]
     },
-    "battleDice": {
-      "faces": [
-        1,
-        5,
-        7
-      ],
-      "n": 4
-    },
-    "battleMoves": [
-      {
-        "id": "wrap",
-        "name": "휘감기",
-        "op": "bleed",
-        "weight": 2,
-        "amount": 3
-      },
-      {
-        "id": "smash",
-        "name": "내리치기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "shrink",
-        "name": "움츠림",
-        "op": "heal",
-        "weight": 1
-      }
-    ],
     "start": {
       "reflect": 2
     }
@@ -5026,36 +4005,7 @@
           "amount": 1
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        3,
-        5,
-        7
-      ],
-      "n": 3
-    },
-    "battleMoves": [
-      {
-        "id": "toll",
-        "name": "타종",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "ring",
-        "name": "귀울림",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 3
-      },
-      {
-        "id": "sanctum",
-        "name": "종의 성역",
-        "op": "armor",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "lucid_king",
@@ -5194,42 +4144,7 @@
           "amount": 2
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        4,
-        6,
-        8
-      ],
-      "n": 3
-    },
-    "battleMoves": [
-      {
-        "id": "scepter",
-        "name": "왕홀 내리찍기",
-        "op": "damage",
-        "weight": 3
-      },
-      {
-        "id": "crown",
-        "name": "꿈의 왕관",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "daydream",
-        "name": "백일몽",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "shield",
-        "name": "왕의 방패",
-        "op": "armor",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "the_maw",
@@ -5358,36 +4273,7 @@
           "amount": 3
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        2,
-        5,
-        9
-      ],
-      "n": 3
-    },
-    "battleMoves": [
-      {
-        "id": "devour",
-        "name": "집어삼키기",
-        "op": "lifesteal",
-        "weight": 3
-      },
-      {
-        "id": "chew",
-        "name": "짓씹기",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 4
-      },
-      {
-        "id": "digest",
-        "name": "소화",
-        "op": "heal",
-        "weight": 1
-      }
-    ]
+    }
   },
   {
     "id": "false_saint",
@@ -5529,43 +4415,7 @@
           "amount": 12
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        3,
-        6,
-        9
-      ],
-      "n": 3
-    },
-    "battleMoves": [
-      {
-        "id": "judge",
-        "name": "심판",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "prayer",
-        "name": "거짓 기도",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "stigma",
-        "name": "성흔",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 3
-      },
-      {
-        "id": "halo",
-        "name": "후광",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      }
-    ]
+    }
   },
   {
     "id": "nameless_dread",
@@ -5657,42 +4507,6 @@
       ]
     },
     "final": true,
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        5
-      ],
-      "n": 3
-    },
-    "battleMoves": [
-      {
-        "id": "whisper",
-        "name": "귓가의 속삭임",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "reach",
-        "name": "닿는다",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 3
-      },
-      {
-        "id": "watch",
-        "name": "바라본다",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "unmake",
-        "name": "지운다",
-        "op": "damage",
-        "weight": 1
-      }
-    ],
     "start": {
       "enrage": 2
     }
@@ -5782,35 +4596,7 @@
           "amount": 1
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        3,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "sermon",
-        "name": "설교",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "tithe",
-        "name": "헌금 걷기",
-        "op": "lifesteal",
-        "weight": 1
-      },
-      {
-        "id": "bless",
-        "name": "축복",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      }
-    ]
+    }
   },
   {
     "id": "choir_ghost",
@@ -5891,35 +4677,7 @@
           "amount": 16
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2,
-        4
-      ]
-    },
-    "battleMoves": [
-      {
-        "id": "discord",
-        "name": "불협화음",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "hymn",
-        "name": "찬송",
-        "op": "heal",
-        "weight": 1
-      },
-      {
-        "id": "high",
-        "name": "찢어지는 고음",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 2
-      }
-    ]
+    }
   },
   {
     "id": "candle_swarm",
@@ -6005,35 +4763,6 @@
           "amount": 5
         }
       ]
-    },
-    "battleDice": {
-      "faces": [
-        1,
-        2
-      ],
-      "n": 6
-    },
-    "battleMoves": [
-      {
-        "id": "wax",
-        "name": "촛농 떨구기",
-        "op": "damage",
-        "weight": 2
-      },
-      {
-        "id": "kindle",
-        "name": "타오르기",
-        "op": "empower",
-        "weight": 1,
-        "mult": 0.3
-      },
-      {
-        "id": "ignite",
-        "name": "불붙기",
-        "op": "bleed",
-        "weight": 1,
-        "amount": 1
-      }
-    ]
+    }
   }
 ]

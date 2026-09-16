@@ -6,7 +6,7 @@ globalThis.localStorage={_d:{},getItem(k){return this._d[k]??null},setItem(k,v){
 const load=p=>JSON.parse(readFileSync(new URL(`../data/${p}`,import.meta.url),'utf8'));
 const {DB}=await import('../js/data.js');
 Object.assign(DB,{dice:load('dice.json'),relics:load('relics.json'),scoring:load('scoring.json'),enemies:load('enemies.json'),
- act1:load('act1.json'),events:load('events.json'),acts:load('acts.json'),statuses:load('statuses.json'),cards:load('cards.json'),layout:load('layout.json')});
+ act1:load('act1.json'),events:load('events.json'),acts:load('acts.json'),statuses:load('statuses.json')});
 DB.statusById=Object.fromEntries(DB.statuses.list.map(x=>[x.id,x]));
 DB.enemyById=Object.fromEntries(DB.enemies.map(e=>[e.id,e]));
 const E=await import('../js/engine.js');

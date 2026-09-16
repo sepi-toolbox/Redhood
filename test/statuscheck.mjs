@@ -10,7 +10,7 @@ const { DB } = await import('../js/data.js');
 Object.assign(DB, {
   dice: load('dice.json'), relics: load('relics.json'), scoring: load('scoring.json'),
   enemies: load('enemies.json'), act1: load('act1.json'), events: load('events.json'), acts: load('acts.json'),
-  statuses: load('statuses.json'), cards: load('cards.json'), layout: load('layout.json'),
+  statuses: load('statuses.json'),
 });
 DB.statusById = Object.fromEntries(DB.statuses.list.map(x => [x.id, x]));
 DB.diceById = Object.fromEntries(DB.dice.map(d => [d.id, d]));

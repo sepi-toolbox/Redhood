@@ -4,11 +4,10 @@ export const DB = {
   scoring: null, enemies: null, enemyById: {}, act1: null,
   events: null, weaponById: {}, eventById: {}, acts: null,
   statuses: null, statusById: {},
-  cards: null, cardById: {},            // v2.0 감정 카드
 };
 
 export async function loadAll() {
-  const [dice, relics, scoring, enemies, act1, events, acts, statuses, cards, layout] = await Promise.all([
+  const [dice, relics, scoring, enemies, act1, events, acts, statuses] = await Promise.all([
     fetchJson('./data/dice.json'),
     fetchJson('./data/relics.json'),
     fetchJson('./data/scoring.json'),
@@ -17,13 +16,10 @@ export async function loadAll() {
     fetchJson('./data/events.json'),
     fetchJson('./data/acts.json'),
     fetchJson('./data/statuses.json'),
-    fetchJson('./data/cards.json'),
-    fetchJson('./data/layout.json'),
   ]);
   DB.dice = dice; DB.relics = relics; DB.scoring = scoring;
   DB.enemies = enemies; DB.act1 = act1; DB.events = events; DB.acts = acts;
-  DB.statuses = statuses; DB.cards = cards; DB.layout = layout;
-  DB.cardById = {}; for (const c of cards.list) DB.cardById[c.id] = c;
+  DB.statuses = statuses;
   DB.statusById = {}; for (const st of statuses.list) DB.statusById[st.id] = st;
   DB.diceById = {}; for (const d of dice) DB.diceById[d.id] = d;
   DB.relicById = {}; for (const r of relics) DB.relicById[r.id] = r;
@@ -41,39 +37,8 @@ async function fetchJson(path) {
 }
 
 function validate() {
-  // v2.0 감정 카드: 시작 덱은 전부 존재하는 카드여야 한다
-  for (const id of DB.cards.starterDeck) {
-    if (!DB.cardById[id]) throw new Error(`cards.json: starterDeck에 없는 카드 id "${id}"`);
-  }
-  for (const c of DB.cards.list) {
-    if (!(c.cost >= 0)) throw new Error(`cards.json: ${c.id} cost가 없습니다`);
-    if (c.target && !['active', 'dead'].includes(c.target)) throw new Error(`cards.json: ${c.id} 미지원 target "${c.target}"`);
-  }
   for (const id of DB.act1.player.startDice) {
     if (!DB.diceById[id]) throw new Error(`act1.json: startDice에 없는 주사위 id "${id}"`);
-  }
-  // v2.17 적 주사위(눈 목록·개수)와 예고 행동(battleMoves) — 위력 = 남은 주사위 합
-  const MOVE_OPS = new Set(['damage', 'bleed', 'armor', 'lifesteal', 'heal', 'empower']);
-  for (const e of DB.enemies) {
-    const bd = e.battleDice;
-    if (bd && bd.faces) {
-      if (!Array.isArray(bd.faces) || !bd.faces.every(f => Number.isInteger(f) && f >= 1 && f <= 20)) {
-        throw new Error(`enemies.json: ${e.id} battleDice.faces 는 1~20 정수 목록이어야 합니다`);
-      }
-    }
-    if (e.faceAbilities) throw new Error(`enemies.json: ${e.id} faceAbilities 는 v2.17에서 폐기 — battleMoves 로 옮기세요`);
-    if (e.battleMoves) {
-      if (!Array.isArray(e.battleMoves) || !e.battleMoves.length) throw new Error(`enemies.json: ${e.id} battleMoves 는 비어있지 않은 목록이어야 합니다`);
-      const seen = new Set();
-      for (const m of e.battleMoves) {
-        if (!m.id || seen.has(m.id)) throw new Error(`enemies.json: ${e.id} battleMoves id 누락/중복 "${m.id || '?'}"`);
-        seen.add(m.id);
-        if (!m.name) throw new Error(`enemies.json: ${e.id}.${m.id} 행동 이름이 없습니다`);
-        if (!MOVE_OPS.has(m.op)) throw new Error(`enemies.json: ${e.id}.${m.id} 미지원 행동 "${m.op}"`);
-        if (m.weight !== undefined && !(m.weight > 0)) throw new Error(`enemies.json: ${e.id}.${m.id} weight 는 양수`);
-        if (m.mult !== undefined && !(m.mult > 0)) throw new Error(`enemies.json: ${e.id}.${m.id} mult 는 양수`);
-      }
-    }
   }
   for (const d of DB.dice) {
     if (!Array.isArray(d.faces) || d.faces.length !== 6) throw new Error(`dice.json: ${d.id} faces는 6면이어야 함`);
