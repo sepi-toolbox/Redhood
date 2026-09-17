@@ -2,8 +2,7 @@
   "name": "Redhood.Core.Tests",
   "rootNamespace": "Redhood.Tests",
   "references": [
-    "Redhood.Core",
-    "Unity.Newtonsoft.Json"
+    "Redhood.Core"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

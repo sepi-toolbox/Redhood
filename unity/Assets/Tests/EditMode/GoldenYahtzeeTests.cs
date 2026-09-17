@@ -2,95 +2,101 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Security.Cryptography;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Redhood.Data;
 using Redhood.Dice;
-using UnityEngine;
 
 namespace Redhood.Tests
 {
     public sealed class GoldenYahtzeeTests
     {
-        private GameDatabase _database;
-        private GoldenVectors _vectors;
+        private GameDatabase _db;
+        private JObject _fixture;
 
         [OneTimeSetUp]
-        public void LoadSourceOfTruth()
+        public void Load()
         {
-            _database = GameDatabase.Load();
-            string path = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "godot",
-                "tests", "golden_yahtzee.json"));
-            _vectors = JsonConvert.DeserializeObject<GoldenVectors>(File.ReadAllText(path));
-            Assert.That(_vectors, Is.Not.Null);
+            _db = TestData.Load();
+            _fixture = JObject.Parse(File.ReadAllText(Path.Combine(TestData.Root,
+                "unity/Tests/Fixtures/current-golden.json")));
         }
 
         [Test]
-        public void All300CategoryVectorsMatchWebClient()
+        public void FixtureMatchesCurrentSourceHashes()
         {
-            var failures = new List<string>();
-            foreach (EvalVector vector in _vectors.Eval)
+            foreach (JProperty entry in ((JObject)_fixture["sources"]).Properties())
             {
-                CategoryResult actual = YahtzeeCalculator.Evaluate(_database.Category(vector.Category),
-                    vector.Faces, new HashSet<int>(vector.Zeroed ?? Array.Empty<int>()));
-                if (actual.Valid != vector.Valid || actual.Base != vector.Base ||
-                    !actual.Contributing.SequenceEqual(vector.Contributing))
-                {
-                    failures.Add($"{vector.Category} [{string.Join(",", vector.Faces)}]: " +
-                        $"expected {vector.Valid}/{vector.Base}/[{string.Join(",", vector.Contributing)}], " +
-                        $"got {actual.Valid}/{actual.Base}/[{string.Join(",", actual.Contributing)}]");
-                }
+                using var sha = SHA256.Create();
+                string actual = BitConverter.ToString(sha.ComputeHash(
+                    File.ReadAllBytes(Path.Combine(TestData.Root, entry.Name)))).Replace("-", "").ToLowerInvariant();
+                Assert.That(actual, Is.EqualTo((string)entry.Value),
+                    "Regenerate fixtures: node unity/tools/generate-golden.mjs");
             }
-
-            Assert.That(failures, Is.Empty, string.Join("\n", failures.Take(20)));
         }
 
         [Test]
-        public void All150DamageVectorsMatchWebClient()
+        public void CurrentGoldenVectorsMatchJavaScript()
         {
-            var failures = new List<string>();
-            foreach (DamageVector vector in _vectors.Damage)
+            foreach (JObject vector in _fixture["vectors"]) Verify(vector);
+            TestContext.WriteLine($"JS golden comparisons: {_fixture["vectors"].Count()}");
+        }
+
+        [Test]
+        [Category("Exhaustive")]
+        public void AllOrderedFiveDiceHandsMatchJavaScript()
+        {
+            string path = Path.Combine(TestData.Root, "unity/Tests/Generated/exhaustive.jsonl");
+            if (!File.Exists(path))
+                Assert.Ignore("Optional exhaustive suite: node unity/tools/generate-golden.mjs --exhaustive");
+            int count = 0;
+            foreach (string line in File.ReadLines(path))
             {
-                DiceDefinition[] dice = vector.Gold.Select(isGold => new DiceDefinition { Gold = isGold }).ToArray();
-                RelicDefinition[] relics = vector.Relics.Select(_database.Relic).ToArray();
-                DamageResult actual = YahtzeeCalculator.ComputeDamage(_database.Category(vector.Category),
-                    vector.Faces, dice, relics, _database.Scoring, whet: vector.Whet, hpRatio: vector.HpRatio);
-                if (actual.Valid != vector.Valid || actual.Total != vector.Total)
-                {
-                    failures.Add($"{vector.Category} [{string.Join(",", vector.Faces)}]: " +
-                        $"expected {vector.Valid}/{vector.Total}, got {actual.Valid}/{actual.Total}");
-                }
+                Verify(JObject.Parse(line));
+                count++;
             }
-
-            Assert.That(failures, Is.Empty, string.Join("\n", failures.Take(20)));
+            Assert.That(count, Is.EqualTo(268912));
+            TestContext.WriteLine($"Ordered-hand comparisons (0..6, normal + stunned): {count}");
         }
 
-        private sealed class GoldenVectors
+        private void Verify(JObject vector)
         {
-            [JsonProperty("eval")] public List<EvalVector> Eval = new();
-            [JsonProperty("damage")] public List<DamageVector> Damage = new();
-        }
-
-        private sealed class EvalVector
-        {
-            [JsonProperty("cat")] public string Category;
-            [JsonProperty("faces")] public int[] Faces;
-            [JsonProperty("zeroed")] public int[] Zeroed;
-            [JsonProperty("valid")] public bool Valid;
-            [JsonProperty("base")] public int Base;
-            [JsonProperty("contributing")] public int[] Contributing;
-        }
-
-        private sealed class DamageVector
-        {
-            [JsonProperty("cat")] public string Category;
-            [JsonProperty("faces")] public int[] Faces;
-            [JsonProperty("gold")] public bool[] Gold;
-            [JsonProperty("relics")] public string[] Relics;
-            [JsonProperty("whet")] public int Whet;
-            [JsonProperty("hpRatio")] public double HpRatio;
-            [JsonProperty("total")] public int Total;
-            [JsonProperty("valid")] public bool Valid;
+            var faces = vector["faces"].ToObject<int[]>();
+            var zeroed = new HashSet<int>(vector["zeroed"].ToObject<int[]>());
+            CategoryDefinition cat = vector["definition"]?.ToObject<CategoryDefinition>()
+                ?? _db.Category((string)vector["cat"]);
+            JObject expected = (JObject)vector["expected"];
+            string context = $"{cat.Id} [{string.Join(",", faces)}]";
+            if ((string)vector["type"] == "eval")
+            {
+                CategoryResult result = YahtzeeCalculator.Evaluate(cat, faces, zeroed);
+                if (result.Valid != (bool)expected["valid"] || result.Base != (int)expected["base"] ||
+                    !result.Contributing.SequenceEqual(expected["contributing"].ToObject<int[]>()))
+                    Assert.Fail(context + " category mismatch. JS=" + expected +
+                        $" C#={result.Valid}/{result.Base}/[{string.Join(",", result.Contributing)}]");
+            }
+            else
+            {
+                var dice = vector["dice"].ToObject<string[]>().Select(_db.Die).ToArray();
+                var relics = vector["definitions"] != null
+                    ? vector["definitions"].ToObject<RelicDefinition[]>()
+                    : vector["relics"].ToObject<string[]>().Select(_db.Relic).ToArray();
+                DamageResult result = YahtzeeCalculator.ComputeDamage(cat, faces, dice, relics, _db.Scoring,
+                    zeroed, (int)vector["whet"], (double)vector["hpRatio"]);
+                Assert.That(result.Valid, Is.EqualTo((bool)expected["valid"]), context);
+                Assert.That(result.Base, Is.EqualTo((int)expected["base"]), context);
+                Assert.That(result.Total, Is.EqualTo((int)expected["total"]), context);
+                Assert.That(result.Gold, Is.EqualTo((int)expected["gold"]), context);
+                Assert.That(result.Split, Is.EqualTo((int)expected["split"]), context);
+                Assert.That(result.Multiplier, Is.EqualTo((double)expected["mult"]), context);
+                Assert.That(result.WhetMultiplier, Is.EqualTo((double)expected["whetMult"]), context);
+                Assert.That(result.Bonus, Is.EqualTo((int)expected["bonus"]), context);
+                Assert.That(result.Flat, Is.EqualTo((int)expected["flat"]), context);
+                Assert.That(result.IsZero, Is.EqualTo((bool)expected["isZero"]), context);
+                if (expected["contributing"] != null)
+                    Assert.That(result.Contributing, Is.EqualTo(expected["contributing"].ToObject<int[]>()), context);
+            }
         }
     }
 }

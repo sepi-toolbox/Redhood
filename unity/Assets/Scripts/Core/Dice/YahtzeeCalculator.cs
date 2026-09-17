@@ -79,7 +79,7 @@ namespace Redhood.Dice
                     {
                         int face = matchingFaces.Max();
                         int[] indices = all.Where(i => faces[i] == face).ToArray();
-                        double multiplier = score == "matchedSumX2" ? 2d : category.Mult;
+                        double multiplier = score == "matchedSumX2" ? 2d : Multiplier(category);
                         return Pass(Floor(indices.Sum(Value) * multiplier), indices);
                     }
 
@@ -95,15 +95,15 @@ namespace Redhood.Dice
                     var indices = new List<int>(4);
                     foreach (int face in pairFaces)
                         indices.AddRange(all.Where(i => faces[i] == face).Take(2));
-                    return Pass(Floor(indices.Sum(Value) * category.Mult), indices);
+                    return Pass(Floor(indices.Sum(Value) * Multiplier(category)), indices);
                 }
                 case "fullHouse":
                 {
                     int[] groups = counts.Values.OrderBy(value => value).ToArray();
-                    bool valid = groups.SequenceEqual(new[] { 2, 3 }) || groups.SequenceEqual(new[] { 5 });
+                    bool valid = groups.SequenceEqual(new[] { 2, 3 }) || (groups.Length > 0 && groups[0] == 5);
                     if (!valid) return Fail();
                     int baseDamage = ScoreText(category.Score) == "sumAll"
-                        ? Floor(all.Sum(Value) * category.Mult)
+                        ? Floor(all.Sum(Value) * Multiplier(category))
                         : ScoreNumber(category.Score);
                     return Pass(baseDamage, all);
                 }
@@ -177,9 +177,9 @@ namespace Redhood.Dice
             var runFaces = new HashSet<int>(Enumerable.Range(endAt - category.Length + 1, category.Length));
             var used = new HashSet<int>();
             int[] indices = all.Where(i => runFaces.Contains(faces[i]) && used.Add(faces[i])).ToArray();
-            int baseDamage = category.Score?.Type == JTokenType.Integer
+            int baseDamage = category.Score?.Type == JTokenType.Integer || category.Score?.Type == JTokenType.Float
                 ? ScoreNumber(category.Score)
-                : Floor(indices.Sum(value) * category.Mult);
+                : Floor(indices.Sum(value) * Multiplier(category));
             return Pass(baseDamage, indices);
         }
 
@@ -218,6 +218,7 @@ namespace Redhood.Dice
             ? score.Value<int>() : 0;
 
         private static int Floor(double value) => (int)Math.Floor(value);
+        private static double Multiplier(CategoryDefinition category) => category.Mult == 0 ? 1d : category.Mult;
         private static CategoryResult Pass(int damage, IEnumerable<int> indices) => new(true, damage, indices);
         private static CategoryResult Fail() => new(false, 0, Array.Empty<int>());
     }

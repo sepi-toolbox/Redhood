@@ -5,6 +5,14 @@
 /UserSettings/
 /Builds/
 /Assets/StreamingAssets/Data/
+/Assets/Resources/Redhood/
+/Assets/Resources/Redhood.meta
+**/bin/
+**/obj/
+/Tests/Generated/
 *.csproj
+!Tests/Redhood.Core.csproj
+!Tests/Headless/Redhood.Tests.csproj
+**/TestResults/
 *.sln
 *.user

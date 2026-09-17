@@ -1,0 +1,5 @@
+<linker>
+  <assembly fullname="Redhood.Core">
+    <type fullname="Redhood.Data.*" preserve="all" />
+  </assembly>
+</linker>

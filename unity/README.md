@@ -1,37 +1,85 @@
-# REDHOOD — Unity port
+# REDHOOD — Unity 이식
 
-This folder contains the Unity client port. The web client remains untouched and
-`../data/*.json` remains the authoritative game database.
+현재 단계: **원본 아트가 적용된 족보 연습 화면 + 검증 가능한 C# 규칙 코어**.
+완성된 전투 엔진은 아니다. 기존 웹판·Godot 파일은 변경하지 않는다.
 
-## Baseline
+## 실행
 
-- Unity 6 LTS (`6000.0`)
-- Portrait reference resolution: `390 x 844`
-- Newtonsoft Json for the existing polymorphic JSON data
-- EditMode tests for the pure C# scoring and battle-domain code
+1. `codex/unity-vertical-slice` 브랜치의 **저장소 전체**를 받는다.
+   `unity/`만 받으면 원본 `data/`, `assets/`가 없어 실행되지 않는다.
+2. Unity Hub에서 저장소의 `unity/` 폴더를 프로젝트로 추가한다.
+   프로젝트 기준 버전은 **6000.0.40f1**이다. 다른 6000.0 패치로의 업그레이드는 에디터에서 확인한다.
+3. 패키지 설치와 임포트가 끝나면 **REDHOOD → Open battle prototype**을 선택한다.
+4. Play를 누른다. Game 뷰를 390×844 또는 다른 세로 비율로 맞춘다.
+5. **주사위 굴리기 → 리롤할 주사위 탭 → 족보 선택 → 확정 → 다음 턴** 순으로 조작한다.
 
-## Open the project
+원본처럼 첫 굴림·리롤 직후에는 모두 유지 상태다. 선택한 주사위만 리롤하며,
+아무것도 선택하지 않으면 횟수가 소모되지 않는다. 승리 후 우측 상단에서 재시작할 수 있다.
 
-1. In Unity Hub, add the `unity` folder as a project.
-2. Open it with Unity 6 LTS.
-3. Run EditMode tests from **Window > General > Test Runner**.
+## 포함 범위 / 남은 범위
 
-In the Editor, data is read directly from the repository's top-level `data`
-folder. Before a player build, `RedhoodDataBuildProcessor` copies the same JSON
-files into `Assets/StreamingAssets/Data`; generated copies are git-ignored.
+| 항목 | 현재 상태 |
+|---|---|
+| 족보 8종·금박·쌍눈·피해 계산 유물 훅·벼름 배율 | 순수 C# 계산기에서 지원 및 JS 대조 |
+| 5개 주사위·선택 리롤·족보 미리보기·확정·턴·승리 | 연습 세션에서 지원 |
+| 적 체력·이름, 시작 주사위 | 원본 JSON에서 로드 |
+| 숲·늑대·주사위·버튼, 한글 폰트 | uGUI 화면에 연결 |
+| 모바일 화면 비율·안전 영역 | 레이아웃 코드 적용, 기기 검증 대기 |
+| 적 AI·피격·패배·상태이상·변형·획득 족보 제한 | **아직 미이식** |
+| 특수 주사위의 굴림 효과·유물 런타임 효과 | 계산기 외 전투 효과는 **미이식** |
+| 지도·상점·이벤트·저장·음향·모바일 빌드 | **미이식 / 미검증** |
 
-## First milestone
+연습 화면은 모든 기본 족보를 개방하며 적이 반격하지 않는다. 벼름과 유물 계산은
+계산기 테스트에서만 검증한다. 실제 전투에서는 일격 변형만 벼름을 소비하므로,
+이 연습 세션에서 임의로 벼름을 증폭·소비하지 않는다.
 
-The first milestone deliberately contains no final presentation layer. It ports
-the deterministic rules first:
+## 구조와 데이터
 
-- five dice, hold/unhold, and two rerolls;
-- all eight scoring categories;
-- gold/split dice and relic damage hooks;
-- whet multiplier;
-- a minimal enemy HP loop;
-- all 450 existing JS golden vectors, plus focused regression tests for the
-  highest-risk scoring cases.
+- `Assets/Scripts/Core/`: Unity 의존성이 없는 데이터·족보·연습 세션.
+- `Assets/Scripts/Runtime/`: Resources 로더와 uGUI 화면.
+- `Assets/Editor/RedhoodSourceAssets.cs`: 원본 데이터와 필요한 아트만 자동 동기화.
+- `Assets/Tests/EditMode/`: Unity Test Runner와 .NET에서 공유하는 NUnit 테스트.
+- `Tests/Fixtures/current-golden.json`: 최신 JS에서 생성한 고정 대조값 913건.
 
-Next: connect `BattleSession` to the portrait battle UI and replace the fixed
-prototype enemy with an entry loaded from `enemies.json`.
+단일 원본은 저장소의 `data/*.json`, `assets/`다. 에디터 로드·Play 진입·빌드 전에
+`Assets/Resources/Redhood/`에 필요한 파일만 동기화한다. 이 사본은 git에 넣지 않는다.
+플레이어는 Resources로 읽으므로 Android/WebGL에서 StreamingAssets를
+`File.ReadAllText`로 읽는 문제를 피한다.
+[Unity 파일 접근 제약](https://docs.unity3d.com/6000.0/Documentation/Manual/StreamingAssets.html)
+
+한글 폰트는 Google Fonts 배포본 Nanum Gothic이며, SIL OFL 라이선스를 함께 포함한다.
+[원본 폰트와 라이선스](https://github.com/google/fonts/tree/main/ofl/nanumgothic)
+
+## 검증
+
+Unity에서는 **Window → General → Test Runner → EditMode → Run All**.
+Node.js와 .NET 8 SDK가 있으면 저장소 루트에서:
+
+```sh
+node unity/tools/verify.mjs --exhaustive
+```
+
+- C# 9 / .NET Standard 2.1 규칙 코어를 실제 컴파일한다.
+- NUnit 테스트 16개: 데이터·턴 제어·중복 확정·승리·계산 회귀 등.
+- 최신 JS 대조 913건.
+- 0~6의 모든 순서 있는 5개 주사위 조합 × 8개 족보 × 일반/기절: 268,912건.
+- 원본 파일 SHA-256 검사로 낡은 대조값을 감지한다.
+- 완전 열거 파일은 `Tests/Generated/`에 생성되며 git에 넣지 않는다.
+
+데이터/JS 변경 후 기준값을 갱신하려면:
+
+```sh
+node unity/tools/generate-golden.mjs
+```
+
+Godot의 과거 450건은 변경하지 않는다. 그중 20건은 현재 웹판의 결과와 다르며,
+기여 인덱스도 일부 정렬되어 있어 그대로 Unity 검증 기준으로 사용할 수 없었다.
+
+**검증 한계:** .NET 검증은 규칙 코어에 대한 것이다. Unity 에디터의 전체 컴파일,
+씬 실행·화면 QA, 패키지 임포트와 Android/iOS/WebGL 빌드는 아직 수행하지 않았다.
+이 PR은 그 확인이 끝날 때까지 Draft로 유지한다.
+
+## 다음 이식 단위
+
+웹판 `js/engine.js`의 적 행동 선택·예고·턴 처리부터 대조 테스트를 추가한다.
+카드 전투 프로토타입인 `cardbattle.js`는 이 족보형 이식에 섞지 않는다.

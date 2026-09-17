@@ -6,6 +6,27 @@ using Newtonsoft.Json.Linq;
 namespace Redhood.Data
 {
     [Serializable]
+    public sealed class EnemyDefinition
+    {
+        [JsonProperty("id")] public string Id = string.Empty;
+        [JsonProperty("name")] public string Name = string.Empty;
+        [JsonProperty("hp")] public int[] Hp = Array.Empty<int>();
+    }
+
+    [Serializable]
+    public sealed class ActDefinition
+    {
+        [JsonProperty("player")] public PlayerDefinition Player;
+    }
+
+    [Serializable]
+    public sealed class PlayerDefinition
+    {
+        [JsonProperty("maxHp")] public int MaxHp;
+        [JsonProperty("startDice")] public string[] StartDice = Array.Empty<string>();
+    }
+
+    [Serializable]
     public sealed class ScoringDefinition
     {
         [JsonProperty("rerollsPerTurn")] public int RerollsPerTurn = 2;
