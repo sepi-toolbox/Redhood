@@ -8,9 +8,9 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: NanumGothic
+  fontName: Redhood UI
   fontNames:
-  - NanumGothic
+  - Redhood UI
   fallbackFontReferences: []
   customCharacters:
   fontRenderingMode: 0

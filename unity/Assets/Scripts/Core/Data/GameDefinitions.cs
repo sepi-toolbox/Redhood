@@ -11,6 +11,64 @@ namespace Redhood.Data
         [JsonProperty("id")] public string Id = string.Empty;
         [JsonProperty("name")] public string Name = string.Empty;
         [JsonProperty("hp")] public int[] Hp = Array.Empty<int>();
+        [JsonProperty("moves")] public Dictionary<string, EnemyMove> Moves = new();
+        [JsonProperty("uniqueMoves")] public Dictionary<string, EnemyMove> UniqueMoves = new();
+        [JsonProperty("pattern")] public EnemyPattern Pattern;
+        [JsonProperty("phases")] public List<EnemyPhaseDefinition> Phases;
+        [JsonProperty("defaultMove")] public string DefaultMove;
+        [JsonProperty("start")] public JObject Start;
+    }
+
+    public sealed class EnemyMove
+    {
+        [JsonProperty("name")] public string Name = string.Empty;
+        [JsonProperty("effects")] public List<EnemyEffect> Effects = new();
+        [JsonProperty("cooldown")] public int Cooldown;
+        [JsonProperty("minTurn")] public int MinTurn;
+        [JsonProperty("lockTurn")] public int LockTurn;
+        [JsonProperty("followUp")] public JToken FollowUp;
+        [JsonProperty("break")] public EnemyBreak Break;
+        [JsonProperty("hidden")] public bool Hidden;
+    }
+
+    public sealed class EnemyEffect
+    {
+        [JsonProperty("op")] public string Op = string.Empty;
+        [JsonProperty("amount")] public int Amount;
+        [JsonProperty("hits")] public int Hits = 1;
+        [JsonProperty("turns")] public int Turns;
+        [JsonProperty("kind")] public string Kind;
+    }
+
+    public sealed class EnemyPattern
+    {
+        [JsonProperty("weights")] public Dictionary<string, double> Weights = new();
+        [JsonProperty("noRepeat")] public int NoRepeat;
+    }
+
+    public sealed class EnemyPhaseDefinition
+    {
+        [JsonProperty("untilHpRatio")] public double UntilHpRatio;
+        [JsonProperty("pattern")] public EnemyPattern Pattern;
+        [JsonProperty("enter")] public string Enter;
+    }
+
+    public sealed class EnemyBreak
+    {
+        [JsonProperty("damage")] public int Damage;
+        [JsonProperty("move")] public string Move;
+    }
+
+    public sealed class StatusDefinitions
+    {
+        [JsonProperty("list")] public List<StatusDefinition> List = new();
+    }
+
+    public sealed class StatusDefinition
+    {
+        [JsonProperty("id")] public string Id;
+        [JsonProperty("rule")] public string Rule;
+        [JsonProperty("turns")] public int Turns;
     }
 
     [Serializable]

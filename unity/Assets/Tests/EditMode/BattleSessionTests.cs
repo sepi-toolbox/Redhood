@@ -9,7 +9,7 @@ namespace Redhood.Tests
 {
     public sealed class BattleSessionTests
     {
-        private static BattleSession Session() => new BattleSession(TestData.Load(), "wolf", _ => 0);
+        private static BattleSession Session() => new BattleSession(TestData.Load(), "wolf", () => 0);
 
         [Test]
         public void StartsUnrolledAndUsesSourceEnemyHp()
@@ -37,7 +37,7 @@ namespace Redhood.Tests
         public void RerollOnlyChangesSelectedDieAndResetsSelection()
         {
             int counter = 0;
-            var s = new BattleSession(TestData.Load(), "wolf", n => counter++ % n);
+            var s = new BattleSession(TestData.Load(), "wolf", () => (counter++ % 6) / 6d);
             s.InitialRoll();
             int[] before = s.Faces.ToArray();
             s.SetHeld(2, false);
@@ -63,7 +63,7 @@ namespace Redhood.Tests
             var actual = s.Confirm("onePair");
             Assert.That(actual.Total, Is.EqualTo(preview));
             Assert.That(s.EnemyHp, Is.EqualTo(hp - preview));
-            Assert.That(s.Phase, Is.EqualTo(BattlePhase.TurnComplete));
+            Assert.That(s.Phase, Is.EqualTo(BattlePhase.EnemyTurn));
             Assert.Throws<InvalidOperationException>(() => s.Confirm("onePair"));
             Assert.Throws<InvalidOperationException>(() => s.SetHeld(0, false));
             Assert.That(s.Reroll(), Is.False);
@@ -107,7 +107,7 @@ namespace Redhood.Tests
         [Test]
         public void RejectsInvalidRngOutput()
         {
-            Assert.Throws<InvalidOperationException>(() => new BattleSession(TestData.Load(), "wolf", n => n));
+            Assert.Throws<InvalidOperationException>(() => new BattleSession(TestData.Load(), "wolf", () => 1));
         }
 
         [Test]

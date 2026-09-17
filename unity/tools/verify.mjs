@@ -11,6 +11,7 @@ function run(command, args) {
   if (result.status !== 0) process.exit(result.status || 1);
 }
 run(process.execPath, ['unity/tools/asset-metadata.mjs', '--check']);
+run(process.execPath, ['unity/tools/generate-battle-golden.mjs', '--check']);
 run(process.execPath, ['unity/tools/generate-golden.mjs', '--check',
   ...(process.argv.includes('--exhaustive') ? ['--exhaustive'] : [])]);
 run(dotnet, ['build', 'unity/Tests/Headless/Redhood.Tests.csproj', '-c', 'Release', '--nologo']);

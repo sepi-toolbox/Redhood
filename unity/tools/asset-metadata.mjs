@@ -25,10 +25,10 @@ function visit(relative) {
     if (relative.endsWith('.cs')) importer = 'MonoImporter:\n  externalObjects: {}\n  serializedVersion: 2\n  defaultReferences: []\n  executionOrder: 0\n  icon: {instanceID: 0}\n';
     if (relative.endsWith('.asmdef')) importer = 'AssemblyDefinitionImporter:\n  externalObjects: {}\n';
     if (relative.endsWith('.txt')) importer = 'TextScriptImporter:\n  externalObjects: {}\n';
-    if (relative.endsWith('.ttf')) importer = 'TrueTypeFontImporter:\n  externalObjects: {}\n  serializedVersion: 4\n  fontSize: 16\n  forceTextureCase: -2\n  characterSpacing: 0\n  characterPadding: 1\n  includeFontData: 1\n  fontName: NanumGothic\n  fontNames:\n  - NanumGothic\n  fallbackFontReferences: []\n  customCharacters: \n  fontRenderingMode: 0\n  ascentCalculationMode: 1\n  useLegacyBoundsCalculation: 0\n';
+    if (relative.endsWith('.ttf')) importer = 'TrueTypeFontImporter:\n  externalObjects: {}\n  serializedVersion: 4\n  fontSize: 16\n  forceTextureCase: -2\n  characterSpacing: 0\n  characterPadding: 1\n  includeFontData: 1\n  fontName: Redhood UI\n  fontNames:\n  - Redhood UI\n  fallbackFontReferences: []\n  customCharacters:\n  fontRenderingMode: 0\n  ascentCalculationMode: 1\n  useLegacyBoundsCalculation: 0\n';
     fs.writeFileSync(meta, 'fileFormatVersion: 2\nguid: ' + guid + '\n' +
       (directory ? 'folderAsset: yes\n' : '') + importer +
-      '  userData: \n  assetBundleName: \n  assetBundleVariant: \n');
+      '  userData:\n  assetBundleName:\n  assetBundleVariant:\n');
     count++;
   }
   return true;

@@ -10,13 +10,14 @@ namespace Redhood.Data
     public sealed class GameDatabase
     {
         public static readonly string[] RequiredFiles =
-            { "scoring.json", "dice.json", "relics.json", "enemies.json", "act1.json" };
+            { "scoring.json", "dice.json", "relics.json", "enemies.json", "act1.json", "statuses.json" };
 
         public ScoringDefinition Scoring { get; private set; }
         public IReadOnlyList<DiceDefinition> Dice { get; private set; }
         public IReadOnlyList<RelicDefinition> Relics { get; private set; }
         public IReadOnlyList<EnemyDefinition> Enemies { get; private set; }
         public PlayerDefinition Player { get; private set; }
+        public IReadOnlyList<StatusDefinition> Statuses { get; private set; }
 
         public static GameDatabase FromJson(Func<string, string> read)
         {
@@ -27,7 +28,8 @@ namespace Redhood.Data
                 Dice = Parse<List<DiceDefinition>>(read, "dice.json"),
                 Relics = Parse<List<RelicDefinition>>(read, "relics.json"),
                 Enemies = Parse<List<EnemyDefinition>>(read, "enemies.json"),
-                Player = Parse<ActDefinition>(read, "act1.json").Player
+                Player = Parse<ActDefinition>(read, "act1.json").Player,
+                Statuses = Parse<StatusDefinitions>(read, "statuses.json").List
             };
             if (db.Scoring.Categories == null || db.Scoring.Categories.Count == 0)
                 throw new InvalidDataException("scoring.json: categories are empty.");
