@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 025c69431d03909ab8d405da7596437a
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Redhood UI
+  fontNames:
+  - Redhood UI
+  fallbackFontReferences: []
+  customCharacters:
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

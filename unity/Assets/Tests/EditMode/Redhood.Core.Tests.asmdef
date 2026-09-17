@@ -1,0 +1,14 @@
+{
+  "name": "Redhood.Core.Tests",
+  "rootNamespace": "Redhood.Tests",
+  "references": [
+    "Redhood.Core"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false
+}

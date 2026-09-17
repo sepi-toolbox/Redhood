@@ -1,0 +1,7 @@
+{
+  "name": "Redhood.Core",
+  "rootNamespace": "Redhood",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

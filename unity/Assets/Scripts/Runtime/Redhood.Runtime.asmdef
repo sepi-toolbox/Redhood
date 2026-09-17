@@ -1,0 +1,6 @@
+{
+  "name": "Redhood.Runtime",
+  "rootNamespace": "Redhood",
+  "references": ["Redhood.Core", "Unity.ugui"],
+  "autoReferenced": true
+}
